@@ -1,0 +1,57 @@
+package org.firstinspires.ftc.teamcode.Autonomous;
+
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
+@Autonomous(name = "Test Drive To")
+@Disabled
+public class TestDriveTo extends Autonomous_Base {
+
+    @Override
+    public void runOpMode() throws InterruptedException {
+        /// Init ///
+
+        initializeDrive();
+        initializeBulkRead();
+        try {
+            initializeOdometry();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new InterruptedException();
+        }
+
+        /// Start ///
+
+        waitForStart();
+        if (isStopRequested()) return;
+
+        /// Loop ///
+
+        while (opModeIsActive()) {
+
+            updateBulkRead();
+            drive.update();
+
+            driveTo(24, 24, Math.PI / 2);
+            driveTo(0, 0, 0);
+
+            updateSubsystems();
+            updateTelemetry();
+        }
+
+        /// Stop ///
+
+        setMotorPowers(0, 0, 0, 0);
+    }
+
+    @Override
+    protected void updateSubsystems() {
+
+    }
+
+    @Override
+    protected void updateTelemetry() {
+        telemetry.addData("Position", drive.getPoseEstimate());
+        telemetry.update();
+    }
+}
