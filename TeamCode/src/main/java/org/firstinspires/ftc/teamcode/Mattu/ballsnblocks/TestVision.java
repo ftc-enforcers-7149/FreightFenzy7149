@@ -57,6 +57,11 @@ public class TestVision extends OpMode {
                 //Starts streaming with width, height, and rotation
                 webcam.startStreaming(640, 360, OpenCvCameraRotation.UPRIGHT);
             }
+
+            @Override
+            public void onError(int errorCode) {
+
+            }
         });
     }
 
