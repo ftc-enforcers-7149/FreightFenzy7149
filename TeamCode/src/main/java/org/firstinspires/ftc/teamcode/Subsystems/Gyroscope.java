@@ -117,7 +117,7 @@ public class Gyroscope {
      * @param heading
      * @return
      */
-    public double cvtTrigAng(double heading) {
+    public static double cvtTrigAng(double heading) {
         if (heading >= 0 && heading < 90) {
             return -heading + 90;
         }

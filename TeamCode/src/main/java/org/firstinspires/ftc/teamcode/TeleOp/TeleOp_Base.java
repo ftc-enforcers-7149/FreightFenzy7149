@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.Odometry.SensorBot.SBMecanumDrive;
 import org.firstinspires.ftc.teamcode.Subsystems.BulkRead;
+import org.firstinspires.ftc.teamcode.Subsystems.Gyroscope;
 
 import static org.firstinspires.ftc.teamcode.Subsystems.FixedRoadrunner.createPose2d;
 
@@ -22,6 +23,9 @@ public abstract class TeleOp_Base extends OpMode {
     //State machine logic
     protected double leftX, leftY, rightX;
     protected double lastLeftX, lastLeftY, lastRightX;
+
+    //Headless
+    protected double offset, lim;
 
     //Initialization
     protected void initializeDrive() {
@@ -66,6 +70,7 @@ public abstract class TeleOp_Base extends OpMode {
     }
     protected void initializeVars() {
         lastLeftX = 0; lastLeftY = 0; lastRightX = 0;
+        offset = 0; lim = 1;
     }
 
     //Loop updates
@@ -95,8 +100,39 @@ public abstract class TeleOp_Base extends OpMode {
 
         setMotorPowers(v1, v2, v3, v4);
     }
-    protected void driveHeadless(double angle) {
+    protected void driveHeadless(double angle, boolean reset) {
+        if (reset) {
+            offset = angle;
+        }
 
+        double r = Math.hypot(leftX, leftY) * Math.sqrt(2);
+        double robotAngle = Math.atan2(leftY, leftX) - Math.toRadians(Gyroscope.cvtTrigAng(angle - offset)) - 3 * Math.PI / 4;
+
+        double vFL = r * Math.sin(robotAngle) + rightX;
+        double vFR = r * Math.cos(robotAngle) - rightX;
+        double vBL = r * Math.cos(robotAngle) + rightX;
+        double vBR = r * Math.sin(robotAngle) - rightX;
+
+        double max = Math.max(
+                Math.max(
+                        Math.abs(vFL),
+                        Math.abs(vFR)),
+                Math.max(
+                        Math.abs(vBL),
+                        Math.abs(vBR))
+        );
+
+        if (max > lim) {
+            vFL /= max * (1 / lim);
+            vFR /= max * (1 / lim);
+            vBL /= max * (1 / lim);
+            vBR /= max * (1 / lim);
+        }
+
+        fLeft.setPower(vFL);
+        fRight.setPower(vFR);
+        bLeft.setPower(vBL);
+        bRight.setPower(vBR);
     }
 
     //State machine logic
