@@ -7,7 +7,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.DistanceLocalization;
 import org.firstinspires.ftc.teamcode.TeleOp.TeleOp_Base;
 
 @TeleOp(name="Distance Sensor Localization")
-//@Disabled
+@Disabled
 public class LocalizationTest extends TeleOp_Base {
 
     DistanceLocalization locale;
