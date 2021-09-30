@@ -1,9 +1,10 @@
 package org.firstinspires.ftc.teamcode.TeleOp;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Gyroscope;
 
@@ -17,7 +18,17 @@ public class PrototypeChassis extends TeleOp_Base {
 
     //Lift
     private DcMotor lift;
-    private double power, lastPower;
+    private double liftPower, lastLiftPower;
+
+    //Intake
+    private enum IntakeDirection {
+        LEFT, RIGHT, CENTER, NONE
+    }
+
+    private Servo wrist;
+    private CRServo intake;
+    private IntakeDirection intakeDir, lastIntakeDir;
+    private double intakePower, lastIntakePower;
 
     @Override
     public void init() {
@@ -30,7 +41,15 @@ public class PrototypeChassis extends TeleOp_Base {
         lift.setDirection(DcMotorSimple.Direction.REVERSE);
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        lastPower = 0;
+        wrist = hardwareMap.servo.get("wrist");
+        wrist.setDirection(Servo.Direction.REVERSE);
+        intake = hardwareMap.crservo.get("intake");
+        intake.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        lastLiftPower = 0;
+        lastIntakePower = 0;
+        lastIntakeDir = IntakeDirection.NONE;
+        intakeDir = IntakeDirection.NONE;
     }
 
     @Override
@@ -40,8 +59,27 @@ public class PrototypeChassis extends TeleOp_Base {
         driveHeadless(gyro.getRawYaw(), resetAngle);
 
         //Lift
-        if (power != lastPower) {
-            lift.setPower(power);
+        if (liftPower != lastLiftPower) {
+            lift.setPower(liftPower);
+        }
+
+        //Intake
+        if (intakeDir != lastIntakeDir) {
+            switch (intakeDir) {
+                case LEFT:
+                    wrist.setPosition(0);
+                    break;
+                case RIGHT:
+                    wrist.setPosition(1);
+                    break;
+                case CENTER:
+                    wrist.setPosition(0.615);
+                    break;
+            }
+        }
+
+        if (intakePower != lastIntakePower) {
+            intake.setPower(intakePower);
         }
 
         updateStateMachine();
@@ -62,12 +100,20 @@ public class PrototypeChassis extends TeleOp_Base {
         resetAngle = gamepad1.y;
 
         //Lift
-        power = gamepad1.right_trigger - gamepad1.left_trigger;
+        liftPower = gamepad1.right_trigger - gamepad1.left_trigger;
+
+        //Intake
+        if (gamepad2.dpad_up) intakeDir = IntakeDirection.CENTER;
+        else if (gamepad2.dpad_left) intakeDir = IntakeDirection.LEFT;
+        else if (gamepad2.dpad_right) intakeDir = IntakeDirection.RIGHT;
+        intakePower = (gamepad2.right_bumper ? 1 : 0) - (gamepad2.left_bumper ? 1 : 0);
     }
 
     @Override
     protected void updateStateMachine() {
         lastLeftX = leftX; lastLeftY = leftY; lastRightX = rightX;
-        lastPower = power;
+        lastLiftPower = liftPower;
+        lastIntakeDir = intakeDir;
+        lastIntakePower = intakePower;
     }
 }
