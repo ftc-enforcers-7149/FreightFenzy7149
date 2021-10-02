@@ -82,7 +82,7 @@ public class BulkRead {
      * @param motor the motor to find the position of
      * @return returns the value of the motor's position in encoder ticks
      */
-    public synchronized double getMotorPos(DcMotorEx motor) {
+    public synchronized int getMotorPos(DcMotorEx motor) {
 
         try
         {
@@ -90,7 +90,7 @@ public class BulkRead {
             int portNum = motor.getPortNumber();
 
             //Checks if motors are reversed; if so, stores the encoder value
-            double mPos = (motor.getDirection() == DcMotorSimple.Direction.REVERSE) ? -bData.getMotorCurrentPosition(portNum) : bData.getMotorCurrentPosition(portNum);
+            int mPos = (motor.getDirection() == DcMotorSimple.Direction.REVERSE) ? -bData.getMotorCurrentPosition(portNum) : bData.getMotorCurrentPosition(portNum);
 
             //Returns the position
             return mPos;
@@ -108,7 +108,7 @@ public class BulkRead {
      * @param mName the name of the motor to read
      * @return returns the value of the motor's position in encoder ticks
      */
-    public synchronized double getMotorPos(String mName) {
+    public synchronized int getMotorPos(String mName) {
 
         //Sets the motor to read
         DcMotorEx motor = hardwareMap.get(DcMotorEx.class, mName);
@@ -119,7 +119,7 @@ public class BulkRead {
             int portNum = motor.getPortNumber();
 
             //Checks if motors are reversed; if so, stores the encoder value
-            double mPos = (motor.getDirection() == DcMotorSimple.Direction.REVERSE) ? -bData.getMotorCurrentPosition(portNum) : bData.getMotorCurrentPosition(portNum);
+            int mPos = (motor.getDirection() == DcMotorSimple.Direction.REVERSE) ? -bData.getMotorCurrentPosition(portNum) : bData.getMotorCurrentPosition(portNum);
 
             //Returns the position
             return mPos;
