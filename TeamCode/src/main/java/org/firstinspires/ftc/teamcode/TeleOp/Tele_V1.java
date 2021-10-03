@@ -30,16 +30,17 @@ public class Tele_V1 extends TeleOp_Base {
 
         driveHeadless(gyro.getRawYaw(), resetAngle);
 
-        if (gamepad1.dpad_up) turningIntake.setWristPosCenter();
-        if (gamepad1.dpad_left) turningIntake.setWristPosLeft();
-        if (gamepad1.dpad_right) turningIntake.setWristPosRight();
+        if (gamepad2.dpad_up) turningIntake.setWristPosCenter();
+        if (gamepad2.dpad_left) turningIntake.setWristPosLeft();
+        if (gamepad2.dpad_right) turningIntake.setWristPosRight();
 
-        if (gamepad1.right_trigger > 0.1) {
+        if (gamepad2.right_trigger > 0.1) {
             turningIntake.setIntakePower(gamepad1.right_trigger);
         }
-
-        if (gamepad1.left_trigger > 0.1) {
+        else if (gamepad2.left_trigger > 0.1) {
             turningIntake.setIntakePower(gamepad1.left_trigger);
+        } else {
+            turningIntake.setIntakePower(0);
         }
 
         turningIntake.update();

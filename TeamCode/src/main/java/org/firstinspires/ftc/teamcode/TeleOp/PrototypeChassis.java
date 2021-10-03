@@ -30,6 +30,10 @@ public class PrototypeChassis extends TeleOp_Base {
     private IntakeDirection intakeDir, lastIntakeDir;
     private double intakePower, lastIntakePower;
 
+    //Carousel
+    private CRServo spinner;
+    private double spinnerPower, lastSpinnerPower;
+
     @Override
     public void init() {
         initializeDrive();
@@ -46,10 +50,14 @@ public class PrototypeChassis extends TeleOp_Base {
         intake = hardwareMap.crservo.get("intake");
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
 
+        spinner = hardwareMap.crservo.get("spinner");
+        spinner.setDirection(DcMotorSimple.Direction.REVERSE);
+
         lastLiftPower = 0;
         lastIntakePower = 0;
         lastIntakeDir = IntakeDirection.NONE;
         intakeDir = IntakeDirection.NONE;
+        lastSpinnerPower = 0;
     }
 
     @Override
@@ -82,6 +90,10 @@ public class PrototypeChassis extends TeleOp_Base {
             intake.setPower(intakePower);
         }
 
+        if (spinnerPower != lastSpinnerPower) {
+            spinner.setPower(spinnerPower);
+        }
+
         updateStateMachine();
     }
 
@@ -89,6 +101,8 @@ public class PrototypeChassis extends TeleOp_Base {
     public void stop() {
         setMotorPowers(0, 0, 0, 0);
         lift.setPower(0);
+        intake.setPower(0);
+        spinner.setPower(0);
     }
 
     @Override
@@ -107,6 +121,9 @@ public class PrototypeChassis extends TeleOp_Base {
         else if (gamepad2.dpad_left) intakeDir = IntakeDirection.LEFT;
         else if (gamepad2.dpad_right) intakeDir = IntakeDirection.RIGHT;
         intakePower = (gamepad2.right_bumper ? 1 : 0) - (gamepad2.left_bumper ? 1 : 0);
+
+        //Spinner
+        spinnerPower = gamepad1.a ? 1 : 0;
     }
 
     @Override
@@ -115,5 +132,6 @@ public class PrototypeChassis extends TeleOp_Base {
         lastLiftPower = liftPower;
         lastIntakeDir = intakeDir;
         lastIntakePower = intakePower;
+        lastSpinnerPower = spinnerPower;
     }
 }

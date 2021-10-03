@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Subsystems;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.acmerobotics.roadrunner.control.PIDFController;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -19,9 +20,9 @@ public class Lift {
 
     //Convert motor ticks to rotations (using Gobilda's given equation)
     private final double toRot = (((1+(46.0/17))) * (1+(46.0/17))) * 28;
-    public static final double PULLEY_CIRCUMFERENCE = 3; //inches
+    public static final double PULLEY_CIRCUMFERENCE = 3.424; //inches
     public static final int STAGES = 2;
-    public static final double MAX_HEIGHT = 20;
+    public static final double MAX_HEIGHT = 13;
 
     //PIDF Controller
     private PIDFController controller;
@@ -44,6 +45,7 @@ public class Lift {
      */
     public Lift(HardwareMap hardwareMap, String liftName) {
         lift = hardwareMap.get(DcMotorEx.class, liftName);
+        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setDirection(DcMotorSimple.Direction.REVERSE);
 
         initPID();
@@ -60,6 +62,7 @@ public class Lift {
      */
     public Lift(HardwareMap hardwareMap, String liftName, BulkRead bRead) {
         lift = hardwareMap.get(DcMotorEx.class, liftName);
+        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setDirection(DcMotorSimple.Direction.REVERSE);
 
         initPID();
@@ -96,8 +99,8 @@ public class Lift {
      */
     public void update() {
         //Get motor ticks
-        if (useBRead) currPosition = bRead.getMotorPos(lift);
-        else currPosition = lift.getCurrentPosition();
+        if (useBRead) currPosition = Math.abs(bRead.getMotorPos(lift));
+        else currPosition = Math.abs(lift.getCurrentPosition());
 
         //Use PID to go to position
         if (usePID) {
@@ -154,7 +157,7 @@ public class Lift {
      * @return Amount of inches of lift
      */
     private double ticksToLiftInches(int ticks) {
-        return ticks * toRot * PULLEY_CIRCUMFERENCE * STAGES;
+        return (ticks / toRot) * PULLEY_CIRCUMFERENCE * STAGES;
     }
 
     /**
@@ -163,7 +166,7 @@ public class Lift {
      * @return Motor ticks
      */
     private int liftInchesToTicks(double inches) {
-        return (int) (inches / STAGES / PULLEY_CIRCUMFERENCE / toRot);
+        return (int) ((inches / STAGES / PULLEY_CIRCUMFERENCE) * toRot);
     }
 
     /**
