@@ -7,8 +7,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 public class TurningIntake {
 
-    private Servo wrist;
-    private CRServo intake;
+    public Servo wrist;
+    public CRServo intake;
     private double intakePower,lastIntakePower;
     private double wristPos, lastWristPos;
 
