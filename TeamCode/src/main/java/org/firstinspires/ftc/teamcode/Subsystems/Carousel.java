@@ -1,0 +1,34 @@
+package org.firstinspires.ftc.teamcode.Subsystems;
+
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+
+public class Carousel {
+
+    public CRServo carousel;
+    private double carouselPower, lastCarouselPower;
+
+    public Carousel(HardwareMap hardwaremap, String intakeServoName) {
+        carousel = hardwaremap.crservo.get(intakeServoName);
+
+        carousel.setDirection(DcMotorSimple.Direction.REVERSE);
+    }
+
+    public void update() {
+        if (carouselPower != lastCarouselPower) {
+            carousel.setPower(carouselPower);
+        }
+
+        lastCarouselPower = carouselPower;
+    }
+
+    public void setPower(double power) {
+        carouselPower = power;
+    }
+
+    public void stop() {
+        carouselPower = 0;
+        update();
+    }
+}
