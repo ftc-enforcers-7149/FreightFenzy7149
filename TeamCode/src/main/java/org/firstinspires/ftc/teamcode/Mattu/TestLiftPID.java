@@ -69,7 +69,8 @@ public class TestLiftPID extends TeleOp_Base {
     @Override
     protected void getInput() {
         //Lift
-        liftPower = gamepad1.right_trigger - gamepad1.left_trigger;
+        if (gamepad1.right_trigger > 0.1 || gamepad1.left_trigger > 0.1)
+            liftPower = gamepad1.right_trigger - gamepad1.left_trigger;
 
         if (gamepad1.dpad_up) liftPos = LiftPosition.HIGH;
         else if (gamepad1.dpad_left) liftPos = LiftPosition.MIDDLE;

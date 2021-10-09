@@ -44,21 +44,24 @@ public class TurningIntake {
         this.intakePower = intakePower;
     }
 
-    public void setWristPosLeft() {
-        if(lastWristPos >= 0.05) wristPos -= 0.05;
+    public void moveWristLeft() {
+        wristPos -= 0.05;
+        if (wristPos < 0) wristPos = 0;
     }
 
-    public void setWristPosRight() {
-        if(lastWristPos <= .95) wristPos += 0.05;
+    public void moveWristRight() {
+        wristPos += 0.05;
+        if (wristPos > 1) wristPos = 1;
     }
 
-    public void setWristPosCenter() {
+    public void setWristCenter() {
         wristPos = 0.615;
     }
 
     public void stop() {
-        intake.setPower(0);
-        wrist.setPosition(0.615);
+        setWristCenter();
+        setIntakePower(0);
+        update();
     }
 
     public double getIntakePower() {

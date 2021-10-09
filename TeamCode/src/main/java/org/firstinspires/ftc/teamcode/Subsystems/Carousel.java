@@ -28,7 +28,7 @@ public class Carousel {
     }
 
     public void stop() {
-        carouselPower = 0;
+        setPower(0);
         update();
     }
 }
