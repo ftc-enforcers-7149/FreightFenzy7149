@@ -43,6 +43,16 @@ public class Tele_V1 extends TeleOp_Base {
             turningIntake.setIntakePower(0);
         }
 
+        if(gamepad2.right_bumper) {
+            turningIntake.setWristPosRight();
+        }
+        else if(gamepad2.left_bumper) {
+            turningIntake.setWristPosLeft();
+        }
+        else if(gamepad2.a) {
+            turningIntake.setWristPosCenter();
+        }
+
         turningIntake.update();
         updateStateMachine();
     }

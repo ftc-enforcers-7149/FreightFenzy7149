@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Subsystems;
 
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -27,6 +28,7 @@ public class TurningIntake {
     }
 
     public void update() {
+
         if (intakePower != lastIntakePower) {
             intake.setPower(intakePower);
         }
@@ -43,11 +45,11 @@ public class TurningIntake {
     }
 
     public void setWristPosLeft() {
-        wristPos = 0;
+        if(lastWristPos >= 0.05) wristPos -= 0.05;
     }
 
     public void setWristPosRight() {
-        wristPos = 1;
+        if(lastWristPos <= .95) wristPos += 0.05;
     }
 
     public void setWristPosCenter() {
