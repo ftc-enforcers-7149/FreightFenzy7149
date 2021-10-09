@@ -34,8 +34,8 @@ public class TurningIntake {
             wrist.setPosition(wristPos);
         }
 
-        intakePower = lastIntakePower;
-        wristPos = lastWristPos;
+        lastIntakePower = intakePower;
+        lastWristPos = wristPos;
     }
 
     public void setIntakePower(double intakePower) {
@@ -57,5 +57,33 @@ public class TurningIntake {
     public void stop() {
         intake.setPower(0);
         wrist.setPosition(0.615);
+    }
+
+    public double getIntakePower() {
+        return intakePower;
+    }
+
+    public double getLastIntakePower() {
+        return lastIntakePower;
+    }
+
+    public void setLastIntakePower(double lastIntakePower) {
+        this.lastIntakePower = lastIntakePower;
+    }
+
+    public double getWristPos() {
+        return wristPos;
+    }
+
+    public void setWristPos(double wristPos) {
+        this.wristPos = wristPos;
+    }
+
+    public double getLastWristPos() {
+        return lastWristPos;
+    }
+
+    public void setLastWristPos(double lastWristPos) {
+        this.lastWristPos = lastWristPos;
     }
 }
