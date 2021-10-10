@@ -4,12 +4,12 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-public class Carousel {
+public class CarouselSpinner {
 
     public CRServo carousel;
     private double carouselPower, lastCarouselPower;
 
-    public Carousel(HardwareMap hardwaremap, String intakeServoName) {
+    public CarouselSpinner(HardwareMap hardwaremap, String intakeServoName) {
         carousel = hardwaremap.crservo.get(intakeServoName);
 
         carousel.setDirection(DcMotorSimple.Direction.REVERSE);

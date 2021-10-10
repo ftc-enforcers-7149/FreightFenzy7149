@@ -4,7 +4,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Subsystems.BulkRead;
 import org.firstinspires.ftc.teamcode.Subsystems.Lift;
-import org.firstinspires.ftc.teamcode.TeleOp.PrototypeChassis;
 import org.firstinspires.ftc.teamcode.TeleOp.TeleOp_Base;
 
 @TeleOp(name = "Test Lift PID")
