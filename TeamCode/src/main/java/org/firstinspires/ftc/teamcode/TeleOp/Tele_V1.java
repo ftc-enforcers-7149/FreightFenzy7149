@@ -52,7 +52,7 @@ public class Tele_V1 extends TeleOp_Base {
         //Headless
         leftX = gamepad1.left_stick_x;
         leftY = gamepad1.left_stick_y;
-        rightX = Math.signum(gamepad1.right_stick_x) * Math.abs(Math.pow(gamepad1.right_stick_x, 3));
+        rightX = Math.signum(gamepad1.right_stick_x) * Math.abs(Math.pow(gamepad1.right_stick_x, 7));
         resetAngle = gamepad1.y;
     }
 
