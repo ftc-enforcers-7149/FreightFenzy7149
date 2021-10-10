@@ -6,8 +6,10 @@ import com.acmerobotics.roadrunner.control.PIDFController;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
+import org.firstinspires.ftc.teamcode.Odometry.DriveWheels.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Odometry.SensorBot.SBMecanumDrive;
 import org.firstinspires.ftc.teamcode.Subsystems.BulkRead;
 
@@ -17,9 +19,10 @@ import static org.firstinspires.ftc.teamcode.Subsystems.FixedRoadrunner.createPo
 public abstract class Autonomous_Base extends LinearOpMode {
 
     //Drive
-    protected SBMecanumDrive drive;
-    protected DcMotor fLeft, fRight, bLeft, bRight;
+    protected MecanumDrive drive;
     public static PIDCoefficients H_PID = new PIDCoefficients(-5, 0, -0.04);
+    protected DcMotorEx fLeft, fRight, bLeft, bRight;
+    private boolean initializedDrive = false;
 
     //Control objects
     protected BulkRead bReadCH, bReadEH;
@@ -119,14 +122,11 @@ public abstract class Autonomous_Base extends LinearOpMode {
         while (opModeIsActive() && (Math.abs(relativeX) > 0.1 || Math.abs(relativeY) > 0.1) && System.currentTimeMillis() < startTime + 1000) {
 
             //Update bulk read, odometry, and subsystems
-            bReadCH.update();
-            bReadEH.update();
+            updateBulkRead();
             drive.update();
-            if (USE_SUBS) updateSubsystems();
 
             //Output telemetry
             telemetry.addLine("Waiting for position correction");
-            updateTelemetry();
 
             //Gets the distance to the point
             relativeX = destX - (-drive.getPoseEstimate().getY());
@@ -142,17 +142,14 @@ public abstract class Autonomous_Base extends LinearOpMode {
             double bR = scale * Math.cos(robotAngle);
 
             //Sets powers to motors
-            drive.leftFront.setPower(fL);
-            drive.rightFront.setPower(fR);
-            drive.leftRear.setPower(bL);
-            drive.rightRear.setPower(bR);
+            drive.setMotorPowers(fL, bL, bR, fR);
+
+            updateSubsystems();
+            updateTelemetry();
         }
 
         //Stops motors
-        drive.leftFront.setPower(0);
-        drive.rightFront.setPower(0);
-        drive.leftRear.setPower(0);
-        drive.rightRear.setPower(0);
+        drive.setMotorPowers(0, 0, 0, 0);
     }
 
     /**
@@ -203,15 +200,11 @@ public abstract class Autonomous_Base extends LinearOpMode {
         while (opModeIsActive() && Math.abs(delta) > 0.125 && System.currentTimeMillis() < startTime + 1000) {
 
             //Update bulk read, odometry, and subsystems
-            bReadCH.update();
-            bReadEH.update();
-
+            updateBulkRead();
             drive.update();
-            updateSubsystems();
 
             //Output telemetry
             telemetry.addLine("Waiting for heading correction");
-            updateTelemetry();
 
             //Gets heading
             heading = Math.toDegrees(drive.getPoseEstimate().getHeading());
@@ -238,17 +231,14 @@ public abstract class Autonomous_Base extends LinearOpMode {
             }
 
             //Drive the motors so the robot turns
-            drive.leftFront.setPower(-speed);
-            drive.rightFront.setPower(speed);
-            drive.leftRear.setPower(-speed);
-            drive.rightRear.setPower(speed);
+            drive.setMotorPowers(-speed, -speed, speed, speed);
+
+            updateSubsystems();
+            updateTelemetry();
         }
 
         //Stops motors
-        drive.leftFront.setPower(0);
-        drive.rightFront.setPower(0);
-        drive.leftRear.setPower(0);
-        drive.rightRear.setPower(0);
+        drive.setMotorPowers(0, 0, 0, 0);
     }
 
     /**
@@ -267,10 +257,10 @@ public abstract class Autonomous_Base extends LinearOpMode {
 
     //Initialization
     protected void initializeDrive() {
-        fLeft = hardwareMap.dcMotor.get("fLeft");
-        fRight = hardwareMap.dcMotor.get("fRight");
-        bLeft = hardwareMap.dcMotor.get("bLeft");
-        bRight = hardwareMap.dcMotor.get("bRight");
+        fLeft = hardwareMap.get(DcMotorEx.class, "fLeft");
+        fRight = hardwareMap.get(DcMotorEx.class, "fRight");
+        bLeft = hardwareMap.get(DcMotorEx.class, "bLeft");
+        bRight = hardwareMap.get(DcMotorEx.class, "bRight");
 
         fLeft.setDirection(DcMotorSimple.Direction.FORWARD);
         fRight.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -286,6 +276,8 @@ public abstract class Autonomous_Base extends LinearOpMode {
         fRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         bLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         bRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        initializedDrive = true;
     }
     protected void initializeBulkRead() {
         try {
@@ -302,8 +294,11 @@ public abstract class Autonomous_Base extends LinearOpMode {
         }
     }
     protected void initializeOdometry() throws Exception {
-        if (!hasCH || !hasEH) throw new Exception("Missing Hub");
-        drive = new SBMecanumDrive(hardwareMap, bReadCH, bReadEH);
+        if (!hasCH) throw new Exception("Missing \"Control Hub\". Check configuration file naming");
+        if (initializedDrive)
+            drive = new MecanumDrive(hardwareMap, bReadCH, fLeft, fRight, bLeft, bRight);
+        else
+            drive = new MecanumDrive(hardwareMap, bReadCH);
         drive.setPoseEstimate(createPose2d(0, 0, 0));
     }
 
@@ -312,8 +307,16 @@ public abstract class Autonomous_Base extends LinearOpMode {
         if (hasCH) bReadCH.update();
         if (hasEH) bReadEH.update();
     }
-    protected abstract void updateSubsystems();
-    protected abstract void updateTelemetry();
+    protected abstract void subsystemUpdates();
+    protected abstract void addTelemetryData();
+
+    protected final void updateSubsystems() {
+        if (USE_SUBS) subsystemUpdates();
+    }
+    protected final void updateTelemetry() {
+        addTelemetryData();
+        telemetry.update();
+    }
 
     //Useful functions
     protected void setMotorPowers(double v1, double v2, double v3, double v4) {

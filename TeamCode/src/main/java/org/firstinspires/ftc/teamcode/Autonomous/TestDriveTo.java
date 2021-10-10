@@ -45,13 +45,12 @@ public class TestDriveTo extends Autonomous_Base {
     }
 
     @Override
-    protected void updateSubsystems() {
+    protected void subsystemUpdates() {
 
     }
 
     @Override
-    protected void updateTelemetry() {
+    protected void addTelemetryData() {
         telemetry.addData("Position", drive.getPoseEstimate());
-        telemetry.update();
     }
 }

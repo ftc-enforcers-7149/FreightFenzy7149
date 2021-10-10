@@ -2,8 +2,10 @@ package org.firstinspires.ftc.teamcode.TeleOp;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
+import org.firstinspires.ftc.teamcode.Odometry.DriveWheels.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Odometry.SensorBot.SBMecanumDrive;
 import org.firstinspires.ftc.teamcode.Subsystems.BulkRead;
 import org.firstinspires.ftc.teamcode.Subsystems.Gyroscope;
@@ -13,8 +15,9 @@ import static org.firstinspires.ftc.teamcode.Subsystems.FixedRoadrunner.createPo
 public abstract class TeleOp_Base extends OpMode {
 
     //Drive
-    protected SBMecanumDrive drive;
-    protected DcMotor fLeft, fRight, bLeft, bRight;
+    protected MecanumDrive drive;
+    protected DcMotorEx fLeft, fRight, bLeft, bRight;
+    private boolean initializedDrive = false;
 
     //Control objects
     protected BulkRead bReadCH, bReadEH;
@@ -29,10 +32,10 @@ public abstract class TeleOp_Base extends OpMode {
 
     //Initialization
     protected void initializeDrive() {
-        fLeft = hardwareMap.dcMotor.get("fLeft");
-        fRight = hardwareMap.dcMotor.get("fRight");
-        bLeft = hardwareMap.dcMotor.get("bLeft");
-        bRight = hardwareMap.dcMotor.get("bRight");
+        fLeft = hardwareMap.get(DcMotorEx.class, "fLeft");
+        fRight = hardwareMap.get(DcMotorEx.class, "fRight");
+        bLeft = hardwareMap.get(DcMotorEx.class, "bLeft");
+        bRight = hardwareMap.get(DcMotorEx.class, "bRight");
 
         fLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         fRight.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -48,6 +51,8 @@ public abstract class TeleOp_Base extends OpMode {
         fRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         bLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         bRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        initializedDrive = true;
     }
     protected void initializeBulkRead() {
         try {
@@ -64,8 +69,11 @@ public abstract class TeleOp_Base extends OpMode {
         }
     }
     protected void initializeOdometry() throws Exception {
-        if (!hasCH || !hasEH) throw new Exception("Missing Hub");
-        drive = new SBMecanumDrive(hardwareMap, bReadCH, bReadEH);
+        if (!hasCH) throw new Exception("Missing \"Control Hub\". Check configuration file naming");
+        if (initializedDrive)
+            drive = new MecanumDrive(hardwareMap, bReadCH, fLeft, fRight, bLeft, bRight);
+        else
+            drive = new MecanumDrive(hardwareMap, bReadCH);
         drive.setPoseEstimate(createPose2d(0, 0, 0));
     }
     protected void initializeVars() {
