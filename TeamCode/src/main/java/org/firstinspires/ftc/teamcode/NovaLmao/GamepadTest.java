@@ -22,8 +22,6 @@ public class GamepadTest extends OpMode {
         if(gamepadFun.getNumFingers() >= 1) telemetry.addData("Finger 1 Y?: ", gamepadFun.getFingerOneY());
         if(gamepadFun.getNumFingers() == 2) telemetry.addData("Finger 2 Y?: ", gamepadFun.getFingerTwoY());
 
-        gamepadFun.rumble(25);
-
+        //gamepadFun.rumble(25);
     }
-
 }

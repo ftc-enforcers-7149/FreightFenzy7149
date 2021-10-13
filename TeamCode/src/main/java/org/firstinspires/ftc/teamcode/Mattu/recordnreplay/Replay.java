@@ -322,14 +322,12 @@ public class Replay extends Autonomous_Base {
     }
 
     @Override
-    protected void updateSubsystems() {
-        if (USE_SUBS) {
+    protected void subsystemUpdates() {
 
-        }
     }
 
     @Override
-    protected void updateTelemetry() {
+    protected void addTelemetryData() {
         telemetry.addData("Position", drive.getPoseEstimate());
         telemetry.update();
     }
