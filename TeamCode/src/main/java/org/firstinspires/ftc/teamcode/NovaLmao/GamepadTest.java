@@ -15,7 +15,6 @@ public class GamepadTest extends OpMode {
     public void loop() {
 
         gamepadFun.update();
-
         telemetry.addData("Touch button?: ", (gamepadFun.isTouchButton()) ? "Yes" : "No");
         telemetry.addData("Number of fingers: ", gamepadFun.getNumFingers());
         if(gamepadFun.getNumFingers() >= 1) telemetry.addData("Finger 1 X?: ", gamepadFun.getFingerOneX());
