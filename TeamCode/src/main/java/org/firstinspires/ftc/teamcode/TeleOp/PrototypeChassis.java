@@ -111,17 +111,23 @@ public class PrototypeChassis extends TeleOp_Base {
         //Headless
         leftX = gamepad1.left_stick_x;
         leftY = gamepad1.left_stick_y;
-        rightX = Math.signum(gamepad1.right_stick_x) * Math.abs(Math.pow(gamepad1.right_stick_x, 3));
+        rightX = Math.signum(gamepad1.right_stick_x) * Math.abs(Math.pow(gamepad1.right_stick_x, 7));
         resetAngle = gamepad1.y;
 
         //Lift
-        liftPower = gamepad1.right_trigger - gamepad1.left_trigger;
+        if (gamepad1.right_trigger > 0.1 || gamepad1.left_trigger > 0.1)
+            liftPower = gamepad1.right_trigger - gamepad1.left_trigger;
+        else
+            liftPower = 0;
 
         //Intake
         if (gamepad2.dpad_up) intakeDir = IntakeDirection.CENTER;
         else if (gamepad2.dpad_left) intakeDir = IntakeDirection.LEFT;
         else if (gamepad2.dpad_right) intakeDir = IntakeDirection.RIGHT;
-        intakePower = (gamepad2.right_bumper ? 1 : 0) - (gamepad2.left_bumper ? 1 : 0);
+        if (gamepad2.right_trigger > 0.1 || gamepad2.left_trigger > 0.1)
+            intakePower = gamepad2.right_trigger - (gamepad2.left_trigger * 0.75);
+        else
+            intakePower = 0;
 
         //Spinner
         spinnerPower = gamepad1.a ? 1 : 0;

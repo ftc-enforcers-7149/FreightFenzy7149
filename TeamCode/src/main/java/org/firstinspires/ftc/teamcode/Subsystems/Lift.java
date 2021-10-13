@@ -21,8 +21,8 @@ public class Lift {
     //Convert motor ticks to rotations (using Gobilda's given equation)
     private final double toRot = (((1+(46.0/17))) * (1+(46.0/17))) * 28;
     public static final double PULLEY_CIRCUMFERENCE = 3.424; //inches
-    public static final int STAGES = 2;
-    public static final double MAX_HEIGHT = 13;
+    public static final int STAGES = 3;
+    public static final double MAX_HEIGHT = 19;
 
     //PIDF Controller
     private PIDFController controller;
