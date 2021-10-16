@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.Odometry.Util.Encoder;
 
-public class Flywheel {
+public class  Flywheel {
 
     //Shooter motor and attached REV Encoder
     public DcMotorEx flywheel;
