@@ -7,22 +7,17 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 
-import java.util.Locale;
-
 public class Gyroscope {
-    //IMU variables
-    private BNO055IMU imu;
-    private Orientation angles;
+
+    //IMU sensor
+    public BNO055IMU imu;
+
+    private double rawYaw, yaw, angVel;
     private double offset;
 
-    /**
-     *Gyro constructor. initializes imu
-     * @param hardwareMap hardwareMap
-     */
     public Gyroscope(HardwareMap hardwareMap){
         //Set up imu parameters
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
@@ -41,109 +36,54 @@ public class Gyroscope {
         offset = 0;
     }
 
-    //x acceleration of imu
-    public double getXAccel(){
-        return imu.getLinearAcceleration().xAccel;
-    }
-
-    //y acceleration of imu
-    public double getYAccel(){
-        return imu.getLinearAcceleration().yAccel;
+    public void update() {
+        rawYaw = getNewRawYaw();
+        yaw = cvtOffset(denormalizeDegrees(rawYaw), offset);
+        angVel = imu.getAngularVelocity().zRotationRate;
     }
 
     /**
-     * Gets the shortest distance between two angles.
-     * @param destAngle Destination angle
-     * @param heading   Current angle
-     * @return
+     * Set constant offset for the imu
+     * Only applies to getYaw() function
+     * @param offset Angle offset, in degrees [-inf,inf]
      */
-    public double getDelta(double destAngle, double heading) {
-        //ensures heading is under 360
-        if (heading >= 360) {
-            heading -= 360;
-        }
-        double delta;
-        //finds delta when current heading is greater the the destination heading
-        if (heading > destAngle) {
-            delta = heading - destAngle;
-            if (delta > 180) {
-                return 360 - delta;
-            }
-
-            return -delta;
-        }
-        //finds delta when current heading is less than the the destination heading
-        else {
-            delta = destAngle - heading;
-            if (delta > 180) {
-                return -(360 - delta);
-            }
-
-            return delta;
-        }
-    }
-
     public void setOffset(double offset){
         this.offset = offset;
     }
 
     /**
-     * Gets the shortest distance between two angles.
-     * @param destAngle Destination angle
-     * @param heading   Current angle
+     * Converts gyro degrees from -180 to 180 to be 0 to 360
+     * @param angle Angle to convert
      * @return
      */
-    public double getRelDelta(double destAngle, double heading) {
-        return (heading-destAngle);
-    }
-
-
-
-    /**
-     * converts gyro degrees from -180 to 180 to be 0 to 360
-     * @param heading
-     * @return
-     */
-    public double cvtDegrees(double heading) {
-        if (heading < 0) {
-            return 360 + heading;
+    public double denormalizeDegrees(double angle) {
+        if (angle < 0) {
+            return 360 + angle;
         } else {
-            return heading;
+            return angle;
         }
     }
 
     /**
-     * Converts degrees to work with sine and cosine
-     * @param heading
+     * Converts degrees to unit circle
+     * @param angle Angle to convert
      * @return
      */
-    public static double cvtTrigAng(double heading) {
-        if (heading >= 0 && heading < 90) {
-            return -heading + 90;
+    public static double cvtTrigAng(double angle) {
+        if (angle >= 0 && angle < 90) {
+            return -angle + 90;
         }
-        return -heading + 450;
-    }
-
-    public double cvtRelativeAng(double heading,double initAng){
-        double retVal;
-        if (heading < 0) {
-            retVal =  360 + heading;
-        } else {
-            retVal =  heading;
-        }
-
-        return (retVal+180+initAng)%360;
+        return -angle + 450;
     }
 
     /**
-     * adds a constant offset
-     * to the current angle
-     * @param yaw current angle
-     * @param offset angle offset
+     * Adds a constant offset to the current angle
+     * @param angle Current angle
+     * @param offset Angle offset
      * @return
      */
-    public double cvtOffset(double yaw, double offset){
-        double retVal = yaw;
+    public double cvtOffset(double angle, double offset){
+        double retVal = angle;
 
         retVal += offset;
         //makes sure angle is under 360 degrees
@@ -158,47 +98,50 @@ public class Gyroscope {
     }
 
     /**
-     * returns raw yaw value from gyro
-     * @return
+     * @return Raw yaw value from gyro, in degrees
      */
-    public double getRawYaw(){
-        return imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+    public double getRawYaw() {
+        return rawYaw;
     }
 
     /**
-     * returns degrees in 0-360 degree format
-     * @return
+     * @return Degrees in 0-360 degree format
      */
-    public double getYaw() {return cvtOffset(cvtDegrees(imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle),offset);}
-
-    /**
-     * returns degrees in 0-360 degree format, with straight being 90 degrees instead of 0
-     * @return
-     */
-    public double getTrigYaw() {return cvtTrigAng(imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle);}
-
-    /**
-     *
-     */
-    public double getRelativeYaw(double initAng){return cvtRelativeAng(imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle,initAng);}
-
-
-    /**
-     * method needed for gyro
-     * @param angleUnit
-     * @param angle
-     * @return
-     */
-    String formatAngle(AngleUnit angleUnit, double angle) {
-        return formatDegrees(AngleUnit.DEGREES.fromUnit(angleUnit, angle));
+    public double getYaw() {
+        return yaw;
     }
 
     /**
-     * method needed for gyro
-     * @param degrees
-     * @return
+     * @return Angular velocity, in degrees
      */
-    String formatDegrees(double degrees){
-        return String.format(Locale.getDefault(), "%.1f", AngleUnit.DEGREES.normalize(degrees));
+    public double getAngVel() {
+        return angVel;
+    }
+
+    /**
+     * Makes a new sensor read before returning
+     * @return Raw yaw value from gyro, in degrees
+     */
+    public double getNewRawYaw() {
+        update();
+        return rawYaw;
+    }
+
+    /**
+     * Makes a new sensor read before returning
+     * @return Degrees in 0-360 degree format
+     */
+    public double getNewYaw() {
+        update();
+        return yaw;
+    }
+
+    /**
+     * Makes a new sensor read before returning
+     * @return Angular velocity, in degrees
+     */
+    public double getNewAngVel() {
+        update();
+        return angVel;
     }
 }

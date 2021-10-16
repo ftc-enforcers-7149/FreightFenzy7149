@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.Mattu;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -41,7 +40,7 @@ public class SlowedDriving extends TeleOp_Base {
         getInput();
 
         // Drive
-        driveHeadless(gyro.getRawYaw(), resetAngle);
+        driveHeadless(gyro.getNewRawYaw(), resetAngle);
 
         // Lift
         if (gamepad1.right_trigger > 0.1 || gamepad1.left_trigger > 0.1)

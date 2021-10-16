@@ -63,7 +63,7 @@ public class DistanceLocalization {
      */
     public void update() {
         rawF = sF.getDistance(DistanceUnit.INCH); rawR = sR.getDistance(DistanceUnit.INCH);
-        theta = gyro.getYaw();
+        theta = gyro.getNewYaw();
 
         if (theta != lastTheta || rawF != lastRawF || rawR != lastRawR)
             calculatePosition(theta, rawF, rawR);
@@ -327,7 +327,7 @@ public class DistanceLocalization {
     }
 
     public void setHeading(double heading) {
-        gyro.setOffset(heading - gyro.getRawYaw());
+        gyro.setOffset(heading - gyro.getNewRawYaw());
     }
 
     //TODO: Take this out when it works

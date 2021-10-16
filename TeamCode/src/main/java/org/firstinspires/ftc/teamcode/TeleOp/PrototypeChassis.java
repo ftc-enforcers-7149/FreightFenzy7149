@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.TeleOp;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -9,11 +10,10 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.Subsystems.Gyroscope;
 
 @TeleOp(name = "Prototype Chassis")
-//@Disabled
+@Disabled
 public class PrototypeChassis extends TeleOp_Base {
 
     //Headless
-    protected Gyroscope gyro;
     private boolean resetAngle;
 
     //Lift
@@ -37,9 +37,8 @@ public class PrototypeChassis extends TeleOp_Base {
     @Override
     public void init() {
         initializeDrive();
+        initializeGyro();
         initializeVars();
-
-        gyro = new Gyroscope(hardwareMap);
 
         lift = hardwareMap.dcMotor.get("lift");
         lift.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -65,6 +64,7 @@ public class PrototypeChassis extends TeleOp_Base {
 
     @Override
     public void loop() {
+        gyro.update();
         getInput();
 
         driveHeadless(gyro.getRawYaw(), resetAngle);

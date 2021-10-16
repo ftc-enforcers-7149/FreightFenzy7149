@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.Mattu;
 
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
-import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -56,7 +55,7 @@ public class TestDistanceSensors extends TeleOp_Base {
 
         driveArcade();
 
-        double angleDeg = gyro.getYaw();
+        double angleDeg = gyro.getNewYaw();
         double rawSF = sF.getDistance(DistanceUnit.INCH);
         double rawSR = sR.getDistance(DistanceUnit.INCH);
 

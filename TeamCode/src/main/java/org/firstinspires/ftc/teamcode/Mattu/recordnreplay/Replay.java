@@ -32,6 +32,7 @@ public class Replay extends Autonomous_Base {
         //Initializes robot hardware
         initializeDrive();
         initializeBulkRead();
+        initializeGyro();
         try {
             initializeOdometry();
         } catch (Exception e) {
@@ -54,6 +55,7 @@ public class Replay extends Autonomous_Base {
         while (opModeIsActive() && path.size() > 0) {
             //Update all sensors and odometry
             updateBulkRead();
+            gyro.update();
             drive.update();
 
             //Follow all drives up till the next significant point (usually contains an action)
@@ -68,6 +70,7 @@ public class Replay extends Autonomous_Base {
                     while (opModeIsActive() && System.currentTimeMillis() < startTime + 250) {
                         System.out.println("DELAYING");
                         updateBulkRead();
+                        gyro.update();
                         drive.update();
                         updateSubsystems();
                         updateTelemetry();
@@ -242,6 +245,7 @@ public class Replay extends Autonomous_Base {
                             Math.abs(relH) > hAcc)) {
 
                 updateBulkRead();
+                gyro.update();
                 drive.update();
 
                 //Update robot position
@@ -315,6 +319,7 @@ public class Replay extends Autonomous_Base {
         //Waits for the turn to complete
         while (opModeIsActive() && drive.isBusy()) {
             updateBulkRead();
+            gyro.update();
             drive.update();
             updateSubsystems();
             updateTelemetry();

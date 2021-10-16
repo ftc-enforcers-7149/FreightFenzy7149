@@ -13,6 +13,7 @@ public class TestDriveTo extends Autonomous_Base {
 
         initializeDrive();
         initializeBulkRead();
+        initializeGyro();
         try {
             initializeOdometry();
         } catch (Exception e) {
@@ -30,6 +31,7 @@ public class TestDriveTo extends Autonomous_Base {
         while (opModeIsActive()) {
 
             updateBulkRead();
+            gyro.update();
             drive.update();
 
             driveTo(24, 24, Math.PI / 2);

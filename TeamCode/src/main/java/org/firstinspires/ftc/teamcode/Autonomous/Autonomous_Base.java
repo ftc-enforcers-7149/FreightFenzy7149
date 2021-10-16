@@ -10,8 +10,8 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.Odometry.DriveWheels.MecanumDrive;
-import org.firstinspires.ftc.teamcode.Odometry.SensorBot.SBMecanumDrive;
 import org.firstinspires.ftc.teamcode.Subsystems.BulkRead;
+import org.firstinspires.ftc.teamcode.Subsystems.Gyroscope;
 
 import static org.firstinspires.ftc.teamcode.Subsystems.FixedRoadrunner.createPose2d;
 
@@ -22,7 +22,8 @@ public abstract class Autonomous_Base extends LinearOpMode {
     protected MecanumDrive drive;
     public static PIDCoefficients H_PID = new PIDCoefficients(-5, 0, -0.04);
     protected DcMotorEx fLeft, fRight, bLeft, bRight;
-    private boolean initializedDrive = false;
+    protected Gyroscope gyro;
+    private boolean initializedMotors = false, initializedDrive = false, initializedGyro = false;
 
     //Control objects
     protected BulkRead bReadCH, bReadEH;
@@ -57,6 +58,7 @@ public abstract class Autonomous_Base extends LinearOpMode {
                         Math.abs(relH) > hAcc)) {
 
             updateBulkRead();
+            gyro.update();
             drive.update();
 
             //Update robot position
@@ -123,6 +125,7 @@ public abstract class Autonomous_Base extends LinearOpMode {
 
             //Update bulk read, odometry, and subsystems
             updateBulkRead();
+            gyro.update();
             drive.update();
 
             //Output telemetry
@@ -201,6 +204,7 @@ public abstract class Autonomous_Base extends LinearOpMode {
 
             //Update bulk read, odometry, and subsystems
             updateBulkRead();
+            gyro.update();
             drive.update();
 
             //Output telemetry
@@ -257,27 +261,40 @@ public abstract class Autonomous_Base extends LinearOpMode {
 
     //Initialization
     protected void initializeDrive() {
-        fLeft = hardwareMap.get(DcMotorEx.class, "fLeft");
-        fRight = hardwareMap.get(DcMotorEx.class, "fRight");
-        bLeft = hardwareMap.get(DcMotorEx.class, "bLeft");
-        bRight = hardwareMap.get(DcMotorEx.class, "bRight");
+        if (!initializedDrive) {
+            fLeft = hardwareMap.get(DcMotorEx.class, "fLeft");
+            fRight = hardwareMap.get(DcMotorEx.class, "fRight");
+            bLeft = hardwareMap.get(DcMotorEx.class, "bLeft");
+            bRight = hardwareMap.get(DcMotorEx.class, "bRight");
 
-        fLeft.setDirection(DcMotorSimple.Direction.FORWARD);
-        fRight.setDirection(DcMotorSimple.Direction.REVERSE);
-        bLeft.setDirection(DcMotorSimple.Direction.FORWARD);
-        bRight.setDirection(DcMotorSimple.Direction.REVERSE);
+            fLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+            fRight.setDirection(DcMotorSimple.Direction.FORWARD);
+            bLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+            bRight.setDirection(DcMotorSimple.Direction.FORWARD);
 
-        fLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        fRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            fLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            fRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            bLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            bRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        fLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        fRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        bLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        bRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            fLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            fRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            bLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            bRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        initializedDrive = true;
+            fLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            fRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            bLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            bRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        }
+        else {
+            fLeft = drive.fLeft;
+            fRight = drive.fRight;
+            bLeft = drive.bLeft;
+            bRight = drive.bRight;
+        }
+
+        initializedMotors = true;
     }
     protected void initializeBulkRead() {
         try {
@@ -293,13 +310,27 @@ public abstract class Autonomous_Base extends LinearOpMode {
             hasEH = false;
         }
     }
+    protected void initializeGyro() {
+        if (!initializedDrive)
+            gyro = new Gyroscope(hardwareMap);
+        else
+            gyro = drive.gyro;
+
+        initializedGyro = true;
+    }
     protected void initializeOdometry() throws Exception {
         if (!hasCH) throw new Exception("Missing \"Control Hub\". Check configuration file naming");
-        if (initializedDrive)
+        if (initializedMotors && initializedGyro)
+            drive = new MecanumDrive(hardwareMap, bReadCH, fLeft, fRight, bLeft, bRight, gyro);
+        else if (initializedMotors)
             drive = new MecanumDrive(hardwareMap, bReadCH, fLeft, fRight, bLeft, bRight);
+        else if (initializedGyro)
+            drive = new MecanumDrive(hardwareMap, bReadCH, gyro);
         else
             drive = new MecanumDrive(hardwareMap, bReadCH);
         drive.setPoseEstimate(createPose2d(0, 0, 0));
+
+        initializedDrive = true;
     }
 
     //Loop updates
@@ -319,6 +350,16 @@ public abstract class Autonomous_Base extends LinearOpMode {
     }
 
     //Useful functions
+    protected void waitForDriveComplete() {
+        while (opModeIsActive() && drive.isBusy()) {
+            updateBulkRead();
+            if (initializedGyro) gyro.update();
+            if (initializedDrive) drive.update();
+            updateSubsystems();
+            updateTelemetry();
+        }
+    }
+
     protected void setMotorPowers(double v1, double v2, double v3, double v4) {
         fLeft.setPower(v1);
         fRight.setPower(v2);

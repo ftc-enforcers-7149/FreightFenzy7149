@@ -6,7 +6,6 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.Odometry.DriveWheels.MecanumDrive;
-import org.firstinspires.ftc.teamcode.Odometry.SensorBot.SBMecanumDrive;
 import org.firstinspires.ftc.teamcode.Subsystems.BulkRead;
 import org.firstinspires.ftc.teamcode.Subsystems.Gyroscope;
 
@@ -17,7 +16,8 @@ public abstract class TeleOp_Base extends OpMode {
     //Drive
     protected MecanumDrive drive;
     protected DcMotorEx fLeft, fRight, bLeft, bRight;
-    private boolean initializedDrive = false;
+    protected Gyroscope gyro;
+    private boolean initializedMotors = false, initializedDrive = false, initializedGyro = false;
 
     //Control objects
     protected BulkRead bReadCH, bReadEH;
@@ -32,27 +32,40 @@ public abstract class TeleOp_Base extends OpMode {
 
     //Initialization
     protected void initializeDrive() {
-        fLeft = hardwareMap.get(DcMotorEx.class, "fLeft");
-        fRight = hardwareMap.get(DcMotorEx.class, "fRight");
-        bLeft = hardwareMap.get(DcMotorEx.class, "bLeft");
-        bRight = hardwareMap.get(DcMotorEx.class, "bRight");
+        if (!initializedDrive) {
+            fLeft = hardwareMap.get(DcMotorEx.class, "fLeft");
+            fRight = hardwareMap.get(DcMotorEx.class, "fRight");
+            bLeft = hardwareMap.get(DcMotorEx.class, "bLeft");
+            bRight = hardwareMap.get(DcMotorEx.class, "bRight");
 
-        fLeft.setDirection(DcMotorSimple.Direction.REVERSE);
-        fRight.setDirection(DcMotorSimple.Direction.FORWARD);
-        bLeft.setDirection(DcMotorSimple.Direction.REVERSE);
-        bRight.setDirection(DcMotorSimple.Direction.FORWARD);
+            fLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+            fRight.setDirection(DcMotorSimple.Direction.FORWARD);
+            bLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+            bRight.setDirection(DcMotorSimple.Direction.FORWARD);
 
-        fLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        fRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            fLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            fRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            bLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            bRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        fLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        fRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        bLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        bRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            fLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            fRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            bLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            bRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        initializedDrive = true;
+            fLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            fRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            bLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            bRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        }
+        else {
+            fLeft = drive.fLeft;
+            fRight = drive.fRight;
+            bLeft = drive.bLeft;
+            bRight = drive.bRight;
+        }
+
+        initializedMotors = true;
     }
     protected void initializeBulkRead() {
         try {
@@ -68,13 +81,27 @@ public abstract class TeleOp_Base extends OpMode {
             hasEH = false;
         }
     }
+    protected void initializeGyro() {
+        if (!initializedDrive)
+            gyro = new Gyroscope(hardwareMap);
+        else
+            gyro = drive.gyro;
+
+        initializedGyro = true;
+    }
     protected void initializeOdometry() throws Exception {
         if (!hasCH) throw new Exception("Missing \"Control Hub\". Check configuration file naming");
-        if (initializedDrive)
+        if (initializedMotors && initializedGyro)
+            drive = new MecanumDrive(hardwareMap, bReadCH, fLeft, fRight, bLeft, bRight, gyro);
+        else if (initializedMotors)
             drive = new MecanumDrive(hardwareMap, bReadCH, fLeft, fRight, bLeft, bRight);
+        else if (initializedGyro)
+            drive = new MecanumDrive(hardwareMap, bReadCH, gyro);
         else
             drive = new MecanumDrive(hardwareMap, bReadCH);
         drive.setPoseEstimate(createPose2d(0, 0, 0));
+
+        initializedDrive = true;
     }
     protected void initializeVars() {
         lastLeftX = 0; lastLeftY = 0; lastRightX = 0; lastRightY = 0;
@@ -90,27 +117,36 @@ public abstract class TeleOp_Base extends OpMode {
     //Driving
     protected void driveArcade() {
         //Simple arcade math
-        double v1 = -leftY + leftX - rightX;
-        double v2 = -leftY - leftX + rightX;
-        double v3 = -leftY - leftX - rightX;
-        double v4 = -leftY + leftX + rightX;
+        if (leftY != lastLeftY && leftX != lastLeftX && rightX != lastRightX) {
+            double vFL = -leftY + leftX - rightX;
+            double vFR = -leftY - leftX + rightX;
+            double vBL = -leftY - leftX - rightX;
+            double vBR = -leftY + leftX + rightX;
 
-        //Getting the max value can assure that no motor will be set to a value above a certain point.
-        double max = Math.max(Math.max(Math.abs(v1), Math.abs(v2)), Math.max(Math.abs(v3), Math.abs(v4)));
+            //Getting the max value can assure that no motor will be set to a value above a certain point.
+            double max = Math.max(Math.max(Math.abs(vFL), Math.abs(vFR)), Math.max(Math.abs(vBL), Math.abs(vBR)));
 
-        //In this case, no motor can go above lim power by scaling them all down if such a thing might occur.
-        if (max > 1) {
-            v1 /= max;
-            v2 /= max;
-            v3 /= max;
-            v4 /= max;
+            //In this case, no motor can go above lim power by scaling them all down if such a thing might occur.
+            if (max > lim) {
+                vFL /= max / lim;
+                vFR /= max / lim;
+                vBL /= max / lim;
+                vBR /= max / lim;
+            }
+
+            setMotorPowers(vFL, vFR, vBL, vBR);
         }
-
-        setMotorPowers(v1, v2, v3, v4);
     }
     protected void driveHeadless(double angle, boolean reset) {
         if (reset) {
             offset = angle;
+        }
+
+        if ((leftY == 0 && lastLeftY != 0) &&
+                (leftX == 0 && lastLeftX != 0) &&
+                (rightX == 0 && lastRightX != 0)) {
+            setMotorPowers(0, 0, 0, 0);
+            return;
         }
 
         double r = Math.hypot(leftX, leftY) * Math.sqrt(2);
@@ -131,44 +167,35 @@ public abstract class TeleOp_Base extends OpMode {
         );
 
         if (max > lim) {
-            vFL /= max * (1 / lim);
-            vFR /= max * (1 / lim);
-            vBL /= max * (1 / lim);
-            vBR /= max * (1 / lim);
+            vFL /= max / lim;
+            vFR /= max / lim;
+            vBL /= max / lim;
+            vBR /= max / lim;
         }
 
-        fLeft.setPower(vFL);
-        fRight.setPower(vFR);
-        bLeft.setPower(vBL);
-        bRight.setPower(vBR);
+        setMotorPowers(vFL, vFR, vBL, vBR);
     }
     protected void driveTank() {
-        if (leftY >= 0.1) {
-            fLeft.setPower(leftY);
-            bLeft.setPower(leftY);
-        } else if (leftY <= -0.1) {
-            fLeft.setPower(leftY);
-            bLeft.setPower(leftY);
-        } else if (leftY == 0) {
-            fLeft.setPower(0);
-            bLeft.setPower(0);
-        }
+        if (leftY != lastLeftY && rightY != lastRightY) {
+            double vL = -leftY;
+            double vR = -rightY;
 
-        if (rightY >= 0.1) {
-            fRight.setPower(rightY);
-            bRight.setPower(rightY);
-        } else if (rightY <= -0.1) {
-            fRight.setPower(rightY);
-            bRight.setPower(rightY);
-        } else if (rightY == 0) {
-            fRight.setPower(0);
-            bRight.setPower(0);
+            double max = Math.max(vL, vR);
+
+            if (max > lim) {
+                vL /= max / lim;
+                vR /= max / lim;
+            }
+
+            setMotorPowers(vL, vR, vL, vR);
         }
     }
 
     //State machine logic
     protected abstract void getInput();
     protected abstract void updateStateMachine();
+
+    //Useful functions
 
     /**
      * Curves an input so that 0->0, -1->-1, and 1->1,
@@ -181,11 +208,10 @@ public abstract class TeleOp_Base extends OpMode {
         return Math.signum(input) * Math.abs(Math.pow(input, exp));
     }
 
-    //Useful functions
-    protected void setMotorPowers(double v1, double v2, double v3, double v4) {
-        fLeft.setPower(v1);
-        fRight.setPower(v2);
-        bLeft.setPower(v3);
-        bRight.setPower(v4);
+    protected void setMotorPowers(double vFL, double vFR, double vBL, double vBR) {
+        fLeft.setPower(vFL);
+        fRight.setPower(vFR);
+        bLeft.setPower(vBL);
+        bRight.setPower(vBR);
     }
 }

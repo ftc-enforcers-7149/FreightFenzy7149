@@ -32,6 +32,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.teamcode.Odometry.Util.LynxModuleUtil;
 import org.firstinspires.ftc.teamcode.Odometry.trajectorysequence.*;
 import org.firstinspires.ftc.teamcode.Subsystems.BulkRead;
+import org.firstinspires.ftc.teamcode.Subsystems.Gyroscope;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -61,15 +62,17 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
 
     private TrajectoryFollower follower;
 
-    private DcMotorEx fLeft, bLeft, bRight, fRight;
+    public DcMotorEx fLeft, bLeft, bRight, fRight;
     private List<DcMotorEx> motors;
 
-    private BNO055IMU imu;
+    public Gyroscope gyro;
     private VoltageSensor batteryVoltageSensor;
 
     private BulkRead bRead;
 
-    public MecanumDrive(HardwareMap hardwareMap, BulkRead bRead) {
+    public MecanumDrive(HardwareMap hardwareMap, BulkRead bRead,
+                        DcMotorEx fLeft, DcMotorEx fRight, DcMotorEx bLeft, DcMotorEx bRight,
+                        Gyroscope gyro) {
         super(kV, kA, kStatic, TRACK_WIDTH, TRACK_WIDTH, LATERAL_MULTIPLIER);
 
         this.bRead = bRead;
@@ -85,10 +88,96 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
             module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
         }
 
-        imu = hardwareMap.get(BNO055IMU.class, "imu");
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
-        imu.initialize(parameters);
+        this.fLeft = fLeft;
+        this.fRight = fRight;
+        this.bLeft = bLeft;
+        this.bRight = bRight;
+
+        this.gyro = gyro;
+
+        motors = Arrays.asList(fLeft, bLeft, bRight, fRight);
+
+        for (DcMotorEx motor : motors) {
+            MotorConfigurationType motorConfigurationType = motor.getMotorType().clone();
+            motorConfigurationType.setAchieveableMaxRPMFraction(1.0);
+            motor.setMotorType(motorConfigurationType);
+        }
+
+        if (RUN_USING_ENCODER) {
+            setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+
+        if (RUN_USING_ENCODER && MOTOR_VELO_PID != null) {
+            setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, MOTOR_VELO_PID);
+        }
+
+        setLocalizer(new org.firstinspires.ftc.teamcode.Odometry.DriveWheels.MecanumLocalizer(this));
+
+        trajectorySequenceRunner = new TrajectorySequenceRunner(follower, HEADING_PID);
+    }
+
+    public MecanumDrive(HardwareMap hardwareMap, BulkRead bRead,
+                        DcMotorEx fLeft, DcMotorEx fRight, DcMotorEx bLeft, DcMotorEx bRight) {
+        super(kV, kA, kStatic, TRACK_WIDTH, TRACK_WIDTH, LATERAL_MULTIPLIER);
+
+        this.bRead = bRead;
+
+        follower = new HolonomicPIDVAFollower(TRANSLATIONAL_PID, TRANSLATIONAL_PID, HEADING_PID,
+                new Pose2d(0.5, 0.5, Math.toRadians(5.0)), 0.5);
+
+        LynxModuleUtil.ensureMinimumFirmwareVersion(hardwareMap);
+
+        batteryVoltageSensor = hardwareMap.voltageSensor.iterator().next();
+
+        for (LynxModule module : hardwareMap.getAll(LynxModule.class)) {
+            module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+        }
+
+        gyro = new Gyroscope(hardwareMap);
+
+        this.fLeft = fLeft;
+        this.fRight = fRight;
+        this.bLeft = bLeft;
+        this.bRight = bRight;
+
+        motors = Arrays.asList(fLeft, bLeft, bRight, fRight);
+
+        for (DcMotorEx motor : motors) {
+            MotorConfigurationType motorConfigurationType = motor.getMotorType().clone();
+            motorConfigurationType.setAchieveableMaxRPMFraction(1.0);
+            motor.setMotorType(motorConfigurationType);
+        }
+
+        if (RUN_USING_ENCODER) {
+            setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+
+        if (RUN_USING_ENCODER && MOTOR_VELO_PID != null) {
+            setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, MOTOR_VELO_PID);
+        }
+
+        setLocalizer(new org.firstinspires.ftc.teamcode.Odometry.DriveWheels.MecanumLocalizer(this));
+
+        trajectorySequenceRunner = new TrajectorySequenceRunner(follower, HEADING_PID);
+    }
+
+    public MecanumDrive(HardwareMap hardwareMap, BulkRead bRead, Gyroscope gyro) {
+        super(kV, kA, kStatic, TRACK_WIDTH, TRACK_WIDTH, LATERAL_MULTIPLIER);
+
+        this.bRead = bRead;
+
+        follower = new HolonomicPIDVAFollower(TRANSLATIONAL_PID, TRANSLATIONAL_PID, HEADING_PID,
+                new Pose2d(0.5, 0.5, Math.toRadians(5.0)), 0.5);
+
+        LynxModuleUtil.ensureMinimumFirmwareVersion(hardwareMap);
+
+        batteryVoltageSensor = hardwareMap.voltageSensor.iterator().next();
+
+        for (LynxModule module : hardwareMap.getAll(LynxModule.class)) {
+            module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+        }
+
+        this.gyro = gyro;
 
         fLeft = hardwareMap.get(DcMotorEx.class, "fLeft");
         fRight = hardwareMap.get(DcMotorEx.class, "fRight");
@@ -125,8 +214,7 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
         trajectorySequenceRunner = new TrajectorySequenceRunner(follower, HEADING_PID);
     }
 
-    public MecanumDrive(HardwareMap hardwareMap, BulkRead bRead,
-                        DcMotorEx fLeft, DcMotorEx fRight, DcMotorEx bLeft, DcMotorEx bRight) {
+    public MecanumDrive(HardwareMap hardwareMap, BulkRead bRead) {
         super(kV, kA, kStatic, TRACK_WIDTH, TRACK_WIDTH, LATERAL_MULTIPLIER);
 
         this.bRead = bRead;
@@ -142,15 +230,12 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
             module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
         }
 
-        imu = hardwareMap.get(BNO055IMU.class, "imu");
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
-        imu.initialize(parameters);
+        gyro = new Gyroscope(hardwareMap);
 
-        this.fLeft = fLeft;
-        this.fRight = fRight;
-        this.bLeft = bLeft;
-        this.bRight = bRight;
+        fLeft = hardwareMap.get(DcMotorEx.class, "fLeft");
+        fRight = hardwareMap.get(DcMotorEx.class, "fRight");
+        bLeft = hardwareMap.get(DcMotorEx.class, "bLeft");
+        bRight = hardwareMap.get(DcMotorEx.class, "bRight");
 
         motors = Arrays.asList(fLeft, bLeft, bRight, fRight);
 
@@ -329,7 +414,7 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
 
     @Override
     public double getRawExternalHeading() {
-        return imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).firstAngle;
+        return Math.toRadians(gyro.getRawYaw());
     }
 
     @Override
@@ -352,7 +437,7 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
         // Rotate about the z axis is the default assuming your REV Hub/Control Hub is laying
         // flat on a surface
 
-        return (double) imu.getAngularVelocity().xRotationRate;
+        return Math.toRadians(gyro.getAngVel());
     }
 
     public static TrajectoryVelocityConstraint getVelocityConstraint(double maxVel, double maxAngularVel, double trackWidth) {

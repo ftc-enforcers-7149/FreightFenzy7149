@@ -37,6 +37,7 @@ public class Record extends TeleOp_Base {
         //All of these methods initialize hardware or class variables (with default values)
         initializeDrive();
         initializeBulkRead();
+        initializeGyro();
         try {
             initializeOdometry();
         } catch (Exception e) {
@@ -74,11 +75,12 @@ public class Record extends TeleOp_Base {
     public void loop() {
         //Update sensors and inputs from gamepad
         updateBulkRead();
+        gyro.update();
         drive.update();
         getInput();
 
         //Drive the robot
-        driveArcade();
+        driveHeadless(gyro.getRawYaw(), gamepad1.y);
 
         //Get current position
         double x = drive.getPoseEstimate().getX();
@@ -214,9 +216,9 @@ public class Record extends TeleOp_Base {
 
     @Override
     protected void getInput() {
-        leftX = gamepad1.left_stick_x;
-        leftY = gamepad1.left_stick_y;
-        rightX = -Math.signum(gamepad1.right_stick_x) * Math.abs(Math.pow(gamepad1.right_stick_x, 3));
+        leftX = curveInput(gamepad1.left_stick_x, 7)*lim;
+        leftY = curveInput(gamepad1.left_stick_y, 7)*lim;
+        rightX = curveInput(gamepad1.right_stick_x, 7)*lim;
         currA = gamepad1.a;
         currB = gamepad1.b;
         currRightTrig = gamepad1.right_trigger;

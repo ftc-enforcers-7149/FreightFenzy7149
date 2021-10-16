@@ -38,11 +38,6 @@ public class Lift {
     //If using PID or not
     private boolean usePID;
 
-    /**
-     * Initialize the lift (without Bulk Read)
-     * @param hardwareMap The OpMode's hardware map
-     * @param liftName The name of the lift motor in the configuration
-     */
     public Lift(HardwareMap hardwareMap, String liftName) {
         lift = hardwareMap.get(DcMotorEx.class, liftName);
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -54,12 +49,6 @@ public class Lift {
         useBRead = false;
     }
 
-    /**
-     * Initialize the lift (with Bulk Read)
-     * @param hardwareMap The OpMode's hardware map
-     * @param liftName The name of the lift motor in the configuration
-     * @param bRead A Bulk Read object for the correct hub
-     */
     public Lift(HardwareMap hardwareMap, String liftName, BulkRead bRead) {
         lift = hardwareMap.get(DcMotorEx.class, liftName);
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -97,11 +86,6 @@ public class Lift {
         usePID = true;
     }
 
-    /**
-     * Updates the PID and lift power
-     * When using PID, goes to a target position
-     * When using motor power, does not go to a target
-     */
     public void update() {
         //Get motor ticks
         if (useBRead) currPosition = -bRead.getMotorPos(lift);
@@ -132,9 +116,6 @@ public class Lift {
         }
     }
 
-    /**
-     * Stops the lift
-     */
     public void stop() {
         setPower(0);
         update();
@@ -174,17 +155,11 @@ public class Lift {
         return (int) ((inches / STAGES / PULLEY_CIRCUMFERENCE) * toRot);
     }
 
-    /**
-     * Initializes the PID controller
-     */
     private void initPID() {
         controller = new PIDFController(pidCoeffs);
         controller.setOutputBounds(-1, 1);
     }
 
-    /**
-     * Initializes class variables to defaults
-     */
     private void initVars() {
         output = 0; lastOutput = 0;
         setPosition = 0;

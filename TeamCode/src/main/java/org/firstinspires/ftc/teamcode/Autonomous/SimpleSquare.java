@@ -15,6 +15,7 @@ public class SimpleSquare extends Autonomous_Base {
 
         initializeDrive();
         initializeBulkRead();
+        initializeGyro();
         try {
             initializeOdometry();
         } catch (Exception e) {
@@ -30,6 +31,7 @@ public class SimpleSquare extends Autonomous_Base {
         /// Loop ///
 
         updateBulkRead();
+        gyro.update();
         drive.update();
         updateSubsystems();
         updateTelemetry();
@@ -43,6 +45,7 @@ public class SimpleSquare extends Autonomous_Base {
 
         while (opModeIsActive() && drive.isBusy()) {
             updateBulkRead();
+            gyro.update();
             drive.update();
             updateSubsystems();
             updateTelemetry();
@@ -67,6 +70,7 @@ public class SimpleSquare extends Autonomous_Base {
 
         while (opModeIsActive() && drive.isBusy()) {
             updateBulkRead();
+            gyro.update();
             drive.update();
             updateSubsystems();
             updateTelemetry();
@@ -77,6 +81,7 @@ public class SimpleSquare extends Autonomous_Base {
 
         while (opModeIsActive() && drive.isBusy()) {
             updateBulkRead();
+            gyro.update();
             drive.update();
             updateSubsystems();
             updateTelemetry();
@@ -101,6 +106,7 @@ public class SimpleSquare extends Autonomous_Base {
 
         while (opModeIsActive() && drive.isBusy()) {
             updateBulkRead();
+            gyro.update();
             drive.update();
             updateSubsystems();
             updateTelemetry();
@@ -115,6 +121,7 @@ public class SimpleSquare extends Autonomous_Base {
 
         while (opModeIsActive() && drive.isBusy()) {
             updateBulkRead();
+            gyro.update();
             drive.update();
             updateSubsystems();
             updateTelemetry();
@@ -125,6 +132,7 @@ public class SimpleSquare extends Autonomous_Base {
 
         while (opModeIsActive() && drive.isBusy()) {
             updateBulkRead();
+            gyro.update();
             drive.update();
             updateSubsystems();
             updateTelemetry();

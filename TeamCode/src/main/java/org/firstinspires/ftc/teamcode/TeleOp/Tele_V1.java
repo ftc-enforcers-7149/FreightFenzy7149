@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.TeleOp;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Subsystems.CarouselSpinner;
@@ -13,7 +12,6 @@ import org.firstinspires.ftc.teamcode.Subsystems.TurningIntake;
 public class Tele_V1 extends TeleOp_Base {
 
     //Headless
-    protected Gyroscope gyro;
     private boolean resetAngle;
 
     private TurningIntake turningIntake;
@@ -24,9 +22,8 @@ public class Tele_V1 extends TeleOp_Base {
     public void init() {
         initializeDrive();
         initializeBulkRead();
+        initializeGyro();
         initializeVars();
-
-        gyro = new Gyroscope(hardwareMap);
 
         turningIntake = new TurningIntake(hardwareMap, "intake", "wrist");
         lift = new Lift(hardwareMap, "lift", bReadEH);
@@ -36,6 +33,7 @@ public class Tele_V1 extends TeleOp_Base {
     @Override
     public void loop() {
         updateBulkRead();
+        gyro.update();
         getInput();
 
         // Drive
@@ -56,7 +54,7 @@ public class Tele_V1 extends TeleOp_Base {
         else
             lift.setPower(0);
 
-        if (lift.getLiftHeight() > 5) lim = 0.5;
+        if (lift.getLiftHeight() > 10) lim = 0.5;
         else lim = 1;
 
         // Carousel
