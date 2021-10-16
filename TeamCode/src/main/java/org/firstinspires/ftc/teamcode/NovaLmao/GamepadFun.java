@@ -12,6 +12,8 @@ public class GamepadFun {
     private double fingerOneX, lastFingerOneX, fingerOneY, lastFingerOneY,
             fingerTwoX, lastFingerTwoX, fingerTwoY, lastFingerTwoY;
 
+    private double standardMult = 100;
+
     public GamepadFun (Gamepad gamepad) {
 
         this.gamepad = gamepad;
@@ -24,19 +26,28 @@ public class GamepadFun {
         touchButton = gamepad.touchpad;
 
         lastNumFingers = numFingers;
-        numFingers = (gamepad.touchpad_finger_1) ? 1 : ((gamepad.touchpad_finger_2) ? 2 : 0);
+
+        if(gamepad.touchpad_finger_1) {
+            numFingers = 1;
+        }
+        else if(gamepad.touchpad_finger_1 && gamepad.touchpad_finger_2) {
+            numFingers = 2;
+        }
+        else {
+            numFingers = 0;
+        }
 
         lastFingerOneX = fingerOneX;
-        if(numFingers >= 1) fingerOneX = gamepad.touchpad_finger_1_x;
+        if(numFingers >= 1) fingerOneX = standardMult * gamepad.touchpad_finger_1_x;
 
         lastFingerOneY = fingerOneY;
-        if(numFingers >= 1) fingerOneY = gamepad.touchpad_finger_1_y;
+        if(numFingers >= 1) fingerOneY = standardMult * gamepad.touchpad_finger_1_y;
 
         lastFingerTwoX = fingerTwoX;
-        if(numFingers > 1) fingerTwoX = gamepad.touchpad_finger_2_x;
+        if(numFingers == 2) fingerTwoX = standardMult * gamepad.touchpad_finger_2_x;
 
         lastFingerTwoY = fingerTwoY;
-        if(numFingers > 1) fingerTwoY = gamepad.touchpad_finger_2_y;
+        if(numFingers == 2) fingerTwoY = standardMult * gamepad.touchpad_finger_2_y;
 
     }
 
@@ -54,6 +65,14 @@ public class GamepadFun {
 
     public void rumbleBlips(int blips) {
         gamepad.rumbleBlips(blips);
+    }
+
+    public void startRumble() {
+        gamepad.rumble(Gamepad.RUMBLE_DURATION_CONTINUOUS);
+    }
+
+    public void stopRumble() {
+        gamepad.stopRumble();
     }
 
     public boolean isTouchButton() {
