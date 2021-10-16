@@ -18,6 +18,7 @@ public class TouchButton {
 
     public TouchButton(GamepadFun gFun, double leftX, double rightX, double bottomY, double topY) {
 
+        this.gFun = gFun;
         this.leftX = leftX;
         this.rightX = rightX;
         this.bottomY = bottomY;
@@ -27,6 +28,7 @@ public class TouchButton {
 
     public TouchButton(GamepadFun gFun, double leftX, double rightX, double bottomY, double topY, double standardMult) {
 
+        this.gFun = gFun;
         this.leftX = leftX;
         this.rightX = rightX;
         this.bottomY = bottomY;

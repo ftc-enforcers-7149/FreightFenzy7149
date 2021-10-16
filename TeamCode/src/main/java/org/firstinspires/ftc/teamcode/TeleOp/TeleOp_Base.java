@@ -147,6 +147,17 @@ public abstract class TeleOp_Base extends OpMode {
     protected abstract void getInput();
     protected abstract void updateStateMachine();
 
+    /**
+     * Curves an input so that 0->0, -1->-1, and 1->1,
+     * but in between values curve slowly up by input^exp
+     * @param input The function input
+     * @param exp The exponent for the curve
+     * @return The result of curving the input
+     */
+    protected double curveInput(double input, double exp) {
+        return Math.signum(input) * Math.abs(Math.pow(input, exp));
+    }
+
     //Useful functions
     protected void setMotorPowers(double v1, double v2, double v3, double v4) {
         fLeft.setPower(v1);

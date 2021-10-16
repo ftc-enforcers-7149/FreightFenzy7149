@@ -1,24 +1,23 @@
-package org.firstinspires.ftc.teamcode.TeleOp;
+package org.firstinspires.ftc.teamcode.Mattu;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.Subsystems.CarouselSpinner;
 import org.firstinspires.ftc.teamcode.Subsystems.Gyroscope;
 import org.firstinspires.ftc.teamcode.Subsystems.Lift;
-import org.firstinspires.ftc.teamcode.Subsystems.TurningIntake;
+import org.firstinspires.ftc.teamcode.TeleOp.TeleOp_Base;
 
-@TeleOp (name = "Tele_V1")
+@TeleOp(name = "Slowed Driving")
 //@Disabled
-public class Tele_V1 extends TeleOp_Base {
+public class SlowedDriving extends TeleOp_Base {
 
     //Headless
     protected Gyroscope gyro;
     private boolean resetAngle;
 
-    private TurningIntake turningIntake;
     private Lift lift;
-    private CarouselSpinner spinner;
+    private Servo wrist;
 
     @Override
     public void init() {
@@ -28,9 +27,12 @@ public class Tele_V1 extends TeleOp_Base {
 
         gyro = new Gyroscope(hardwareMap);
 
-        turningIntake = new TurningIntake(hardwareMap, "intake", "wrist");
         lift = new Lift(hardwareMap, "lift", bReadEH);
-        spinner = new CarouselSpinner(hardwareMap, "leftSpinner", "rightSpinner");
+
+        wrist = hardwareMap.servo.get("wrist");
+        wrist.setDirection(Servo.Direction.REVERSE);
+
+        wrist.setPosition(0.45);
     }
 
     @Override
@@ -41,43 +43,30 @@ public class Tele_V1 extends TeleOp_Base {
         // Drive
         driveHeadless(gyro.getRawYaw(), resetAngle);
 
-        // Turning Intake
-        if (gamepad2.dpad_up) turningIntake.setWristCenter();
-        else if (gamepad2.dpad_left) turningIntake.moveWristLeft();
-        else if (gamepad2.dpad_right) turningIntake.moveWristRight();
-
-        if (gamepad2.right_trigger > 0.1 || gamepad2.left_trigger > 0.1)
-            turningIntake.setIntakePower(gamepad2.right_trigger - gamepad2.left_trigger);
-        else turningIntake.setIntakePower(0);
-
         // Lift
         if (gamepad1.right_trigger > 0.1 || gamepad1.left_trigger > 0.1)
             lift.setPower(gamepad1.right_trigger - gamepad1.left_trigger);
         else
             lift.setPower(0);
 
-        if (lift.getLiftHeight() > 5) lim = 0.5;
-        else lim = 1;
-
-        // Carousel
-        spinner.setLeftPower(gamepad1.x ? 1 : 0);
-        spinner.setRightPower(gamepad1.b ? 1 : 0);
+        if (lift.getLiftHeight() > 5) {
+            lim = 0.5;
+        }
+        else {
+            lim = 1;
+        }
 
         // Telemetry
         telemetry.addData("Lift Height: ", lift.getLiftHeight());
 
-        turningIntake.update();
         lift.update();
-        spinner.update();
         updateStateMachine();
     }
 
     @Override
     public void stop() {
-        setMotorPowers(0,0,0,0);
-        turningIntake.stop();
+        setMotorPowers(0, 0, 0, 0);
         lift.stop();
-        spinner.stop();
     }
 
     @Override

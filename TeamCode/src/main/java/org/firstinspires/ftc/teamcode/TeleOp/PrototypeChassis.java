@@ -31,8 +31,8 @@ public class PrototypeChassis extends TeleOp_Base {
     private double intakePower, lastIntakePower;
 
     //Carousel
-    private CRServo spinner;
-    private double spinnerPower, lastSpinnerPower;
+    private CRServo leftSpinner, rightSpinner;
+    private double leftPower, lastLeftPower, rightPower, lastRightPower;
 
     @Override
     public void init() {
@@ -50,19 +50,21 @@ public class PrototypeChassis extends TeleOp_Base {
         intake = hardwareMap.crservo.get("intake");
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        spinner = hardwareMap.crservo.get("spinner");
-        spinner.setDirection(DcMotorSimple.Direction.REVERSE);
+        leftSpinner = hardwareMap.crservo.get("leftSpinner");
+        leftSpinner.setDirection(DcMotorSimple.Direction.REVERSE);
+        rightSpinner = hardwareMap.crservo.get("rightSpinner");
+        rightSpinner.setDirection(DcMotorSimple.Direction.FORWARD);
 
         lastLiftPower = 0;
         lastIntakePower = 0;
         lastIntakeDir = IntakeDirection.NONE;
         intakeDir = IntakeDirection.NONE;
-        lastSpinnerPower = 0;
+        lastLeftPower = 0;
+        lastRightPower = 0;
     }
 
     @Override
     public void loop() {
-
         getInput();
 
         driveHeadless(gyro.getRawYaw(), resetAngle);
@@ -82,7 +84,7 @@ public class PrototypeChassis extends TeleOp_Base {
                     wrist.setPosition(1);
                     break;
                 case CENTER:
-                    wrist.setPosition(0.615);
+                    wrist.setPosition(0.45);
                     break;
             }
         }
@@ -91,8 +93,12 @@ public class PrototypeChassis extends TeleOp_Base {
             intake.setPower(intakePower);
         }
 
-        if (spinnerPower != lastSpinnerPower) {
-            spinner.setPower(spinnerPower);
+        if (leftPower != lastLeftPower) {
+            leftSpinner.setPower(leftPower);
+        }
+
+        if (rightPower != lastRightPower) {
+            rightSpinner.setPower(rightPower);
         }
 
         updateStateMachine();
@@ -103,7 +109,8 @@ public class PrototypeChassis extends TeleOp_Base {
         setMotorPowers(0, 0, 0, 0);
         lift.setPower(0);
         intake.setPower(0);
-        spinner.setPower(0);
+        leftSpinner.setPower(0);
+        rightSpinner.setPower(0);
     }
 
     @Override
@@ -111,7 +118,7 @@ public class PrototypeChassis extends TeleOp_Base {
         //Headless
         leftX = gamepad1.left_stick_x;
         leftY = gamepad1.left_stick_y;
-        rightX = Math.signum(gamepad1.right_stick_x) * Math.abs(Math.pow(gamepad1.right_stick_x, 7));
+        rightX = curveInput(gamepad1.right_stick_x, 7);
         resetAngle = gamepad1.y;
 
         //Lift
@@ -130,7 +137,8 @@ public class PrototypeChassis extends TeleOp_Base {
             intakePower = 0;
 
         //Spinner
-        spinnerPower = gamepad1.a ? 1 : 0;
+        leftPower = gamepad1.x ? 1 : 0;
+        rightPower = gamepad1.b ? 1 : 0;
     }
 
     @Override
@@ -139,6 +147,7 @@ public class PrototypeChassis extends TeleOp_Base {
         lastLiftPower = liftPower;
         lastIntakeDir = intakeDir;
         lastIntakePower = intakePower;
-        lastSpinnerPower = spinnerPower;
+        lastLeftPower = leftPower;
+        lastRightPower = rightPower;
     }
 }

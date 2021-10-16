@@ -20,11 +20,11 @@ public class TurningIntake {
         wrist.setDirection(Servo.Direction.REVERSE);
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        wrist.setPosition(0.615);
+        wrist.setPosition(0.45);
         intakePower = 0;
         lastIntakePower = 0;
-        wristPos = 0.615;
-        lastWristPos = 0.615;
+        wristPos = 0.45;
+        lastWristPos = 0.45;
     }
 
     public void update() {
@@ -33,7 +33,7 @@ public class TurningIntake {
             intake.setPower(intakePower);
         }
         if (wristPos != lastWristPos) {
-            wrist.setPosition(wristPos);
+            wrist.setPosition(wristPos);//fixInput(wristPos));
         }
 
         lastIntakePower = intakePower;
@@ -55,7 +55,11 @@ public class TurningIntake {
     }
 
     public void setWristCenter() {
-        wristPos = 0.615;
+        wristPos = 0.45;
+    }
+
+    private double fixInput(double input) {
+        return (-20d/99) * (input*input) + (119d/99) * (input);
     }
 
     public void stop() {

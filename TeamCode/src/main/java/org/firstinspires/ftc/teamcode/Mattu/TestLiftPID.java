@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Mattu;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Subsystems.BulkRead;
@@ -7,6 +8,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Lift;
 import org.firstinspires.ftc.teamcode.TeleOp.TeleOp_Base;
 
 @TeleOp(name = "Test Lift PID")
+//@Disabled
 public class TestLiftPID extends TeleOp_Base {
 
     private Lift lift;

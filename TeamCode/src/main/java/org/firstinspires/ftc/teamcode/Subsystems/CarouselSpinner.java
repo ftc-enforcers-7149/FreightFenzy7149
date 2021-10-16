@@ -6,29 +6,44 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class CarouselSpinner {
 
-    public CRServo carousel;
-    private double carouselPower, lastCarouselPower;
+    public CRServo leftSpinner, rightSpinner;
+    private double leftPower, lastLeftPower, rightPower, lastRightPower;
 
-    public CarouselSpinner(HardwareMap hardwaremap, String intakeServoName) {
-        carousel = hardwaremap.crservo.get(intakeServoName);
+    public CarouselSpinner(HardwareMap hardwaremap, String leftName, String rightName) {
+        leftSpinner = hardwaremap.crservo.get(leftName);
+        rightSpinner = hardwaremap.crservo.get(rightName);
 
-        carousel.setDirection(DcMotorSimple.Direction.REVERSE);
+        leftSpinner.setDirection(DcMotorSimple.Direction.REVERSE);
+        rightSpinner.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        lastLeftPower = 0;
+        lastRightPower = 0;
     }
 
     public void update() {
-        if (carouselPower != lastCarouselPower) {
-            carousel.setPower(carouselPower);
+        if (leftPower != lastLeftPower) {
+            leftSpinner.setPower(leftPower);
         }
 
-        lastCarouselPower = carouselPower;
+        if (rightPower != lastRightPower) {
+            rightSpinner.setPower(rightPower);
+        }
+
+        lastLeftPower = leftPower;
+        lastRightPower = rightPower;
     }
 
-    public void setPower(double power) {
-        carouselPower = power;
+    public void setLeftPower(double power) {
+        leftPower = power;
+    }
+
+    public void setRightPower(double power) {
+        rightPower = power;
     }
 
     public void stop() {
-        setPower(0);
+        setLeftPower(0);
+        setRightPower(0);
         update();
     }
 }

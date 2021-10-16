@@ -40,6 +40,9 @@ public class GamepadTest extends OpMode {
         telemetry.addData("\nLeft swipe?: ", leftButton.returnSwipeVector().getVelocity() != 0);
         telemetry.addData("Right swipe?: ", rightButton.returnSwipeVector().getVelocity() != 0);
 
+        telemetry.addData("\nLeft swipe: ", leftButton.returnSwipeVector().getVelocity());
+        telemetry.addData("Right swipe: ", rightButton.returnSwipeVector().getVelocity());
+
         gamepadFun.rumbleBlips(5);
     }
 }

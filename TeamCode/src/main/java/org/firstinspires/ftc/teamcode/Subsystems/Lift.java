@@ -20,7 +20,7 @@ public class Lift {
 
     //Convert motor ticks to rotations (using Gobilda's given equation)
     private final double toRot = (((1+(46.0/17))) * (1+(46.0/17))) * 28;
-    public static final double PULLEY_CIRCUMFERENCE = 3.424; //inches
+    public static final double PULLEY_CIRCUMFERENCE = 2.8285; //inches
     public static final int STAGES = 3;
     public static final double MAX_HEIGHT = 19;
 
@@ -63,6 +63,8 @@ public class Lift {
     public Lift(HardwareMap hardwareMap, String liftName, BulkRead bRead) {
         lift = hardwareMap.get(DcMotorEx.class, liftName);
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         lift.setDirection(DcMotorSimple.Direction.REVERSE);
 
         initPID();
@@ -78,6 +80,9 @@ public class Lift {
      */
     public void setPower(double power) {
         liftPower = power;
+
+        if (liftPower < 0 && getLiftHeight() < -0.1) liftPower = 0;
+
         usePID = false;
     }
 
@@ -99,8 +104,8 @@ public class Lift {
      */
     public void update() {
         //Get motor ticks
-        if (useBRead) currPosition = Math.abs(bRead.getMotorPos(lift));
-        else currPosition = Math.abs(lift.getCurrentPosition());
+        if (useBRead) currPosition = -bRead.getMotorPos(lift);
+        else currPosition = lift.getCurrentPosition();
 
         //Use PID to go to position
         if (usePID) {
