@@ -11,8 +11,8 @@ public class GamepadTest extends OpMode {
 
     public void init() {
         gamepadFun = new GamepadFun(gamepad1);
-        leftButton = new TouchButton(gamepadFun, -100, 0, -500, 500);
-        rightButton = new TouchButton(gamepadFun, 0, 100, -500, 500);
+        leftButton = new TouchButton(gamepadFun, -100, 0, -500, 500, 200);
+        rightButton = new TouchButton(gamepadFun, 0, 100, -500, 500, 200);
     }
 
     public void loop() {
@@ -37,8 +37,11 @@ public class GamepadTest extends OpMode {
         telemetry.addData("\nLeft button?: ", leftButton.isRange());
         telemetry.addData("Right button?", rightButton.isRange());
 
-        telemetry.addData("\nLeft swipe?: ", leftButton.returnSwipeVector().getVelocity() != 0);
-        telemetry.addData("Right swipe?: ", rightButton.returnSwipeVector().getVelocity() != 0);
+        telemetry.addData("\nLeft swipe?: ", leftButton.swipeVector().getVelocity() != 0);
+        telemetry.addData("Right swipe?: ", rightButton.swipeVector().getVelocity() != 0);
+
+        telemetry.addData("\nLeft swipe: ", leftButton.swipeVector().getVelocity());
+        telemetry.addData("Right swipe: ", leftButton.swipeVector().getVelocity());
 
         gamepadFun.rumbleBlips(5);
     }

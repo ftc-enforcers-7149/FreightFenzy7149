@@ -15,43 +15,49 @@ public class TouchButton {
     double standardMult;
     double leftX, rightX, bottomY, topY;
     double time, lastTime = 0;
+    double pollingTime;
 
-    public TouchButton(GamepadFun gFun, double leftX, double rightX, double bottomY, double topY) {
+    public TouchButton(GamepadFun gFun, double leftX, double rightX, double bottomY, double topY, double pollingTime) {
 
         this.leftX = leftX;
         this.rightX = rightX;
         this.bottomY = bottomY;
         this.topY = topY;
+        this.pollingTime = pollingTime;
 
     }
 
-    public TouchButton(GamepadFun gFun, double leftX, double rightX, double bottomY, double topY, double standardMult) {
+    public TouchButton(GamepadFun gFun, double leftX, double rightX, double bottomY, double topY, double pollingTime, double standardMult) {
 
         this.leftX = leftX;
         this.rightX = rightX;
         this.bottomY = bottomY;
         this.topY = topY;
+        this.pollingTime = pollingTime;
         this.standardMult = standardMult;
 
     }
 
     public void update() {
 
-        lastTime = time;
+        if(lastTime == time + pollingTime) lastTime = time;
         time = NanoClock.system().seconds();
 
     }
 
-    public VectorPacket returnSwipeVector() {
+    public VectorPacket swipeVector() {
 
         VectorPacket v = new VectorPacket();
+        boolean fingerOneInRange, fingerTwoInRange;
 
         switch(gFun.getNumFingers()) {
 
             case 1:
 
-                if((gFun.getFingerOneX() <= rightX && gFun.getFingerOneX() >= leftX)
-                        && (gFun.getFingerOneY() <= topY && gFun.getFingerOneY() >= bottomY)) {
+                fingerOneInRange = (gFun.getFingerOneX() <= rightX && gFun.getFingerOneX() >= leftX)
+                        && (gFun.getFingerOneY() <= topY && gFun.getFingerOneY() >= bottomY);
+
+                if(fingerOneInRange) {
 
                     v.setTime(time);
                     v.setLastTime(lastTime);
@@ -65,8 +71,13 @@ public class TouchButton {
 
             case 2:
 
-                if(((gFun.getFingerOneX() <= rightX && gFun.getFingerOneX() >= leftX)
-                        && (gFun.getFingerOneY() <= topY && gFun.getFingerOneY() >= bottomY))) {
+                //check for both first
+                fingerOneInRange = (gFun.getFingerOneX() <= rightX && gFun.getFingerOneX() >= leftX)
+                        && (gFun.getFingerOneY() <= topY && gFun.getFingerOneY() >= bottomY);
+                fingerTwoInRange = ((gFun.getFingerTwoX() <= rightX && gFun.getFingerTwoX() >= leftX)
+                        && (gFun.getFingerTwoY() <= topY && gFun.getFingerTwoY() >= bottomY));
+
+                if(fingerOneInRange && fingerTwoInRange) {
 
                     v.setTime(time);
                     v.setLastTime(lastTime);
@@ -76,8 +87,7 @@ public class TouchButton {
                     v.setLastY(gFun.getLastFingerOneY());
 
                 }
-                else if (((gFun.getFingerTwoX() <= rightX && gFun.getFingerTwoX() >= leftX)
-                        && (gFun.getFingerTwoY() <= topY && gFun.getFingerTwoY() >= bottomY))) {
+                else if (fingerTwoInRange) {
 
                     v.setTime(time);
                     v.setLastTime(lastTime);
@@ -87,18 +97,14 @@ public class TouchButton {
                     v.setLastY(gFun.getLastFingerTwoY());
 
                 }
-                else if(((gFun.getFingerOneX() <= rightX && gFun.getFingerOneX() >= leftX)
-                        && (gFun.getFingerOneY() <= topY && gFun.getFingerOneY() >= bottomY))
-                        &&
-                        ((gFun.getFingerTwoX() <= rightX && gFun.getFingerTwoX() >= leftX)
-                                && (gFun.getFingerTwoY() <= topY && gFun.getFingerTwoY() >= bottomY))) {
+                else if(fingerOneInRange) {
 
                     v.setTime(time);
                     v.setLastTime(lastTime);
-                    v.setX(Math.abs(gFun.getFingerTwoX() - gFun.getFingerOneX()));
-                    v.setY(Math.abs(gFun.getFingerTwoY() - gFun.getFingerOneY()));
-                    v.setLastX(Math.abs(gFun.getLastFingerTwoX() - gFun.getLastFingerOneX()));
-                    v.setLastY(Math.abs(gFun.getLastFingerTwoY() - gFun.getLastFingerOneY()));
+                    v.setX((Math.abs(gFun.getFingerTwoX() - gFun.getFingerOneX())) / 2);
+                    v.setY((Math.abs(gFun.getFingerTwoY() - gFun.getFingerOneY())) / 2);
+                    v.setLastX((Math.abs(gFun.getLastFingerTwoX() - gFun.getLastFingerOneX())) / 2);
+                    v.setLastY((Math.abs(gFun.getLastFingerTwoY() - gFun.getLastFingerOneY())) / 2);
 
                 }
 
@@ -157,7 +163,7 @@ public class TouchButton {
         }
 
         public double getVelocity() {
-            return Math.sqrt((Math.pow(getXVel(), 2) + Math.pow(getYVel(), 2)));
+            return Math.sqrt(Math.pow(getXVel(), 2) + Math.pow(getYVel(), 2));
         }
 
         public double getAngle() {
