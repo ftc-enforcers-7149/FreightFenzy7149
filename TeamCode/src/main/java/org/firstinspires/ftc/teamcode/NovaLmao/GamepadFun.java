@@ -37,17 +37,19 @@ public class GamepadFun {
             numFingers = 0;
         }
 
-        lastFingerOneX = fingerOneX;
-        if(numFingers >= 1) fingerOneX = standardMult * gamepad.touchpad_finger_1_x;
+        if(numFingers >= 1) {
+            lastFingerOneX = fingerOneX;
+            fingerOneX = standardMult * gamepad.touchpad_finger_1_x;
+            lastFingerOneY = fingerOneY;
+            fingerOneY = standardMult * gamepad.touchpad_finger_1_y;
+        }
 
-        lastFingerOneY = fingerOneY;
-        if(numFingers >= 1) fingerOneY = standardMult * gamepad.touchpad_finger_1_y;
-
-        lastFingerTwoX = fingerTwoX;
-        if(numFingers == 2) fingerTwoX = standardMult * gamepad.touchpad_finger_2_x;
-
-        lastFingerTwoY = fingerTwoY;
-        if(numFingers == 2) fingerTwoY = standardMult * gamepad.touchpad_finger_2_y;
+        if(numFingers == 2) {
+            lastFingerTwoX = fingerTwoX;
+            fingerTwoX = standardMult * gamepad.touchpad_finger_2_x;
+            lastFingerTwoY = fingerTwoY;
+            fingerTwoY = standardMult * gamepad.touchpad_finger_2_y;
+        }
 
     }
 

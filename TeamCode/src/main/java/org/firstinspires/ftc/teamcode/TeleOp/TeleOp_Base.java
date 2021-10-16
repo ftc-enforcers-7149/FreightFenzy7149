@@ -24,8 +24,8 @@ public abstract class TeleOp_Base extends OpMode {
     private boolean hasCH, hasEH;
 
     //State machine logic
-    protected double leftX, leftY, rightX;
-    protected double lastLeftX, lastLeftY, lastRightX;
+    protected double leftX, leftY, rightX, rightY;
+    protected double lastLeftX, lastLeftY, lastRightX, lastRightY;
 
     //Headless
     protected double offset, lim;
@@ -77,7 +77,7 @@ public abstract class TeleOp_Base extends OpMode {
         drive.setPoseEstimate(createPose2d(0, 0, 0));
     }
     protected void initializeVars() {
-        lastLeftX = 0; lastLeftY = 0; lastRightX = 0;
+        lastLeftX = 0; lastLeftY = 0; lastRightX = 0; lastRightY = 0;
         offset = 0; lim = 1;
     }
 
@@ -141,6 +141,29 @@ public abstract class TeleOp_Base extends OpMode {
         fRight.setPower(vFR);
         bLeft.setPower(vBL);
         bRight.setPower(vBR);
+    }
+    protected void driveTank() {
+        if (leftY >= 0.1) {
+            fLeft.setPower(leftY);
+            bLeft.setPower(leftY);
+        } else if (leftY <= -0.1) {
+            fLeft.setPower(leftY);
+            bLeft.setPower(leftY);
+        } else if (leftY == 0) {
+            fLeft.setPower(0);
+            bLeft.setPower(0);
+        }
+
+        if (rightY >= 0.1) {
+            fRight.setPower(rightY);
+            bRight.setPower(rightY);
+        } else if (rightY <= -0.1) {
+            fRight.setPower(rightY);
+            bRight.setPower(rightY);
+        } else if (rightY == 0) {
+            fRight.setPower(0);
+            bRight.setPower(0);
+        }
     }
 
     //State machine logic
