@@ -14,12 +14,12 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.RobotLog;
 
-import org.firstinspires.ftc.teamcode.Odometry.SensorBot.SBMecanumDrive;
+import org.firstinspires.ftc.teamcode.Odometry.DriveWheels.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Subsystems.BulkRead;
 
 import java.util.Objects;
 
-import static org.firstinspires.ftc.teamcode.Odometry.SensorBot.SBDriveConstants.*;
+import static org.firstinspires.ftc.teamcode.Odometry.DriveWheels.DriveConstants.*;
 
 /*
  * This routine is designed to tune the open-loop feedforward coefficients. Although it may seem unnecessary,
@@ -69,8 +69,7 @@ public class ManualFeedforwardTuner extends LinearOpMode {
         telemetry = new MultipleTelemetry(telemetry, dashboard.getTelemetry());
 
         BulkRead bReadCH = new BulkRead(hardwareMap, "Control Hub");
-        BulkRead bReadEH = new BulkRead(hardwareMap, "Expansion Hub");
-        SBMecanumDrive drive = new SBMecanumDrive(hardwareMap, bReadCH, bReadEH);
+        MecanumDrive drive = new MecanumDrive(hardwareMap, bReadCH);
 
         mode = Mode.TUNING_MODE;
 
@@ -112,8 +111,6 @@ public class ManualFeedforwardTuner extends LinearOpMode {
                     double targetPower = Kinematics.calculateMotorFeedforward(motionState.getV(), motionState.getA(), kV, kA, kStatic);
 
                     drive.setDrivePower(new Pose2d(targetPower, 0, 0));
-                    bReadCH.update();
-                    bReadEH.update();
                     drive.updatePoseEstimate();
 
                     Pose2d poseVelo = Objects.requireNonNull(drive.getPoseVelocity(), "poseVelocity() must not be null. Ensure that the getWheelVelocities() method has been overridden in your localizer.");

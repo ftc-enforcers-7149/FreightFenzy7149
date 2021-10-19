@@ -37,7 +37,7 @@ public class Gyroscope {
     }
 
     public void update() {
-        rawYaw = getNewRawYaw();
+        rawYaw = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
         yaw = cvtOffset(denormalizeDegrees(rawYaw), offset);
         angVel = imu.getAngularVelocity().zRotationRate;
     }

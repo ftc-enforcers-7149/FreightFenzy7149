@@ -22,8 +22,11 @@ public class DriveConstants {
     /*
      * These are motor constants that should be listed online for your motors.
      */
-    public static final double TICKS_PER_REV = 537.6;
-    public static final double MAX_RPM = 312;
+    //TODO: Switch over to 312 rpm when we switch drive motors
+    public static final double TICKS_PER_REV = (((1+(46.0/17))) * (1+(46.0/17))) * 28;
+    public static final double MAX_RPM = 435;
+    //public static final double TICKS_PER_REV = 537.6;
+    //public static final double MAX_RPM = 312;
 
     /*
      * Set RUN_USING_ENCODER to true to enable built-in hub velocity control using drive encoders.
@@ -34,7 +37,7 @@ public class DriveConstants {
      * from DriveVelocityPIDTuner.
      */
     public static final boolean RUN_USING_ENCODER = true;
-    public static PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(0, 0, 0,
+    public static PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(25, 0, 0,
             getMotorVelocityF(MAX_RPM / 60 * TICKS_PER_REV));
 
     /*
@@ -48,14 +51,19 @@ public class DriveConstants {
     public static double WHEEL_RADIUS = 1.8898; // in
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (motor) speed
 
+    /*
+     * Precise corrections for converting motor rotations to linear movement
+     */
+    public static double WHEEL_MULT = 1.02043003458;
+
     //TODO:
     // TRACK_WIDTH is left-right distance between drive wheels (centers)
     // WHEEL_BASE is front-back distance between drive wheels (centers)
     // Their average is used to determine turning rates based on drive wheel positions
     // Tune both separately, TRACK_WIDTH first using TrackWidthTuner,
     // WHEEL_BASE second using the MecanumLocalizer heading estimation (without extHeading)
-    public static double TRACK_WIDTH = 13.34; // in
-    public static double WHEEL_BASE = 13.34; // in
+    public static double TRACK_WIDTH = 10.7; // in
+    public static double WHEEL_BASE = 8.4; // in
 
     /*
      * These are the feedforward parameters used to model the drive motor behavior. If you are using
@@ -95,10 +103,10 @@ public class DriveConstants {
      * You are free to raise this on your own if you would like. It is best determined through experimentation.
 
      */
-    public static double MAX_VEL = 52.48291908330528;
-    public static double MAX_ACCEL = 52.48291908330528;
-    public static double MAX_ANG_VEL = Math.toRadians(225.416023988006);
-    public static double MAX_ANG_ACCEL = Math.toRadians(225.416023988006);
+    public static double MAX_VEL = 52;
+    public static double MAX_ACCEL = 52;
+    public static double MAX_ANG_VEL = Math.toRadians(225);
+    public static double MAX_ANG_ACCEL = Math.toRadians(225);
 
 
     public static double encoderTicksToInches(double ticks) {

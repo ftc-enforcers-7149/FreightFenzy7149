@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.internal.system.Misc;
-import org.firstinspires.ftc.teamcode.Odometry.SensorBot.SBMecanumDrive;
+import org.firstinspires.ftc.teamcode.Odometry.DriveWheels.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Odometry.Util.LoggingUtil;
 import org.firstinspires.ftc.teamcode.Odometry.Util.RegressionUtil;
 import org.firstinspires.ftc.teamcode.Subsystems.BulkRead;
@@ -19,7 +19,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.BulkRead;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.firstinspires.ftc.teamcode.Odometry.SensorBot.SBDriveConstants.*;
+import static org.firstinspires.ftc.teamcode.Odometry.DriveWheels.DriveConstants.*;
 
 /*
  * Op mode for computing kV, kStatic, and kA from various drive routines. For the curious, here's an
@@ -48,8 +48,7 @@ public class AutomaticFeedforwardTuner extends LinearOpMode {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
         BulkRead bReadCH = new BulkRead(hardwareMap, "Control Hub");
-        BulkRead bReadEH = new BulkRead(hardwareMap, "Expansion Hub");
-        SBMecanumDrive drive = new SBMecanumDrive(hardwareMap, bReadCH, bReadEH);
+        MecanumDrive drive = new MecanumDrive(hardwareMap, bReadCH);
 
         NanoClock clock = NanoClock.system();
 

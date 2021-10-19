@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-import org.firstinspires.ftc.teamcode.Odometry.SensorBot.SBMecanumDrive;
+import org.firstinspires.ftc.teamcode.Odometry.DriveWheels.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Subsystems.BulkRead;
 
 import java.util.List;
@@ -19,22 +19,18 @@ import java.util.List;
  * encoder localizer heading may be significantly off if the track width has not been tuned).
  */
 @TeleOp(group = "drive")
-@Disabled
+//@Disabled
 public class LocalizationTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         BulkRead bReadCH = new BulkRead(hardwareMap, "Control Hub");
-        BulkRead bReadEH = new BulkRead(hardwareMap, "Expansion Hub");
-        SBMecanumDrive drive = new SBMecanumDrive(hardwareMap, bReadCH, bReadEH);
+        MecanumDrive drive = new MecanumDrive(hardwareMap, bReadCH);
 
         drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         waitForStart();
 
         while (!isStopRequested()) {
-            bReadCH.update();
-            bReadEH.update();
-
             drive.setWeightedDrivePower(
                     new Pose2d(
                             -gamepad1.left_stick_y,
@@ -46,16 +42,17 @@ public class LocalizationTest extends LinearOpMode {
             drive.update();
 
             Pose2d poseEstimate = drive.getPoseEstimate();
-            telemetry.addData("x", -poseEstimate.getY());
-            telemetry.addData("y", poseEstimate.getX());
+            telemetry.addData("x", poseEstimate.getX());
+            telemetry.addData("y", poseEstimate.getY());
             telemetry.addData("heading", Math.toDegrees(poseEstimate.getHeading()));
 
-            List<Double> wheelPositions = drive.locale.getWheelPositions();
+            List<Double> wheelPositions = drive.getWheelPositions();
 
             telemetry.addLine("Wheel Positions:");
             telemetry.addLine(wheelPositions.get(0).toString());
             telemetry.addLine(wheelPositions.get(1).toString());
             telemetry.addLine(wheelPositions.get(2).toString());
+            telemetry.addLine(wheelPositions.get(3).toString());
             telemetry.update();
         }
     }

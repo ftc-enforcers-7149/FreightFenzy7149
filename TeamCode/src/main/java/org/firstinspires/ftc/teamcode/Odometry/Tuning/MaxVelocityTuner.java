@@ -9,12 +9,12 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.Odometry.SensorBot.SBMecanumDrive;
+import org.firstinspires.ftc.teamcode.Odometry.DriveWheels.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Subsystems.BulkRead;
 
 import java.util.Objects;
 
-import static org.firstinspires.ftc.teamcode.Odometry.SensorBot.SBDriveConstants.*;
+import static org.firstinspires.ftc.teamcode.Odometry.DriveWheels.DriveConstants.*;
 
 /**
  * This routine is designed to calculate the maximum velocity your bot can achieve under load. It
@@ -26,9 +26,9 @@ import static org.firstinspires.ftc.teamcode.Odometry.SensorBot.SBDriveConstants
  */
 @Config
 @Autonomous(group = "drive")
-@Disabled
+//@Disabled
 public class MaxVelocityTuner extends LinearOpMode {
-    public static double RUNTIME = 2.0;
+    public static double RUNTIME = 1.0;
 
     private ElapsedTime timer;
     private double maxVelocity = 0.0;
@@ -38,8 +38,7 @@ public class MaxVelocityTuner extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         BulkRead bReadCH = new BulkRead(hardwareMap, "Control Hub");
-        BulkRead bReadEH = new BulkRead(hardwareMap, "Expansion Hub");
-        SBMecanumDrive drive = new SBMecanumDrive(hardwareMap, bReadCH, bReadEH);
+        MecanumDrive drive = new MecanumDrive(hardwareMap, bReadCH);
 
         drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 

@@ -7,8 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.Odometry.SensorBot.SBDriveConstants;
-import org.firstinspires.ftc.teamcode.Odometry.SensorBot.SBMecanumDrive;
+import org.firstinspires.ftc.teamcode.Odometry.DriveWheels.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Subsystems.BulkRead;
 
 /*
@@ -26,15 +25,14 @@ import org.firstinspires.ftc.teamcode.Subsystems.BulkRead;
  */
 @Config
 @Autonomous(group = "drive")
-@Disabled
+//@Disabled
 public class FollowerPIDTuner extends LinearOpMode {
     public static double DISTANCE = 48; // in
 
     @Override
     public void runOpMode() throws InterruptedException {
         BulkRead bReadCH = new BulkRead(hardwareMap, "Control Hub");
-        BulkRead bReadEH = new BulkRead(hardwareMap, "Expansion Hub");
-        SBMecanumDrive drive = new SBMecanumDrive(hardwareMap, bReadCH, bReadEH);
+        MecanumDrive drive = new MecanumDrive(hardwareMap, bReadCH);
 
         Pose2d startPose = new Pose2d(-DISTANCE / 2, -DISTANCE / 2, 0);
 

@@ -14,12 +14,12 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.RobotLog;
 
+import org.firstinspires.ftc.teamcode.Odometry.DriveWheels.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Subsystems.BulkRead;
-import org.firstinspires.ftc.teamcode.Odometry.SensorBot.SBMecanumDrive;
 
 import java.util.List;
 
-import static org.firstinspires.ftc.teamcode.Odometry.SensorBot.SBDriveConstants.*;
+import static org.firstinspires.ftc.teamcode.Odometry.DriveWheels.DriveConstants.*;
 
 /*
  * This routine is designed to tune the PID coefficients used by the REV Expansion Hubs for closed-
@@ -49,7 +49,7 @@ import static org.firstinspires.ftc.teamcode.Odometry.SensorBot.SBDriveConstants
  */
 @Config
 @Autonomous(group = "drive")
-@Disabled
+//@Disabled
 public class DriveVelocityPIDTuner extends LinearOpMode {
     public static double DISTANCE = 72; // in
 
@@ -74,8 +74,7 @@ public class DriveVelocityPIDTuner extends LinearOpMode {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
         BulkRead bReadCH = new BulkRead(hardwareMap, "Control Hub");
-        BulkRead bReadEH = new BulkRead(hardwareMap, "Expansion Hub");
-        SBMecanumDrive drive = new SBMecanumDrive(hardwareMap, bReadCH, bReadEH);
+        MecanumDrive drive = new MecanumDrive(hardwareMap, bReadCH);
 
         Mode mode = Mode.TUNING_MODE;
 

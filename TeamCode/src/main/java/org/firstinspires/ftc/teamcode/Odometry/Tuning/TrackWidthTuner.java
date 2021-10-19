@@ -11,10 +11,10 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.MovingStatistics;
 
 import org.firstinspires.ftc.robotcore.internal.system.Misc;
-import org.firstinspires.ftc.teamcode.Odometry.SensorBot.SBMecanumDrive;
+import org.firstinspires.ftc.teamcode.Odometry.DriveWheels.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Subsystems.BulkRead;
 
-import static org.firstinspires.ftc.teamcode.Odometry.SensorBot.SBDriveConstants.TRACK_WIDTH;
+import static org.firstinspires.ftc.teamcode.Odometry.DriveWheels.DriveConstants.TRACK_WIDTH;
 
 /*
  * This routine determines the effective track width. The procedure works by executing a point turn
@@ -27,7 +27,7 @@ import static org.firstinspires.ftc.teamcode.Odometry.SensorBot.SBDriveConstants
  */
 @Config
 @Autonomous(group = "drive")
-@Disabled
+//@Disabled
 public class TrackWidthTuner extends LinearOpMode {
     public static double ANGLE = 180; // deg
     public static int NUM_TRIALS = 5;
@@ -38,8 +38,7 @@ public class TrackWidthTuner extends LinearOpMode {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
         BulkRead bReadCH = new BulkRead(hardwareMap, "Control Hub");
-        BulkRead bReadEH = new BulkRead(hardwareMap, "Expansion Hub");
-        SBMecanumDrive drive = new SBMecanumDrive(hardwareMap, bReadCH, bReadEH);
+        MecanumDrive drive = new MecanumDrive(hardwareMap, bReadCH);
 
         telemetry.addLine("Press play to begin the track width tuner routine");
         telemetry.addLine("Make sure your robot has enough clearance to turn smoothly");

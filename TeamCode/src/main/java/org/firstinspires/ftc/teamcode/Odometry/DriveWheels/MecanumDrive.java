@@ -16,7 +16,6 @@ import com.acmerobotics.roadrunner.trajectory.constraints.MinVelocityConstraint;
 import com.acmerobotics.roadrunner.trajectory.constraints.ProfileAccelerationConstraint;
 import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryAccelerationConstraint;
 import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryVelocityConstraint;
-import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -26,9 +25,6 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.teamcode.Odometry.Util.LynxModuleUtil;
 import org.firstinspires.ftc.teamcode.Odometry.trajectorysequence.*;
 import org.firstinspires.ftc.teamcode.Subsystems.BulkRead;
@@ -49,7 +45,7 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
     public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(0, 0, 0);
     public static PIDCoefficients HEADING_PID = new PIDCoefficients(0, 0, 0);
 
-    public static double LATERAL_MULTIPLIER = 1;
+    public static double LATERAL_MULTIPLIER = 1.09115622611;
 
     public static double VX_WEIGHT = 1;
     public static double VY_WEIGHT = 1;
@@ -66,9 +62,9 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
     private List<DcMotorEx> motors;
 
     public Gyroscope gyro;
-    private VoltageSensor batteryVoltageSensor;
+    public VoltageSensor batteryVoltageSensor;
 
-    private BulkRead bRead;
+    public BulkRead bRead;
 
     public MecanumDrive(HardwareMap hardwareMap, BulkRead bRead,
                         DcMotorEx fLeft, DcMotorEx fRight, DcMotorEx bLeft, DcMotorEx bRight,
@@ -388,19 +384,25 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
     @Override
     public List<Double> getWheelPositions() {
         List<Double> wheelPositions = new ArrayList<>();
-        for (DcMotorEx motor : motors) {
-            wheelPositions.add(encoderTicksToInches(bRead.getMotorPos(motor)));
-        }
+
+        wheelPositions.add(-encoderTicksToInches(bRead.getMotorPos(fLeft)) * WHEEL_MULT);
+        wheelPositions.add(-encoderTicksToInches(bRead.getMotorPos(bLeft)) * WHEEL_MULT);
+        wheelPositions.add(-encoderTicksToInches(bRead.getMotorPos(bRight)) * WHEEL_MULT);
+        wheelPositions.add(-encoderTicksToInches(bRead.getMotorPos(fRight)) * WHEEL_MULT);
         return wheelPositions;
     }
 
     @Override
     @NotNull
     public List<Double> getWheelVelocities() {
+        bRead.update(); //TODO: Remove immediately
+
         List<Double> wheelVelocities = new ArrayList<>();
-        for (DcMotorEx motor : motors) {
-            wheelVelocities.add(encoderTicksToInches(bRead.getMotorVel(motor)));
-        }
+
+        wheelVelocities.add(-encoderTicksToInches(bRead.getMotorVel(fLeft)) * WHEEL_MULT);
+        wheelVelocities.add(-encoderTicksToInches(bRead.getMotorVel(bLeft)) * WHEEL_MULT);
+        wheelVelocities.add(-encoderTicksToInches(bRead.getMotorVel(bRight)) * WHEEL_MULT);
+        wheelVelocities.add(-encoderTicksToInches(bRead.getMotorVel(fRight)) * WHEEL_MULT);
         return wheelVelocities;
     }
 
