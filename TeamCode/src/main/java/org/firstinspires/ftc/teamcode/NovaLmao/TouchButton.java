@@ -5,6 +5,8 @@ import android.widget.Button;
 import com.acmerobotics.roadrunner.util.NanoClock;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
+import org.opencv.core.Point;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -16,6 +18,7 @@ public class TouchButton {
     double leftX, rightX, bottomY, topY;
     double time, lastTime = 0;
     double pollingTime;
+    VectorPacket v1, lastV1, v2, lastV2;
 
     public TouchButton(GamepadFun gFun, double leftX, double rightX, double bottomY, double topY, double pollingTime) {
 
@@ -25,6 +28,7 @@ public class TouchButton {
         this.bottomY = bottomY;
         this.topY = topY;
         this.pollingTime = pollingTime;
+        standardMult = 100;
 
     }
 
@@ -42,8 +46,32 @@ public class TouchButton {
 
     public void update() {
 
-        if(lastTime == time + pollingTime) lastTime = time;
         time = NanoClock.system().seconds();
+
+        if(lastTime >= time + pollingTime) {
+
+            lastTime = time;
+
+            switch(gFun.getNumFingers()) {
+
+                case 1:
+                    //lastV2 = v2
+                    //v2 = 0
+                    //update v1 (check if it's the first time finger is on!)
+                    break;
+                case 2:
+                    //update v2
+                    //update v1
+                    break;
+                default:
+                    if (gFun.getLastNumFingers() == 1) {
+                        //assume we've gone from 1 to 0; drop v1 to 0
+                    } else {
+                        //assume we've gone from 2 to 0; drop v1 and v2 to 0
+                    }
+                    break;
+            }
+        }
 
     }
 
@@ -146,6 +174,28 @@ public class TouchButton {
 
     }
 
+    public boolean isRange(double x, double y) {
+
+        if((x <= rightX && x >= leftX)
+                && (y <= topY && y >= bottomY)) {
+            return true;
+        }
+
+        return false;
+
+    }
+
+    //im doing this tomorrow lol
+    public class Swipe {
+
+        private VectorPacket v, lastV;
+
+        public void update() {
+            //KLSFDJLKSDJFLKSDJFLKSDFJ FUCK FUCK FUCK FUCK FUCK
+        }
+
+    }
+
     public class VectorPacket {
 
         private double x, y, lastX, lastY, time, lastTime;
@@ -221,6 +271,5 @@ public class TouchButton {
         }
 
     }
-
 
 }

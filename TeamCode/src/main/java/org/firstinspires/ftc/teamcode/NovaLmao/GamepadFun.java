@@ -6,7 +6,7 @@ public class GamepadFun {
 
     private Gamepad gamepad;
 
-    private boolean touchButton, lastTouchButton;
+    private boolean touchButton, lastTouchButton, fingerOn, lastFingerOn;
     private int numFingers, lastNumFingers;
 
     private double fingerOneX, lastFingerOneX, fingerOneY, lastFingerOneY,
@@ -27,14 +27,20 @@ public class GamepadFun {
 
         lastNumFingers = numFingers;
 
-        if(gamepad.touchpad_finger_1) {
-            numFingers = 1;
-        }
-        else if(gamepad.touchpad_finger_1 && gamepad.touchpad_finger_2) {
+        if(gamepad.touchpad_finger_1 && gamepad.touchpad_finger_2) {
             numFingers = 2;
+            lastFingerOn = fingerOn;
+            fingerOn = true;
+        }
+        else if(gamepad.touchpad_finger_1) {
+            numFingers = 1;
+            lastFingerOn = fingerOn;
+            fingerOn = true;
         }
         else {
             numFingers = 0;
+            lastFingerOn = fingerOn;
+            fingerOn = false;
         }
 
         if(numFingers >= 1) {
@@ -172,4 +178,13 @@ public class GamepadFun {
     public void setLastFingerTwoY(double lastFingerTwoY) {
         this.lastFingerTwoY = lastFingerTwoY;
     }
+
+    public boolean getLastFingerOn() {
+        return lastFingerOn;
+    }
+
+    public boolean getFingerOn() {
+        return fingerOn;
+    }
+
 }
