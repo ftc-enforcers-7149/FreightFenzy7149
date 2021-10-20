@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp(name = "Smith Chassis")
 //@Disabled
-public class SmithChassis extends TeleOp_Base{
+public class SmithChassis extends TeleOp_Base {
 
     public void init() {
         initializeDrive();
@@ -30,6 +30,6 @@ public class SmithChassis extends TeleOp_Base{
 
     @Override
     protected void updateStateMachine() {
-        lastLeftY = leftY; lastRightX = rightX;
+        lastLeftY = leftY; lastRightY = rightY;
     }
 }

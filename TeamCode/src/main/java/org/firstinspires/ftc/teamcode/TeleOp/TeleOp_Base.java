@@ -177,10 +177,10 @@ public abstract class TeleOp_Base extends OpMode {
     }
     protected void driveTank() {
         if (leftY != lastLeftY && rightY != lastRightY) {
-            double vL = -leftY;
-            double vR = -rightY;
+            double vL = leftY;
+            double vR = rightY;
 
-            double max = Math.max(vL, vR);
+            double max = Math.max(Math.abs(vL), Math.abs(vR));
 
             if (max > lim) {
                 vL /= max / lim;
