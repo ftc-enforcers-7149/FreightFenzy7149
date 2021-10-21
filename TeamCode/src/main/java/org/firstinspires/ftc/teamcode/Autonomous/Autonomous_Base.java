@@ -20,7 +20,7 @@ public abstract class Autonomous_Base extends LinearOpMode {
 
     //Drive
     protected MecanumDrive drive;
-    public static PIDCoefficients H_PID = new PIDCoefficients(-5, 0, -0.04);
+    public static PIDCoefficients H_PID = new PIDCoefficients(-2, 0, -0.01);
     protected DcMotorEx fLeft, fRight, bLeft, bRight;
     protected Gyroscope gyro;
     private boolean initializedMotors = false, initializedDrive = false, initializedGyro = false;
