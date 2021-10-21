@@ -23,7 +23,7 @@ public class SmithAutoWarehouseBlue extends Autonomous_Base{
 
             /// Loop ///
 
-            tankDriveTo(1,1,600);
+            tankDriveTo(-1,-1,600);
 
             /// Stop ///
 
