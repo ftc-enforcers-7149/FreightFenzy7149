@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Mattu;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -8,7 +9,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Lift;
 import org.firstinspires.ftc.teamcode.TeleOp.TeleOp_Base;
 
 @TeleOp(name = "Slowed Driving")
-//@Disabled
+@Disabled
 public class SlowedDriving extends TeleOp_Base {
 
     //Headless

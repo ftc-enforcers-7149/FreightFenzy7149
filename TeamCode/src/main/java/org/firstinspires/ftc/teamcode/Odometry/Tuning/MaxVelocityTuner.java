@@ -26,7 +26,7 @@ import static org.firstinspires.ftc.teamcode.Odometry.DriveWheels.DriveConstants
  */
 @Config
 @Autonomous(group = "drive")
-//@Disabled
+@Disabled
 public class MaxVelocityTuner extends LinearOpMode {
     public static double RUNTIME = 1.0;
 

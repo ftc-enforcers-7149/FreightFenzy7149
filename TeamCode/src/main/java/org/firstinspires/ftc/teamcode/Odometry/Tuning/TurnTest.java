@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.BulkRead;
  */
 @Config
 @Autonomous(group = "drive")
-//@Disabled
+@Disabled
 public class TurnTest extends LinearOpMode {
     public static double ANGLE = 180; // deg
 

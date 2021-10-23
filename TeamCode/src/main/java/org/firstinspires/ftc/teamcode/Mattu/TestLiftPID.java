@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Lift;
 import org.firstinspires.ftc.teamcode.TeleOp.TeleOp_Base;
 
 @TeleOp(name = "Test Lift PID")
-//@Disabled
+@Disabled
 public class TestLiftPID extends TeleOp_Base {
 
     private Lift lift;

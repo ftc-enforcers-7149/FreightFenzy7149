@@ -1,11 +1,12 @@
 package org.firstinspires.ftc.teamcode.Autonomous.SmithChassis;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Autonomous_Base;
 
-//@Disabled
 @Autonomous(name = "Smith Auto Blue Storage Unit")
+@Disabled
 public class SmithAutoStorageUnitBlue extends Autonomous_Base {
 
     @Override

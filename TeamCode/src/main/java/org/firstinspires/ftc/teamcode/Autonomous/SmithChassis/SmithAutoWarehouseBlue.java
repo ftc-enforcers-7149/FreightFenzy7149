@@ -5,8 +5,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Autonomous_Base;
 
-//@Disabled
 @Autonomous(name = "Smith Auto Warehouse Blue")
+@Disabled
 public class SmithAutoWarehouseBlue extends Autonomous_Base{
 
         @Override
