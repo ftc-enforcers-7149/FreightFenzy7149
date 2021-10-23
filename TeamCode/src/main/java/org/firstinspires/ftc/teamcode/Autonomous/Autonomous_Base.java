@@ -20,7 +20,7 @@ public abstract class Autonomous_Base extends LinearOpMode {
 
     //Drive
     protected MecanumDrive drive;
-    public static PIDCoefficients H_PID = new PIDCoefficients(-2, 0, -0.01);
+    public static PIDCoefficients H_PID = new PIDCoefficients(-0.5, 0, -0.05);
     protected DcMotorEx fLeft, fRight, bLeft, bRight;
     protected Gyroscope gyro;
     private boolean initializedMotors = false, initializedDrive = false, initializedGyro = false;
@@ -31,13 +31,22 @@ public abstract class Autonomous_Base extends LinearOpMode {
 
     protected boolean USE_SUBS;
 
+    //How accurate each attribute should be at each point
+    public static double POS_ACC = 0.1;
+    public static double H_ACC = Math.toRadians(1);
+
+    public static double MIN_SPEED = 0.2;
+    public static double MIN_TURN = 0.1;
+    public static double CLOSE_DIST = 0;
+
+    public static double SLOW_DIST = 15;
+
     public void driveTo(double destX, double destY, double destH) {
+        drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
         PIDFController hControl = new PIDFController(H_PID);
         hControl.setOutputBounds(0, 1);
         hControl.setTargetPosition(0);
-
-        //How accurate each attribute should be at each point
-        double xAcc = 1, yAcc = 1, hAcc = Math.toRadians(1);
 
         //Current robot position
         double robotX = drive.getPoseEstimate().getX();
@@ -53,9 +62,9 @@ public abstract class Autonomous_Base extends LinearOpMode {
 
         //While robot is not at the current destination point
         while (opModeIsActive() &&
-                (Math.abs(relX) > xAcc ||
-                        Math.abs(relY) > yAcc ||
-                        Math.abs(relH) > hAcc)) {
+                (Math.abs(relX) > POS_ACC ||
+                        Math.abs(relY) > POS_ACC ||
+                        Math.abs(relH) > H_ACC)) {
 
             updateBulkRead();
             gyro.update();
@@ -73,9 +82,9 @@ public abstract class Autonomous_Base extends LinearOpMode {
 
             hWeight = hControl.update(Math.abs(relH));
 
-            if (Math.abs(relX) < xAcc) relX = 0;
-            if (Math.abs(relY) < yAcc) relY = 0;
-            if (Math.abs(relH) < hAcc) hWeight = 0;
+            if (Math.abs(relX) < POS_ACC) relX = 0;
+            if (Math.abs(relY) < POS_ACC) relY = 0;
+            if (Math.abs(relH) < H_ACC) hWeight = 0;
 
             double driveAngle = deltaHeading(robotH, Math.atan2(relY, relX));
 
@@ -83,17 +92,25 @@ public abstract class Autonomous_Base extends LinearOpMode {
             double yPower = Math.sin(driveAngle);
             double hPower = Math.copySign(hWeight, relH);
 
-            if (Math.sqrt((relX*relX) + (relY*relY)) < 5) {
-                xPower *= 0.25;
-                yPower *= 0.25;
+            double dist = Math.sqrt((relX*relX) + (relY*relY));
+
+            if (dist <= SLOW_DIST) {
+                xPower *= Math.pow(dist / SLOW_DIST, 2);
+                yPower *= Math.pow(dist / SLOW_DIST, 2);
+            }
+
+            double max = Math.max(Math.abs(xPower), Math.abs(yPower));
+            if (dist <= CLOSE_DIST && max != 0) {
+                xPower /= max / MIN_SPEED;
+                yPower /= max / MIN_SPEED;
             }
             else {
-                if (Math.abs(xPower) < 0.25 && Math.abs(xPower) > 0)
-                    xPower = Math.copySign(0.25, xPower);
-                if (Math.abs(yPower) < 0.25 && Math.abs(yPower) > 0)
-                    yPower = Math.copySign(0.25, yPower);
-                if (Math.abs(hPower) < 0.25 && Math.abs(hPower) > 0)
-                    hPower = Math.copySign(0.25, hPower);
+                if (max < MIN_SPEED && max != 0) {
+                    xPower /= max / MIN_SPEED;
+                    yPower /= max / MIN_SPEED;
+                }
+                if (Math.abs(hPower) < MIN_TURN && Math.abs(hPower) > 0)
+                    hPower = Math.copySign(MIN_TURN, hPower);
             }
 
             drive.setWeightedDrivePower(new Pose2d(xPower, yPower, hPower));

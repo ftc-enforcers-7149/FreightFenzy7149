@@ -40,24 +40,28 @@ public class BlueRight extends Autonomous_Base {
 
         /// Loop ///
 
-        driveTo(4, -7, 0);
+        POS_ACC = 1;
+        driveTo(4, -5, 0);
 
         double startTime = System.currentTimeMillis();
-        while (opModeIsActive() && System.currentTimeMillis() < startTime + 6000) {
+        turningIntake.setWristRight();
+        while (opModeIsActive() && System.currentTimeMillis() < startTime + 4000) {
             updateBulkRead();
             gyro.update();
             drive.update();
 
-            spinner.setRightPower(1);
+            spinner.setRightPower(0.75);
             turningIntake.setIntakePower(-1);
 
             updateSubsystems();
             updateTelemetry();
         }
         spinner.setRightPower(0);
+        turningIntake.setWristLeft();
         turningIntake.setIntakePower(0);
 
-        driveTo(24, -8, 0);
+        POS_ACC = 0.1;
+        driveTo(30, -5, 0);
 
         /// Stop ///
 
@@ -66,6 +70,9 @@ public class BlueRight extends Autonomous_Base {
         turningIntake.stop();
         lift.stop();
         spinner.stop();
+
+        startTime = System.currentTimeMillis();
+        while (opModeIsActive() && System.currentTimeMillis() < startTime + 1000);
     }
 
     @Override

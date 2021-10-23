@@ -40,24 +40,28 @@ public class RedLeft extends Autonomous_Base {
 
         /// Loop ///
 
-        driveTo(4, 7, 0);
+        POS_ACC = 1;
+        driveTo(4, 5, 0);
 
         double startTime = System.currentTimeMillis();
-        while (opModeIsActive() && System.currentTimeMillis() < startTime + 6000) {
+        turningIntake.setWristLeft();
+        while (opModeIsActive() && System.currentTimeMillis() < startTime + 4000) {
             updateBulkRead();
             gyro.update();
             drive.update();
 
-            spinner.setLeftPower(1);
+            spinner.setLeftPower(0.75);
             turningIntake.setIntakePower(-1);
 
             updateSubsystems();
             updateTelemetry();
         }
         spinner.setLeftPower(0);
+        turningIntake.setWristRight();
         turningIntake.setIntakePower(0);
 
-        driveTo(24, 8, 0);
+        POS_ACC = 0.1;
+        driveTo(30, 5, 0);
 
         /// Stop ///
 

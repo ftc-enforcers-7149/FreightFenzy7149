@@ -69,14 +69,14 @@ public class TurningIntake {
      * Scan wrist to the left
      */
     public void moveWristLeft() {
-        turnSpeed = -0.05;
+        turnSpeed = -0.35;
     }
 
     /**
      * Scan wrist to the right
      */
     public void moveWristRight() {
-        turnSpeed = 0.05;
+        turnSpeed = 0.35;
     }
 
     /**
@@ -97,7 +97,7 @@ public class TurningIntake {
      * Turn wrist to the center
      */
     public void setWristCenter() {
-        wristPos = 0.5; turnSpeed = 0;
+        wristPos = 0.45; turnSpeed = 0;
     }
 
     /**
