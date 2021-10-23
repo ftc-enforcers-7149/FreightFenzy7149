@@ -14,7 +14,7 @@ public class SmithChassis extends TeleOp_Base {
 
     public void loop() {
         getInput();
-        driveTank();
+        driveAccelTank(250, gamepad1.a);
         updateStateMachine();
     }
 
@@ -26,10 +26,11 @@ public class SmithChassis extends TeleOp_Base {
     protected void getInput() {
         leftY = gamepad1.left_stick_y;
         rightY = gamepad1.right_stick_y;
+        time = System.currentTimeMillis();
     }
 
     @Override
     protected void updateStateMachine() {
-        lastLeftY = leftY; lastRightY = rightY;
+        lastLeftY = leftY; lastRightY = rightY; lastTime = time;
     }
 }

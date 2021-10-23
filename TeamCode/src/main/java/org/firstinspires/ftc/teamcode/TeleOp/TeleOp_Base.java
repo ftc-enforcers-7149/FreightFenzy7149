@@ -26,6 +26,7 @@ public abstract class TeleOp_Base extends OpMode {
     //State machine logic
     protected double leftX, leftY, rightX, rightY;
     protected double lastLeftX, lastLeftY, lastRightX, lastRightY;
+    protected double time, lastTime, startTimeL, startTimeR, startTime;
 
     //Headless
     protected double offset, lim;
@@ -175,8 +176,75 @@ public abstract class TeleOp_Base extends OpMode {
 
         setMotorPowers(vFL, vFR, vBL, vBR);
     }
+
+    protected void driveAccelHeadless(double angle, boolean reset, double accelTime, double turnFactor, boolean disregard) {
+
+        // Resets the robot's angle
+        if (reset) {
+            offset = angle;
+        }
+
+        // A little bit of fun math to determine whether we've made a significant change in joystick position.
+        // Have fun messing around with this to your liking. This is a complete guesstimate.
+
+        if(Math.abs(leftX - lastLeftX) >= .15 || Math.abs(leftY - lastLeftY) >= .15) startTime = System.currentTimeMillis();
+
+        // If our controllers are zeroed, set the motor powers to zero
+
+        if ((leftY == 0 && lastLeftY != 0) &&
+                (leftX == 0 && lastLeftX != 0) &&
+                (rightX == 0 && lastRightX != 0)) {
+            setMotorPowers(0, 0, 0, 0);
+            return;
+        }
+
+        // Ratio for the wheels
+
+        double r = Math.hypot(leftX, leftY) * Math.sqrt(2);
+
+        //Robot angle
+
+        double robotAngle = Math.atan2(leftY, leftX) - Math.toRadians(Gyroscope.cvtTrigAng(angle - offset)) - 3 * Math.PI / 4;
+
+        // Sine and cosine factors. These ramp based on a time-based acceleration curve.
+
+        double sinFactor = (time - startTime <= accelTime) && !disregard ? ((time - startTime) / accelTime) * Math.sin(robotAngle) : Math.sin(robotAngle);
+        double cosFactor = (time - startTime <= accelTime) && !disregard ? ((time - startTime) / accelTime) * Math.cos(robotAngle) : Math.cos(robotAngle);
+
+        // Sets the motor powers
+
+        double vFL = r * sinFactor + rightX * turnFactor;
+        double vFR = r * cosFactor - rightX * turnFactor;
+        double vBL = r * cosFactor + rightX * turnFactor;
+        double vBR = r * sinFactor - rightX * turnFactor;
+
+        // Calculates the maximum moter powers
+
+        double max = Math.max(
+                Math.max(
+                        Math.abs(vFL),
+                        Math.abs(vFR)),
+                Math.max(
+                        Math.abs(vBL),
+                        Math.abs(vBR))
+        );
+
+        // Normalizes the wheel powers
+
+        if (max > lim) {
+            vFL /= max / lim;
+            vFR /= max / lim;
+            vBL /= max / lim;
+            vBR /= max / lim;
+        }
+
+        // Sets the motor powers
+
+        setMotorPowers(vFL, vFR, vBL, vBR);
+    }
+
     protected void driveTank() {
-        if (leftY != lastLeftY && rightY != lastRightY) {
+        if (leftY != lastLeftY || rightY != lastRightY) {
             double vL = leftY;
             double vR = rightY;
 
@@ -188,6 +256,65 @@ public abstract class TeleOp_Base extends OpMode {
             }
 
             setMotorPowers(vL, vR, vL, vR);
+        }
+    }
+
+    protected void driveAccelTank(double accelTime, boolean disregard) {
+
+        // Checks to see if we need to update anything.
+
+        if (leftY != lastLeftY || rightY != lastRightY || time - startTimeL <= accelTime || time - startTimeR <= accelTime) {
+
+            // Checks for significant change in left joystick position. This value is an estimate.
+
+            if(Math.abs(leftY - lastLeftY) >= .15) {
+
+                startTimeL = System.currentTimeMillis();
+
+            }
+
+            // Checks for significant change in right joystick position. This value is an estimate.
+
+            if(Math.abs(rightY - lastRightY) >= .15) {
+
+                startTimeR = System.currentTimeMillis();
+
+            }
+
+            // Figures out if we're turning or not, and creates a multiplier to slow us down if so.
+
+            double turnMult = Math.abs(leftY - rightY) > .1 ? .6 : 1;
+
+            // The fun bit. If we're not disregarding acceleration and we haven't gone over our ramp-up time, we set
+            // power based on the time elapsed in the acceleration, standardized against the acceleration time.
+
+            double vL = (time - startTimeL <= accelTime) && !disregard ? leftY * (time - startTimeL) / accelTime : leftY;
+            double vR = (time - startTimeR <= accelTime) && !disregard ? rightY * (time - startTimeR) / accelTime : rightY;
+
+            // Ensures we don't start at 0 power.
+            //TODO: tune
+            if(vL < .15) vL = .15;
+            if(vR < .15) vR = .15;
+
+            // If one wheel has already ramped up and we're not turning, we ramp the other motor up with it in proportion.
+
+            if (Math.abs(vL) >= turnMult + .05) vR = rightY * (vL / leftY);
+            else if (Math.abs(vR) >= turnMult + .05) vL = leftY * (vR / rightY);
+
+            // Calculates the maximum arbitrary power value.
+
+            double max = Math.max(Math.abs(vL), Math.abs(vR));
+
+            // Standardizes the power on a scale of 1.
+
+            if (max > lim) {
+                vL /= max / lim;
+                vR /= max / lim;
+            }
+
+            // Sets motor powers.
+
+            setMotorPowers(vL * turnMult, vR * turnMult, vL * turnMult, vR * turnMult);
         }
     }
 
@@ -214,4 +341,5 @@ public abstract class TeleOp_Base extends OpMode {
         bLeft.setPower(vBL);
         bRight.setPower(vBR);
     }
+
 }
