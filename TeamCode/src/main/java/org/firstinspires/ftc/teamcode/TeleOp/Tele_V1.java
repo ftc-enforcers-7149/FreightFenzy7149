@@ -81,9 +81,9 @@ public class Tele_V1 extends TeleOp_Base {
     @Override
     protected void getInput() {
         //Headless
-        leftX = curveInput(gamepad1.left_stick_x, 7)*lim;
-        leftY = curveInput(gamepad1.left_stick_y, 7)*lim;
-        rightX = curveInput(gamepad1.right_stick_x, 7)*lim;
+        leftX = curveInput(gamepad1.left_stick_x, 5)*lim;
+        leftY = curveInput(gamepad1.left_stick_y, 5)*lim;
+        rightX = curveInput(gamepad1.right_stick_x, 5)*lim*0.75;
         resetAngle = gamepad1.y;
     }
 

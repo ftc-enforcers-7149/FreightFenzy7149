@@ -48,7 +48,7 @@ public class TurningIntake {
         intakePower = 0;
         lastIntakePower = 0;
         wristPos = 0.45;
-        lastWristPos = moveOnInit ? 0.45 : 0;
+        lastWristPos = moveOnInit ? 0.45 : -1;
         turnSpeed = 0;
         lastTime = System.currentTimeMillis();
     }
@@ -61,8 +61,11 @@ public class TurningIntake {
         //Move wrist at [turnSpeed]/sec
         wristPos += turnSpeed * (System.currentTimeMillis() - lastTime) / 1000;
 
+        if (wristPos < 0) wristPos = 0;
+        if (wristPos > 1) wristPos = 1;
+
         if (wristPos != lastWristPos) {
-            wrist.setPosition(fixInput(wristPos));
+            wrist.setPosition(wristPos);//fixInput(wristPos));
         }
 
         //Set turnSpeed back to 0 after each loop so
@@ -86,14 +89,14 @@ public class TurningIntake {
      * Scan wrist to the left
      */
     public void moveWristLeft() {
-        turnSpeed = -0.35;
+        turnSpeed = -1;
     }
 
     /**
      * Scan wrist to the right
      */
     public void moveWristRight() {
-        turnSpeed = 0.35;
+        turnSpeed = 1;
     }
 
     /**
@@ -107,7 +110,7 @@ public class TurningIntake {
      * Turn wrist all the way to the right
      */
     public void setWristRight() {
-        wristPos = 0; turnSpeed = 0;
+        wristPos = 1; turnSpeed = 0;
     }
 
     /**
@@ -143,7 +146,7 @@ public class TurningIntake {
     }
 
     public void stop() {
-        setWristCenter();
+        //setWristCenter();
         setIntakePower(0);
         update();
     }

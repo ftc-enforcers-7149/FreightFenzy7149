@@ -44,28 +44,37 @@ public class BlueLeft extends Autonomous_Base {
 
         //Spit out preloaded block
         turningIntake.setWristRight();
+        waitForTime(750);
         outtake();
+
+        POS_ACC = 1;
 
         //Cycle "n" times
         for (int n = 0; n < 3; n++) {
             //Drive into warehouse while intaking
             turningIntake.setWristCenter();
             turningIntake.setIntakePower(1);
-            driveTo(24, 0, 0);
+            waitForTime(750);
+            driveTo(40 + n * 4, 0, 0);
             waitForTime(500);
 
             //Stop intaking and back out of warehouse
+            turningIntake.setIntakePower(-0.1);
+            waitForTime(300);
             turningIntake.setIntakePower(0);
             driveTo(0, 0, 0);
 
             //Outtake collected block
             turningIntake.setWristRight();
+            waitForTime(750);
             outtake();
         }
 
         //Park
         turningIntake.setWristCenter();
-        driveTo(24, 0, 0);
+        waitForTime(750);
+        POS_ACC = 0.1;
+        driveTo(48, 0, 0);
 
         /// Stop ///
 

@@ -58,9 +58,11 @@ public class BlueRight extends Autonomous_Base {
         turningIntake.setWristLeft();
         turningIntake.setIntakePower(0);
 
+        waitForTime(750);
+
         //Park
         POS_ACC = 0.1;
-        driveTo(30, -5, 0);
+        driveTo(29.5, -5, 0);
 
         /// Stop ///
 
