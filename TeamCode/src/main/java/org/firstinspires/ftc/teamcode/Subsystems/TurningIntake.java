@@ -36,6 +36,23 @@ public class TurningIntake {
         lastTime = System.currentTimeMillis();
     }
 
+    public TurningIntake(HardwareMap hardwaremap, String intakeServoName, String wristServoName,
+                         boolean moveOnInit) {
+        intake = hardwaremap.crservo.get(intakeServoName);
+        wrist = hardwaremap.servo.get(wristServoName);
+
+        wrist.setDirection(Servo.Direction.REVERSE);
+        intake.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        if (moveOnInit) wrist.setPosition(0.45);
+        intakePower = 0;
+        lastIntakePower = 0;
+        wristPos = 0.45;
+        lastWristPos = moveOnInit ? 0.45 : 0;
+        turnSpeed = 0;
+        lastTime = System.currentTimeMillis();
+    }
+
     public void update() {
         if (intakePower != lastIntakePower) {
             intake.setPower(intakePower);

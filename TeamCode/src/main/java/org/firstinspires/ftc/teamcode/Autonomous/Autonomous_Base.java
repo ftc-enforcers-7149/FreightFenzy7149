@@ -377,6 +377,17 @@ public abstract class Autonomous_Base extends LinearOpMode {
         }
     }
 
+    protected void waitForTime(double ms) {
+        double startTime = System.currentTimeMillis();
+        while (opModeIsActive() && System.currentTimeMillis() < startTime + ms) {
+            updateBulkRead();
+            if (initializedGyro) gyro.update();
+            if (initializedDrive) drive.update();
+            updateSubsystems();
+            updateTelemetry();
+        }
+    }
+
     protected void setMotorPowers(double v1, double v2, double v3, double v4) {
         fLeft.setPower(v1);
         fRight.setPower(v2);

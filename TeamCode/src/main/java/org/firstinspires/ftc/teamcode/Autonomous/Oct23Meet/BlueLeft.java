@@ -29,7 +29,7 @@ public class BlueLeft extends Autonomous_Base {
             throw new InterruptedException();
         }
 
-        turningIntake = new TurningIntake(hardwareMap, "intake", "wrist");
+        turningIntake = new TurningIntake(hardwareMap, "intake", "wrist", false);
         lift = new Lift(hardwareMap, "lift", bReadEH);
         spinner = new CarouselSpinner(hardwareMap, "leftSpinner", "rightSpinner");
 
@@ -40,24 +40,30 @@ public class BlueLeft extends Autonomous_Base {
 
         /// Loop ///
 
-        driveTo(8, -8, 0);
+        //Spit out preloaded block
+        turningIntake.setWristRight();
+        outtake();
 
-        double startTime = System.currentTimeMillis();
-        while (opModeIsActive() && System.currentTimeMillis() < startTime + 1000) {
-            updateBulkRead();
-            gyro.update();
-            drive.update();
+        //Cycle "n" times
+        for (int n = 0; n < 3; n++) {
+            //Drive into warehouse while intaking
+            turningIntake.setWristCenter();
+            turningIntake.setIntakePower(1);
+            driveTo(24, 0, 0);
+            waitForTime(500);
 
-            spinner.setRightPower(1);
-            turningIntake.setIntakePower(-1);
+            //Stop intaking and back out of warehouse
+            turningIntake.setIntakePower(0);
+            driveTo(0, 0, 0);
 
-            updateSubsystems();
-            updateTelemetry();
+            //Outtake collected block
+            turningIntake.setWristRight();
+            outtake();
         }
-        spinner.setRightPower(0);
-        turningIntake.setIntakePower(0);
 
-        driveTo(24, -8, 0);
+        //Park
+        turningIntake.setWristCenter();
+        driveTo(24, 0, 0);
 
         /// Stop ///
 
@@ -66,6 +72,24 @@ public class BlueLeft extends Autonomous_Base {
         turningIntake.stop();
         lift.stop();
         spinner.stop();
+
+        waitForTime(1000);
+    }
+
+    private void outtake() {
+        turningIntake.setIntakePower(-1);
+
+        double startTime = System.currentTimeMillis();
+        while (opModeIsActive() && System.currentTimeMillis() < startTime + 1000) {
+            updateBulkRead();
+            gyro.update();
+            drive.update();
+
+            updateSubsystems();
+            updateTelemetry();
+        }
+
+        turningIntake.setIntakePower(0);
     }
 
     @Override

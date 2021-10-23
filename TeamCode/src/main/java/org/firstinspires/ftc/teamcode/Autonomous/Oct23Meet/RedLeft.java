@@ -29,7 +29,7 @@ public class RedLeft extends Autonomous_Base {
             throw new InterruptedException();
         }
 
-        turningIntake = new TurningIntake(hardwareMap, "intake", "wrist");
+        turningIntake = new TurningIntake(hardwareMap, "intake", "wrist", false);
         lift = new Lift(hardwareMap, "lift", bReadEH);
         spinner = new CarouselSpinner(hardwareMap, "leftSpinner", "rightSpinner");
 
@@ -40,26 +40,23 @@ public class RedLeft extends Autonomous_Base {
 
         /// Loop ///
 
+        //Drive into duckwheel
         POS_ACC = 1;
         driveTo(4, 5, 0);
 
-        double startTime = System.currentTimeMillis();
+        //Spin duckwheel while outtaking preloaded block into storage unit
         turningIntake.setWristLeft();
-        while (opModeIsActive() && System.currentTimeMillis() < startTime + 4000) {
-            updateBulkRead();
-            gyro.update();
-            drive.update();
+        spinner.setLeftPower(0.75);
+        turningIntake.setIntakePower(-1);
 
-            spinner.setLeftPower(0.75);
-            turningIntake.setIntakePower(-1);
+        waitForTime(4000);
 
-            updateSubsystems();
-            updateTelemetry();
-        }
+        //Stop spinning / outtaking
         spinner.setLeftPower(0);
         turningIntake.setWristRight();
         turningIntake.setIntakePower(0);
 
+        //Park
         POS_ACC = 0.1;
         driveTo(30, 5, 0);
 
@@ -70,6 +67,8 @@ public class RedLeft extends Autonomous_Base {
         turningIntake.stop();
         lift.stop();
         spinner.stop();
+
+        waitForTime(1000);
     }
 
     @Override
