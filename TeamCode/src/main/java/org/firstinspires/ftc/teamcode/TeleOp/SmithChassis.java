@@ -1,11 +1,15 @@
 package org.firstinspires.ftc.teamcode.TeleOp;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp(name = "Smith Chassis")
-@Disabled
+//@Disabled
+@Config
 public class SmithChassis extends TeleOp_Base {
+
+    public static double accelTime = 250;
 
     public void init() {
         initializeDrive();
@@ -14,7 +18,7 @@ public class SmithChassis extends TeleOp_Base {
 
     public void loop() {
         getInput();
-        driveAccelTank(250, gamepad1.a);
+        driveAccelTank(accelTime, gamepad1.a);
         updateStateMachine();
     }
 

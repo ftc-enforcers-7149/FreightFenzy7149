@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.NovaLmao;
 
 import com.qualcomm.robotcore.hardware.Gamepad;
 
-public class GamepadFun {
+public class Touchpad {
 
     private Gamepad gamepad;
 
@@ -14,7 +14,7 @@ public class GamepadFun {
 
     private double standardMult = 100;
 
-    public GamepadFun (Gamepad gamepad) {
+    public Touchpad(Gamepad gamepad) {
 
         this.gamepad = gamepad;
 
