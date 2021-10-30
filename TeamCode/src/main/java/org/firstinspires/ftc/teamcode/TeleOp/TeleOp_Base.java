@@ -27,9 +27,23 @@ public abstract class TeleOp_Base extends OpMode {
     protected double leftX, leftY, rightX, rightY;
     protected double lastLeftX, lastLeftY, lastRightX, lastRightY;
     protected double time, lastTime, startTimeL, startTimeR, startTime;
+    protected double velL, velR, lastVelL = 0, lastVelR = 0;
 
     //Headless
     protected double offset, lim;
+
+    public enum AccelState {
+
+        TURNING,
+        ACCEL_TURNING,
+        ACCELERATING,
+        POST_TURN_RAMP,
+        POST_ACCELERATING,
+        RESTING
+
+    }
+
+    protected AccelState aStateL = AccelState.RESTING, aStateR = AccelState.RESTING, aState = AccelState.RESTING, lastAState, lastAStateL, lastAStateR;
 
     //Initialization
     protected void initializeDrive() {
@@ -261,15 +275,21 @@ public abstract class TeleOp_Base extends OpMode {
 
     protected void driveAccelTank(double accelTime, boolean disregard) {
 
+        lastAStateL = aStateL;
+        lastAStateR = aStateR;
+
         // Checks to see if we need to update anything.
 
-        if (leftY != lastLeftY || rightY != lastRightY || time - startTimeL <= accelTime || time - startTimeR <= accelTime) {
+        /*if (leftY != lastLeftY || rightY != lastRightY || time - startTimeL <= accelTime || time - startTimeR <= accelTime
+            || aStateL != AccelState.RESTING || aStateR != AccelState.RESTING) {*/
+        if(leftY != 0 || rightY != 0) {
 
             // Checks for significant change in left joystick position. This value is an estimate.
 
             if(Math.abs(leftY - lastLeftY) >= .15) {
 
                 startTimeL = System.currentTimeMillis();
+                velL = 0;
 
             }
 
@@ -278,44 +298,151 @@ public abstract class TeleOp_Base extends OpMode {
             if(Math.abs(rightY - lastRightY) >= .15) {
 
                 startTimeR = System.currentTimeMillis();
+                velR = 0;
 
             }
 
-            // Figures out if we're turning or not, and creates a multiplier to slow us down if so.
+            boolean accelLeft = (time - startTimeL <= accelTime) && !disregard;
+            boolean accelRight = (time - startTimeR <= accelTime) && !disregard;
+            boolean turning = Math.abs(leftY - rightY) > .1;
 
-            double turnMult = Math.abs(leftY - rightY) > .1 ? .6 : 1;
+            if(turning) {
 
-            // The fun bit. If we're not disregarding acceleration and we haven't gone over our ramp-up time, we set
-            // power based on the time elapsed in the acceleration, standardized against the acceleration time.
+                aStateL = accelLeft ? AccelState.ACCEL_TURNING : AccelState.TURNING;
+                aStateR = accelRight ? AccelState.ACCEL_TURNING : AccelState.TURNING;
 
-            double vL = (time - startTimeL <= accelTime) && !disregard ? leftY * (time - startTimeL) / accelTime : leftY;
-            double vR = (time - startTimeR <= accelTime) && !disregard ? rightY * (time - startTimeR) / accelTime : rightY;
+                if(leftY == 0) aStateL = AccelState.RESTING;
+                if(rightY == 0) aStateR = AccelState.RESTING;
 
-            // Ensures we don't start at 0 power.
-            //TODO: tune
-            if(vL < .15) vL = .15;
-            if(vR < .15) vR = .15;
+            }
+            else {
+
+                if(accelLeft) {
+                    aStateL = (lastAStateL == AccelState.ACCEL_TURNING || lastAStateL == AccelState.TURNING
+                                || lastAStateL == AccelState.POST_TURN_RAMP) ?
+                            AccelState.POST_TURN_RAMP : AccelState.ACCELERATING;
+                }
+                else {
+                    aStateL = (leftY == 0) ? AccelState.RESTING : AccelState.POST_ACCELERATING;
+                }
+
+                if(accelRight) {
+                    aStateR = (lastAStateR == AccelState.ACCEL_TURNING || lastAStateR == AccelState.TURNING
+                            || lastAStateR == AccelState.POST_TURN_RAMP) ?
+                            AccelState.POST_TURN_RAMP : AccelState.ACCELERATING;
+                }
+                else {
+                    aStateR = (rightY == 0) ? AccelState.RESTING : AccelState.POST_ACCELERATING;
+                }
+
+            }
+
+            switch(aStateL) {
+
+                case TURNING:
+                    velL = leftY * .6;
+                    break;
+
+                case ACCEL_TURNING:
+                    velL = ((leftY) * (time - startTimeR) / accelTime) * .6 ;
+                    break;
+
+                case ACCELERATING:
+                    velL = leftY * (time - startTimeL) / accelTime;
+                    break;
+
+                case POST_ACCELERATING:
+                    velL = leftY;
+                    break;
+                case RESTING:
+                        velL = 0;
+                        break;
+                default:
+                    break;
+
+            }
+
+            switch(aStateR) {
+
+                case TURNING:
+                    velR = rightY * .6;
+                    break;
+
+                case ACCEL_TURNING:
+                    velR = ((rightY) * (time - startTimeR) / accelTime) *.6 ;
+                    break;
+
+                case ACCELERATING:
+                    velR = rightY * (time - startTimeR) / accelTime;
+                    break;
+
+                case POST_ACCELERATING:
+                    velR = rightY;
+                    break;
+
+                case RESTING:
+                    velR = 0;
+                    break;
+
+                default:
+                    break;
+
+            }
 
             // If one wheel has already ramped up and we're not turning, we ramp the other motor up with it in proportion.
 
-            if (Math.abs(vL) >= turnMult + .05) vR = rightY * (vL / leftY);
-            else if (Math.abs(vR) >= turnMult + .05) vL = leftY * (vR / rightY);
+            if(aStateL == AccelState.POST_TURN_RAMP) {
+                velL = aStateL != lastAStateL ? velR : leftY * (velR / rightY);
+            }
+            else if(aStateR == AccelState.POST_TURN_RAMP) {
+                velR = aStateR != lastAStateR ? velL : rightY * (velL / leftY);
+            }
+
+            // Ensures we don't start at 0 power.
+
+            //TODO: tune
+            if(Math.abs(velL) < .15 && leftY != 0) velL = Math.copySign(0.15, velL);
+            if(Math.abs(velR) < .15 && rightY != 0) velR = Math.copySign(0.15, velR);
 
             // Calculates the maximum arbitrary power value.
 
-            double max = Math.max(Math.abs(vL), Math.abs(vR));
+            double max = Math.max(Math.abs(velL), Math.abs(velR));
 
             // Standardizes the power on a scale of 1.
 
             if (max > lim) {
-                vL /= max / lim;
-                vR /= max / lim;
+                velL /= max / lim;
+                velR /= max / lim;
             }
 
             // Sets motor powers.
 
-            setMotorPowers(vL * turnMult, vR * turnMult, vL * turnMult, vR * turnMult);
+            setMotorPowers(velL, velR, velL, velR);
+
         }
+        /*else if (leftY == 0 || rightY == 0) {*/
+        else {
+
+            aStateL = AccelState.RESTING;
+            aStateR = AccelState.RESTING;
+
+            if(aStateL != lastAStateL || aStateR != lastAStateR) setMotorPowers(0, 0, 0, 0);
+
+//            if(aStateL != lastAStateL) {
+//                lastAStateL = aStateL;
+//                aStateL = AccelState.RESTING;
+//            }
+//            if(aStateR != lastAStateR) {
+//                lastAStateR = aStateR;
+//                aStateR = AccelState.RESTING;
+//            }
+
+        }
+
+        lastVelL = velL;
+        lastVelR = velR;
+        /*lastAStateL = aStateL;
+        lastAStateR = aStateR;*/
     }
 
     //State machine logic

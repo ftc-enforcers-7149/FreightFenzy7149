@@ -20,6 +20,16 @@ public class SmithChassis extends TeleOp_Base {
         getInput();
         driveAccelTank(accelTime, gamepad1.a);
         updateStateMachine();
+
+        telemetry.addData("Left Y:, ", gamepad1.left_stick_y);
+        telemetry.addData("Left Power:", fLeft.getPower());
+        telemetry.addData("Left state: ", aStateL);
+        telemetry.addData("Left last state: ", lastAStateL);
+        telemetry.addData("\nRight Y: ", gamepad1.right_stick_y);
+        telemetry.addData("Right Power: ", fRight.getPower());
+        telemetry.addData("Right state: ", aStateR);
+        telemetry.addData("Right last state: ", lastAStateR);
+
     }
 
     public void stop() {
