@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Lift;
 import org.firstinspires.ftc.teamcode.Subsystems.TurningIntake;
 
 @Autonomous(name = "Red Right")
-//@Disabled
+@Disabled
 public class RedRight extends Autonomous_Base {
 
     private TurningIntake turningIntake;

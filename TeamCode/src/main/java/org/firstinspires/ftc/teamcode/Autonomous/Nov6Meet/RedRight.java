@@ -1,16 +1,15 @@
-package org.firstinspires.ftc.teamcode.Autonomous.Oct23Meet;
+package org.firstinspires.ftc.teamcode.Autonomous.Nov6Meet;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Autonomous_Base;
 import org.firstinspires.ftc.teamcode.Subsystems.CarouselSpinner;
 import org.firstinspires.ftc.teamcode.Subsystems.Lift;
 import org.firstinspires.ftc.teamcode.Subsystems.TurningIntake;
 
-@Autonomous(name = "Blue Left")
-@Disabled
-public class BlueLeft extends Autonomous_Base {
+@Autonomous(name = "Red Right")
+//@Disabled
+public class RedRight extends Autonomous_Base {
 
     private TurningIntake turningIntake;
     private Lift lift;
@@ -43,7 +42,7 @@ public class BlueLeft extends Autonomous_Base {
         /// Loop ///
 
         //Spit out preloaded block
-        turningIntake.setWristRight();
+        turningIntake.setWristLeft();
         waitForTime(750);
         outtake();
 
@@ -65,7 +64,7 @@ public class BlueLeft extends Autonomous_Base {
             driveTo(0, 0, 0);
 
             //Outtake collected block
-            turningIntake.setWristRight();
+            turningIntake.setWristLeft();
             waitForTime(750);
             outtake();
         }
@@ -91,7 +90,7 @@ public class BlueLeft extends Autonomous_Base {
         turningIntake.setIntakePower(-1);
 
         double startTime = System.currentTimeMillis();
-        while (opModeIsActive() && System.currentTimeMillis() < startTime + 1000) {
+        while (opModeIsActive() && System.currentTimeMillis() < startTime + 1500) {
             updateBulkRead();
             gyro.update();
             drive.update();

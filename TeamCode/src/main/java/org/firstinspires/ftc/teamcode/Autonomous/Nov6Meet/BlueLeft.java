@@ -1,7 +1,6 @@
-package org.firstinspires.ftc.teamcode.Autonomous.Oct23Meet;
+package org.firstinspires.ftc.teamcode.Autonomous.Nov6Meet;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Autonomous_Base;
 import org.firstinspires.ftc.teamcode.Subsystems.CarouselSpinner;
@@ -9,7 +8,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Lift;
 import org.firstinspires.ftc.teamcode.Subsystems.TurningIntake;
 
 @Autonomous(name = "Blue Left")
-@Disabled
+//@Disabled
 public class BlueLeft extends Autonomous_Base {
 
     private TurningIntake turningIntake;

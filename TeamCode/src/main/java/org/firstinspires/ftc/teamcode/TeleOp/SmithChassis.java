@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp(name = "Smith Chassis")
-//@Disabled
+@Disabled
 @Config
 public class SmithChassis extends TeleOp_Base {
 

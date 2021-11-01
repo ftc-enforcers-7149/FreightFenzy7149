@@ -37,7 +37,8 @@ public class Tele_V1 extends TeleOp_Base {
         getInput();
 
         // Drive
-        driveAccelHeadless(gyro.getRawYaw(), resetAngle, 250, .6, gamepad1.a);
+        //driveAccelHeadless(gyro.getRawYaw(), resetAngle, 250, .6, gamepad1.a);
+        driveHeadless(gyro.getRawYaw(), resetAngle);
 
         // Turning Intake
         if (gamepad2.dpad_up) turningIntake.setWristCenter();

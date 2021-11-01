@@ -1,16 +1,15 @@
-package org.firstinspires.ftc.teamcode.Autonomous.Oct23Meet;
+package org.firstinspires.ftc.teamcode.Autonomous.Nov6Meet;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Autonomous_Base;
 import org.firstinspires.ftc.teamcode.Subsystems.CarouselSpinner;
 import org.firstinspires.ftc.teamcode.Subsystems.Lift;
 import org.firstinspires.ftc.teamcode.Subsystems.TurningIntake;
 
-@Autonomous(name = "Blue Left")
-@Disabled
-public class BlueLeft extends Autonomous_Base {
+@Autonomous(name = "Red Left")
+//@Disabled
+public class RedLeft extends Autonomous_Base {
 
     private TurningIntake turningIntake;
     private Lift lift;
@@ -42,39 +41,27 @@ public class BlueLeft extends Autonomous_Base {
 
         /// Loop ///
 
-        //Spit out preloaded block
-        turningIntake.setWristRight();
-        waitForTime(750);
-        outtake();
-
+        //Drive into duckwheel
         POS_ACC = 1;
+        driveTo(4, 5, 0);
 
-        //Cycle "n" times
-        for (int n = 0; n < 3; n++) {
-            //Drive into warehouse while intaking
-            turningIntake.setWristCenter();
-            turningIntake.setIntakePower(1);
-            waitForTime(750);
-            driveTo(40 + n * 4, 0, 0);
-            waitForTime(500);
+        //Spin duckwheel while outtaking preloaded block into storage unit
+        turningIntake.setWristLeft();
+        spinner.setLeftPower(0.75);
+        turningIntake.setIntakePower(-1);
 
-            //Stop intaking and back out of warehouse
-            turningIntake.setIntakePower(-0.1);
-            waitForTime(300);
-            turningIntake.setIntakePower(0);
-            driveTo(0, 0, 0);
+        waitForTime(4000);
 
-            //Outtake collected block
-            turningIntake.setWristRight();
-            waitForTime(750);
-            outtake();
-        }
+        //Stop spinning / outtaking
+        spinner.setLeftPower(0);
+        turningIntake.setWristRight();
+        turningIntake.setIntakePower(0);
+
+        waitForTime(750);
 
         //Park
-        turningIntake.setWristCenter();
-        waitForTime(750);
         POS_ACC = 0.1;
-        driveTo(48, 0, 0);
+        driveTo(29.5, 5, 0);
 
         /// Stop ///
 
@@ -85,22 +72,6 @@ public class BlueLeft extends Autonomous_Base {
         spinner.stop();
 
         waitForTime(1000);
-    }
-
-    private void outtake() {
-        turningIntake.setIntakePower(-1);
-
-        double startTime = System.currentTimeMillis();
-        while (opModeIsActive() && System.currentTimeMillis() < startTime + 1000) {
-            updateBulkRead();
-            gyro.update();
-            drive.update();
-
-            updateSubsystems();
-            updateTelemetry();
-        }
-
-        turningIntake.setIntakePower(0);
     }
 
     @Override
