@@ -2,10 +2,9 @@ package org.firstinspires.ftc.teamcode.TeleOp;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.Subsystems.CarouselSpinner;
-import org.firstinspires.ftc.teamcode.Subsystems.Gyroscope;
-import org.firstinspires.ftc.teamcode.Subsystems.Lift;
-import org.firstinspires.ftc.teamcode.Subsystems.TurningIntake;
+import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.CarouselSpinner;
+import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
+import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.TurningIntake;
 
 @TeleOp (name = "Tele_V1")
 //@Disabled
@@ -26,7 +25,7 @@ public class Tele_V1 extends TeleOp_Base {
         initializeVars();
 
         turningIntake = new TurningIntake(hardwareMap, "intake", "wrist");
-        lift = new Lift(hardwareMap, "lift", bReadEH);
+        lift = new Lift(hardwareMap, "lift", bReadCH);
         spinner = new CarouselSpinner(hardwareMap, "leftSpinner", "rightSpinner");
     }
 

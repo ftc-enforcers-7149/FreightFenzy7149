@@ -3,9 +3,9 @@ package org.firstinspires.ftc.teamcode.Autonomous.Nov6Meet;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Autonomous_Base;
-import org.firstinspires.ftc.teamcode.Subsystems.CarouselSpinner;
-import org.firstinspires.ftc.teamcode.Subsystems.Lift;
-import org.firstinspires.ftc.teamcode.Subsystems.TurningIntake;
+import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.CarouselSpinner;
+import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
+import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.TurningIntake;
 
 @Autonomous(name = "Red Right")
 //@Disabled
