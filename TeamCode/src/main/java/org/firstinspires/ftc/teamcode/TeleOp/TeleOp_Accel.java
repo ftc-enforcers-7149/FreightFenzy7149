@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
+import org.firstinspires.ftc.teamcode.NovaLmao.CurveHandling;
 import org.firstinspires.ftc.teamcode.Odometry.DriveWheels.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Subsystems.BulkRead;
 import org.firstinspires.ftc.teamcode.Subsystems.Gyroscope;
@@ -28,17 +29,21 @@ public abstract class TeleOp_Accel extends OpMode {
     protected double lastLeftX, lastLeftY, lastRightX, lastRightY;
     protected double time, lastTime, startTimeL, startTimeR, startTime;
     protected double velL, velR, lastVelL = 0, lastVelR = 0;
+    boolean tankInit = false;
 
     //Headless
     protected double offset, lim;
 
+    protected CurveHandling curve, curveL, curveR;
+
+    //Configurable CurveHandle variables
+    public static double revZone = .2, revTime = 150, maxTime = 500;
+
     public enum AccelState {
 
         TURNING,
-        ACCEL_TURNING,
-        ACCELERATING,
+        DRIVING,
         POST_TURN_RAMP,
-        POST_ACCELERATING,
         RESTING
 
     }
@@ -80,6 +85,7 @@ public abstract class TeleOp_Accel extends OpMode {
             bRight = drive.bRight;
         }
 
+        curve = new CurveHandling(System.currentTimeMillis(), revZone, revTime, maxTime);
         initializedMotors = true;
     }
     protected void initializeBulkRead() {
@@ -153,6 +159,7 @@ public abstract class TeleOp_Accel extends OpMode {
         }
     }
 
+    //TODO: rewrite
     protected void driveAccelHeadless(double angle, boolean reset, double accelTime, double turnFactor, boolean disregard) {
 
         // Resets the robot's angle
@@ -219,22 +226,62 @@ public abstract class TeleOp_Accel extends OpMode {
         setMotorPowers(vFL, vFR, vBL, vBR);
     }
 
-    protected void driveAccelTank(double accelTime, boolean disregard) {
+    protected  void driveAccelTank(boolean disregard) {
+
+        if(!tankInit)  {
+            curveL = curve; curveR = curve;
+            tankInit = true;
+        }
+
+        //TODO: make this a bit fancier
+        if(leftY != 0 || rightY != 0) {
+
+            curveL.run(time, leftY);
+            curveR.run(time, rightY);
+
+            if(Math.abs(leftY - rightY) > .1) {
+
+                velL = curveL.getProjVelocity() * 0.6;
+                velR = curveR.getProjVelocity() * 0.6;
+
+            }
+            else {
+
+                velL = curveL.getProjVelocity();
+                velR = curveR.getProjVelocity();
+
+            }
+
+            setMotorPowers(velL, velR, velL, velR);
+
+        }
+
+        lastVelL = velL;
+        lastVelR = velR;
+
+    }
+
+    /*protected void driveAccelTank(double accelTime, boolean disregard) {
 
         lastAStateL = aStateL;
         lastAStateR = aStateR;
 
+        if(!tankInit)  {
+            curveL = curve; curveR = curve;
+            tankInit = true;
+        }
+
         // Checks to see if we need to update anything.
 
-        /*if (leftY != lastLeftY || rightY != lastRightY || time - startTimeL <= accelTime || time - startTimeR <= accelTime
-            || aStateL != AccelState.RESTING || aStateR != AccelState.RESTING) {*/
+        *//*if (leftY != lastLeftY || rightY != lastRightY || time - startTimeL <= accelTime || time - startTimeR <= accelTime
+            || aStateL != AccelState.RESTING || aStateR != AccelState.RESTING) {*//*
         if(leftY != 0 || rightY != 0) {
 
             // Checks for significant change in left joystick position. This value is an estimate.
 
             if(Math.abs(leftY - lastLeftY) >= .15) {
 
-                startTimeL = System.currentTimeMillis();
+                startTimeL = time;
                 velL = 0;
 
             }
@@ -243,7 +290,7 @@ public abstract class TeleOp_Accel extends OpMode {
 
             if(Math.abs(rightY - lastRightY) >= .15) {
 
-                startTimeR = System.currentTimeMillis();
+                startTimeR = time;
                 velR = 0;
 
             }
@@ -254,8 +301,8 @@ public abstract class TeleOp_Accel extends OpMode {
 
             if(turning) {
 
-                aStateL = accelLeft ? AccelState.ACCEL_TURNING : AccelState.TURNING;
-                aStateR = accelRight ? AccelState.ACCEL_TURNING : AccelState.TURNING;
+                aStateL = AccelState.TURNING;
+                aStateR = AccelState.TURNING;
 
                 if(leftY == 0) aStateL = AccelState.RESTING;
                 if(rightY == 0) aStateR = AccelState.RESTING;
@@ -264,42 +311,37 @@ public abstract class TeleOp_Accel extends OpMode {
             else {
 
                 if(accelLeft) {
-                    aStateL = (lastAStateL == AccelState.ACCEL_TURNING || lastAStateL == AccelState.TURNING
+                    aStateL = (lastAStateL == AccelState.TURNING
                             || lastAStateL == AccelState.POST_TURN_RAMP) ?
-                            AccelState.POST_TURN_RAMP : AccelState.ACCELERATING;
+                            AccelState.POST_TURN_RAMP : AccelState.DRIVING;
                 }
                 else {
-                    aStateL = (leftY == 0) ? AccelState.RESTING : AccelState.POST_ACCELERATING;
+                    aStateL = (leftY == 0) ? AccelState.RESTING : AccelState.DRIVING;
                 }
 
                 if(accelRight) {
-                    aStateR = (lastAStateR == AccelState.ACCEL_TURNING || lastAStateR == AccelState.TURNING
+                    aStateR = (lastAStateR == AccelState.TURNING
                             || lastAStateR == AccelState.POST_TURN_RAMP) ?
-                            AccelState.POST_TURN_RAMP : AccelState.ACCELERATING;
+                            AccelState.POST_TURN_RAMP : AccelState.DRIVING;
                 }
                 else {
-                    aStateR = (rightY == 0) ? AccelState.RESTING : AccelState.POST_ACCELERATING;
+                    aStateR = (rightY == 0) ? AccelState.RESTING : AccelState.DRIVING;
                 }
 
             }
 
+            boolean lCurve = curveL.run(time - startTimeL, leftY);
+
             switch(aStateL) {
 
                 case TURNING:
-                    velL = leftY * .6;
+                    velL = curveL.getProjVelocity() * 0.6;
                     break;
 
-                case ACCEL_TURNING:
-                    velL = ((leftY) * (time - startTimeR) / accelTime) * .6 ;
+                case DRIVING:
+                    velL = curveL.getProjVelocity();
                     break;
 
-                case ACCELERATING:
-                    velL = leftY * (time - startTimeL) / accelTime;
-                    break;
-
-                case POST_ACCELERATING:
-                    velL = leftY;
-                    break;
                 case RESTING:
                     velL = 0;
                     break;
@@ -308,15 +350,15 @@ public abstract class TeleOp_Accel extends OpMode {
 
             }
 
+            boolean rCurve;
+            if(aStateR != AccelState.RESTING) rCurve = curveR.run(time - startTimeR, rightY);
+
             switch(aStateR) {
 
                 case TURNING:
-                    velR = rightY * .6;
+                    velR = curveR.run(time - startTimeR, rightY) ? rightY * 0.6 : curve.getProjVelocity() * 0.6;
                     break;
 
-                case ACCEL_TURNING:
-                    velR = ((rightY) * (time - startTimeR) / accelTime) *.6 ;
-                    break;
 
                 case ACCELERATING:
                     velR = rightY * (time - startTimeR) / accelTime;
@@ -366,7 +408,7 @@ public abstract class TeleOp_Accel extends OpMode {
             setMotorPowers(velL, velR, velL, velR);
 
         }
-        /*else if (leftY == 0 || rightY == 0) {*/
+        *//*else if (leftY == 0 || rightY == 0) {*//*
         else {
 
             aStateL = AccelState.RESTING;
@@ -387,13 +429,14 @@ public abstract class TeleOp_Accel extends OpMode {
 
         lastVelL = velL;
         lastVelR = velR;
-        /*lastAStateL = aStateL;
-        lastAStateR = aStateR;*/
-    }
+        *//*lastAStateL = aStateL;
+        lastAStateR = aStateR;*//*
+    }*/
 
     //State machine logic
     protected abstract void getInput();
     protected abstract void updateStateMachine();
+
 
     //Useful functions
 

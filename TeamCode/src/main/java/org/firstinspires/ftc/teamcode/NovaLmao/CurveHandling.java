@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit;
 // https://www.desmos.com/calculator/qwbiczq3la
 public class CurveHandling {
 
-    private double output;
+    private double projVelocity;
 
     // Normalization values
     private double maxValue, maxInput;
@@ -16,12 +16,14 @@ public class CurveHandling {
 
     // Rewrite this comment
     private double lastInput = 0, lastOutput = 0, lastVelocity = 0, lastTime = 0;
+    private double startTime = 0;
 
     private CurveProfile c;
     private boolean disregardRev;
 
-    public CurveHandling(double maxValue, double maxInput, double revZone, double revTime, double maxTime) {
+    public CurveHandling(double time, double maxValue, double maxInput, double revZone, double revTime, double maxTime) {
 
+        this.startTime = time;
         this.maxValue = maxValue; this.maxInput = maxInput;
         c = new CurveProfile(revTime, maxTime, revZone, 0.1);
 
@@ -30,8 +32,9 @@ public class CurveHandling {
 
     }
 
-    public CurveHandling(double maxValue, double maxInput, double revZone, double revTime, double maxTime, TimeUnit timeUnit) {
+    public CurveHandling(double time, double maxValue, double maxInput, double revZone, double revTime, double maxTime, TimeUnit timeUnit) {
 
+        this.startTime = time;
         this.maxValue = maxValue; this.maxInput = maxInput;
         c = new CurveProfile(revTime, maxTime, revZone, 0.1);
         /*this.timeUnit = timeUnit;*/
@@ -40,8 +43,9 @@ public class CurveHandling {
 
     }
 
-    public CurveHandling(double revZone, double revTime, double maxTime) {
+    public CurveHandling(double time, double revZone, double revTime, double maxTime) {
 
+        this.startTime = time;
         this.maxValue = 1; this.maxInput = 1;
         c = new CurveProfile(revTime, maxTime, revZone, 0.1);
 
@@ -71,13 +75,18 @@ public class CurveHandling {
             // Evaluates if we're decelerating.
             boolean isDecelerating = output < 0;
 
-            // If our input has changed and we're outside the deadzone, update curve profile.
+            // If our input has changed and we're outside the deadzone, update curve profile and start time.
             // If not, we don't change our profile.
             if (inputChange && !isDeadzone) {
 
                 //Update curve profile.
-                c.update(lastOutput, output);
+                //TODO: I know this logic will probably be messed up with positive-negative change but
+                // I can't be bothered to change it right now. Oh well
+                c.update(Math.max(lastOutput, c.deadzone), output);
                 disregardRev = c.revZone > Math.abs(output);
+
+                //Update start time.
+                startTime = time;
 
             }
 
@@ -97,7 +106,7 @@ public class CurveHandling {
                     double a = (c.cRev - c.iOutput) / Math.pow(c.revTime / 1000, 2);
 
                     // Our overall equation
-                    output = a * Math.pow(time, 2) + c.iOutput;
+                    output = a * Math.pow(time - startTime, 2) + c.iOutput;
 
                 }
                 // If we're outside of our rev value, use max curve:
@@ -108,7 +117,7 @@ public class CurveHandling {
                     double a = (c.cRev - c.dOutput) / Math.pow((c.revTime / 1000) - (c.maxTime / 1000), 2);
 
                     // Our overall equation
-                    output = a * Math.pow(time - (c.maxTime / 1000), 2) + c.dOutput;
+                    output = a * Math.pow((time - startTime) - (c.maxTime / 1000), 2) + c.dOutput;
 
                 }
 
@@ -123,6 +132,7 @@ public class CurveHandling {
 
         lastInput = input;
         lastOutput = output;
+        this.projVelocity = output;
         return output;
 
     }
@@ -134,7 +144,7 @@ public class CurveHandling {
 
     }
 
-    public double getOutput() {return output;}
+    public double getProjVelocity() {return projVelocity;}
 
     // Just for readability.
 
