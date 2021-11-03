@@ -125,7 +125,7 @@ public class CurveHandling {
                     // The equation is a = (rev power - desired input power) / (normalized rev time - normalized max time) ^ 2
                     double a;
                     if(!revTranslate) a = (c.cRev - c.dOutput) / Math.pow((c.revTime / 1000) - (c.maxTime / 1000), 2);
-                    else a = ((c.iOutput + c.cRev) - dOutput) / Math.pow((c.revTime / 1000) - (c.maxTime / 1000), 2);
+                    else a = ((c.iOutput + c.cRev) - c.dOutput) / Math.pow((c.revTime / 1000) - (c.maxTime / 1000), 2);
 
                     // Our overall equation
                     output = a * Math.pow((time - startTime) - (c.maxTime / 1000), 2) + c.dOutput;
@@ -136,7 +136,7 @@ public class CurveHandling {
                     
                     double a = (c.iOutput - c.dOutput) / Math.pow(0 - c.maxTime / 1000, 2);
                     
-                    output = Math.pow(time - c.maxTime / 1000, 2) + c.iOutput;
+                    output = a * Math.pow(time - c.maxTime / 1000, 2) + c.iOutput;
                     
                 }    
 

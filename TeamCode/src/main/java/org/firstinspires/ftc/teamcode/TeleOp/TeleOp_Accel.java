@@ -226,7 +226,7 @@ public abstract class TeleOp_Accel extends OpMode {
         setMotorPowers(vFL, vFR, vBL, vBR);
     }
 
-    protected  void driveAccelTank(boolean disregard) {
+    protected void driveAccelTank(boolean disregard) {
 
         if(!tankInit)  {
             curveL = curve; curveR = curve;
