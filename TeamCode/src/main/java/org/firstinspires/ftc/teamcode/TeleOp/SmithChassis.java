@@ -1,12 +1,10 @@
 package org.firstinspires.ftc.teamcode.TeleOp;
 
-import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp(name = "Smith Chassis")
 @Disabled
-@Config
 public class SmithChassis extends TeleOp_Base {
 
     public static double accelTime = 250;
