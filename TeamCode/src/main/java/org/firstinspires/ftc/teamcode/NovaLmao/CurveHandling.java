@@ -2,7 +2,8 @@ package org.firstinspires.ftc.teamcode.NovaLmao;
 
 import java.util.concurrent.TimeUnit;
 
-// https://www.desmos.com/calculator/qwbiczq3la
+// https://www.desmos.com/calculator/qwbiczq3la - non Rev translated curve
+// https://www.desmos.com/calculator/4hrjskviqw - rev translated curve
 public class CurveHandling {
 
     private double projVelocity;
@@ -20,6 +21,7 @@ public class CurveHandling {
 
     private CurveProfile c;
     private boolean disregardRev;
+    private boolean revTranslate = false;
 
     public CurveHandling(double time, double maxValue, double maxInput, double revZone, double revTime, double maxTime) {
 
@@ -54,6 +56,7 @@ public class CurveHandling {
     }
 
     //TODO: holy fucking shit proofread this dawg
+    // and test the math lol. You can just input joystick input and check for scaling
     private double update(double time, double input) {
 
         // We normalize our input and set it to our output variable.
@@ -93,6 +96,10 @@ public class CurveHandling {
             // Evaluates if we're within our maximum allotted profile time.
             boolean isTime = time <= c.maxTime;
 
+            //TODO: this doesn't catch when initial input is either greater than c for the non-translated curve
+            // or if we're less than c for the translated curve.
+            // Add in max curve-only equation. Shouldn't be too hard.
+            
             // If we're within our time profile and not in the deadzone, follow curve
             if (isTime && (!isDeadzone || !isDecelerating)) {
 
@@ -103,23 +110,35 @@ public class CurveHandling {
 
                     // Calculates our slope modifier.
                     // The equation is a = (rev power - initial input power) / normalized rev time ^ 2
-                    double a = (c.cRev - c.iOutput) / Math.pow(c.revTime / 1000, 2);
+                    double a;
+                    if(!revTranslate) a = (c.cRev - c.iOutput) / Math.pow(c.revTime / 1000, 2);
+                    else a = c.cRev / Math.pow(c.revTime / 1000, 2);
 
                     // Our overall equation
                     output = a * Math.pow(time - startTime, 2) + c.iOutput;
 
                 }
                 // If we're outside of our rev value, use max curve:
-                else {
+                else if(!disregardRev) {
 
                     // Calculates our slope modifier.
                     // The equation is a = (rev power - desired input power) / (normalized rev time - normalized max time) ^ 2
-                    double a = (c.cRev - c.dOutput) / Math.pow((c.revTime / 1000) - (c.maxTime / 1000), 2);
+                    double a;
+                    if(!revTranslate) a = (c.cRev - c.dOutput) / Math.pow((c.revTime / 1000) - (c.maxTime / 1000), 2);
+                    else a = ((c.iOutput + c.cRev) - dOutput) / Math.pow((c.revTime / 1000) - (c.maxTime / 1000), 2);
 
                     // Our overall equation
                     output = a * Math.pow((time - startTime) - (c.maxTime / 1000), 2) + c.dOutput;
 
                 }
+                // see todo above. this should work.
+                else {
+                    
+                    double a = (c.iOutput - c.dOutput) / Math.pow(0 - c.maxTime / 1000, 2);
+                    
+                    output = Math.pow(time - c.maxTime / 1000, 2) + c.iOutput;
+                    
+                }    
 
             }
         }
@@ -145,6 +164,7 @@ public class CurveHandling {
     }
 
     public double getProjVelocity() {return projVelocity;}
+    public void setRevTranslate(boolean revTranslate) {this.revTranslate = revTranslate;}
 
     // Just for readability.
 
