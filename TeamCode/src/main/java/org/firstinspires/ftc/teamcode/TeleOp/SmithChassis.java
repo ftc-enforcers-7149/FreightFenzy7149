@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp(name = "Smith Chassis")
 @Disabled
-public class SmithChassis extends TeleOp_Base {
+public class SmithChassis extends TeleOp_Accel {
 
     public static double accelTime = 250;
 
