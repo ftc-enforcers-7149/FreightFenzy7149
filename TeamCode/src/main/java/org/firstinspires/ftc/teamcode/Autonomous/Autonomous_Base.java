@@ -66,9 +66,7 @@ public abstract class Autonomous_Base extends LinearOpMode {
                         Math.abs(relY) > POS_ACC ||
                         Math.abs(relH) > H_ACC)) {
 
-            updateBulkRead();
-            gyro.update();
-            drive.update();
+            updateInputs();
 
             //Update robot position
             robotX = drive.getPoseEstimate().getX();
@@ -119,8 +117,7 @@ public abstract class Autonomous_Base extends LinearOpMode {
             telemetry.addData("Y Power: ", yPower);
             telemetry.addData("H Power: ", hPower);
 
-            updateSubsystems();
-            updateTelemetry();
+            updateOutputs();
         }
 
         setMotorPowers(0, 0, 0, 0);
@@ -141,9 +138,7 @@ public abstract class Autonomous_Base extends LinearOpMode {
         while (opModeIsActive() && (Math.abs(relativeX) > 0.1 || Math.abs(relativeY) > 0.1) && System.currentTimeMillis() < startTime + 1000) {
 
             //Update bulk read, odometry, and subsystems
-            updateBulkRead();
-            gyro.update();
-            drive.update();
+            updateInputs();
 
             //Output telemetry
             telemetry.addLine("Waiting for position correction");
@@ -164,8 +159,7 @@ public abstract class Autonomous_Base extends LinearOpMode {
             //Sets powers to motors
             drive.setMotorPowers(fL, bL, bR, fR);
 
-            updateSubsystems();
-            updateTelemetry();
+            updateOutputs();
         }
 
         //Stops motors
@@ -220,9 +214,7 @@ public abstract class Autonomous_Base extends LinearOpMode {
         while (opModeIsActive() && Math.abs(delta) > 0.125 && System.currentTimeMillis() < startTime + 1000) {
 
             //Update bulk read, odometry, and subsystems
-            updateBulkRead();
-            gyro.update();
-            drive.update();
+            updateInputs();
 
             //Output telemetry
             telemetry.addLine("Waiting for heading correction");
@@ -254,8 +246,7 @@ public abstract class Autonomous_Base extends LinearOpMode {
             //Drive the motors so the robot turns
             drive.setMotorPowers(-speed, -speed, speed, speed);
 
-            updateSubsystems();
-            updateTelemetry();
+            updateOutputs();
         }
 
         //Stops motors
@@ -336,15 +327,15 @@ public abstract class Autonomous_Base extends LinearOpMode {
         initializedGyro = true;
     }
     protected void initializeOdometry() throws Exception {
-        if (!hasCH) throw new Exception("Missing \"Control Hub\". Check configuration file naming");
+        if (!hasCH || !hasEH) throw new Exception("Missing \"Control Hub\". Check configuration file naming");
         if (initializedMotors && initializedGyro)
-            drive = new MecanumDrive(hardwareMap, bReadCH, fLeft, fRight, bLeft, bRight, gyro);
+            drive = new MecanumDrive(hardwareMap, bReadCH, bReadEH, fLeft, fRight, bLeft, bRight, gyro);
         else if (initializedMotors)
-            drive = new MecanumDrive(hardwareMap, bReadCH, fLeft, fRight, bLeft, bRight);
+            drive = new MecanumDrive(hardwareMap, bReadCH, bReadEH, fLeft, fRight, bLeft, bRight);
         else if (initializedGyro)
-            drive = new MecanumDrive(hardwareMap, bReadCH, gyro);
+            drive = new MecanumDrive(hardwareMap, bReadCH, bReadEH, gyro);
         else
-            drive = new MecanumDrive(hardwareMap, bReadCH);
+            drive = new MecanumDrive(hardwareMap, bReadCH, bReadEH);
         drive.setPoseEstimate(createPose2d(0, 0, 0));
 
         initializedDrive = true;
@@ -367,24 +358,27 @@ public abstract class Autonomous_Base extends LinearOpMode {
     }
 
     //Useful functions
+    protected void updateInputs() {
+        updateBulkRead();
+        if (initializedGyro) gyro.update();
+        if (initializedDrive) drive.update();
+    }
+
+    protected void updateOutputs() {
+        updateSubsystems();
+        updateTelemetry();
+    }
+
     protected void waitForDriveComplete() {
         while (opModeIsActive() && drive.isBusy()) {
-            updateBulkRead();
-            if (initializedGyro) gyro.update();
-            if (initializedDrive) drive.update();
-            updateSubsystems();
-            updateTelemetry();
+            updateInputs();
         }
     }
 
     protected void waitForTime(double ms) {
         double startTime = System.currentTimeMillis();
         while (opModeIsActive() && System.currentTimeMillis() < startTime + ms) {
-            updateBulkRead();
-            if (initializedGyro) gyro.update();
-            if (initializedDrive) drive.update();
-            updateSubsystems();
-            updateTelemetry();
+            updateOutputs();
         }
     }
 

@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.Odometry.DriveWheels;
 
-import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.kinematics.Kinematics;
 import com.acmerobotics.roadrunner.kinematics.MecanumKinematics;
@@ -42,8 +41,9 @@ public class MecanumLocalizer implements Localizer {
     @Override
     public void update() {
         //Only use in Tuning OpModes
-        drive.bRead.update();
-        drive.gyro.update();
+        //drive.bReadCH.update();
+        //drive.bReadEH.update();
+        //drive.gyro.update();
 
         //Get current wheel positions & heading
         List<Double> wheelPositions = drive.getWheelPositions();

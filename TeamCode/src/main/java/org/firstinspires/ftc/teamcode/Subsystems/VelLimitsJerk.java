@@ -46,7 +46,7 @@ public class VelLimitsJerk {
         input *= inputRatio;
 
         if (input != lastInput) {
-            startValue = velFunction(Math.abs(lastInput), startValue, currTime - startTime);
+            startValue = velFunction(lastInput, startValue, currTime - startTime);
             startTime = currTime;
         }
 

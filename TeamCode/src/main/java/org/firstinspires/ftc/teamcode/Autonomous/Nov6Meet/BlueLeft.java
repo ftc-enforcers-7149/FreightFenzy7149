@@ -6,6 +6,9 @@ import org.firstinspires.ftc.teamcode.Autonomous.Autonomous_Base;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.CarouselSpinner;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.TurningIntake;
+import org.firstinspires.ftc.teamcode.Subsystems.Webcam.OpenCV;
+import org.firstinspires.ftc.teamcode.Subsystems.Webcam.TSEPipeline;
+import org.opencv.core.RotatedRect;
 
 @Autonomous(name = "Blue Left")
 //@Disabled
@@ -14,6 +17,8 @@ public class BlueLeft extends Autonomous_Base {
     private TurningIntake turningIntake;
     private Lift lift;
     private CarouselSpinner spinner;
+
+    private OpenCV tseDetector;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -34,46 +39,36 @@ public class BlueLeft extends Autonomous_Base {
         lift = new Lift(hardwareMap, "lift", bReadEH);
         spinner = new CarouselSpinner(hardwareMap, "leftSpinner", "rightSpinner");
 
+        tseDetector = new OpenCV(hardwareMap);
+        tseDetector.start(new TSEPipeline(0, 0, 640, 360));
+
         /// Start ///
 
         waitForStart();
+
+        detectBarcode();
+        tseDetector.stop();
+
         if (isStopRequested()) return;
 
         /// Loop ///
 
-        //Spit out preloaded block
-        turningIntake.setWristRight();
-        waitForTime(750);
-        outtake();
 
-        POS_ACC = 1;
 
-        //Cycle "n" times
-        for (int n = 0; n < 3; n++) {
-            //Drive into warehouse while intaking
-            turningIntake.setWristCenter();
-            turningIntake.setIntakePower(1);
-            waitForTime(750);
-            driveTo(40 + n * 4, 0, 0);
-            waitForTime(500);
-
-            //Stop intaking and back out of warehouse
-            turningIntake.setIntakePower(-0.1);
-            waitForTime(300);
-            turningIntake.setIntakePower(0);
-            driveTo(0, 0, 0);
-
-            //Outtake collected block
-            turningIntake.setWristRight();
-            waitForTime(750);
-            outtake();
-        }
-
-        //Park
-        turningIntake.setWristCenter();
-        waitForTime(750);
-        POS_ACC = 0.1;
-        driveTo(48, 0, 0);
+        //From 0,0,0
+//        driveTo(-10, -30, 350);
+//        lift.setPower(0.7);
+//        waitForTime(1000);
+//        driveTo(-12, -36, 350); //Position for placing in hub
+//        turningIntake.setWristRight();
+//        turningIntake.setIntakePower(-1);
+//        waitForTime(750);
+//        turningIntake.setIntakePower(0);
+//        turningIntake.setWristCenter();
+//        driveTo(-10, -30, 350);
+//        lift.setPower(-1);
+//        waitForTime(750);
+//        driveTo(0, 0, 0);
 
         /// Stop ///
 
@@ -88,18 +83,21 @@ public class BlueLeft extends Autonomous_Base {
 
     private void outtake() {
         turningIntake.setIntakePower(-1);
-
-        double startTime = System.currentTimeMillis();
-        while (opModeIsActive() && System.currentTimeMillis() < startTime + 1000) {
-            updateBulkRead();
-            gyro.update();
-            drive.update();
-
-            updateSubsystems();
-            updateTelemetry();
-        }
-
+        waitForTime(1000);
         turningIntake.setIntakePower(0);
+    }
+
+    private HubLevel detectBarcode() {
+        RotatedRect boundingRect = tseDetector.getRect();
+        if (boundingRect.center.x <= 640 / 3.0) {
+            return HubLevel.LOW;
+        }
+        else if (boundingRect.center.x >= 2 * 640 / 3.0) {
+            return HubLevel.MIDDLE;
+        }
+        else {
+            return HubLevel.HIGH;
+        }
     }
 
     @Override

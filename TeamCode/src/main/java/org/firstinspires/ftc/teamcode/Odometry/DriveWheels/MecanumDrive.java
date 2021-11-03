@@ -64,14 +64,15 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
     public Gyroscope gyro;
     public VoltageSensor batteryVoltageSensor;
 
-    public BulkRead bRead;
+    public BulkRead bReadCH, bReadEH;
 
-    public MecanumDrive(HardwareMap hardwareMap, BulkRead bRead,
+    public MecanumDrive(HardwareMap hardwareMap, BulkRead bReadCH, BulkRead bReadEH,
                         DcMotorEx fLeft, DcMotorEx fRight, DcMotorEx bLeft, DcMotorEx bRight,
                         Gyroscope gyro) {
         super(kV, kA, kStatic, TRACK_WIDTH, TRACK_WIDTH, LATERAL_MULTIPLIER);
 
-        this.bRead = bRead;
+        this.bReadCH = bReadCH;
+        this.bReadEH = bReadEH;
 
         follower = new HolonomicPIDVAFollower(TRANSLATIONAL_PID, TRANSLATIONAL_PID, HEADING_PID,
                 new Pose2d(0.5, 0.5, Math.toRadians(5.0)), 0.5);
@@ -112,11 +113,12 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
         trajectorySequenceRunner = new TrajectorySequenceRunner(follower, HEADING_PID);
     }
 
-    public MecanumDrive(HardwareMap hardwareMap, BulkRead bRead,
+    public MecanumDrive(HardwareMap hardwareMap, BulkRead bReadCH, BulkRead bReadEH,
                         DcMotorEx fLeft, DcMotorEx fRight, DcMotorEx bLeft, DcMotorEx bRight) {
         super(kV, kA, kStatic, TRACK_WIDTH, TRACK_WIDTH, LATERAL_MULTIPLIER);
 
-        this.bRead = bRead;
+        this.bReadCH = bReadCH;
+        this.bReadEH = bReadEH;
 
         follower = new HolonomicPIDVAFollower(TRANSLATIONAL_PID, TRANSLATIONAL_PID, HEADING_PID,
                 new Pose2d(0.5, 0.5, Math.toRadians(5.0)), 0.5);
@@ -157,10 +159,12 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
         trajectorySequenceRunner = new TrajectorySequenceRunner(follower, HEADING_PID);
     }
 
-    public MecanumDrive(HardwareMap hardwareMap, BulkRead bRead, Gyroscope gyro) {
+    public MecanumDrive(HardwareMap hardwareMap, BulkRead bReadCH, BulkRead bReadEH,
+                        Gyroscope gyro) {
         super(kV, kA, kStatic, TRACK_WIDTH, TRACK_WIDTH, LATERAL_MULTIPLIER);
 
-        this.bRead = bRead;
+        this.bReadCH = bReadCH;
+        this.bReadEH = bReadEH;
 
         follower = new HolonomicPIDVAFollower(TRANSLATIONAL_PID, TRANSLATIONAL_PID, HEADING_PID,
                 new Pose2d(0.5, 0.5, Math.toRadians(5.0)), 0.5);
@@ -210,10 +214,11 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
         trajectorySequenceRunner = new TrajectorySequenceRunner(follower, HEADING_PID);
     }
 
-    public MecanumDrive(HardwareMap hardwareMap, BulkRead bRead) {
+    public MecanumDrive(HardwareMap hardwareMap, BulkRead bReadCH, BulkRead bReadEH) {
         super(kV, kA, kStatic, TRACK_WIDTH, TRACK_WIDTH, LATERAL_MULTIPLIER);
 
-        this.bRead = bRead;
+        this.bReadCH = bReadCH;
+        this.bReadEH = bReadEH;
 
         follower = new HolonomicPIDVAFollower(TRANSLATIONAL_PID, TRANSLATIONAL_PID, HEADING_PID,
                 new Pose2d(0.5, 0.5, Math.toRadians(5.0)), 0.5);
@@ -385,24 +390,22 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
     public List<Double> getWheelPositions() {
         List<Double> wheelPositions = new ArrayList<>();
 
-        wheelPositions.add(-encoderTicksToInches(bRead.getMotorPos(fLeft)) * WHEEL_MULT);
-        wheelPositions.add(-encoderTicksToInches(bRead.getMotorPos(bLeft)) * WHEEL_MULT);
-        wheelPositions.add(-encoderTicksToInches(bRead.getMotorPos(bRight)) * WHEEL_MULT);
-        wheelPositions.add(-encoderTicksToInches(bRead.getMotorPos(fRight)) * WHEEL_MULT);
+        wheelPositions.add(-encoderTicksToInches(bReadCH.getMotorPos(fLeft)) * WHEEL_MULT);
+        wheelPositions.add(-encoderTicksToInches(bReadCH.getMotorPos(bLeft)) * WHEEL_MULT);
+        wheelPositions.add(-encoderTicksToInches(bReadEH.getMotorPos(bRight)) * WHEEL_MULT);
+        wheelPositions.add(-encoderTicksToInches(bReadEH.getMotorPos(fRight)) * WHEEL_MULT);
         return wheelPositions;
     }
 
     @Override
     @NotNull
     public List<Double> getWheelVelocities() {
-        bRead.update(); //TODO: Remove immediately
-
         List<Double> wheelVelocities = new ArrayList<>();
 
-        wheelVelocities.add(-encoderTicksToInches(bRead.getMotorVel(fLeft)) * WHEEL_MULT);
-        wheelVelocities.add(-encoderTicksToInches(bRead.getMotorVel(bLeft)) * WHEEL_MULT);
-        wheelVelocities.add(-encoderTicksToInches(bRead.getMotorVel(bRight)) * WHEEL_MULT);
-        wheelVelocities.add(-encoderTicksToInches(bRead.getMotorVel(fRight)) * WHEEL_MULT);
+        wheelVelocities.add(-encoderTicksToInches(bReadCH.getMotorVel(fLeft)) * WHEEL_MULT);
+        wheelVelocities.add(-encoderTicksToInches(bReadCH.getMotorVel(bLeft)) * WHEEL_MULT);
+        wheelVelocities.add(-encoderTicksToInches(bReadEH.getMotorVel(bRight)) * WHEEL_MULT);
+        wheelVelocities.add(-encoderTicksToInches(bReadEH.getMotorVel(fRight)) * WHEEL_MULT);
         return wheelVelocities;
     }
 
