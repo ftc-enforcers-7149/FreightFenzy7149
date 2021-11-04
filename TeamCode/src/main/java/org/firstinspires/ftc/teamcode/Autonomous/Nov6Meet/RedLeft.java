@@ -18,6 +18,8 @@ public class RedLeft extends Autonomous_Base {
     private Lift lift;
     private CarouselSpinner spinner;
 
+    private int liftLevel = 0;
+
     private OpenCV tseDetector;
 
     @Override
@@ -53,37 +55,35 @@ public class RedLeft extends Autonomous_Base {
 
         /// Loop ///
 
-        //Drive into duckwheel
-        POS_ACC = 1;
+        //Vision
+
+        //Drive to the duckwheel
         driveTo(4, 5, 0);
 
-        //Spin duckwheel while outtaking preloaded block into storage unit
-        turningIntake.setWristLeft();
-        spinner.setLeftPower(0.75);
-        turningIntake.setIntakePower(-1);
-
+        //Spin and stop duckwheel
+        spinner.setRightPower(0.75);
         waitForTime(4000);
+        spinner.setRightPower(0);
 
-        //Stop spinning / outtaking
-        spinner.setLeftPower(0);
-        turningIntake.setWristRight();
+        //Drive to hub
+        driveTo(40,-28,315);
+
+        //Put lift up
+        setLiftHeight(liftLevel);
+
+        //Drive to hub and outtake
+        driveTo(42,-30,315);
+        turningIntake.setIntakePower(-1);
+        waitForTime(750);
         turningIntake.setIntakePower(0);
 
-        waitForTime(750);
+        //Drive a little bit back and drop lift
+        driveTo(40,-28,315);
+        setLiftHeight(2);
 
-        //Park
-        POS_ACC = 0.1;
-        driveTo(29.5, 5, 0);
-
-        /// Stop ///
-
-        setMotorPowers(0, 0, 0, 0);
-
-        turningIntake.stop();
-        lift.stop();
-        spinner.stop();
-
-        waitForTime(1000);
+        //Align with the warehouse and park
+        driveTo(33,-26,270);
+        driveTo(33,-75,270);
     }
 
     private HubLevel detectBarcode() {
@@ -96,6 +96,14 @@ public class RedLeft extends Autonomous_Base {
         }
         else {
             return HubLevel.HIGH;
+        }
+    }
+
+    private void setLiftHeight(double height) {
+        lift.setTargetHeight(height);
+        while (opModeIsActive() && lift.getLiftHeight() < height - 0.5) {
+            updateInputs();
+            updateOutputs();
         }
     }
 

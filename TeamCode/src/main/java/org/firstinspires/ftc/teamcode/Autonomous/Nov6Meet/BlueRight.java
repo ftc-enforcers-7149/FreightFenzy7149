@@ -18,6 +18,8 @@ public class BlueRight extends Autonomous_Base {
     private Lift lift;
     private CarouselSpinner spinner;
 
+    private int liftLevel = 0;
+
     private OpenCV tseDetector;
 
     @Override
@@ -54,37 +56,35 @@ public class BlueRight extends Autonomous_Base {
 
         /// Loop ///
 
-        //Drive into duckwheel
-        POS_ACC = 1;
+        //Vision
+
+        //Drive to the duckwheel
         driveTo(4, -5, 0);
 
-        //Spin duckwheel while outtaking preloaded block into storage unit
-        turningIntake.setWristRight();
+        //Spin and stop duckwheel
         spinner.setRightPower(0.75);
-        turningIntake.setIntakePower(-1);
-
         waitForTime(4000);
-
-        //Stop spinning / outtaking
         spinner.setRightPower(0);
-        turningIntake.setWristLeft();
+
+        //Drive to hub
+        driveTo(40,28,45);
+
+        //Put lift up
+        lift.setTargetHeight(liftLevel);
+
+        //Drive to hub and outtake
+        driveTo(42,30,45);
+        turningIntake.setIntakePower(-1);
+        waitForTime(750);
         turningIntake.setIntakePower(0);
 
-        waitForTime(750);
+        //Drive a little bit back and drop lift
+        driveTo(40,28,45);
+        setLiftHeight(2);
 
-        //Park
-        POS_ACC = 0.1;
-        driveTo(29.5, -5, 0);
-
-        /// Stop ///
-
-        setMotorPowers(0, 0, 0, 0);
-
-        turningIntake.stop();
-        lift.stop();
-        spinner.stop();
-
-        waitForTime(1000);
+        //Align with the warehouse and park
+        driveTo(33,26,90);
+        driveTo(33,75,90);
     }
 
     private HubLevel detectBarcode() {
@@ -97,6 +97,14 @@ public class BlueRight extends Autonomous_Base {
         }
         else {
             return HubLevel.HIGH;
+        }
+    }
+
+    private void setLiftHeight(double height) {
+        lift.setTargetHeight(height);
+        while (opModeIsActive() && lift.getLiftHeight() < height - 0.5) {
+            updateInputs();
+            updateOutputs();
         }
     }
 

@@ -18,6 +18,8 @@ public class BlueLeft extends Autonomous_Base {
     private Lift lift;
     private CarouselSpinner spinner;
 
+    private int liftLevel = 0;
+
     private OpenCV tseDetector;
 
     @Override
@@ -53,22 +55,63 @@ public class BlueLeft extends Autonomous_Base {
 
         /// Loop ///
 
+        //Add Vision
 
+        //Set lift to correct level according to the vision
+        setLiftHeight(liftLevel);
 
-        //From 0,0,0
-//        driveTo(-10, -30, 350);
-//        lift.setPower(0.7);
-//        waitForTime(1000);
-//        driveTo(-12, -36, 350); //Position for placing in hub
-//        turningIntake.setWristRight();
-//        turningIntake.setIntakePower(-1);
-//        waitForTime(750);
-//        turningIntake.setIntakePower(0);
-//        turningIntake.setWristCenter();
-//        driveTo(-10, -30, 350);
-//        lift.setPower(-1);
-//        waitForTime(750);
-//        driveTo(0, 0, 0);
+        //Drive to hub
+        driveTo(16,0,0);
+
+        //Deliver pre-loaded block
+        turningIntake.setIntakePower(-1);
+        waitForTime(750);
+        turningIntake.setIntakePower(0);
+
+        //Move back a little so that the intake dosen't hit the hub
+        driveTo(14,0,0);
+
+        //Put lift back down
+        setLiftHeight(0);
+
+        //Realign with the wall and turn towards the warehouse
+        driveTo(0,0,90);
+
+        //Start intakeing
+        turningIntake.setIntakePower(1);
+
+        //Drive into the warehouse
+        driveTo(0,47,90);
+
+        //Stop intake
+        turningIntake.setIntakePower(0);
+
+        //Drive backwards to the hub
+        driveTo(0,0,90);
+
+        //Turn and move towards the hub
+        driveTo(14,0,0);
+
+        //Set lift to the highest height
+        setLiftHeight(16.5);
+
+        //Move forward
+        driveTo(16,0,0);
+
+        //Outtake the game element
+        turningIntake.setIntakePower(-1);
+        waitForTime(750);
+        turningIntake.setIntakePower(0);
+
+        //Drive a little back and turn
+        driveTo(14,0,90);
+
+        //Put lift down
+        lift.setTargetHeight(0);
+
+        //Park in warehouse
+        driveTo(0,0,90);
+        driveTo(0,47,90);
 
         /// Stop ///
 
@@ -97,6 +140,14 @@ public class BlueLeft extends Autonomous_Base {
         }
         else {
             return HubLevel.HIGH;
+        }
+    }
+
+    private void setLiftHeight(double height) {
+        lift.setTargetHeight(height);
+        while (opModeIsActive() && lift.getLiftHeight() < height - 0.5) {
+            updateInputs();
+            updateOutputs();
         }
     }
 

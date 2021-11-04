@@ -18,6 +18,8 @@ public class RedRight extends Autonomous_Base {
     private Lift lift;
     private CarouselSpinner spinner;
 
+    private int liftLevel = 0;
+
     private OpenCV tseDetector;
 
     @Override
@@ -53,49 +55,64 @@ public class RedRight extends Autonomous_Base {
 
         /// Loop ///
 
-        //Spit out preloaded block
-        turningIntake.setWristLeft();
+        //Add Vision
+
+        //Set lift to correct level according to the vision
+        setLiftHeight(liftLevel);
+
+        //Drive to hub
+        driveTo(16,0,0);
+
+        //Deliver pre-loaded block
+        turningIntake.setIntakePower(-1);
         waitForTime(750);
-        outtake();
+        turningIntake.setIntakePower(0);
 
-        POS_ACC = 1;
+        //Move back a little so that the intake dosen't hit the hub
+        driveTo(14,0,0);
 
-        //Cycle "n" times
-        for (int n = 0; n < 3; n++) {
-            //Drive into warehouse while intaking
-            turningIntake.setWristCenter();
-            turningIntake.setIntakePower(1);
-            waitForTime(750);
-            driveTo(40 + n * 4, 0, 0);
-            waitForTime(500);
+        //Put lift back down
+        setLiftHeight(0);
 
-            //Stop intaking and back out of warehouse
-            turningIntake.setIntakePower(-0.1);
-            waitForTime(300);
-            turningIntake.setIntakePower(0);
-            driveTo(0, 0, 0);
+        //Realign with the wall and turn towards the warehouse
+        driveTo(0,0,270);
 
-            //Outtake collected block
-            turningIntake.setWristLeft();
-            waitForTime(750);
-            outtake();
-        }
+        //Start intakeing
+        turningIntake.setIntakePower(1);
 
-        //Park
-        turningIntake.setWristCenter();
+        //Drive into the warehouse
+        driveTo(0,-47,270);
+
+        //Stop intake
+        turningIntake.setIntakePower(0);
+
+        //Drive backwards to the hub
+        driveTo(0,0,270);
+
+        //Turn and move towards the hub
+        driveTo(14,0,0);
+
+        //Set lift to the highest height
+        setLiftHeight(16.5);
+        //lift.setTargetHeight(3);
+
+        //Move forward
+        driveTo(16,0,0);
+
+        //Outtake the game element
+        turningIntake.setIntakePower(-1);
         waitForTime(750);
-        POS_ACC = 0.1;
-        driveTo(48, 0, 0);
+        turningIntake.setIntakePower(0);
 
-        /// Stop ///
+        //Drive a little back and turn
+        driveTo(14,0,270);
 
-        setMotorPowers(0, 0, 0, 0);
+        //Put lift down
+        lift.setTargetHeight(0);
 
-        turningIntake.stop();
-        lift.stop();
-        spinner.stop();
-
-        waitForTime(1000);
+        //Park in warehouse
+        driveTo(0,0,270);
+        driveTo(0,47,270);
     }
 
     private void outtake() {
@@ -114,6 +131,14 @@ public class RedRight extends Autonomous_Base {
         }
         else {
             return HubLevel.HIGH;
+        }
+    }
+
+    private void setLiftHeight(double height) {
+        lift.setTargetHeight(height);
+        while (opModeIsActive() && lift.getLiftHeight() < height - 0.5) {
+            updateInputs();
+            updateOutputs();
         }
     }
 
