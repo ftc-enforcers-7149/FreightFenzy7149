@@ -392,8 +392,8 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
 
         wheelPositions.add(-encoderTicksToInches(bReadCH.getMotorPos(fLeft)) * WHEEL_MULT);
         wheelPositions.add(-encoderTicksToInches(bReadCH.getMotorPos(bLeft)) * WHEEL_MULT);
-        wheelPositions.add(-encoderTicksToInches(bReadEH.getMotorPos(bRight)) * WHEEL_MULT);
-        wheelPositions.add(-encoderTicksToInches(bReadEH.getMotorPos(fRight)) * WHEEL_MULT);
+        wheelPositions.add(-encoderTicksToInches(bReadCH.getMotorPos(bRight)) * WHEEL_MULT);
+        wheelPositions.add(-encoderTicksToInches(bReadCH.getMotorPos(fRight)) * WHEEL_MULT);
         return wheelPositions;
     }
 
@@ -404,8 +404,8 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
 
         wheelVelocities.add(-encoderTicksToInches(bReadCH.getMotorVel(fLeft)) * WHEEL_MULT);
         wheelVelocities.add(-encoderTicksToInches(bReadCH.getMotorVel(bLeft)) * WHEEL_MULT);
-        wheelVelocities.add(-encoderTicksToInches(bReadEH.getMotorVel(bRight)) * WHEEL_MULT);
-        wheelVelocities.add(-encoderTicksToInches(bReadEH.getMotorVel(fRight)) * WHEEL_MULT);
+        wheelVelocities.add(-encoderTicksToInches(bReadCH.getMotorVel(bRight)) * WHEEL_MULT);
+        wheelVelocities.add(-encoderTicksToInches(bReadCH.getMotorVel(fRight)) * WHEEL_MULT);
         return wheelVelocities;
     }
 
