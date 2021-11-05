@@ -111,15 +111,15 @@ public abstract class TeleOp_Accel extends OpMode {
         initializedGyro = true;
     }
     protected void initializeOdometry() throws Exception {
-        if (!hasCH) throw new Exception("Missing \"Control Hub\". Check configuration file naming");
+        if (!hasCH || !hasEH) throw new Exception("Missing \"Control Hub\". Check configuration file naming");
         if (initializedMotors && initializedGyro)
-            drive = new MecanumDrive(hardwareMap, bReadCH, fLeft, fRight, bLeft, bRight, gyro);
+            drive = new MecanumDrive(hardwareMap, bReadCH, bReadEH, fLeft, fRight, bLeft, bRight, gyro);
         else if (initializedMotors)
-            drive = new MecanumDrive(hardwareMap, bReadCH, fLeft, fRight, bLeft, bRight);
+            drive = new MecanumDrive(hardwareMap, bReadCH, bReadEH, fLeft, fRight, bLeft, bRight);
         else if (initializedGyro)
-            drive = new MecanumDrive(hardwareMap, bReadCH, gyro);
+            drive = new MecanumDrive(hardwareMap, bReadCH, bReadEH, gyro);
         else
-            drive = new MecanumDrive(hardwareMap, bReadCH);
+            drive = new MecanumDrive(hardwareMap, bReadCH, bReadEH);
         drive.setPoseEstimate(createPose2d(0, 0, 0));
 
         initializedDrive = true;

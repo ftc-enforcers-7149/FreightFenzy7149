@@ -38,7 +38,8 @@ public class TrackWidthTuner extends LinearOpMode {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
         BulkRead bReadCH = new BulkRead(hardwareMap, "Control Hub");
-        MecanumDrive drive = new MecanumDrive(hardwareMap, bReadCH);
+        BulkRead bReadEH = new BulkRead(hardwareMap, "Expansion Hub");
+        MecanumDrive drive = new MecanumDrive(hardwareMap, bReadCH, bReadEH);
 
         telemetry.addLine("Press play to begin the track width tuner routine");
         telemetry.addLine("Make sure your robot has enough clearance to turn smoothly");

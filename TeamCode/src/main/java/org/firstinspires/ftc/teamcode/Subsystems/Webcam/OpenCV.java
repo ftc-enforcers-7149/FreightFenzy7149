@@ -35,6 +35,9 @@ public class OpenCV {
     }
 
     public void start(RectPipeline rectPipeline) {
+        pipeline = rectPipeline;
+        webcam.setPipeline(pipeline);
+
         webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
             public void onOpened() {
@@ -60,7 +63,7 @@ public class OpenCV {
     }
 
     public RotatedRect getRect() {
-        if (pipeline != null) return pipeline.boundingRect;
+        if (pipeline != null) return pipeline.getRect();
         else return null;
     }
 

@@ -36,7 +36,8 @@ public class BackAndForth extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         BulkRead bReadCH = new BulkRead(hardwareMap, "Control Hub");
-        MecanumDrive drive = new MecanumDrive(hardwareMap, bReadCH);
+        BulkRead bReadEH = new BulkRead(hardwareMap, "Expansion Hub");
+        MecanumDrive drive = new MecanumDrive(hardwareMap, bReadCH, bReadEH);
 
         Trajectory trajectoryForward = drive.trajectoryBuilder(new Pose2d())
                 .forward(DISTANCE)

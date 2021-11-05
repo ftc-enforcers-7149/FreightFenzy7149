@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
+import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.teamcode.Odometry.DriveWheels.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Subsystems.BulkRead;
 import org.firstinspires.ftc.teamcode.Subsystems.Gyroscope;
@@ -369,15 +370,24 @@ public abstract class Autonomous_Base extends LinearOpMode {
         updateTelemetry();
     }
 
+    protected void customWait(Func<Boolean> func) {
+        while (opModeIsActive() && func.value()) {
+            updateInputs();
+            updateOutputs();
+        }
+    }
+
     protected void waitForDriveComplete() {
         while (opModeIsActive() && drive.isBusy()) {
             updateInputs();
+            updateOutputs();
         }
     }
 
     protected void waitForTime(double ms) {
         double startTime = System.currentTimeMillis();
         while (opModeIsActive() && System.currentTimeMillis() < startTime + ms) {
+            updateInputs();
             updateOutputs();
         }
     }

@@ -23,13 +23,19 @@ public class Lift {
     //Convert motor ticks to rotations (using Gobilda's given equation)
     private final double toRot = (((1+(46.0/17))) * (1+(46.0/17))) * 28;
     public static final double PULLEY_CIRCUMFERENCE = 2.8285; //inches
-    public static final int STAGES = 3;
-    public static final double MAX_HEIGHT = 19;
+    public static final int STAGES = 2;
+
+    public static double GROUND_HEIGHT = 0;
+    public static double BARRIER_HEIGHT = 8;
+    public static double LOW_HEIGHT = 8;
+    public static double MIDDLE_HEIGHT = 16.25;
+    public static double HIGH_HEIGHT = 21;
+    public static double MAX_HEIGHT = 23;
 
     //PIDF Controller
     private PIDFController controller;
     private double output, lastOutput;
-    public static final PIDCoefficients pidCoeffs = new PIDCoefficients(0, 0, 0);
+    public static PIDCoefficients pidCoeffs = new PIDCoefficients(0.03, 0.001, 0);
 
     //Position (in motor ticks) to run to
     private int currPosition, setPosition;
@@ -43,6 +49,8 @@ public class Lift {
     public Lift(HardwareMap hardwareMap, String liftName) {
         lift = hardwareMap.get(DcMotorEx.class, liftName);
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         lift.setDirection(DcMotorSimple.Direction.REVERSE);
 
         initPID();
@@ -119,6 +127,7 @@ public class Lift {
     }
 
     public void stop() {
+        lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         setPower(0);
         update();
     }

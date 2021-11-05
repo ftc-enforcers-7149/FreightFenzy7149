@@ -22,7 +22,8 @@ public class StrafeTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         BulkRead bReadCH = new BulkRead(hardwareMap, "Control Hub");
-        MecanumDrive drive = new MecanumDrive(hardwareMap, bReadCH);
+        BulkRead bReadEH = new BulkRead(hardwareMap, "Expansion Hub");
+        MecanumDrive drive = new MecanumDrive(hardwareMap, bReadCH, bReadEH);
 
         Trajectory trajectory = drive.trajectoryBuilder(new Pose2d())
                 .strafeRight(DISTANCE)

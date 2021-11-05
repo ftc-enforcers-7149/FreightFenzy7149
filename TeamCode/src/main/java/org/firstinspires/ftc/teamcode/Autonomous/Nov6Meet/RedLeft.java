@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Autonomous.Nov6Meet;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Autonomous_Base;
@@ -18,9 +19,9 @@ public class RedLeft extends Autonomous_Base {
     private Lift lift;
     private CarouselSpinner spinner;
 
-    private int liftLevel = 0;
-
     private OpenCV tseDetector;
+
+    FtcDashboard dashboard;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -37,65 +38,89 @@ public class RedLeft extends Autonomous_Base {
             throw new InterruptedException();
         }
 
+        dashboard = FtcDashboard.getInstance();
+
         turningIntake = new TurningIntake(hardwareMap, "intake", "wrist", false);
         lift = new Lift(hardwareMap, "lift", bReadEH);
         spinner = new CarouselSpinner(hardwareMap, "leftSpinner", "rightSpinner");
 
-        tseDetector = new OpenCV(hardwareMap);
-        tseDetector.start(new TSEPipeline(0, 0, 640, 360));
+        tseDetector = new OpenCV(hardwareMap, dashboard);
+        tseDetector.start(new TSEPipeline(320, 180, 320, 180));
+
+        /// Init Loop ///
+
+        while (!isStarted() && !isStopRequested()) {
+            tseDetector.update();
+            telemetry.addData("Hub Level: ", detectBarcode());
+            telemetry.update();
+        }
+        if (isStopRequested()) return;
 
         /// Start ///
 
-        waitForStart();
-
-        detectBarcode();
+        HubLevel liftHeight = detectBarcode();
         tseDetector.stop();
-
-        if (isStopRequested()) return;
 
         /// Loop ///
 
-        //Vision
-
         //Drive to the duckwheel
-        driveTo(4, 5, 0);
+        driveTo(3, 3, 0);
 
         //Spin and stop duckwheel
-        spinner.setRightPower(0.75);
+        spinner.setLeftPower(0.75);
         waitForTime(4000);
-        spinner.setRightPower(0);
+        spinner.setLeftPower(0);
 
         //Drive to hub
-        driveTo(40,-28,315);
+        driveTo(22,-16, Math.toRadians(315));
 
-        //Put lift up
-        setLiftHeight(liftLevel);
+        //Set lift to correct level according to the vision
+        switch (liftHeight) {
+            case LOW:
+                setLiftHeight(Lift.LOW_HEIGHT);
+            case MIDDLE:
+                setLiftHeight(Lift.MIDDLE_HEIGHT);
+            case HIGH:
+                setLiftHeight(Lift.HIGH_HEIGHT);
+        }
 
         //Drive to hub and outtake
-        driveTo(42,-30,315);
-        turningIntake.setIntakePower(-1);
-        waitForTime(750);
-        turningIntake.setIntakePower(0);
+        driveTo(24,-20, Math.toRadians(315));
+        outtake();
 
         //Drive a little bit back and drop lift
-        driveTo(40,-28,315);
-        setLiftHeight(2);
+        driveTo(16,-22, Math.toRadians(315));
+        lift.setTargetHeight(Lift.BARRIER_HEIGHT);
 
         //Align with the warehouse and park
-        driveTo(33,-26,270);
-        driveTo(33,-75,270);
+        driveTo(20,-33, Math.toRadians(270));
+        setLiftHeight(Lift.BARRIER_HEIGHT);
+        driveTo(20,-75, Math.toRadians(270));
+
+        /// Stop ///
+
+        turningIntake.stop();
+        lift.stop();
+        spinner.stop();
+        setMotorPowers(0, 0, 0, 0);
+
+        waitForTime(500);
+    }
+
+    private void outtake() {
+        turningIntake.setIntakePower(-1);
+        waitForTime(1500);
+        turningIntake.setIntakePower(0);
     }
 
     private HubLevel detectBarcode() {
         RotatedRect boundingRect = tseDetector.getRect();
-        if (boundingRect.center.x <= 640 / 3.0) {
-            return HubLevel.LOW;
-        }
-        else if (boundingRect.center.x >= 2 * 640 / 3.0) {
+        if (boundingRect == null) return HubLevel.HIGH;
+        if (boundingRect.center.x >= 3 * 640 / 4.0) {
             return HubLevel.MIDDLE;
         }
         else {
-            return HubLevel.HIGH;
+            return HubLevel.LOW;
         }
     }
 

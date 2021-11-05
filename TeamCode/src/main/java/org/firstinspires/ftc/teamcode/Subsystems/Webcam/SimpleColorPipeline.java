@@ -22,9 +22,6 @@ public class SimpleColorPipeline extends RectPipeline {
     //What color to draw bounding rect
     private final Scalar drawColor;
 
-    private RotatedRect boundingRect = new RotatedRect();  //The most recent bounding rectangle of the rings
-    private Bitmap bitmap;  //The most recent image (cropped) from the camera
-
     private int posX, posY;
     private int width, height;
 
@@ -98,7 +95,7 @@ public class SimpleColorPipeline extends RectPipeline {
         }
 
         //Convert the original image (with drawn rectangle) to a bitmap for output
-        bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+        bitmap = Bitmap.createBitmap(output.width(), output.height(), Bitmap.Config.RGB_565);
         Utils.matToBitmap(output, bitmap);
 
         return output;

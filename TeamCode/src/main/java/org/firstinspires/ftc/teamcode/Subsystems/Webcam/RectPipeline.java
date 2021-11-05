@@ -160,7 +160,7 @@ public abstract class RectPipeline extends OpenCvPipeline {
         Point[] vertices = new Point[4];
         rect.points(vertices);
         for (int j = 0; j < 4; j++){
-            Imgproc.line(output, vertices[j], vertices[(j+1)%4], color);
+            Imgproc.line(output, vertices[j], vertices[(j+1)%4], color, 2);
         }
     }
 

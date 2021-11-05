@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
 import org.firstinspires.ftc.teamcode.TeleOp.TeleOp_Base;
 
 @TeleOp(name = "Test Lift PID")
-@Disabled
+//@Disabled
 public class TestLiftPID extends TeleOp_Base {
 
     private Lift lift;
@@ -39,13 +39,13 @@ public class TestLiftPID extends TeleOp_Base {
         if (liftPos != lastLiftPos) {
             switch (liftPos) {
                 case HIGH:
-                    lift.setTargetHeight(15.75);
+                    lift.setTargetHeight(Lift.HIGH_HEIGHT);
                     break;
                 case MIDDLE:
-                    lift.setTargetHeight(9.5);
+                    lift.setTargetHeight(Lift.MIDDLE_HEIGHT);
                     break;
                 case LOW:
-                    lift.setTargetHeight(4);
+                    lift.setTargetHeight(Lift.LOW_HEIGHT);
                     break;
                 case GROUND:
                     lift.setTargetHeight(0);

@@ -32,7 +32,8 @@ public class FollowerPIDTuner extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         BulkRead bReadCH = new BulkRead(hardwareMap, "Control Hub");
-        MecanumDrive drive = new MecanumDrive(hardwareMap, bReadCH);
+        BulkRead bReadEH = new BulkRead(hardwareMap, "Expansion Hub");
+        MecanumDrive drive = new MecanumDrive(hardwareMap, bReadCH, bReadEH);
 
         Pose2d startPose = new Pose2d(-DISTANCE / 2, -DISTANCE / 2, 0);
 
