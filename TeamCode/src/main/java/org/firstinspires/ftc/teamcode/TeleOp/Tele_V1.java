@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.TeleOp;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.Mattu.TestLiftPID;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.CarouselSpinner;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.TurningIntake;
@@ -16,6 +17,13 @@ public class Tele_V1 extends TeleOp_Base {
     private TurningIntake turningIntake;
     private Lift lift;
     private CarouselSpinner spinner;
+
+    private double liftPower, lastLiftPower;
+
+    private enum LiftPosition {
+        GROUND, LOW, MIDDLE, HIGH;
+    }
+    private LiftPosition liftPos, lastLiftPos;
 
     @Override
     public void init() {
@@ -49,10 +57,24 @@ public class Tele_V1 extends TeleOp_Base {
         else turningIntake.setIntakePower(0);
 
         // Lift
-        if (gamepad1.right_trigger > 0.1 || gamepad1.left_trigger > 0.1)
-            lift.setPower(gamepad1.right_trigger - gamepad1.left_trigger);
-        else
-            lift.setPower(0);
+        if (liftPower != lastLiftPower)
+            lift.setPower(liftPower);
+        else if (liftPos != lastLiftPos) {
+            switch (liftPos) {
+                case HIGH:
+                    lift.setTargetHeight(Lift.HIGH_HEIGHT);
+                    break;
+                case MIDDLE:
+                    lift.setTargetHeight(Lift.MIDDLE_HEIGHT);
+                    break;
+                case LOW:
+                    lift.setTargetHeight(Lift.LOW_HEIGHT);
+                    break;
+                case GROUND:
+                    lift.setTargetHeight(0);
+                    break;
+            }
+        }
 
         if (lift.getLiftHeight() > 10) {
             lim = 0.5;
@@ -62,6 +84,8 @@ public class Tele_V1 extends TeleOp_Base {
             lim = 1;
             turningIntake.setWheelInterferes(true);
         }
+
+        if (gamepad1.back) lift.setManualOverride(true);
 
         // Carousel
         spinner.setLeftPower(gamepad1.x ? 1 : 0);
@@ -87,14 +111,26 @@ public class Tele_V1 extends TeleOp_Base {
     @Override
     protected void getInput() {
         //Headless
-        leftX = curveInput(gamepad1.left_stick_x, 5)*lim;
-        leftY = curveInput(gamepad1.left_stick_y, 5)*lim;
-        rightX = curveInput(gamepad1.right_stick_x, 5)*lim*0.75;
+        leftX = curveInput(gamepad1.left_stick_x, 5)*lim * 0.8;
+        leftY = curveInput(gamepad1.left_stick_y, 5)*lim * 0.8;
+        rightX = curveInput(gamepad1.right_stick_x, 5)*lim*0.75 * 0.8;
         resetAngle = gamepad1.y;
+
+        if (gamepad1.right_trigger > 0.1 || gamepad1.left_trigger > 0.1)
+            liftPower = gamepad1.right_trigger - gamepad1.left_trigger;
+        else
+            liftPower = 0;
+
+        if (gamepad1.dpad_up) liftPos = LiftPosition.HIGH;
+        else if (gamepad1.dpad_left) liftPos = LiftPosition.MIDDLE;
+        else if (gamepad1.dpad_right) liftPos = LiftPosition.LOW;
+        else if (gamepad1.dpad_down) liftPos = LiftPosition.GROUND;
     }
 
     @Override
     protected void updateStateMachine() {
         lastLeftX = leftX; lastLeftY = leftY; lastRightX = rightX;
+        lastLiftPower = liftPower;
+        lastLiftPos = liftPos;
     }
 }

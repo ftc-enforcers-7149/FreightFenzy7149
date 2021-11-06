@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Autonomous.Nov6Meet;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Autonomous_Base;
@@ -64,7 +65,7 @@ public class RedLeft extends Autonomous_Base {
         /// Loop ///
 
         //Drive to the duckwheel
-        driveTo(3, 3, 0);
+        driveTo(5, 4, 0);
 
         //Spin and stop duckwheel
         spinner.setLeftPower(0.75);
@@ -72,30 +73,35 @@ public class RedLeft extends Autonomous_Base {
         spinner.setLeftPower(0);
 
         //Drive to hub
-        driveTo(22,-16, Math.toRadians(315));
+        driveTo(34,-26, Math.toRadians(315));
 
         //Set lift to correct level according to the vision
         switch (liftHeight) {
             case LOW:
                 setLiftHeight(Lift.LOW_HEIGHT);
+                 break;
             case MIDDLE:
                 setLiftHeight(Lift.MIDDLE_HEIGHT);
+                break;
             case HIGH:
                 setLiftHeight(Lift.HIGH_HEIGHT);
+                break;
         }
 
         //Drive to hub and outtake
-        driveTo(24,-20, Math.toRadians(315));
+        driveTo( 36,-30, Math.toRadians(315));
         outtake();
 
         //Drive a little bit back and drop lift
-        driveTo(16,-22, Math.toRadians(315));
+        driveTo(26,-26, Math.toRadians(315));
         lift.setTargetHeight(Lift.BARRIER_HEIGHT);
 
         //Align with the warehouse and park
-        driveTo(20,-33, Math.toRadians(270));
+        driveTo(26,-33, Math.toRadians(270));
         setLiftHeight(Lift.BARRIER_HEIGHT);
-        driveTo(20,-75, Math.toRadians(270));
+
+        SLOW_DIST = 20;
+        driveTo(26,-120, Math.toRadians(270));
 
         /// Stop ///
 

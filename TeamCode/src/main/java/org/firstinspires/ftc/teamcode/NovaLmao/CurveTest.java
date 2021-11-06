@@ -1,11 +1,15 @@
 package org.firstinspires.ftc.teamcode.NovaLmao;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.TeleOp.TeleOp_Base;
 
 // Tank drive class demonstrating how the curve handling accel class works :)
 
+@TeleOp(name = "Curve Test")
+@Disabled
 public class CurveTest extends TeleOp_Base {
 
     protected double cTime, lTime, sTimeL, sTimeR;

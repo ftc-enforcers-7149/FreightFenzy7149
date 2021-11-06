@@ -1,9 +1,11 @@
 package org.firstinspires.ftc.teamcode.NovaLmao;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@TeleOp(name="GamepadTest")
+@TeleOp(name="Gamepad Test")
+@Disabled
 public class GamepadTest extends OpMode {
 
     Touchpad touchpad;

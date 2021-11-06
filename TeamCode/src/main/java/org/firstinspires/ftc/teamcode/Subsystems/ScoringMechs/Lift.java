@@ -26,16 +26,16 @@ public class Lift {
     public static final int STAGES = 2;
 
     public static double GROUND_HEIGHT = 0;
-    public static double BARRIER_HEIGHT = 8;
-    public static double LOW_HEIGHT = 8;
-    public static double MIDDLE_HEIGHT = 16.25;
-    public static double HIGH_HEIGHT = 21;
-    public static double MAX_HEIGHT = 23;
+    public static double BARRIER_HEIGHT = 11.1;
+    public static double LOW_HEIGHT = 11.1;
+    public static double MIDDLE_HEIGHT = 17;
+    public static double HIGH_HEIGHT = 22;
+    public static double MAX_HEIGHT = 25;
 
     //PIDF Controller
     private PIDFController controller;
     private double output, lastOutput;
-    public static PIDCoefficients pidCoeffs = new PIDCoefficients(0.03, 0.001, 0);
+    public static PIDCoefficients pidCoeffs = new PIDCoefficients(0.01, 0, 0);
 
     //Position (in motor ticks) to run to
     private int currPosition, setPosition;
@@ -45,6 +45,9 @@ public class Lift {
 
     //If using PID or not
     private boolean usePID;
+
+    //If using manual override
+    private boolean manualOverride;
 
     public Lift(HardwareMap hardwareMap, String liftName) {
         lift = hardwareMap.get(DcMotorEx.class, liftName);
@@ -80,8 +83,7 @@ public class Lift {
     public void setPower(double power) {
         liftPower = power;
 
-        if (liftPower < 0 && getLiftHeight() < -0.1) liftPower = 0;
-
+        if (usePID) lastLiftPower = -2;
         usePID = false;
     }
 
@@ -96,13 +98,22 @@ public class Lift {
         usePID = true;
     }
 
+    /**
+     * Manual override disables all features that use the encoder
+     * This consists of the automatic PID control and over turn protection
+     * @param override Whether or not to override
+     */
+    public void setManualOverride(boolean override) {
+        manualOverride = override;
+    }
+
     public void update() {
         //Get motor ticks
         if (useBRead) currPosition = -bRead.getMotorPos(lift);
         else currPosition = lift.getCurrentPosition();
 
         //Use PID to go to position
-        if (usePID) {
+        if (usePID && !manualOverride) {
             output = controller.update(currPosition); //Update PID
 
             //Stop the motor when at rest on the floor
@@ -118,6 +129,8 @@ public class Lift {
 
         //Use motor power to move lift
         else {
+            if (!manualOverride && liftPower < 0 && getLiftHeight() < -0.05) liftPower = 0;
+
             if (liftPower != lastLiftPower) {
                 lift.setPower(liftPower);
 
@@ -176,5 +189,6 @@ public class Lift {
         setPosition = 0;
         liftPower = 0; lastLiftPower = 0;
         usePID = true;
+        manualOverride = false;
     }
 }
