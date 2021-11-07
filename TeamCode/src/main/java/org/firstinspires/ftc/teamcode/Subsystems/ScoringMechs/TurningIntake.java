@@ -29,11 +29,11 @@ public class TurningIntake {
         wrist.setDirection(Servo.Direction.REVERSE);
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        wrist.setPosition(0.32);
+        wrist.setPosition(0.28);
         intakePower = 0;
         lastIntakePower = 0;
-        wristPos = 0.32;
-        lastWristPos = 0.32;
+        wristPos = 0.28;
+        lastWristPos = 0.28;
         turnSpeed = 0;
         lastTime = System.currentTimeMillis();
 
@@ -48,11 +48,11 @@ public class TurningIntake {
         wrist.setDirection(Servo.Direction.REVERSE);
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        if (moveOnInit) wrist.setPosition(0.45);
+        if (moveOnInit) wrist.setPosition(0.28);
         intakePower = 0;
         lastIntakePower = 0;
-        wristPos = 0.32;
-        lastWristPos = moveOnInit ? 0.32 : -1;
+        wristPos = 0.28;
+        lastWristPos = moveOnInit ? 0.28 : -1;
         turnSpeed = 0;
         lastTime = System.currentTimeMillis();
 
@@ -73,7 +73,7 @@ public class TurningIntake {
         }
         else {
             if (wristPos < 0.1) wristPos = 0.1;
-            if (wristPos > 0.55) wristPos = 0.55;
+            if (wristPos > 0.45) wristPos = 0.45;
         }
 
         if (wristPos != lastWristPos) {
@@ -125,7 +125,7 @@ public class TurningIntake {
      */
     public void setWristRight() {
         if (wheelInterferes) wristPos = 1;
-        else  wristPos = 0.55;
+        else  wristPos = 0.45;
         turnSpeed = 0;
     }
 
@@ -133,7 +133,7 @@ public class TurningIntake {
      * Turn wrist to the center
      */
     public void setWristCenter() {
-        wristPos = 0.32; turnSpeed = 0;
+        wristPos = 0.28; turnSpeed = 0;
     }
 
     /**

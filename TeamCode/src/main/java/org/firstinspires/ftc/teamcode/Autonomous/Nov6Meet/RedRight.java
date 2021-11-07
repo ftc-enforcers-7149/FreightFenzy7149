@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Autonomous.Nov6Meet;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Autonomous_Base;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.CarouselSpinner;
@@ -12,7 +13,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Webcam.TSEPipeline;
 import org.opencv.core.RotatedRect;
 
 @Autonomous(name = "Red Right")
-//@Disabled
+@Disabled
 public class RedRight extends Autonomous_Base {
 
     private TurningIntake turningIntake;

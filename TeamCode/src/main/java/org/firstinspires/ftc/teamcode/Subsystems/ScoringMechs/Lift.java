@@ -76,6 +76,21 @@ public class Lift {
         useBRead = true;
     }
 
+    public Lift(HardwareMap hardwareMap, String liftName, BulkRead bRead, boolean reset) {
+        lift = hardwareMap.get(DcMotorEx.class, liftName);
+        if (reset)
+            lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        lift.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        initPID();
+        initVars();
+
+        this.bRead = bRead;
+        useBRead = true;
+    }
+
     /**
      * Set power to the lift motor, stopping the PID
      * @param power Motor power
@@ -117,9 +132,9 @@ public class Lift {
             output = controller.update(currPosition); //Update PID
 
             //Stop the motor when at rest on the floor
-            if (setPosition == 0 && currPosition < liftInchesToTicks(2)) {
+            /*if (setPosition == 0 && currPosition < liftInchesToTicks(0.01)) {
                 output = 0;
-            }
+            }*/
             if (output != lastOutput) {
                 lift.setPower(output);
 

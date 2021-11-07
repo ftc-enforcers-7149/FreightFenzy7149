@@ -22,7 +22,7 @@ public class RedLeft extends Autonomous_Base {
 
     private OpenCV tseDetector;
 
-    FtcDashboard dashboard;
+    //FtcDashboard dashboard;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -39,13 +39,15 @@ public class RedLeft extends Autonomous_Base {
             throw new InterruptedException();
         }
 
-        dashboard = FtcDashboard.getInstance();
+        //dashboard = FtcDashboard.getInstance();
 
         turningIntake = new TurningIntake(hardwareMap, "intake", "wrist", false);
+        turningIntake.setWristRight();
+        turningIntake.update();
         lift = new Lift(hardwareMap, "lift", bReadEH);
         spinner = new CarouselSpinner(hardwareMap, "leftSpinner", "rightSpinner");
 
-        tseDetector = new OpenCV(hardwareMap, dashboard);
+        tseDetector = new OpenCV(hardwareMap);//, dashboard);
         tseDetector.start(new TSEPipeline(320, 180, 320, 180));
 
         /// Init Loop ///
@@ -61,8 +63,12 @@ public class RedLeft extends Autonomous_Base {
 
         HubLevel liftHeight = detectBarcode();
         tseDetector.stop();
+        turningIntake.setWristCenter();
 
         /// Loop ///
+
+        POS_ACC = 1;
+        SLOW_DIST = 15;
 
         //Drive to the duckwheel
         driveTo(5, 4, 0);
@@ -73,7 +79,7 @@ public class RedLeft extends Autonomous_Base {
         spinner.setLeftPower(0);
 
         //Drive to hub
-        driveTo(34,-26, Math.toRadians(315));
+        driveTo(34,-26, Math.toRadians(307));
 
         //Set lift to correct level according to the vision
         switch (liftHeight) {
@@ -89,19 +95,30 @@ public class RedLeft extends Autonomous_Base {
         }
 
         //Drive to hub and outtake
-        driveTo( 36,-30, Math.toRadians(315));
+        driveTo( 36,-31, Math.toRadians(300));
         outtake();
 
+        H_ACC = Math.toRadians(3);
+
         //Drive a little bit back and drop lift
-        driveTo(26,-26, Math.toRadians(315));
+        driveTo(32,-26, Math.toRadians(300));
+        lift.setTargetHeight(Lift.GROUND_HEIGHT);
+
+        while (getRuntime() < 22) {
+            updateInputs();
+            updateOutputs();
+        }
         lift.setTargetHeight(Lift.BARRIER_HEIGHT);
 
         //Align with the warehouse and park
-        driveTo(26,-33, Math.toRadians(270));
+        driveTo(30,-33, Math.toRadians(100));
         setLiftHeight(Lift.BARRIER_HEIGHT);
 
         SLOW_DIST = 20;
-        driveTo(26,-120, Math.toRadians(270));
+        driveTo(40,-128, Math.toRadians(100));
+
+        //Lower lift all the way down for TeleOp
+        setLiftHeight(Lift.GROUND_HEIGHT);
 
         /// Stop ///
 
@@ -110,7 +127,7 @@ public class RedLeft extends Autonomous_Base {
         spinner.stop();
         setMotorPowers(0, 0, 0, 0);
 
-        waitForTime(500);
+        waitForTime(1000);
     }
 
     private void outtake() {

@@ -1,10 +1,8 @@
 package org.firstinspires.ftc.teamcode.Autonomous.Nov6Meet;
 
-import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
-import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.teamcode.Autonomous.Autonomous_Base;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.CarouselSpinner;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
@@ -13,9 +11,9 @@ import org.firstinspires.ftc.teamcode.Subsystems.Webcam.OpenCV;
 import org.firstinspires.ftc.teamcode.Subsystems.Webcam.TSEPipeline;
 import org.opencv.core.RotatedRect;
 
-@Autonomous(name = "Blue Left")
+@Autonomous(name = "Red Left Storage Unit")
 @Disabled
-public class BlueLeft extends Autonomous_Base {
+public class RLStorageUnit extends Autonomous_Base {
 
     private TurningIntake turningIntake;
     private Lift lift;
@@ -23,7 +21,7 @@ public class BlueLeft extends Autonomous_Base {
 
     private OpenCV tseDetector;
 
-    FtcDashboard dashboard;
+    //FtcDashboard dashboard;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -40,13 +38,13 @@ public class BlueLeft extends Autonomous_Base {
             throw new InterruptedException();
         }
 
-        dashboard = FtcDashboard.getInstance();
+        //dashboard = FtcDashboard.getInstance();
 
         turningIntake = new TurningIntake(hardwareMap, "intake", "wrist", false);
         lift = new Lift(hardwareMap, "lift", bReadEH);
         spinner = new CarouselSpinner(hardwareMap, "leftSpinner", "rightSpinner");
 
-        tseDetector = new OpenCV(hardwareMap, dashboard);
+        tseDetector = new OpenCV(hardwareMap);//, dashboard);
         tseDetector.start(new TSEPipeline(320, 180, 320, 180));
 
         /// Init Loop ///
@@ -65,72 +63,45 @@ public class BlueLeft extends Autonomous_Base {
 
         /// Loop ///
 
+        //Drive to the duckwheel
+        driveTo(5, 4, 0);
+
+        //Spin and stop duckwheel
+        spinner.setLeftPower(0.75);
+        waitForTime(4000);
+        spinner.setLeftPower(0);
+
+        //Drive to hub
+        driveTo(34,-26, Math.toRadians(315));
+
         //Set lift to correct level according to the vision
         switch (liftHeight) {
             case LOW:
                 setLiftHeight(Lift.LOW_HEIGHT);
+                 break;
             case MIDDLE:
                 setLiftHeight(Lift.MIDDLE_HEIGHT);
+                break;
             case HIGH:
                 setLiftHeight(Lift.HIGH_HEIGHT);
+                break;
         }
 
-        //Drive to hub
-        driveTo(16,0,0);
-
-        //Deliver pre-loaded block
+        //Drive to hub and outtake
+        driveTo( 36,-30, Math.toRadians(315));
         outtake();
 
-        //Move back a little so that the intake doesn't hit the hub
-        driveTo(10,0,0);
-
-        //Put lift back down
+        //Drive a little bit back and drop lift
+        driveTo(26,-26, Math.toRadians(315));
         lift.setTargetHeight(Lift.GROUND_HEIGHT);
 
-        //Realign with the wall and turn towards the warehouse
-        driveTo(drive.getPoseEstimate().getX(), drive.getPoseEstimate().getY(), Math.toRadians(90));
-        driveTo(0,0, Math.toRadians(90));
+        //Align with the warehouse and park
+        driveTo(26,-20, Math.toRadians(270));
+        turningIntake.setWristLeft();
+        driveTo(26,12, Math.toRadians(270));
+
+        //Lower lift all the way down for TeleOp
         setLiftHeight(Lift.GROUND_HEIGHT);
-
-        //Start intaking
-        turningIntake.setIntakePower(1);
-
-        //Drive into the warehouse
-        driveTo(0,47, Math.toRadians(90));
-
-        //Stop intake
-        turningIntake.setIntakePower(0);
-
-        //Drive backwards to the hub
-        driveTo(0,0, Math.toRadians(90));
-
-        //Turn and move towards the hub
-        driveTo(10,0, Math.toRadians(90));
-        lift.setTargetHeight(Lift.HIGH_HEIGHT);
-        driveTo(drive.getPoseEstimate().getX(), drive.getPoseEstimate().getY(), 0);
-
-        //Set lift to the highest height
-        setLiftHeight(Lift.HIGH_HEIGHT);
-
-        //Move forward
-        driveTo(16,0,0);
-
-        //Outtake the game element
-        outtake();
-
-        //Drive a little back and turn
-        driveTo(10,0, 0);
-
-        //Put lift back down
-        lift.setTargetHeight(Lift.GROUND_HEIGHT);
-
-        //Realign with the wall and turn towards the warehouse
-        driveTo(drive.getPoseEstimate().getX(), drive.getPoseEstimate().getY(), Math.toRadians(90));
-
-        //Park in warehouse
-        driveTo(0,0, Math.toRadians(90));
-        setLiftHeight(Lift.GROUND_HEIGHT);
-        driveTo(0,-47, Math.toRadians(90));
 
         /// Stop ///
 
@@ -139,7 +110,7 @@ public class BlueLeft extends Autonomous_Base {
         spinner.stop();
         setMotorPowers(0, 0, 0, 0);
 
-        waitForTime(500);
+        waitForTime(1000);
     }
 
     private void outtake() {
@@ -150,12 +121,12 @@ public class BlueLeft extends Autonomous_Base {
 
     private HubLevel detectBarcode() {
         RotatedRect boundingRect = tseDetector.getRect();
-        if (boundingRect == null) return HubLevel.LOW;
-        if (boundingRect.center.x <= 640 / 4.0) {
+        if (boundingRect == null) return HubLevel.HIGH;
+        if (boundingRect.center.x >= 3 * 640 / 4.0) {
             return HubLevel.MIDDLE;
         }
         else {
-            return HubLevel.HIGH;
+            return HubLevel.LOW;
         }
     }
 

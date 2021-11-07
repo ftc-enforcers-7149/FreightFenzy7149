@@ -33,7 +33,7 @@ public class Tele_V1 extends TeleOp_Base {
         initializeVars();
 
         turningIntake = new TurningIntake(hardwareMap, "intake", "wrist");
-        lift = new Lift(hardwareMap, "lift", bReadEH);
+        lift = new Lift(hardwareMap, "lift", bReadEH, false);
         spinner = new CarouselSpinner(hardwareMap, "leftSpinner", "rightSpinner");
     }
 
@@ -78,7 +78,7 @@ public class Tele_V1 extends TeleOp_Base {
 
         if (lift.getLiftHeight() > 10) {
             lim = 0.5;
-            turningIntake.setWheelInterferes(false);
+            //turningIntake.setWheelInterferes(false);
         }
         else {
             lim = 1;
