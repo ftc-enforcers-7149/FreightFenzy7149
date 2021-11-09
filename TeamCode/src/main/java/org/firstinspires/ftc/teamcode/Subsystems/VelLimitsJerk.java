@@ -36,6 +36,14 @@ public class VelLimitsJerk {
     }
 
     /**
+     * Assumes a 1:1 ratio of input to output
+     * @param maxTime The desired time to reach the maximum output value starting at 0
+     */
+    public VelLimitsJerk(double maxTime) {
+        this(1, 1, maxTime);
+    }
+
+    /**
      * Updates the output from the velocity curve based on the input and time
      * @param input Input / Desired output
      * @return Output from curve
@@ -66,6 +74,8 @@ public class VelLimitsJerk {
      * @return The curve's output
      */
     private double velFunction(double value, double startValue, double time) {
+        if (maxTime == 0) return value;
+
         double sign = Math.signum(value - startValue);
         double jerk = sign * 4*maxValue/(maxTime*maxTime);
         double timeHalf = Math.sqrt((value - startValue)/jerk);

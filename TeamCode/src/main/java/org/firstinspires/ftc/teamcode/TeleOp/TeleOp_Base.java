@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import org.firstinspires.ftc.teamcode.Odometry.DriveWheels.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Subsystems.BulkRead;
 import org.firstinspires.ftc.teamcode.Subsystems.Gyroscope;
+import org.firstinspires.ftc.teamcode.Subsystems.VelLimitsJerk;
 
 import static org.firstinspires.ftc.teamcode.Subsystems.FixedRoadrunner.createPose2d;
 
@@ -106,6 +107,10 @@ public abstract class TeleOp_Base extends OpMode {
     protected void initializeVars() {
         lastLeftX = 0; lastLeftY = 0; lastRightX = 0; lastRightY = 0;
         offset = 0; lim = 1;
+
+        yJerk = new VelLimitsJerk(300);
+        xJerk = new VelLimitsJerk(0);
+        turnJerk = new VelLimitsJerk(0);
     }
 
     //Loop updates
@@ -175,7 +180,6 @@ public abstract class TeleOp_Base extends OpMode {
 
         setMotorPowers(vFL, vFR, vBL, vBR);
     }
-
     protected void driveTank() {
         if (leftY != lastLeftY || rightY != lastRightY) {
             double vL = leftY;
@@ -190,6 +194,50 @@ public abstract class TeleOp_Base extends OpMode {
 
             setMotorPowers(vL, vR, vL, vR);
         }
+    }
+
+    private VelLimitsJerk yJerk, xJerk, turnJerk;
+
+    protected void driveHeadlessSmooth(double angle, boolean reset) {
+        if (reset) {
+            offset = angle;
+        }
+
+        if ((leftY == 0 && lastLeftY != 0) &&
+                (leftX == 0 && lastLeftX != 0) &&
+                (rightX == 0 && lastRightX != 0)) {
+            setMotorPowers(0, 0, 0, 0);
+            return;
+        }
+
+        double r = Math.hypot(leftX, leftY);
+        double robotAngle = Math.atan2(leftY, leftX) - Math.toRadians(Gyroscope.cvtTrigAng(angle - offset)) - 3 * Math.PI / 4;
+
+        double vFL = r * Math.sin(robotAngle) + rightX;
+        double vFR = r * Math.cos(robotAngle) - rightX;
+        double vBL = r * Math.cos(robotAngle) + rightX;
+        double vBR = r * Math.sin(robotAngle) - rightX;
+
+        //Get robot relative components of motion
+        double robotY = (vFL + vFR + vBL + vBR) / 4;
+        double robotX = (vFL - vFR - vBL + vBR) / 4;
+        double robotTurn = (vFL - vFR + vBL - vBR) / 4;
+
+        //Limit the jerk of each component of motion
+        robotY = yJerk.update(robotY);
+        robotX = xJerk.update(robotX);
+        robotTurn = turnJerk.update(robotTurn);
+
+        double limFixed = lim / (2 - lim);
+        double mult = limFixed / (limFixed + Math.abs(robotTurn));
+
+        //Convert back to motor powers
+        vFL = mult * (robotY + robotX - robotTurn);
+        vFR = mult * (robotY - robotX + robotTurn);
+        vBL = mult * (robotY - robotX - robotTurn);
+        vBR = mult * (robotY + robotX + robotTurn);
+
+        setMotorPowers(vFL, vFR, vBL, vBR);
     }
 
     //State machine logic
