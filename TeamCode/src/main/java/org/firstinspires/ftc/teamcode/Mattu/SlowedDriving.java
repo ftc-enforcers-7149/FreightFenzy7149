@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
 import org.firstinspires.ftc.teamcode.TeleOp.TeleOp_Base;
 
 @TeleOp(name = "Slowed Driving")
-@Disabled
+//@Disabled
 public class SlowedDriving extends TeleOp_Base {
 
     //Headless

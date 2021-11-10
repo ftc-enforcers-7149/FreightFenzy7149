@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.TurningIntake;
 
 @TeleOp (name = "Tele_V1")
 //@Disabled
-public class Tele_V1 extends TeleOp_Base {
+public class Tele_V3 extends TeleOp_Base {
 
     //Headless
     private boolean resetAngle;
