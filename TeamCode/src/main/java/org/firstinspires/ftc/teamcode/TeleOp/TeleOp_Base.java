@@ -196,9 +196,10 @@ public abstract class TeleOp_Base extends OpMode {
         }
     }
 
+    //Smooth driving
     private VelLimitsJerk yJerk, xJerk, turnJerk;
 
-    protected void driveHeadlessSmooth(double angle, boolean reset) {
+    protected final void driveHeadlessSmooth(double angle, boolean reset) {
         if (reset) {
             offset = angle;
         }
@@ -238,6 +239,18 @@ public abstract class TeleOp_Base extends OpMode {
         vBR = mult * (robotY + robotX + robotTurn);
 
         setMotorPowers(vFL, vFR, vBL, vBR);
+    }
+
+    /**
+     * Sets the new "maxTime" for velocity curves
+     * @param yTime yJerk time in ms
+     * @param xTime xJerk time in ms
+     * @param tTime turnJerk time in ms
+     */
+    protected final void setSmoothingTimes(double yTime, double xTime, double tTime) {
+        yJerk.setMaxTime(yTime);
+        xJerk.setMaxTime(xTime);
+        turnJerk.setMaxTime(tTime);
     }
 
     //State machine logic

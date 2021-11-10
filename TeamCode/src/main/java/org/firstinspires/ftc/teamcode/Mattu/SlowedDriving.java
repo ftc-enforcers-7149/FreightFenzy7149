@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.VelLimitsJerk;
 import org.firstinspires.ftc.teamcode.TeleOp.TeleOp_Base;
 
 @TeleOp(name = "Slowed Driving")
-@Disabled
+//@Disabled
 public class SlowedDriving extends TeleOp_Base {
 
     //Headless
@@ -19,8 +19,6 @@ public class SlowedDriving extends TeleOp_Base {
 
     private Lift lift;
     private Servo wrist;
-
-    private VelLimitsJerk driveX, driveY, turn;
 
     @Override
     public void init() {
@@ -35,10 +33,6 @@ public class SlowedDriving extends TeleOp_Base {
         wrist = hardwareMap.servo.get("wrist");
         wrist.setDirection(Servo.Direction.REVERSE);
         wrist.setPosition(0.45);
-
-        driveX = new VelLimitsJerk(1, 1, 1);
-        driveY = new VelLimitsJerk(1, 1, 1);
-        turn = new VelLimitsJerk(1, 1, 1);
     }
 
     @Override
@@ -47,7 +41,7 @@ public class SlowedDriving extends TeleOp_Base {
         getInput();
 
         // Drive
-        driveHeadless(gyro.getNewRawYaw(), resetAngle);
+        driveHeadlessSmooth(gyro.getNewRawYaw(), resetAngle);
 
         // Lift
         if (gamepad1.right_trigger > 0.1 || gamepad1.left_trigger > 0.1)
@@ -56,14 +50,10 @@ public class SlowedDriving extends TeleOp_Base {
             lift.setPower(0);
 
         if (lift.getLiftHeight() > 5) {
-            driveX.setMaxTime(2);
-            driveY.setMaxTime(2);
-            turn.setMaxTime(2);
+            setSmoothingTimes(1, 200, 200);
         }
         else {
-            driveX.setMaxTime(1);
-            driveY.setMaxTime(1);
-            turn.setMaxTime(1);
+            setSmoothingTimes(300, 0, 0);
         }
 
         // Telemetry
@@ -82,9 +72,9 @@ public class SlowedDriving extends TeleOp_Base {
     @Override
     protected void getInput() {
         //Headless
-        leftX = driveX.update(gamepad1.left_stick_x);
-        leftY = driveY.update(gamepad1.left_stick_y);
-        rightX = turn.update(gamepad1.right_stick_x);
+        leftX = gamepad1.left_stick_x;
+        leftY = gamepad1.left_stick_y;
+        rightX = gamepad1.right_stick_x;
         resetAngle = gamepad1.y;
     }
 
