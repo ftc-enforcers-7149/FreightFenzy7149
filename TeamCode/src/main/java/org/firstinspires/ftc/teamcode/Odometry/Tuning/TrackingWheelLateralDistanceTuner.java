@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.Odometry.Tuning;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.roadrunner.drive.MecanumDrive;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.util.Angle;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -9,10 +8,9 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.RobotLog;
 
-import org.firstinspires.ftc.teamcode.Odometry.SensorBot.SBMecanumDrive;
+import org.firstinspires.ftc.teamcode.Odometry.DriveWheels.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Subsystems.BulkRead;
 
-import static org.firstinspires.ftc.teamcode.Odometry.SensorBot.SBLocalizer.LATERAL_DISTANCE;
 
 /**
  * Opmode designed to assist the user in tuning the `StandardTrackingWheelLocalizer`'s
@@ -71,11 +69,13 @@ import static org.firstinspires.ftc.teamcode.Odometry.SensorBot.SBLocalizer.LATE
 public class TrackingWheelLateralDistanceTuner extends LinearOpMode {
     public static int NUM_TURNS = 10;
 
+    public static double LATERAL_DISTANCE = 10;
+
     @Override
     public void runOpMode() throws InterruptedException {
         BulkRead bReadCH = new BulkRead(hardwareMap, "Control Hub");
         BulkRead bReadEH = new BulkRead(hardwareMap, "Expansion Hub");
-        SBMecanumDrive drive = new SBMecanumDrive(hardwareMap, bReadCH, bReadEH);
+        MecanumDrive drive = new MecanumDrive(hardwareMap, bReadCH, bReadEH);
 
         if (!(drive.getLocalizer() instanceof MecanumDrive.MecanumLocalizer)) {
             RobotLog.setGlobalErrorMsg("EnforcersLocalizerV3 is not being set in the "
