@@ -1,10 +1,10 @@
 package org.firstinspires.ftc.teamcode.Autonomous.Nov6Meet;
 
-import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Autonomous_Base;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.CarouselSpinner;
+import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Intake;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.TurningIntake;
 import org.firstinspires.ftc.teamcode.Subsystems.Webcam.OpenCV;
@@ -15,7 +15,7 @@ import org.opencv.core.RotatedRect;
 //@Disabled
 public class BlueRight extends Autonomous_Base {
 
-    private TurningIntake turningIntake;
+    private Intake intake;
     private Lift lift;
     private CarouselSpinner spinner;
 
@@ -40,9 +40,8 @@ public class BlueRight extends Autonomous_Base {
 
         //dashboard = FtcDashboard.getInstance();
 
-        turningIntake = new TurningIntake(hardwareMap, "intake", "wrist", false);
-        turningIntake.setWristLeft();
-        turningIntake.update();
+        intake = new Intake(hardwareMap, "intake");
+        intake.update();
         lift = new Lift(hardwareMap, "lift", bReadEH);
         spinner = new CarouselSpinner(hardwareMap, "leftSpinner", "rightSpinner");
 
@@ -62,7 +61,6 @@ public class BlueRight extends Autonomous_Base {
 
         HubLevel liftHeight = detectBarcode();
         tseDetector.stop();
-        turningIntake.setWristCenter();
 
         /// Loop ///
 
@@ -121,7 +119,7 @@ public class BlueRight extends Autonomous_Base {
 
         /// Stop ///
 
-        turningIntake.stop();
+        intake.stop();
         lift.stop();
         spinner.stop();
         setMotorPowers(0, 0, 0, 0);
@@ -130,9 +128,9 @@ public class BlueRight extends Autonomous_Base {
     }
 
     private void outtake() {
-        turningIntake.setIntakePower(-1);
+        intake.setIntakePower(-1);
         waitForTime(1500);
-        turningIntake.setIntakePower(0);
+        intake.setIntakePower(0);
     }
 
     private HubLevel detectBarcode() {
@@ -156,7 +154,7 @@ public class BlueRight extends Autonomous_Base {
 
     @Override
     protected void subsystemUpdates() {
-        turningIntake.update();
+        intake.update();
         lift.update();
         spinner.update();
     }

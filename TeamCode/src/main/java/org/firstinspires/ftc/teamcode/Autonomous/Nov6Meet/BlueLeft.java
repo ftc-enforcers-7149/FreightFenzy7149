@@ -4,9 +4,9 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
-import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.teamcode.Autonomous.Autonomous_Base;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.CarouselSpinner;
+import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Intake;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.TurningIntake;
 import org.firstinspires.ftc.teamcode.Subsystems.Webcam.OpenCV;
@@ -17,7 +17,7 @@ import org.opencv.core.RotatedRect;
 @Disabled
 public class BlueLeft extends Autonomous_Base {
 
-    private TurningIntake turningIntake;
+    private Intake intake;
     private Lift lift;
     private CarouselSpinner spinner;
 
@@ -42,7 +42,7 @@ public class BlueLeft extends Autonomous_Base {
 
         dashboard = FtcDashboard.getInstance();
 
-        turningIntake = new TurningIntake(hardwareMap, "intake", "wrist", false);
+        intake = new Intake(hardwareMap, "intake");
         lift = new Lift(hardwareMap, "lift", bReadEH);
         spinner = new CarouselSpinner(hardwareMap, "leftSpinner", "rightSpinner");
 
@@ -93,13 +93,13 @@ public class BlueLeft extends Autonomous_Base {
         setLiftHeight(Lift.GROUND_HEIGHT);
 
         //Start intaking
-        turningIntake.setIntakePower(1);
+        intake.setIntakePower(1);
 
         //Drive into the warehouse
         driveTo(0,47, Math.toRadians(90));
 
         //Stop intake
-        turningIntake.setIntakePower(0);
+        intake.setIntakePower(0);
 
         //Drive backwards to the hub
         driveTo(0,0, Math.toRadians(90));
@@ -134,7 +134,7 @@ public class BlueLeft extends Autonomous_Base {
 
         /// Stop ///
 
-        turningIntake.stop();
+        intake.stop();
         lift.stop();
         spinner.stop();
         setMotorPowers(0, 0, 0, 0);
@@ -143,9 +143,9 @@ public class BlueLeft extends Autonomous_Base {
     }
 
     private void outtake() {
-        turningIntake.setIntakePower(-1);
+        intake.setIntakePower(-1);
         waitForTime(1500);
-        turningIntake.setIntakePower(0);
+        intake.setIntakePower(0);
     }
 
     private HubLevel detectBarcode() {
@@ -169,7 +169,7 @@ public class BlueLeft extends Autonomous_Base {
 
     @Override
     protected void subsystemUpdates() {
-        turningIntake.update();
+        intake.update();
         lift.update();
         spinner.update();
     }
