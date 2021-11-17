@@ -29,6 +29,7 @@ import org.firstinspires.ftc.teamcode.Odometry.Util.LynxModuleUtil;
 import org.firstinspires.ftc.teamcode.Odometry.trajectorysequence.*;
 import org.firstinspires.ftc.teamcode.Subsystems.BulkRead;
 import org.firstinspires.ftc.teamcode.Subsystems.Gyroscope;
+import org.firstinspires.ftc.teamcode.Subsystems.Subsytem;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -41,7 +42,7 @@ import static org.firstinspires.ftc.teamcode.Odometry.DriveWheels.DriveConstants
  * Simple mecanum drive hardware implementation for REV hardware.
  */
 @Config
-public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive {
+public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive implements Subsytem {
     public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(0, 0, 0);
     public static PIDCoefficients HEADING_PID = new PIDCoefficients(0, 0, 0);
 
@@ -52,6 +53,7 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
     public static double OMEGA_WEIGHT = 1;
 
     private TrajectorySequenceRunner trajectorySequenceRunner;
+    private boolean pauseTrajectory = false;
 
     private static final TrajectoryVelocityConstraint VEL_CONSTRAINT = getVelocityConstraint(MAX_VEL, MAX_ANG_VEL, TRACK_WIDTH);
     private static final TrajectoryAccelerationConstraint ACCEL_CONSTRAINT = getAccelerationConstraint(MAX_ACCEL);
@@ -329,8 +331,10 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
 
     public void update() {
         updatePoseEstimate();
-        DriveSignal signal = trajectorySequenceRunner.update(getPoseEstimate(), getPoseVelocity());
-        if (signal != null) setDriveSignal(signal);
+        if (!pauseTrajectory) {
+            DriveSignal signal = trajectorySequenceRunner.update(getPoseEstimate(), getPoseVelocity());
+            if (signal != null) setDriveSignal(signal);
+        }
     }
 
     public void waitForIdle() {
@@ -454,5 +458,10 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
 
     public static TrajectoryAccelerationConstraint getAccelerationConstraint(double maxAccel) {
         return new ProfileAccelerationConstraint(maxAccel);
+    }
+
+    public void stop() {
+        pauseTrajectory = true;
+        setMotorPowers(0, 0, 0, 0);
     }
 }

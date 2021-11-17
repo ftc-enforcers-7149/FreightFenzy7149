@@ -29,6 +29,7 @@ public abstract class Autonomous_Base extends LinearOpMode {
     //Control objects
     protected BulkRead bReadCH, bReadEH;
     private boolean hasCH, hasEH;
+    protected AutoCommands commands;
 
     protected boolean USE_SUBS;
 
@@ -328,7 +329,8 @@ public abstract class Autonomous_Base extends LinearOpMode {
         initializedGyro = true;
     }
     protected void initializeOdometry() throws Exception {
-        if (!hasCH || !hasEH) throw new Exception("Missing \"Control Hub\". Check configuration file naming");
+        if (!hasCH) throw new Exception("Missing \"Control Hub\". Check configuration file naming");
+        if (!hasEH) throw new Exception("Missing \"Expansion Hub\". Check configuration file naming");
         if (initializedMotors && initializedGyro)
             drive = new MecanumDrive(hardwareMap, bReadCH, bReadEH, fLeft, fRight, bLeft, bRight, gyro);
         else if (initializedMotors)
@@ -341,12 +343,25 @@ public abstract class Autonomous_Base extends LinearOpMode {
 
         initializedDrive = true;
     }
+    protected void initializeCommands() {
+        commands = new AutoCommands(this);
+    }
+    protected void initializeAll() throws Exception {
+        initializeDrive();
+        initializeBulkRead();
+        initializeGyro();
+        initializeOdometry();
+        initializeCommands();
+    }
 
     //Loop updates
     protected void updateBulkRead() {
         if (hasCH) bReadCH.update();
         if (hasEH) bReadEH.update();
     }
+
+    protected abstract Alliance getAlliance();
+
     protected abstract void subsystemUpdates();
     protected abstract void addTelemetryData();
 

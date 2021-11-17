@@ -4,7 +4,9 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-public class CarouselSpinner {
+import org.firstinspires.ftc.teamcode.Subsystems.Subsytem;
+
+public class CarouselSpinner implements Subsytem {
 
     //The two spinner servos
     public CRServo leftSpinner, rightSpinner;
@@ -23,6 +25,7 @@ public class CarouselSpinner {
         lastRightPower = 0;
     }
 
+    @Override
     public void update() {
         if (leftPower != lastLeftPower) {
             leftSpinner.setPower(leftPower);
@@ -52,6 +55,7 @@ public class CarouselSpinner {
         rightPower = power;
     }
 
+    @Override
     public void stop() {
         setLeftPower(0);
         setRightPower(0);

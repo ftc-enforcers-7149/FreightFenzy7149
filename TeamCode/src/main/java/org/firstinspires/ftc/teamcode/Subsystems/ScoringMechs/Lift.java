@@ -9,9 +9,10 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.Subsystems.BulkRead;
+import org.firstinspires.ftc.teamcode.Subsystems.Subsytem;
 
 @Config
-public class Lift {
+public class Lift implements Subsytem {
 
     //Lift motor
     public DcMotorEx lift;
@@ -122,6 +123,7 @@ public class Lift {
         manualOverride = override;
     }
 
+    @Override
     public void update() {
         //Get motor ticks
         if (useBRead) currPosition = -bRead.getMotorPos(lift);
@@ -154,6 +156,7 @@ public class Lift {
         }
     }
 
+    @Override
     public void stop() {
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         setPower(0);

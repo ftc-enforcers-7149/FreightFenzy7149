@@ -6,7 +6,9 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-public class TurningIntake {
+import org.firstinspires.ftc.teamcode.Subsystems.Subsytem;
+
+public class TurningIntake implements Subsytem {
 
     //Intake servos
     public Servo wrist;
@@ -59,6 +61,7 @@ public class TurningIntake {
         wheelInterferes = true;
     }
 
+    @Override
     public void update() {
         if (intakePower != lastIntakePower) {
             intake.setPower(intakePower);
@@ -170,6 +173,7 @@ public class TurningIntake {
         return (0.5) * (input*input) + (0.5) * (input);
     }
 
+    @Override
     public void stop() {
         setIntakePower(0);
         update();
