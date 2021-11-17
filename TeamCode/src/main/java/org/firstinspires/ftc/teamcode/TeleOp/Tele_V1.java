@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.TeleOp;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Mattu.TestLiftPID;
@@ -8,7 +9,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.TurningIntake;
 
 @TeleOp (name = "Tele_V1")
-//@Disabled
+@Disabled
 public class Tele_V1 extends TeleOp_Base {
 
     //Headless

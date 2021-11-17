@@ -5,7 +5,9 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-public class Intake {
+import org.firstinspires.ftc.teamcode.Subsystems.Subsytem;
+
+public class Intake implements Subsytem {
 
     //Intake servos
     public CRServo intake;
@@ -31,6 +33,7 @@ public class Intake {
         lastIntakePower = 0;
     }
 
+    @Override
     public void update() {
         if (intakePower != lastIntakePower) {
             intake.setPower(intakePower);
@@ -47,6 +50,7 @@ public class Intake {
         this.intakePower = intakePower;
     }
 
+    @Override
     public void stop() {
         setIntakePower(0);
         update();
