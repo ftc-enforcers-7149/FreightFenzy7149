@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Autonomous.Testing;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
+import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
 import org.firstinspires.ftc.teamcode.Autonomous.Autonomous_Base;
 
 @Autonomous(name = "Test Drive To")
@@ -46,6 +47,11 @@ public class TestDriveTo extends Autonomous_Base {
         /// Stop ///
 
         setMotorPowers(0, 0, 0, 0);
+    }
+
+    @Override
+    protected Alliance getAlliance() {
+        return null;
     }
 
     @Override

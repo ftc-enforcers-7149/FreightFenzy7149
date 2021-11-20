@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Autonomous.Testing;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
+import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
 import org.firstinspires.ftc.teamcode.Autonomous.Autonomous_Base;
 
 import static org.firstinspires.ftc.teamcode.Subsystems.FixedRoadrunner.createVector2d;
@@ -143,6 +144,11 @@ public class SimpleSquare extends Autonomous_Base {
         /// Stop ///
 
         setMotorPowers(0, 0, 0, 0);
+    }
+
+    @Override
+    protected Alliance getAlliance() {
+        return null;
     }
 
     @Override

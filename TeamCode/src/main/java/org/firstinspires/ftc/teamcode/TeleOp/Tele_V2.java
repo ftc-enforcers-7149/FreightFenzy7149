@@ -32,7 +32,7 @@ public class Tele_V2 extends TeleOp_Base {
         initializeGyro();
         initializeVars();
 
-        intake = new Intake(hardwareMap, "intake", "wrist");
+        intake = new Intake(hardwareMap, "intake", "intakeColor");
         lift = new Lift(hardwareMap, "lift", bReadEH, false);
         spinner = new CarouselSpinner(hardwareMap, "leftSpinner", "rightSpinner");
     }
@@ -79,6 +79,7 @@ public class Tele_V2 extends TeleOp_Base {
 
         // Telemetry
         telemetry.addData("Lift Height: ", lift.getLiftHeight());
+        telemetry.addData("Freight in Intake: ", intake.getFreightInIntake());
 
         intake.update();
         lift.update();
