@@ -6,21 +6,22 @@ package org.firstinspires.ftc.teamcode.Subsystems;
  * Helps with loop times.
  * @param <T> Value return type
  */
-public abstract class ValueTimer<T> {
+public abstract class ValueTimer<T> implements Subsytem {
 
     private T value; //value type
-    private double iTime = 0; //initial time used for delay
-    private double delayTime = 500; //amount of time (in milliseconds) that value is delayed
-    private boolean isPaused = false; //if reading is paused
-
+    private long iTime = 0; //initial time used for delay
+    private long delayTime = 500; //amount of time (in milliseconds) that value is delayed
+    private boolean isPaused = true; //if reading is paused
+    
     /**
      * main phase of subsystem
      * delays reads of value
      * must be in begging of loop
      */
+    @Override
     public void update() {
         //delay for reads
-       if((System.currentTimeMillis() - iTime > delayTime && !isPaused)){
+       if(!isPaused && System.currentTimeMillis() - iTime > delayTime){
             value = readValue(); //reads inputted value
             iTime = System.currentTimeMillis(); //resets iTime for next loop
        }
@@ -46,21 +47,22 @@ public abstract class ValueTimer<T> {
      * must be before update function
      * @param delayTime inputted delay time in mil secs
      */
-    public void setDelayTime (double delayTime){
+    public void setDelayTime(long delayTime){
         this.delayTime = delayTime;
-    }
-
-    /**
-     * keeps getValue at a constant value
-     */
-    public void pause(){
-        isPaused = true;
     }
 
     /**
      * resumes the pause function
      */
-    public void resume(){
+    public void start(){
         isPaused = false;
+    }
+
+    /**
+     * keeps getValue at a constant value
+     */
+    @Override
+    public void stop(){
+        isPaused = true;
     }
 }

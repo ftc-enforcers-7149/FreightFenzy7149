@@ -17,17 +17,18 @@ public class Intake implements Subsytem {
     //Sensors
     public RevColorSensorV3 intakeColorSensor;
 
-    protected double intakeLength = 2;
-    ValueTimer<Double> colorDist;
+    private static final double minDistance = 2;
+    private ValueTimer<Double> colorDist;
+    private boolean useSensor;
 
     //State machine logic
-    private double intakePower,lastIntakePower;
+    private double intakePower,  lastIntakePower;
 
     public Intake(HardwareMap hardwaremap, String intakeServoName, String intakeColorSensorName) {
-        intakeColorSensor = hardwaremap.get(RevColorSensorV3.class, intakeColorSensorName);
         intake = hardwaremap.crservo.get(intakeServoName);
-
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        intakeColorSensor = hardwaremap.get(RevColorSensorV3.class, intakeColorSensorName);
 
         colorDist = new ValueTimer<Double>() {
             @Override
@@ -35,9 +36,11 @@ public class Intake implements Subsytem {
                 return intakeColorSensor.getDistance(DistanceUnit.INCH);
             }
         };
+        colorDist.start();
 
         intakePower = 0;
         lastIntakePower = 0;
+        useSensor = true;
     }
 
     public Intake(HardwareMap hardwaremap, String intakeServoName) {
@@ -47,11 +50,12 @@ public class Intake implements Subsytem {
 
         intakePower = 0;
         lastIntakePower = 0;
+        useSensor = false;
     }
 
     @Override
     public void update() {
-        colorDist.update();
+        if (useSensor) colorDist.update();
 
         if (intakePower != lastIntakePower) {
             intake.setPower(intakePower);
@@ -69,12 +73,20 @@ public class Intake implements Subsytem {
     }
 
     public boolean getFreightInIntake () {
-        return colorDist.getValue() < intakeLength;
+        return useSensor && colorDist.getValue() < minDistance;
+    }
+
+    public void stopSensor() {
+        colorDist.stop();
+    }
+
+    public void startSensor() {
+        colorDist.start();
     }
 
     @Override
     public void stop() {
-        colorDist.pause();
+        if (useSensor) colorDist.stop();
         setIntakePower(0);
         update();
     }

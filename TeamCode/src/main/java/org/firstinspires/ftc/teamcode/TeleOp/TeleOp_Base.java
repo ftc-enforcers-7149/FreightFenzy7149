@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.Odometry.DriveWheels.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Subsystems.BulkRead;
-import org.firstinspires.ftc.teamcode.Subsystems.Gyroscope;
+import org.firstinspires.ftc.teamcode.Subsystems.Sensors.Gyroscope;
 import org.firstinspires.ftc.teamcode.Subsystems.VelLimitsJerk;
 
 import static org.firstinspires.ftc.teamcode.Subsystems.FixedRoadrunner.createPose2d;

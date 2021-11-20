@@ -28,7 +28,7 @@ import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigu
 import org.firstinspires.ftc.teamcode.Odometry.Util.LynxModuleUtil;
 import org.firstinspires.ftc.teamcode.Odometry.trajectorysequence.*;
 import org.firstinspires.ftc.teamcode.Subsystems.BulkRead;
-import org.firstinspires.ftc.teamcode.Subsystems.Gyroscope;
+import org.firstinspires.ftc.teamcode.Subsystems.Sensors.Gyroscope;
 import org.firstinspires.ftc.teamcode.Subsystems.Subsytem;
 import org.jetbrains.annotations.NotNull;
 

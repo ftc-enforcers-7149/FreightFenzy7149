@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.NovaLmao;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.Subsystems.DistanceLocalization;
+import org.firstinspires.ftc.teamcode.Subsystems.Sensors.DistanceLocalization;
 import org.firstinspires.ftc.teamcode.TeleOp.TeleOp_Base;
 
 @TeleOp(name="Distance Sensor Localization")
