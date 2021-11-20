@@ -7,8 +7,6 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.Subsystems.Gyroscope;
-
 @TeleOp(name = "Prototype Chassis")
 @Disabled
 public class PrototypeChassis extends TeleOp_Base {
