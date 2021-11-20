@@ -33,25 +33,25 @@ public class RedWH extends Auto_V2 {
         }
 
         //Drive to hub
-        driveTo(16,0,0);
+        driveTo(24,0,0);
 
         //Deliver pre-loaded block
         commands.outtake(intake, 1500);
 
         //Move back a little so that the intake doesn't hit the hub
-        driveTo(10,0,0);
+        moveTo(20, 0);
 
         //Put lift back down
         lift.setTargetHeight(Lift.GROUND_HEIGHT);
 
         //Realign with the wall and turn towards the warehouse
-        driveTo(drive.getPoseEstimate().getX(), drive.getPoseEstimate().getY(), Math.toRadians(270));
-        driveTo(0,0, Math.toRadians(270));
+        rotateTo(Math.toRadians(270));
+        moveTo(0,0);
         commands.setLiftHeight(lift, Lift.GROUND_HEIGHT);
 
         //Start intaking
         intake.setIntakePower(1);
-
+ 
         //Drive into the warehouse
         driveTo(0,-47, Math.toRadians(270));
 
