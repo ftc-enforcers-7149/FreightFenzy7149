@@ -131,128 +131,15 @@ public abstract class Autonomous_Base extends LinearOpMode {
      * @param destY The destination y position
      */
     public void moveTo(double destX, double destY) {
-        double scale = 0.25;
-
-        double relativeX = destX - (-drive.getPoseEstimate().getY());
-        double relativeY = destY - (drive.getPoseEstimate().getX());
-
-        double startTime = System.currentTimeMillis();
-        while (opModeIsActive() && (Math.abs(relativeX) > 0.1 || Math.abs(relativeY) > 0.1) && System.currentTimeMillis() < startTime + 1000) {
-
-            //Update bulk read, odometry, and subsystems
-            updateInputs();
-
-            //Output telemetry
-            telemetry.addLine("Waiting for position correction");
-
-            //Gets the distance to the point
-            relativeX = destX - (-drive.getPoseEstimate().getY());
-            relativeY = destY - (drive.getPoseEstimate().getX());
-
-            //Angle the robot needs to drive in (in reference to its own front)
-            double robotAngle = Math.atan2(relativeY, relativeX) - Math.toRadians(Math.toDegrees(drive.getPoseEstimate().getHeading()) + 90) + Math.PI / 4;
-
-            //Calculates each motor power using trig
-            double fL = scale * Math.cos(robotAngle);
-            double fR = scale * Math.sin(robotAngle);
-            double bL = scale * Math.sin(robotAngle);
-            double bR = scale * Math.cos(robotAngle);
-
-            //Sets powers to motors
-            drive.setMotorPowers(fL, bL, bR, fR);
-
-            updateOutputs();
-        }
-
-        //Stops motors
-        drive.setMotorPowers(0, 0, 0, 0);
+        driveTo(destX, destY, drive.getPoseEstimate().getHeading());
     }
 
     /**
-     * @param destAngle Destination angle
-     * @param heading   Current angle
-     * @return The shortest distance between two angles.
-     */
-    public double getDelta(double destAngle, double heading) {
-        if (heading >= 360) {
-            heading -= 360;
-        }
-        double delta;
-        if (heading > destAngle) {
-            delta = heading - destAngle;
-            if (delta > 180) {
-                return 360 - delta;
-            }
-
-            return -delta;
-        }
-        else {
-            delta = destAngle - heading;
-            if (delta > 180) {
-                return -(360 - delta);
-            }
-
-            return delta;
-        }
-    }
-
-    /**
-     * Rotates slowly to a specific angle, without using Roadrunner trajectories
-     * @param destAngle The destination angle
+     * Rotates to a specific angle, without using Roadrunner trajectories
+     * @param destAngle The destination angle in Radians
      */
     public void rotateTo(double destAngle) {
-
-        double initAngle = Math.toDegrees(drive.getPoseEstimate().getHeading()); //Gets the first init angle
-
-        //Variables for the rotate
-        double speed, min=0.17, max=0.8;
-
-        //Get current heading
-        double heading = initAngle;
-        double delta = getDelta(destAngle, heading);
-
-        double startTime = System.currentTimeMillis();
-        //If heading is not at destination
-        while (opModeIsActive() && Math.abs(delta) > 0.125 && System.currentTimeMillis() < startTime + 1000) {
-
-            //Update bulk read, odometry, and subsystems
-            updateInputs();
-
-            //Output telemetry
-            telemetry.addLine("Waiting for heading correction");
-
-            //Gets heading
-            heading = Math.toDegrees(drive.getPoseEstimate().getHeading());
-
-            //Find delta
-            delta = getDelta(destAngle, heading);
-
-            //Finds the speed to rotate the robot so it doesn't over turn, Cubic function
-            speed = 0.001 * Math.pow(delta,3);
-
-            // Finds speeds boundaries
-            if (speed > 0 && speed > max) {
-                speed = max;
-            }
-            else if (speed < 0 && speed < -max) {
-                speed = -max;
-            }
-
-            if (speed > 0 && speed < min) {
-                speed = min;
-            }
-            else if (speed < 0 && speed > -min) {
-                speed = -min;
-            }
-
-            //Drive the motors so the robot turns
-            drive.setMotorPowers(-speed, -speed, speed, speed);
-
-            updateOutputs();
-        }
-
-        //Stops motors
-        drive.setMotorPowers(0, 0, 0, 0);
+        driveTo(drive.getPoseEstimate().getX(), drive.getPoseEstimate().getY(), destAngle);
     }
 
     /**
