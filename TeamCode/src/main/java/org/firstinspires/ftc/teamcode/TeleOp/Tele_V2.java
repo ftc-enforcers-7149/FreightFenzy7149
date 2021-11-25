@@ -32,7 +32,7 @@ public class Tele_V2 extends TeleOp_Base {
         initializeGyro();
         initializeVars();
 
-        intake = new Intake(hardwareMap, "intake", "intakeColor");
+        intake = new Intake(hardwareMap, "intake");//, "intakeColor");
         lift = new Lift(hardwareMap, "lift", bReadEH, false);
         spinner = new CarouselSpinner(hardwareMap, "leftSpinner", "rightSpinner");
     }
@@ -98,8 +98,8 @@ public class Tele_V2 extends TeleOp_Base {
     @Override
     protected void getInput() {
         //Headless
-        leftX = curveInput(gamepad1.left_stick_x, 5)*lim * 0.8;
-        leftY = curveInput(gamepad1.left_stick_y, 5)*lim * 0.8;
+        leftX = curveInput(gamepad1.left_stick_x, 5)*lim * 0.9;
+        leftY = curveInput(gamepad1.left_stick_y, 5)*lim * 0.9;
         rightX = curveInput(gamepad1.right_stick_x, 5)*lim*0.75 * 0.8;
         resetAngle = gamepad1.y;
 
