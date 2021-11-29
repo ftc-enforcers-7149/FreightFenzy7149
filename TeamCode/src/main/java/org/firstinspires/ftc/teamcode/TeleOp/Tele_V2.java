@@ -34,7 +34,7 @@ public class Tele_V2 extends TeleOp_Base {
             return;
         }
 
-        intake = new Intake(hardwareMap, "intake", "intakeColor");
+        intake = new Intake(hardwareMap, "intake");//, "intakeColor");
         lift = new Lift(hardwareMap, "lift", bReadEH, false);
         spinner = new CarouselSpinner(hardwareMap, "leftSpinner", "rightSpinner");
 
