@@ -6,7 +6,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
 import org.firstinspires.ftc.teamcode.Subsystems.Webcam.OpenCV;
 import org.firstinspires.ftc.teamcode.Subsystems.Webcam.TSEPipeline;
 
-public abstract class Auto_V3 extends Autonomous_Base {
+public abstract class Auto_V2 extends Autonomous_Base {
 
     protected Intake intake;
     protected Lift lift;

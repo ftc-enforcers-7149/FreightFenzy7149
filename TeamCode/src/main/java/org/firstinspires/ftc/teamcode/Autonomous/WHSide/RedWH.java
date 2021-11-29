@@ -4,13 +4,13 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
-import org.firstinspires.ftc.teamcode.Autonomous.Auto_V3;
+import org.firstinspires.ftc.teamcode.Autonomous.Auto_V2;
 import org.firstinspires.ftc.teamcode.Autonomous.HubLevel;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
 
 @Autonomous(name = "Red Warehouse")
 @Disabled
-public class RedWH extends Auto_V3 {
+public class RedWH extends Auto_V2 {
 
     @Override
     protected Alliance getAlliance() {

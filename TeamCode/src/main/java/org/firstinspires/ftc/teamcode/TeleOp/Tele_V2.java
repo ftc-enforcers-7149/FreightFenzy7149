@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
 
 @TeleOp (name = "Tele_V2")
 //@Disabled
-public class Tele_V3 extends TeleOp_Base {
+public class Tele_V2 extends TeleOp_Base {
 
     //Headless
     private boolean resetAngle;
