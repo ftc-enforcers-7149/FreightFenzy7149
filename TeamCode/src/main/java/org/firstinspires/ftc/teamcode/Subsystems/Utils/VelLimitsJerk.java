@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Subsystems;
+package org.firstinspires.ftc.teamcode.Subsystems.Utils;
 
 /**
  * A curve, derived using Calculus, that limits jerk to a constant while

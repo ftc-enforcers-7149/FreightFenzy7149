@@ -10,15 +10,15 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.Odometry.DriveWheels.MecanumDrive;
-import org.firstinspires.ftc.teamcode.Subsystems.BulkRead;
-import org.firstinspires.ftc.teamcode.Subsystems.Input;
-import org.firstinspires.ftc.teamcode.Subsystems.Output;
+import org.firstinspires.ftc.teamcode.Subsystems.Sensors.BulkRead;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.Input;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.Output;
 import org.firstinspires.ftc.teamcode.Subsystems.Sensors.Gyroscope;
 
 import java.util.ArrayList;
 import java.util.function.Supplier;
 
-import static org.firstinspires.ftc.teamcode.Subsystems.FixedRoadrunner.createPose2d;
+import static org.firstinspires.ftc.teamcode.Subsystems.Utils.FixedRoadrunner.createPose2d;
 
 @Config
 public abstract class Autonomous_Base extends LinearOpMode {

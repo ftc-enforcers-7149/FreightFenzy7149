@@ -27,11 +27,10 @@ import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigu
 
 import org.firstinspires.ftc.teamcode.Odometry.Util.LynxModuleUtil;
 import org.firstinspires.ftc.teamcode.Odometry.trajectorysequence.*;
-import org.firstinspires.ftc.teamcode.Subsystems.BulkRead;
-import org.firstinspires.ftc.teamcode.Subsystems.Input;
-import org.firstinspires.ftc.teamcode.Subsystems.Output;
+import org.firstinspires.ftc.teamcode.Subsystems.Sensors.BulkRead;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.Input;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.Output;
 import org.firstinspires.ftc.teamcode.Subsystems.Sensors.Gyroscope;
-import org.firstinspires.ftc.teamcode.Subsystems.Subsytem;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;

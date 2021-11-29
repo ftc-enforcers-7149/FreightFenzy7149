@@ -6,9 +6,9 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.Subsystems.Input;
-import org.firstinspires.ftc.teamcode.Subsystems.Output;
-import org.firstinspires.ftc.teamcode.Subsystems.ValueTimer;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.Input;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.Output;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.ValueTimer;
 
 public class Intake implements Output, Input {
 

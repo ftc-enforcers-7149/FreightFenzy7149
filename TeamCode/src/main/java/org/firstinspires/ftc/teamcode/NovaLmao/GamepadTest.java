@@ -4,6 +4,9 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchButton;
+import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Touchpad;
+
 @TeleOp(name="Gamepad Test")
 @Disabled
 public class GamepadTest extends OpMode {

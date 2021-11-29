@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Subsystems;
+package org.firstinspires.ftc.teamcode.Subsystems.Utils;
 
 /**
  * Sets values using a user-defined method, only when the value changes

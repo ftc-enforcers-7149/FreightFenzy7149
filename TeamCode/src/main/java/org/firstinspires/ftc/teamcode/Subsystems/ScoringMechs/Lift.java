@@ -8,10 +8,9 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.teamcode.Subsystems.BulkRead;
-import org.firstinspires.ftc.teamcode.Subsystems.Input;
-import org.firstinspires.ftc.teamcode.Subsystems.Output;
-import org.firstinspires.ftc.teamcode.Subsystems.Subsytem;
+import org.firstinspires.ftc.teamcode.Subsystems.Sensors.BulkRead;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.Input;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.Output;
 
 @Config
 public class Lift implements Output, Input {
