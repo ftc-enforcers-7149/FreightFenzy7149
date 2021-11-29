@@ -23,14 +23,18 @@ public class TestLiftPID extends TeleOp_Base {
 
     @Override
     public void init() {
-        bRead = new BulkRead(hardwareMap, "Expansion Hub");
+        initializeBulkRead();
+
         lift = new Lift(hardwareMap, "lift", bRead);
+
+        addInput(lift);
+        addOutput(lift);
     }
 
     @Override
     public void loop() {
+        updateInputs();
         getInput();
-        bRead.update();
 
         if (liftPower != 0) {
             lift.setPower(liftPower);
@@ -53,18 +57,18 @@ public class TestLiftPID extends TeleOp_Base {
             }
         }
 
-        lift.update();
-
         telemetry.addData("Lift Height (in): ", lift.getLiftHeight());
         telemetry.addData("Lift Motor Ticks: ", lift.getMotorTicks());
         telemetry.addData("Target Position", liftPos);
 
+        updateOutputs();
         updateStateMachine();
     }
 
     @Override
     public void stop() {
-        lift.stop();
+        stopInputs();
+        stopOutputs();
     }
 
     @Override

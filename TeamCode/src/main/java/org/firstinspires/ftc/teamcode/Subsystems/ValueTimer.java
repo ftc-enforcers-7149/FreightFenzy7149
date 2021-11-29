@@ -6,20 +6,20 @@ package org.firstinspires.ftc.teamcode.Subsystems;
  * Helps with loop times.
  * @param <T> Value return type
  */
-public abstract class ValueTimer<T> implements Subsytem {
+public abstract class ValueTimer<T> implements Input {
 
     private T value; //value type
     private long iTime = 0; //initial time used for delay
     private long delayTime = 500; //amount of time (in milliseconds) that value is delayed
     private boolean isPaused = true; //if reading is paused
-    
+
     /**
      * main phase of subsystem
      * delays reads of value
      * must be in begging of loop
      */
     @Override
-    public void update() {
+    public void updateInput() {
         //delay for reads
        if(!isPaused && System.currentTimeMillis() - iTime > delayTime){
             value = readValue(); //reads inputted value
@@ -54,6 +54,7 @@ public abstract class ValueTimer<T> implements Subsytem {
     /**
      * resumes the pause function
      */
+    @Override
     public void start(){
         isPaused = false;
     }

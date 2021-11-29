@@ -5,7 +5,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.CarouselSpinner;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Intake;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
-import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.TurningIntake;
 
 @TeleOp (name = "Tele_V2")
 //@Disabled
@@ -27,20 +26,28 @@ public class Tele_V2 extends TeleOp_Base {
 
     @Override
     public void init() {
-        initializeDrive();
-        initializeBulkRead();
-        initializeGyro();
-        initializeVars();
+        try {
+            initializeAll();
+        } catch (Exception e) {
+            e.printStackTrace();
+            requestOpModeStop();
+            return;
+        }
 
         intake = new Intake(hardwareMap, "intake");//, "intakeColor");
         lift = new Lift(hardwareMap, "lift", bReadEH, false);
         spinner = new CarouselSpinner(hardwareMap, "leftSpinner", "rightSpinner");
+
+        addInput(intake);
+        addInput(lift);
+        addOutput(intake);
+        addOutput(lift);
+        addOutput(spinner);
     }
 
     @Override
     public void loop() {
-        updateBulkRead();
-        gyro.update();
+        updateInputs();
         getInput();
 
         // Drive
@@ -81,18 +88,14 @@ public class Tele_V2 extends TeleOp_Base {
         telemetry.addData("Lift Height: ", lift.getLiftHeight());
         telemetry.addData("Freight in Intake: ", intake.getFreightInIntake());
 
-        intake.update();
-        lift.update();
-        spinner.update();
+        updateOutputs();
         updateStateMachine();
     }
 
     @Override
     public void stop() {
-        setMotorPowers(0,0,0,0);
-        intake.stop();
-        lift.stop();
-        spinner.stop();
+        stopInputs();
+        stopOutputs();
     }
 
     @Override

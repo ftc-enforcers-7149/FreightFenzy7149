@@ -19,8 +19,6 @@ public abstract class Auto_V2 extends Autonomous_Base {
     @Override
     public final void runOpMode() throws InterruptedException {
         /// Init ///
-        USE_SUBS = true;
-
         try {
             initializeAll();
         } catch (Exception e) {
@@ -31,6 +29,12 @@ public abstract class Auto_V2 extends Autonomous_Base {
         intake = new Intake(hardwareMap, "intake");
         lift = new Lift(hardwareMap, "lift", bReadEH);
         spinner = new CarouselSpinner(hardwareMap, "leftSpinner", "rightSpinner");
+
+        addInput(intake);
+        addInput(lift);
+        addOutput(intake);
+        addOutput(lift);
+        addOutput(spinner);
 
         tseDetector = new OpenCV(hardwareMap);
         if (getAlliance() == Alliance.RED)
@@ -57,19 +61,10 @@ public abstract class Auto_V2 extends Autonomous_Base {
 
         /// Stop ///
 
-        intake.stop();
-        lift.stop();
-        spinner.stop();
-        setMotorPowers(0, 0, 0, 0);
+        stopInputs();
+        stopOutputs();
 
         waitForTime(500);
-    }
-
-    @Override
-    protected final void subsystemUpdates() {
-        intake.update();
-        lift.update();
-        spinner.update();
     }
 
     @Override

@@ -9,10 +9,12 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.Subsystems.BulkRead;
+import org.firstinspires.ftc.teamcode.Subsystems.Input;
+import org.firstinspires.ftc.teamcode.Subsystems.Output;
 import org.firstinspires.ftc.teamcode.Subsystems.Subsytem;
 
 @Config
-public class Lift implements Subsytem {
+public class Lift implements Output, Input {
 
     //Lift motor
     public DcMotorEx lift;
@@ -92,6 +94,42 @@ public class Lift implements Subsytem {
         useBRead = true;
     }
 
+    @Override
+    public void updateInput() {
+        //Get motor ticks
+        if (useBRead) currPosition = -bRead.getMotorPos(lift);
+        else currPosition = lift.getCurrentPosition();
+    }
+
+    @Override
+    public void updateOutput() {
+        //Use PID to go to position
+        if (usePID && !manualOverride) {
+            output = controller.update(currPosition); //Update PID
+
+            //Stop the motor when at rest on the floor
+            /*if (setPosition == 0 && currPosition < liftInchesToTicks(0.01)) {
+                output = 0;
+            }*/
+            if (output != lastOutput) {
+                lift.setPower(output);
+
+                lastOutput = output;
+            }
+        }
+
+        //Use motor power to move lift
+        else {
+            if (!manualOverride && liftPower < 0 && getLiftHeight() < -0.05) liftPower = 0;
+
+            if (liftPower != lastLiftPower) {
+                lift.setPower(liftPower);
+
+                lastLiftPower = liftPower;
+            }
+        }
+    }
+
     /**
      * Set power to the lift motor, stopping the PID
      * @param power Motor power
@@ -124,43 +162,10 @@ public class Lift implements Subsytem {
     }
 
     @Override
-    public void update() {
-        //Get motor ticks
-        if (useBRead) currPosition = -bRead.getMotorPos(lift);
-        else currPosition = lift.getCurrentPosition();
-
-        //Use PID to go to position
-        if (usePID && !manualOverride) {
-            output = controller.update(currPosition); //Update PID
-
-            //Stop the motor when at rest on the floor
-            /*if (setPosition == 0 && currPosition < liftInchesToTicks(0.01)) {
-                output = 0;
-            }*/
-            if (output != lastOutput) {
-                lift.setPower(output);
-
-                lastOutput = output;
-            }
-        }
-
-        //Use motor power to move lift
-        else {
-            if (!manualOverride && liftPower < 0 && getLiftHeight() < -0.05) liftPower = 0;
-
-            if (liftPower != lastLiftPower) {
-                lift.setPower(liftPower);
-
-                lastLiftPower = liftPower;
-            }
-        }
-    }
-
-    @Override
     public void stop() {
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         setPower(0);
-        update();
+        updateOutput();
     }
 
     /**

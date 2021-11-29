@@ -5,14 +5,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
 import org.firstinspires.ftc.teamcode.Autonomous.Auto_V2;
-import org.firstinspires.ftc.teamcode.Autonomous.Autonomous_Base;
 import org.firstinspires.ftc.teamcode.Autonomous.HubLevel;
-import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.CarouselSpinner;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
-import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.TurningIntake;
-import org.firstinspires.ftc.teamcode.Subsystems.Webcam.OpenCV;
-import org.firstinspires.ftc.teamcode.Subsystems.Webcam.TSEPipeline;
-import org.opencv.core.RotatedRect;
 
 @Autonomous(name = "Red Duck - Unit Park")
 @Disabled

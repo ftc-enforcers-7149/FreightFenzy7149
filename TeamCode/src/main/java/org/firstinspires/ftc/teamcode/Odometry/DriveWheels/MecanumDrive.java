@@ -28,6 +28,8 @@ import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigu
 import org.firstinspires.ftc.teamcode.Odometry.Util.LynxModuleUtil;
 import org.firstinspires.ftc.teamcode.Odometry.trajectorysequence.*;
 import org.firstinspires.ftc.teamcode.Subsystems.BulkRead;
+import org.firstinspires.ftc.teamcode.Subsystems.Input;
+import org.firstinspires.ftc.teamcode.Subsystems.Output;
 import org.firstinspires.ftc.teamcode.Subsystems.Sensors.Gyroscope;
 import org.firstinspires.ftc.teamcode.Subsystems.Subsytem;
 import org.jetbrains.annotations.NotNull;
@@ -42,7 +44,8 @@ import static org.firstinspires.ftc.teamcode.Odometry.DriveWheels.DriveConstants
  * Simple mecanum drive hardware implementation for REV hardware.
  */
 @Config
-public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive implements Subsytem {
+public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
+        implements Input, Output {
     public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(0, 0, 0);
     public static PIDCoefficients HEADING_PID = new PIDCoefficients(0, 0, 0);
 
@@ -62,6 +65,10 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
 
     public DcMotorEx fLeft, bLeft, bRight, fRight;
     private List<DcMotorEx> motors;
+
+    //Motor powers
+    private double fL, bL, bR, fR;
+    private double lastFL, lastBL, lastBR, lastFR;
 
     public Gyroscope gyro;
     public VoltageSensor batteryVoltageSensor;
@@ -329,17 +336,29 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
         return trajectorySequenceRunner.getLastPoseError();
     }
 
-    public void update() {
+    @Override
+    public void updateInput() {
         updatePoseEstimate();
+    }
+
+    @Override
+    public void updateOutput() {
         if (!pauseTrajectory) {
             DriveSignal signal = trajectorySequenceRunner.update(getPoseEstimate(), getPoseVelocity());
             if (signal != null) setDriveSignal(signal);
         }
+
+        if (fL != lastFL) fLeft.setPower(fL);
+        if (bL != lastBL) bLeft.setPower(bL);
+        if (bR != lastBR) bRight.setPower(bR);
+        if (fR != lastFR) fRight.setPower(fR);
     }
 
     public void waitForIdle() {
-        while (!Thread.currentThread().isInterrupted() && isBusy())
-            update();
+        while (!Thread.currentThread().isInterrupted() && isBusy()) {
+            updateInput();
+            updateOutput();
+        }
     }
 
     public boolean isBusy() {
@@ -415,10 +434,7 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
 
     @Override
     public void setMotorPowers(double v, double v1, double v2, double v3) {
-        fLeft.setPower(v);
-        bLeft.setPower(v1);
-        bRight.setPower(v2);
-        fRight.setPower(v3);
+        fL = v; bL = v1; bR = v2; fR = v3;
     }
 
     @Override
@@ -460,8 +476,10 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
         return new ProfileAccelerationConstraint(maxAccel);
     }
 
+    @Override
     public void stop() {
         pauseTrajectory = true;
         setMotorPowers(0, 0, 0, 0);
+        updateOutput();
     }
 }

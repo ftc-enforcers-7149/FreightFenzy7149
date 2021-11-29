@@ -5,10 +5,11 @@ import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.Subsystems.Input;
 import org.firstinspires.ftc.teamcode.Subsystems.Subsytem;
 import org.firstinspires.ftc.teamcode.Subsystems.ValueTimer;
 
-public class Positioning implements Subsytem {
+public class Positioning implements Input {
 
     private ValueTimer<Double> distanceLeft, distanceRight;
     public Rev2mDistanceSensor distL, distR;
@@ -43,6 +44,7 @@ public class Positioning implements Subsytem {
         };
     }
 
+    @Override
     public void start() {
         distanceLeft.start();
         distanceRight.start();
@@ -50,10 +52,10 @@ public class Positioning implements Subsytem {
     }
 
     @Override
-    public void update() {
-        distanceLeft.update();
-        distanceRight.update();
-        lightDetected.update();
+    public void updateInput() {
+        distanceLeft.updateInput();
+        distanceRight.updateInput();
+        lightDetected.updateInput();
     }
 
     public double getLeftDistance() {

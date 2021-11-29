@@ -4,7 +4,7 @@ package org.firstinspires.ftc.teamcode.Subsystems;
  * Sets values using a user-defined method, only when the value changes
  * @param <T> The type of value to set
  */
-public abstract class ValueSetter<T> implements Subsytem {
+public abstract class ValueSetter<T> implements Output {
 
     private T value, lastValue; //Writeable values
     private boolean disabled; //If the writing is paused
@@ -14,7 +14,7 @@ public abstract class ValueSetter<T> implements Subsytem {
      * Should be called at the beginning of every loop
      */
     @Override
-    public void update() {
+    public void updateOutput() {
         if (!disabled && value != lastValue) {
             writeValue(value);
             lastValue = value;
@@ -38,6 +38,7 @@ public abstract class ValueSetter<T> implements Subsytem {
     /**
      * Enables the update function
      */
+    @Override
     public void start() {
         disabled = false;
     }
