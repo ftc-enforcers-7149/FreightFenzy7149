@@ -20,7 +20,7 @@ public class Intake implements Output, Input {
 
     private static final double minDistance = 2;
     private ValueTimer<Double> colorDist;
-    private boolean useSensor;
+    private final boolean useSensor;
 
     //State machine logic
     private double intakePower,  lastIntakePower;
@@ -31,7 +31,7 @@ public class Intake implements Output, Input {
 
         intakeColorSensor = hardwaremap.get(RevColorSensorV3.class, intakeColorSensorName);
 
-        colorDist = new ValueTimer<Double>() {
+        colorDist = new ValueTimer<Double>(250) {
             @Override
             public Double readValue() {
                 return intakeColorSensor.getDistance(DistanceUnit.INCH);
@@ -51,11 +51,6 @@ public class Intake implements Output, Input {
         intakePower = 0;
         lastIntakePower = 0;
         useSensor = false;
-    }
-
-    @Override
-    public void start() {
-        if (useSensor) colorDist.start();
     }
 
     @Override
@@ -86,17 +81,16 @@ public class Intake implements Output, Input {
 
     @Override
     public void startInput() {
-        colorDist.start();
+        if (useSensor) colorDist.startInput();
     }
 
     @Override
     public void stopInput() {
-        colorDist.stop();
+        if (useSensor) colorDist.stopInput();
     }
 
     @Override
-    public void stop() {
-        if (useSensor) colorDist.stop();
+    public void stopOutput() {
         setIntakePower(0);
         updateOutput();
     }

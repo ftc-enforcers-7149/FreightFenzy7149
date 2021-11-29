@@ -56,7 +56,7 @@ public class CarouselSpinner implements Output {
     }
 
     @Override
-    public void stop() {
+    public void stopOutput() {
         setLeftPower(0);
         setRightPower(0);
         updateOutput();

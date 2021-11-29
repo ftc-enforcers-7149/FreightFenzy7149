@@ -285,9 +285,4 @@ public class BulkRead implements Input {
     public LynxModule.BulkData getBulkData() {
         return bData;
     }
-
-    @Override
-    public void stop() {
-
-    }
 }

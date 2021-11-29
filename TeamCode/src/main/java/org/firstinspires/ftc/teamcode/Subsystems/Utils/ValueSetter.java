@@ -39,7 +39,7 @@ public abstract class ValueSetter<T> implements Output {
      * Enables the update function
      */
     @Override
-    public void start() {
+    public void startOutput() {
         disabled = false;
     }
 
@@ -47,7 +47,7 @@ public abstract class ValueSetter<T> implements Output {
      * Disables the update function
      */
     @Override
-    public void stop() {
+    public void stopOutput() {
         disabled = true;
     }
 }

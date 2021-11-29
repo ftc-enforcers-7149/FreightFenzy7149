@@ -10,8 +10,12 @@ public abstract class ValueTimer<T> implements Input {
 
     private T value; //value type
     private long iTime = 0; //initial time used for delay
-    private long delayTime = 500; //amount of time (in milliseconds) that value is delayed
+    private long delayTime; //amount of time (in milliseconds) that value is delayed
     private boolean isPaused = true; //if reading is paused
+
+    public ValueTimer(long delayTime) {
+        this.delayTime = delayTime;
+    }
 
     /**
      * main phase of subsystem
@@ -55,7 +59,7 @@ public abstract class ValueTimer<T> implements Input {
      * resumes the pause function
      */
     @Override
-    public void start(){
+    public void startInput(){
         isPaused = false;
     }
 
@@ -63,7 +67,7 @@ public abstract class ValueTimer<T> implements Input {
      * keeps getValue at a constant value
      */
     @Override
-    public void stop(){
+    public void stopInput(){
         isPaused = true;
     }
 }

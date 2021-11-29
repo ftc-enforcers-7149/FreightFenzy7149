@@ -55,7 +55,7 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
     public static double OMEGA_WEIGHT = 1;
 
     private TrajectorySequenceRunner trajectorySequenceRunner;
-    private boolean pauseTrajectory = false;
+    private boolean pauseTrajectory = true;
 
     private static final TrajectoryVelocityConstraint VEL_CONSTRAINT = getVelocityConstraint(MAX_VEL, MAX_ANG_VEL, TRACK_WIDTH);
     private static final TrajectoryAccelerationConstraint ACCEL_CONSTRAINT = getAccelerationConstraint(MAX_ACCEL);
@@ -64,6 +64,7 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
 
     public DcMotorEx fLeft, bLeft, bRight, fRight;
     private List<DcMotorEx> motors;
+    private boolean pauseDrive = true;
 
     //Motor powers
     private double fL, bL, bR, fR;
@@ -73,6 +74,7 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
     public VoltageSensor batteryVoltageSensor;
 
     public BulkRead bReadCH, bReadEH;
+    private boolean pauseOdometry = true;
 
     public MecanumDrive(HardwareMap hardwareMap, BulkRead bReadCH, BulkRead bReadEH,
                         DcMotorEx fLeft, DcMotorEx fRight, DcMotorEx bLeft, DcMotorEx bRight,
@@ -119,6 +121,8 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
         setLocalizer(new org.firstinspires.ftc.teamcode.Odometry.DriveWheels.MecanumLocalizer(this));
 
         trajectorySequenceRunner = new TrajectorySequenceRunner(follower, HEADING_PID);
+
+        lastFL = 0; lastFR = 0; lastBL = 0; lastBR = 0;
     }
 
     public MecanumDrive(HardwareMap hardwareMap, BulkRead bReadCH, BulkRead bReadEH,
@@ -165,6 +169,8 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
         setLocalizer(new org.firstinspires.ftc.teamcode.Odometry.DriveWheels.MecanumLocalizer(this));
 
         trajectorySequenceRunner = new TrajectorySequenceRunner(follower, HEADING_PID);
+
+        lastFL = 0; lastFR = 0; lastBL = 0; lastBR = 0;
     }
 
     public MecanumDrive(HardwareMap hardwareMap, BulkRead bReadCH, BulkRead bReadEH,
@@ -220,6 +226,8 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
         setLocalizer(new org.firstinspires.ftc.teamcode.Odometry.DriveWheels.MecanumLocalizer(this));
 
         trajectorySequenceRunner = new TrajectorySequenceRunner(follower, HEADING_PID);
+
+        lastFL = 0; lastFR = 0; lastBL = 0; lastBR = 0;
     }
 
     public MecanumDrive(HardwareMap hardwareMap, BulkRead bReadCH, BulkRead bReadEH) {
@@ -274,6 +282,8 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
         setLocalizer(new org.firstinspires.ftc.teamcode.Odometry.DriveWheels.MecanumLocalizer(this));
 
         trajectorySequenceRunner = new TrajectorySequenceRunner(follower, HEADING_PID);
+
+        lastFL = 0; lastFR = 0; lastBL = 0; lastBR = 0;
     }
 
     public TrajectoryBuilder trajectoryBuilder(Pose2d startPose) {
@@ -337,11 +347,13 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
 
     @Override
     public void updateInput() {
-        updatePoseEstimate();
+        if (!pauseOdometry) updatePoseEstimate();
     }
 
     @Override
     public void updateOutput() {
+        if (pauseDrive) return;
+
         if (!pauseTrajectory) {
             DriveSignal signal = trajectorySequenceRunner.update(getPoseEstimate(), getPoseVelocity());
             if (signal != null) setDriveSignal(signal);
@@ -475,8 +487,30 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
         return new ProfileAccelerationConstraint(maxAccel);
     }
 
+    public void pauseTrajectory() {
+        pauseTrajectory = true;
+        setMotorPowers(0, 0, 0, 0);
+    }
+
     @Override
-    public void stop() {
+    public void startInput() {
+        pauseOdometry = false;
+    }
+
+    @Override
+    public void startOutput() {
+        pauseDrive = false;
+        pauseTrajectory = false;
+    }
+
+    @Override
+    public void stopInput() {
+        pauseOdometry = true;
+    }
+
+    @Override
+    public void stopOutput() {
+        pauseDrive = true;
         pauseTrajectory = true;
         setMotorPowers(0, 0, 0, 0);
         updateOutput();

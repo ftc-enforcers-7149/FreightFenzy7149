@@ -160,13 +160,6 @@ public class Lift implements Output, Input {
         manualOverride = override;
     }
 
-    @Override
-    public void stop() {
-        lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        setPower(0);
-        updateOutput();
-    }
-
     /**
      * Gets the current position of the motor
      * @return Motor ticks
@@ -212,5 +205,12 @@ public class Lift implements Output, Input {
         liftPower = 0; lastLiftPower = 0;
         usePID = true;
         manualOverride = false;
+    }
+
+    @Override
+    public void stopOutput() {
+        lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        setPower(0);
+        updateOutput();
     }
 }

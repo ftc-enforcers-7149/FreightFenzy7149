@@ -21,21 +21,21 @@ public class Positioning implements Input {
         distR = hardwareMap.get(Rev2mDistanceSensor.class, distRName);
         lineDetector = hardwareMap.get(RevColorSensorV3.class, lineName);
 
-        distanceLeft = new ValueTimer<Double>() {
+        distanceLeft = new ValueTimer<Double>(100) {
             @Override
             public Double readValue() {
                 return distL.getDistance(DistanceUnit.INCH);
             }
         };
 
-        distanceRight = new ValueTimer<Double>() {
+        distanceRight = new ValueTimer<Double>(100) {
             @Override
             public Double readValue() {
                 return distR.getDistance(DistanceUnit.INCH);
             }
         };
 
-        lightDetected = new ValueTimer<Double>() {
+        lightDetected = new ValueTimer<Double>(100) {
             @Override
             public Double readValue() {
                 return lineDetector.getLightDetected();
@@ -44,10 +44,10 @@ public class Positioning implements Input {
     }
 
     @Override
-    public void start() {
-        distanceLeft.start();
-        distanceRight.start();
-        lightDetected.start();
+    public void startInput() {
+        distanceLeft.startInput();
+        distanceRight.startInput();
+        lightDetected.startInput();
     }
 
     @Override
@@ -70,9 +70,9 @@ public class Positioning implements Input {
     }
 
     @Override
-    public void stop() {
-        distanceLeft.stop();
-        distanceRight.stop();
-        lightDetected.stop();
+    public void stopInput() {
+        distanceLeft.stopInput();
+        distanceRight.stopInput();
+        lightDetected.stopInput();
     }
 }

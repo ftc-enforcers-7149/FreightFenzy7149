@@ -36,13 +36,13 @@ public class Gyroscope implements Input {
 
         imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
 
-        yawReading = new ValueTimer<Float>() {
+        yawReading = new ValueTimer<Float>(0) {
             @Override
             public Float readValue() {
                 return imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
             }
         };
-        angVelReading = new ValueTimer<Float>() {
+        angVelReading = new ValueTimer<Float>(0) {
             @Override
             public Float readValue() {
                 return imu.getAngularVelocity().zRotationRate;
@@ -53,12 +53,6 @@ public class Gyroscope implements Input {
     }
 
     @Override
-    public void start() {
-        yawReading.start();
-        angVelReading.start();
-    }
-
-    @Override
     public void updateInput() {
         yawReading.updateInput();
         angVelReading.updateInput();
@@ -66,12 +60,6 @@ public class Gyroscope implements Input {
         rawYaw = yawReading.getValue();
         yaw = cvtOffset(denormalizeDegrees(rawYaw), offset);
         angVel = angVelReading.getValue();
-    }
-
-    @Override
-    public void stop() {
-        yawReading.stop();
-        angVelReading.stop();
     }
 
     /**
@@ -175,5 +163,17 @@ public class Gyroscope implements Input {
     public double getNewAngVel() {
         updateInput();
         return angVel;
+    }
+
+    @Override
+    public void startInput() {
+        yawReading.startInput();
+        angVelReading.startInput();
+    }
+
+    @Override
+    public void stopInput() {
+        yawReading.stopInput();
+        angVelReading.stopInput();
     }
 }
