@@ -7,8 +7,12 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.Odometry.DriveWheels.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Subsystems.BulkRead;
+import org.firstinspires.ftc.teamcode.Subsystems.Input;
+import org.firstinspires.ftc.teamcode.Subsystems.Output;
 import org.firstinspires.ftc.teamcode.Subsystems.Sensors.Gyroscope;
 import org.firstinspires.ftc.teamcode.Subsystems.VelLimitsJerk;
+
+import java.util.ArrayList;
 
 import static org.firstinspires.ftc.teamcode.Subsystems.FixedRoadrunner.createPose2d;
 
@@ -30,6 +34,10 @@ public abstract class TeleOp_Base extends OpMode {
 
     //Headless
     protected double offset, lim;
+
+    //Inputs & Outputs
+    ArrayList<Input> inputs;
+    ArrayList<Output> outputs;
 
     //Initialization
     protected void initializeDrive() {
@@ -70,16 +78,18 @@ public abstract class TeleOp_Base extends OpMode {
     }
     protected void initializeBulkRead() {
         try {
-            bReadCH = new BulkRead(hardwareMap, "Control Hub");
-            hasCH = true;
-        } catch (Exception e) {
-            hasCH = false;
-        }
-        try {
             bReadEH = new BulkRead(hardwareMap, "Expansion Hub");
+            inputs.add(0, bReadEH);
             hasEH = true;
         } catch (Exception e) {
             hasEH = false;
+        }
+        try {
+            bReadCH = new BulkRead(hardwareMap, "Control Hub");
+            inputs.add(0, bReadCH);
+            hasCH = true;
+        } catch (Exception e) {
+            hasCH = false;
         }
     }
     protected void initializeGyro() {
@@ -88,6 +98,7 @@ public abstract class TeleOp_Base extends OpMode {
         else
             gyro = drive.gyro;
 
+        inputs.add((hasCH?1:0) + (hasEH?1:0), gyro);
         initializedGyro = true;
     }
     protected void initializeOdometry() throws Exception {
@@ -102,6 +113,8 @@ public abstract class TeleOp_Base extends OpMode {
             drive = new MecanumDrive(hardwareMap, bReadCH, bReadEH);
         drive.setPoseEstimate(createPose2d(0, 0, 0));
 
+        inputs.add((hasCH?1:0) + (hasEH?1:0) + (initializedGyro?1:0), drive);
+        outputs.add(0, drive);
         initializedDrive = true;
     }
     protected void initializeVars() {
@@ -112,11 +125,43 @@ public abstract class TeleOp_Base extends OpMode {
         xJerk = new VelLimitsJerk(0);
         turnJerk = new VelLimitsJerk(0);
     }
+    protected void initializeAll() throws Exception {
+        initializeDrive();
+        initializeBulkRead();
+        initializeGyro();
+        initializeOdometry();
+        initializeVars();
+    }
 
-    //Loop updates
-    protected void updateBulkRead() {
-        if (hasCH) bReadCH.update();
-        if (hasEH) bReadEH.update();
+    protected void addInput(Input input) {
+        inputs.add(input);
+    }
+    protected void addOutput(Output output) {
+        outputs.add(output);
+    }
+
+    //Start
+    protected void startInputs() {
+        for (Input i : inputs) i.startInput();
+    }
+    protected void startOutputs() {
+        for (Output o : outputs) o.startOutput();
+    }
+
+    //Loop
+    protected void updateInputs() {
+        for (Input i : inputs) i.updateInput();
+    }
+    protected void updateOutputs() {
+        for (Output o : outputs) o.updateOutput();
+    }
+
+    //Stop
+    protected void stopInputs() {
+        for (Input i : inputs) i.stopInput();
+    }
+    protected void stopOutputs() {
+        for (Output o : outputs) o.stopOutput();
     }
 
     //Driving

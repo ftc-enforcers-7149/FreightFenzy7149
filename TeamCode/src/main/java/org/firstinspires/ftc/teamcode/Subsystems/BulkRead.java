@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import java.util.HashMap;
 
-public class BulkRead {
+public class BulkRead implements Input {
 
     //Declares LynxModule
     private LynxModule lynxModule;
@@ -46,7 +46,7 @@ public class BulkRead {
 
         velocityMotors = new HashMap<DcMotorEx, Double[]>();
 
-        update();
+        updateInput();
     }
 
     /**
@@ -67,13 +67,14 @@ public class BulkRead {
 
         velocityMotors = new HashMap<DcMotorEx, Double[]>();
 
-        update();
+        updateInput();
     }
 
     /**
      * Saves bulk read data from the hub. Please call this every loop.
      */
-    public void update() {
+    @Override
+    public void updateInput() {
         bData = lynxModule.getBulkData();
     }
 
@@ -283,4 +284,8 @@ public class BulkRead {
         return bData;
     }
 
+    @Override
+    public void stop() {
+
+    }
 }

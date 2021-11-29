@@ -9,11 +9,14 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
+import org.firstinspires.ftc.teamcode.Subsystems.Input;
+import org.firstinspires.ftc.teamcode.Subsystems.ValueTimer;
 
-public class Gyroscope {
+public class Gyroscope implements Input {
 
     //IMU sensor
     public BNO055IMU imu;
+    private ValueTimer<Float> yawReading, angVelReading;
 
     private double rawYaw, yaw, angVel;
     private double offset;
@@ -33,13 +36,42 @@ public class Gyroscope {
 
         imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
 
+        yawReading = new ValueTimer<Float>() {
+            @Override
+            public Float readValue() {
+                return imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+            }
+        };
+        angVelReading = new ValueTimer<Float>() {
+            @Override
+            public Float readValue() {
+                return imu.getAngularVelocity().zRotationRate;
+            }
+        };
+
         offset = 0;
     }
 
-    public void update() {
-        rawYaw = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+    @Override
+    public void start() {
+        yawReading.start();
+        angVelReading.start();
+    }
+
+    @Override
+    public void updateInput() {
+        yawReading.updateInput();
+        angVelReading.updateInput();
+
+        rawYaw = yawReading.getValue();
         yaw = cvtOffset(denormalizeDegrees(rawYaw), offset);
-        angVel = imu.getAngularVelocity().zRotationRate;
+        angVel = angVelReading.getValue();
+    }
+
+    @Override
+    public void stop() {
+        yawReading.stop();
+        angVelReading.stop();
     }
 
     /**
@@ -123,7 +155,7 @@ public class Gyroscope {
      * @return Raw yaw value from gyro, in degrees
      */
     public double getNewRawYaw() {
-        update();
+        updateInput();
         return rawYaw;
     }
 
@@ -132,7 +164,7 @@ public class Gyroscope {
      * @return Degrees in 0-360 degree format
      */
     public double getNewYaw() {
-        update();
+        updateInput();
         return yaw;
     }
 
@@ -141,7 +173,7 @@ public class Gyroscope {
      * @return Angular velocity, in degrees
      */
     public double getNewAngVel() {
-        update();
+        updateInput();
         return angVel;
     }
 }

@@ -23,11 +23,13 @@ public class SlowedDriving extends TeleOp_Base {
     public void init() {
         initializeDrive();
         initializeBulkRead();
+        initializeGyro();
         initializeVars();
 
-        gyro = new Gyroscope(hardwareMap);
-
         lift = new Lift(hardwareMap, "lift", bReadEH);
+
+        addInput(lift);
+        addOutput(lift);
 
         wrist = hardwareMap.servo.get("wrist");
         wrist.setDirection(Servo.Direction.REVERSE);
@@ -36,7 +38,7 @@ public class SlowedDriving extends TeleOp_Base {
 
     @Override
     public void loop() {
-        updateBulkRead();
+        updateInputs();
         getInput();
 
         // Drive
@@ -58,14 +60,15 @@ public class SlowedDriving extends TeleOp_Base {
         // Telemetry
         telemetry.addData("Lift Height: ", lift.getLiftHeight());
 
-        lift.update();
+        updateOutputs();
         updateStateMachine();
     }
 
     @Override
     public void stop() {
+        stopInputs();
+        stopOutputs();
         setMotorPowers(0, 0, 0, 0);
-        lift.stop();
     }
 
     @Override

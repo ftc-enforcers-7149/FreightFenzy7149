@@ -9,10 +9,14 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.teamcode.Odometry.DriveWheels.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Subsystems.BulkRead;
+import org.firstinspires.ftc.teamcode.Subsystems.Input;
+import org.firstinspires.ftc.teamcode.Subsystems.Output;
 import org.firstinspires.ftc.teamcode.Subsystems.Sensors.Gyroscope;
+
+import java.util.ArrayList;
+import java.util.function.Supplier;
 
 import static org.firstinspires.ftc.teamcode.Subsystems.FixedRoadrunner.createPose2d;
 
@@ -31,7 +35,130 @@ public abstract class Autonomous_Base extends LinearOpMode {
     private boolean hasCH, hasEH;
     protected AutoCommands commands;
 
-    protected boolean USE_SUBS;
+    //Inputs & Outputs
+    ArrayList<Input> inputs;
+    ArrayList<Output> outputs;
+
+    //Initialization
+    protected void initializeDrive() {
+        if (!initializedDrive) {
+            fLeft = hardwareMap.get(DcMotorEx.class, "fLeft");
+            fRight = hardwareMap.get(DcMotorEx.class, "fRight");
+            bLeft = hardwareMap.get(DcMotorEx.class, "bLeft");
+            bRight = hardwareMap.get(DcMotorEx.class, "bRight");
+
+            fLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+            fRight.setDirection(DcMotorSimple.Direction.FORWARD);
+            bLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+            bRight.setDirection(DcMotorSimple.Direction.FORWARD);
+
+            fLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            fRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            bLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            bRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+            fLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            fRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            bLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            bRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+            fLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            fRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            bLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            bRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        }
+        else {
+            fLeft = drive.fLeft;
+            fRight = drive.fRight;
+            bLeft = drive.bLeft;
+            bRight = drive.bRight;
+        }
+
+        initializedMotors = true;
+    }
+    protected void initializeBulkRead() {
+        try {
+            bReadEH = new BulkRead(hardwareMap, "Expansion Hub");
+            inputs.add(0, bReadEH);
+            hasEH = true;
+        } catch (Exception e) {
+            hasEH = false;
+        }
+        try {
+            bReadCH = new BulkRead(hardwareMap, "Control Hub");
+            inputs.add(0, bReadCH);
+            hasCH = true;
+        } catch (Exception e) {
+            hasCH = false;
+        }
+    }
+    protected void initializeGyro() {
+        if (!initializedDrive)
+            gyro = new Gyroscope(hardwareMap);
+        else
+            gyro = drive.gyro;
+
+        inputs.add((hasCH?1:0) + (hasEH?1:0), gyro);
+        initializedGyro = true;
+    }
+    protected void initializeOdometry() throws Exception {
+        if (!hasCH || !hasEH) throw new Exception("Missing \"Control Hub\". Check configuration file naming");
+        if (initializedMotors && initializedGyro)
+            drive = new MecanumDrive(hardwareMap, bReadCH, bReadEH, fLeft, fRight, bLeft, bRight, gyro);
+        else if (initializedMotors)
+            drive = new MecanumDrive(hardwareMap, bReadCH, bReadEH, fLeft, fRight, bLeft, bRight);
+        else if (initializedGyro)
+            drive = new MecanumDrive(hardwareMap, bReadCH, bReadEH, gyro);
+        else
+            drive = new MecanumDrive(hardwareMap, bReadCH, bReadEH);
+        drive.setPoseEstimate(createPose2d(0, 0, 0));
+
+        inputs.add((hasCH?1:0) + (hasEH?1:0) + (initializedGyro?1:0), drive);
+        outputs.add(0, drive);
+        initializedDrive = true;
+    }
+    protected void initializeCommands() {
+        commands = new AutoCommands(this);
+    }
+    protected void initializeAll() throws Exception {
+        initializeDrive();
+        initializeBulkRead();
+        initializeGyro();
+        initializeOdometry();
+        initializeCommands();
+    }
+
+    protected void addInput(Input input) {
+        inputs.add(input);
+    }
+    protected void addOutput(Output output) {
+        outputs.add(output);
+    }
+
+    //Start
+    protected void startInputs() {
+        for (Input i : inputs) i.startInput();
+    }
+    protected void startOutputs() {
+        for (Output o : outputs) o.startOutput();
+    }
+
+    //Loop
+    protected void updateInputs() {
+        for (Input i : inputs) i.updateInput();
+    }
+    protected void updateOutputs() {
+        for (Output o : outputs) o.updateOutput();
+        updateTelemetry();
+    }
+
+    //Stop
+    protected void stopInputs() {
+        for (Input i : inputs) i.stopInput();
+    }
+    protected void stopOutputs() {
+        for (Output o : outputs) o.stopOutput();
+    }
 
     //How accurate each attribute should be at each point
     public static double POS_ACC = 0.1;
@@ -156,124 +283,16 @@ public abstract class Autonomous_Base extends LinearOpMode {
         return diff;
     }
 
-    //Initialization
-    protected void initializeDrive() {
-        if (!initializedDrive) {
-            fLeft = hardwareMap.get(DcMotorEx.class, "fLeft");
-            fRight = hardwareMap.get(DcMotorEx.class, "fRight");
-            bLeft = hardwareMap.get(DcMotorEx.class, "bLeft");
-            bRight = hardwareMap.get(DcMotorEx.class, "bRight");
-
-            fLeft.setDirection(DcMotorSimple.Direction.REVERSE);
-            fRight.setDirection(DcMotorSimple.Direction.FORWARD);
-            bLeft.setDirection(DcMotorSimple.Direction.REVERSE);
-            bRight.setDirection(DcMotorSimple.Direction.FORWARD);
-
-            fLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            fRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            bLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            bRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-            fLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            fRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            bLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            bRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-            fLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            fRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            bLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            bRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        }
-        else {
-            fLeft = drive.fLeft;
-            fRight = drive.fRight;
-            bLeft = drive.bLeft;
-            bRight = drive.bRight;
-        }
-
-        initializedMotors = true;
-    }
-    protected void initializeBulkRead() {
-        try {
-            bReadCH = new BulkRead(hardwareMap, "Control Hub");
-            hasCH = true;
-        } catch (Exception e) {
-            hasCH = false;
-        }
-        try {
-            bReadEH = new BulkRead(hardwareMap, "Expansion Hub");
-            hasEH = true;
-        } catch (Exception e) {
-            hasEH = false;
-        }
-    }
-    protected void initializeGyro() {
-        if (!initializedDrive)
-            gyro = new Gyroscope(hardwareMap);
-        else
-            gyro = drive.gyro;
-
-        initializedGyro = true;
-    }
-    protected void initializeOdometry() throws Exception {
-        if (!hasCH) throw new Exception("Missing \"Control Hub\". Check configuration file naming");
-        if (!hasEH) throw new Exception("Missing \"Expansion Hub\". Check configuration file naming");
-        if (initializedMotors && initializedGyro)
-            drive = new MecanumDrive(hardwareMap, bReadCH, bReadEH, fLeft, fRight, bLeft, bRight, gyro);
-        else if (initializedMotors)
-            drive = new MecanumDrive(hardwareMap, bReadCH, bReadEH, fLeft, fRight, bLeft, bRight);
-        else if (initializedGyro)
-            drive = new MecanumDrive(hardwareMap, bReadCH, bReadEH, gyro);
-        else
-            drive = new MecanumDrive(hardwareMap, bReadCH, bReadEH);
-        drive.setPoseEstimate(createPose2d(0, 0, 0));
-
-        initializedDrive = true;
-    }
-    protected void initializeCommands() {
-        commands = new AutoCommands(this);
-    }
-    protected void initializeAll() throws Exception {
-        initializeDrive();
-        initializeBulkRead();
-        initializeGyro();
-        initializeOdometry();
-        initializeCommands();
-    }
-
-    //Loop updates
-    protected void updateBulkRead() {
-        if (hasCH) bReadCH.update();
-        if (hasEH) bReadEH.update();
-    }
-
+    //Useful Functions
     protected abstract Alliance getAlliance();
-
-    protected abstract void subsystemUpdates();
     protected abstract void addTelemetryData();
-
-    protected final void updateSubsystems() {
-        if (USE_SUBS) subsystemUpdates();
-    }
     protected final void updateTelemetry() {
         addTelemetryData();
         telemetry.update();
     }
 
-    //Useful functions
-    protected void updateInputs() {
-        updateBulkRead();
-        if (initializedGyro) gyro.update();
-        if (initializedDrive) drive.update();
-    }
-
-    protected void updateOutputs() {
-        updateSubsystems();
-        updateTelemetry();
-    }
-
-    protected void customWait(Func<Boolean> func) {
-        while (opModeIsActive() && func.value()) {
+    protected void customWait(Supplier<Boolean> value) {
+        while (opModeIsActive() && value.get()) {
             updateInputs();
             updateOutputs();
         }

@@ -6,10 +6,11 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.Subsystems.Subsytem;
+import org.firstinspires.ftc.teamcode.Subsystems.Input;
+import org.firstinspires.ftc.teamcode.Subsystems.Output;
 import org.firstinspires.ftc.teamcode.Subsystems.ValueTimer;
 
-public class Intake implements Subsytem {
+public class Intake implements Output, Input {
 
     //Intake servos
     public CRServo intake;
@@ -36,7 +37,6 @@ public class Intake implements Subsytem {
                 return intakeColorSensor.getDistance(DistanceUnit.INCH);
             }
         };
-        colorDist.start();
 
         intakePower = 0;
         lastIntakePower = 0;
@@ -54,9 +54,17 @@ public class Intake implements Subsytem {
     }
 
     @Override
-    public void update() {
-        if (useSensor) colorDist.update();
+    public void start() {
+        if (useSensor) colorDist.start();
+    }
 
+    @Override
+    public void updateInput() {
+        if (useSensor) colorDist.updateInput();
+    }
+
+    @Override
+    public void updateOutput() {
         if (intakePower != lastIntakePower) {
             intake.setPower(intakePower);
         }
@@ -76,18 +84,20 @@ public class Intake implements Subsytem {
         return useSensor && colorDist.getValue() < minDistance;
     }
 
-    public void stopSensor() {
-        colorDist.stop();
+    @Override
+    public void startInput() {
+        colorDist.start();
     }
 
-    public void startSensor() {
-        colorDist.start();
+    @Override
+    public void stopInput() {
+        colorDist.stop();
     }
 
     @Override
     public void stop() {
         if (useSensor) colorDist.stop();
         setIntakePower(0);
-        update();
+        updateOutput();
     }
 }

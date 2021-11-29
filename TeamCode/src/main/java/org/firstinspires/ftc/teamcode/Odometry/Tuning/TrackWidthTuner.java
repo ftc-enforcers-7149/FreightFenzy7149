@@ -68,7 +68,8 @@ public class TrackWidthTuner extends LinearOpMode {
                 headingAccumulator += Angle.norm(heading - lastHeading);
                 lastHeading = heading;
 
-                drive.update();
+                drive.updateInput();
+                drive.updateOutput();
             }
 
             double trackWidth = TRACK_WIDTH * Math.toRadians(ANGLE) / headingAccumulator;
