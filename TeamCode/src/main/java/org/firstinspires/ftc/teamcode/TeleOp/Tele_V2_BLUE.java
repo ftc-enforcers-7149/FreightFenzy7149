@@ -6,9 +6,12 @@ import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.CarouselSpinner;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Intake;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
 
-@TeleOp (name = "Tele_V2")
+import static org.firstinspires.ftc.teamcode.GlobalData.HEADING;
+import static org.firstinspires.ftc.teamcode.GlobalData.RAN_AUTO;
+
+@TeleOp (name = "BLUE Tele_V2")
 //@Disabled
-public class Tele_V2 extends TeleOp_Base {
+public class Tele_V2_BLUE extends TeleOp_Base {
 
     //Headless
     private boolean resetAngle;
@@ -34,9 +37,11 @@ public class Tele_V2 extends TeleOp_Base {
             return;
         }
 
-        intake = new Intake(hardwareMap, "intake");//, "intakeColor");
-        lift = new Lift(hardwareMap, "lift", bReadEH, false);
+        intake = new Intake(hardwareMap, "intake", "intakeColor");
+        lift = new Lift(hardwareMap, "lift", bReadEH, !RAN_AUTO);
         spinner = new CarouselSpinner(hardwareMap, "leftSpinner", "rightSpinner");
+
+        if (RAN_AUTO) gyro.setOffset(HEADING);
 
         addInput(intake);
         addInput(lift);
@@ -59,7 +64,7 @@ public class Tele_V2 extends TeleOp_Base {
         // Drive
         driveHeadless(gyro.getRawYaw(), resetAngle);
 
-        //Intake
+        // Intake
         if (gamepad2.right_trigger > 0.1 || gamepad2.left_trigger > 0.1)
             intake.setIntakePower(gamepad2.right_trigger - gamepad2.left_trigger);
         else intake.setIntakePower(0);
@@ -86,8 +91,15 @@ public class Tele_V2 extends TeleOp_Base {
 
         if (gamepad1.back) lift.setManualOverride(true);
 
+        if (lift.getLiftHeight() > 10) {
+            lim = 0.6;
+        }
+        else {
+            lim = 1;
+        }
+
         // Carousel
-        spinner.setLeftPower(gamepad1.x ? 1 : 0);
+        spinner.setLeftPower(gamepad1.x ? -1 : 0);
         spinner.setRightPower(gamepad1.b ? 1 : 0);
 
         // Telemetry
@@ -116,6 +128,11 @@ public class Tele_V2 extends TeleOp_Base {
             liftPower = gamepad1.right_trigger - gamepad1.left_trigger;
         else
             liftPower = 0;
+
+        if (gamepad2.dpad_up) liftPos = LiftPosition.HIGH;
+        else if (gamepad2.dpad_left) liftPos = LiftPosition.MIDDLE;
+        else if (gamepad2.dpad_right) liftPos = LiftPosition.LOW;
+        else if (gamepad2.dpad_down) liftPos = LiftPosition.GROUND;
 
         if (gamepad1.dpad_up) liftPos = LiftPosition.HIGH;
         else if (gamepad1.dpad_left) liftPos = LiftPosition.MIDDLE;

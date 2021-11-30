@@ -38,11 +38,13 @@ public abstract class TeleOp_Base extends OpMode {
     //Inputs & Outputs
     ArrayList<Input> inputs;
     ArrayList<Output> outputs;
+    private boolean initializedSources = false;
 
     //Initialization
     protected void initializeSources() {
         inputs = new ArrayList<Input>();
         outputs = new ArrayList<Output>();
+        initializedSources = true;
     }
     protected void initializeDrive() {
         if (!initializedDrive) {
@@ -81,6 +83,8 @@ public abstract class TeleOp_Base extends OpMode {
         initializedMotors = true;
     }
     protected void initializeBulkRead() {
+        if (!initializedSources) initializeSources();
+
         try {
             bReadEH = new BulkRead(hardwareMap, "Expansion Hub");
             inputs.add(0, bReadEH);
@@ -97,6 +101,8 @@ public abstract class TeleOp_Base extends OpMode {
         }
     }
     protected void initializeGyro() {
+        if (!initializedSources) initializeSources();
+
         if (!initializedDrive)
             gyro = new Gyroscope(hardwareMap);
         else
@@ -106,6 +112,8 @@ public abstract class TeleOp_Base extends OpMode {
         initializedGyro = true;
     }
     protected void initializeOdometry() throws Exception {
+        if (!initializedSources) initializeSources();
+
         if (!hasCH || !hasEH) throw new Exception("Missing \"Control Hub\". Check configuration file naming");
         if (initializedMotors && initializedGyro)
             drive = new MecanumDrive(hardwareMap, bReadCH, bReadEH, fLeft, fRight, bLeft, bRight, gyro);

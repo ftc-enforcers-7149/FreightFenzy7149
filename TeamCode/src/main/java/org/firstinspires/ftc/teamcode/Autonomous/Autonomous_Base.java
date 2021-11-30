@@ -38,8 +38,14 @@ public abstract class Autonomous_Base extends LinearOpMode {
     //Inputs & Outputs
     ArrayList<Input> inputs;
     ArrayList<Output> outputs;
+    private boolean initializedSources = false;
 
     //Initialization
+    protected void initializeSources() {
+        inputs = new ArrayList<Input>();
+        outputs = new ArrayList<Output>();
+        initializedSources = true;
+    }
     protected void initializeDrive() {
         if (!initializedDrive) {
             fLeft = hardwareMap.get(DcMotorEx.class, "fLeft");
@@ -77,6 +83,8 @@ public abstract class Autonomous_Base extends LinearOpMode {
         initializedMotors = true;
     }
     protected void initializeBulkRead() {
+        if (!initializedSources) initializeSources();
+
         try {
             bReadEH = new BulkRead(hardwareMap, "Expansion Hub");
             inputs.add(0, bReadEH);
@@ -93,6 +101,8 @@ public abstract class Autonomous_Base extends LinearOpMode {
         }
     }
     protected void initializeGyro() {
+        if (!initializedSources) initializeSources();
+
         if (!initializedDrive)
             gyro = new Gyroscope(hardwareMap);
         else
@@ -102,6 +112,8 @@ public abstract class Autonomous_Base extends LinearOpMode {
         initializedGyro = true;
     }
     protected void initializeOdometry() throws Exception {
+        if (!initializedSources) initializeSources();
+
         if (!hasCH || !hasEH) throw new Exception("Missing \"Control Hub\". Check configuration file naming");
         if (initializedMotors && initializedGyro)
             drive = new MecanumDrive(hardwareMap, bReadCH, bReadEH, fLeft, fRight, bLeft, bRight, gyro);
@@ -121,6 +133,7 @@ public abstract class Autonomous_Base extends LinearOpMode {
         commands = new AutoCommands(this);
     }
     protected void initializeAll() throws Exception {
+        initializeSources();
         initializeDrive();
         initializeBulkRead();
         initializeGyro();

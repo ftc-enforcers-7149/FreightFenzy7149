@@ -6,6 +6,10 @@ import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
 import org.firstinspires.ftc.teamcode.Subsystems.Webcam.OpenCV;
 import org.firstinspires.ftc.teamcode.Subsystems.Webcam.TSEPipeline;
 
+import static org.firstinspires.ftc.teamcode.GlobalData.ALLIANCE;
+import static org.firstinspires.ftc.teamcode.GlobalData.HEADING;
+import static org.firstinspires.ftc.teamcode.GlobalData.RAN_AUTO;
+
 public abstract class Auto_V2 extends Autonomous_Base {
 
     protected Intake intake;
@@ -26,7 +30,7 @@ public abstract class Auto_V2 extends Autonomous_Base {
             throw new InterruptedException(e.getMessage());
         }
 
-        intake = new Intake(hardwareMap, "intake");
+        intake = new Intake(hardwareMap, "intake", "intakeColor");
         lift = new Lift(hardwareMap, "lift", bReadEH);
         spinner = new CarouselSpinner(hardwareMap, "leftSpinner", "rightSpinner");
 
@@ -66,6 +70,10 @@ public abstract class Auto_V2 extends Autonomous_Base {
 
         stopInputs();
         stopOutputs();
+
+        ALLIANCE = getAlliance();
+        RAN_AUTO = true;
+        HEADING = gyro.getRawYaw();
 
         waitForTime(500);
     }

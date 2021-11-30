@@ -158,6 +158,11 @@ public class Lift implements Output, Input {
      */
     public void setManualOverride(boolean override) {
         manualOverride = override;
+        if (override) currPosition = 0;
+        else {
+            lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        }
     }
 
     /**
