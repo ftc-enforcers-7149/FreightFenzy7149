@@ -1,16 +1,20 @@
 package org.firstinspires.ftc.teamcode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.CarouselSpinner;
+import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Elevator;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Intake;
-import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
+import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Scorer;
+import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Turret;
 import org.firstinspires.ftc.teamcode.Subsystems.Webcam.OpenCV;
 import org.firstinspires.ftc.teamcode.Subsystems.Webcam.TSEPipeline;
 
 public abstract class Auto_V3 extends Autonomous_Base {
 
-    protected Intake intake;
-    protected Lift lift;
     protected CarouselSpinner spinner;
+    protected Intake intake;
+    protected Elevator elevator;
+    protected Turret turret;
+    protected Scorer scorer;
 
     protected OpenCV tseDetector;
 
@@ -26,15 +30,19 @@ public abstract class Auto_V3 extends Autonomous_Base {
             throw new InterruptedException(e.getMessage());
         }
 
-        intake = new Intake(hardwareMap, "intake");
-        lift = new Lift(hardwareMap, "lift", bReadEH);
-        spinner = new CarouselSpinner(hardwareMap, "leftSpinner", "rightSpinner");
+        spinner = new CarouselSpinner(hardwareMap, "spinner");
+        intake = new Intake(hardwareMap, "intake", "intakeColor");
+        elevator = new Elevator(hardwareMap, "elevator", bReadEH);
+        turret = new Turret(hardwareMap, "turret", bReadEH);
+        scorer = new Scorer(elevator, turret);
 
         addInput(intake);
-        addInput(lift);
-        addOutput(intake);
-        addOutput(lift);
+        addInput(elevator);
+        addInput(turret);
+
         addOutput(spinner);
+        addOutput(intake);
+        addOutput(scorer);
 
         tseDetector = new OpenCV(hardwareMap);
         if (getAlliance() == Alliance.RED)
@@ -73,6 +81,5 @@ public abstract class Auto_V3 extends Autonomous_Base {
     @Override
     protected final void addTelemetryData() {
         telemetry.addData("Position: ", drive.getPoseEstimate());
-        telemetry.addData("Lift Height: ", lift.getLiftHeight());
     }
 }

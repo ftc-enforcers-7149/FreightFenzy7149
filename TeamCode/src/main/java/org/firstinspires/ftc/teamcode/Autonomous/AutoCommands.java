@@ -1,9 +1,8 @@
 package org.firstinspires.ftc.teamcode.Autonomous;
 
-import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.CarouselSpinner;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Intake;
-import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
+import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.ElevatorOld;
 import org.firstinspires.ftc.teamcode.Subsystems.Webcam.OpenCV;
 import org.opencv.core.RotatedRect;
 
@@ -15,20 +14,24 @@ public class AutoCommands {
         this.op = op;
     }
 
-    public HubLevel detectBarcode(OpenCV tseDetector) {
+    public ElevatorOld.Level detectBarcode(OpenCV tseDetector) {
         RotatedRect boundingRect = tseDetector.getRect();
-        if (boundingRect == null) return HubLevel.LOW;
+        if (boundingRect == null) return ElevatorOld.Level.LOW;
         if (boundingRect.center.x <= 640 / 4.0) {
-            return HubLevel.MIDDLE;
+            return ElevatorOld.Level.MIDDLE;
         }
         else {
-            return HubLevel.HIGH;
+            return ElevatorOld.Level.HIGH;
         }
     }
 
-    public void setLiftHeight(Lift lift, double height) {
-        lift.setTargetHeight(height);
-        op.customWait(() -> (lift.getLiftHeight() < height - 0.5));
+    public void setElevatorHeight(ElevatorOld elevator, double height) {
+        elevator.setTargetHeight(height);
+        op.customWait(() -> (elevator.getHeight() < height - 0.5));
+    }
+
+    public void setElevatorHeight(ElevatorOld elevator, ElevatorOld.Level level) {
+        setElevatorHeight(elevator, level.height);
     }
 
     public void outtake(Intake intake, long msTime) {
@@ -38,15 +41,8 @@ public class AutoCommands {
     }
 
     public void spinDuck(CarouselSpinner spinner, long msTime) {
-        if (op.getAlliance() == Alliance.RED) {
-            spinner.setLeftPower(0.75);
-            op.waitForTime(msTime);
-            spinner.setLeftPower(0);
-        }
-        else if (op.getAlliance() == Alliance.BLUE) {
-            spinner.setRightPower(0.75);
-            op.waitForTime(msTime);
-            spinner.setRightPower(0);
-        }
+        spinner.setPower(op.getAlliance(), 1);
+        op.waitForTime(msTime);
+        spinner.setPower(op.getAlliance(), 0);
     }
 }

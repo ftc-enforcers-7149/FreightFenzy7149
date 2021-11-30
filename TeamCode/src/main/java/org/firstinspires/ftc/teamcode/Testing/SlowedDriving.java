@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Sensors.Gyroscope;
-import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
+import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.ElevatorOld;
 import org.firstinspires.ftc.teamcode.TeleOp.TeleOp_Base;
 
 @TeleOp(name = "Slowed Driving")
@@ -16,7 +16,7 @@ public class SlowedDriving extends TeleOp_Base {
     protected Gyroscope gyro;
     private boolean resetAngle;
 
-    private Lift lift;
+    private ElevatorOld elevator;
     private Servo wrist;
 
     @Override
@@ -26,10 +26,10 @@ public class SlowedDriving extends TeleOp_Base {
         initializeGyro();
         initializeVars();
 
-        lift = new Lift(hardwareMap, "lift", bReadEH);
+        elevator = new ElevatorOld(hardwareMap, "elevator", bReadEH);
 
-        addInput(lift);
-        addOutput(lift);
+        addInput(elevator);
+        addOutput(elevator);
 
         wrist = hardwareMap.servo.get("wrist");
         wrist.setDirection(Servo.Direction.REVERSE);
@@ -44,13 +44,13 @@ public class SlowedDriving extends TeleOp_Base {
         // Drive
         driveHeadlessSmooth(gyro.getNewRawYaw(), resetAngle);
 
-        // Lift
+        // Elevator
         if (gamepad1.right_trigger > 0.1 || gamepad1.left_trigger > 0.1)
-            lift.setPower(gamepad1.right_trigger - gamepad1.left_trigger);
+            elevator.setPower(gamepad1.right_trigger - gamepad1.left_trigger);
         else
-            lift.setPower(0);
+            elevator.setPower(0);
 
-        if (lift.getLiftHeight() > 5) {
+        if (elevator.getHeight() > 5) {
             setSmoothingTimes(1, 200, 200);
         }
         else {
@@ -58,7 +58,7 @@ public class SlowedDriving extends TeleOp_Base {
         }
 
         // Telemetry
-        telemetry.addData("Lift Height: ", lift.getLiftHeight());
+        telemetry.addData("Elevator Height: ", elevator.getHeight());
 
         updateOutputs();
         updateStateMachine();

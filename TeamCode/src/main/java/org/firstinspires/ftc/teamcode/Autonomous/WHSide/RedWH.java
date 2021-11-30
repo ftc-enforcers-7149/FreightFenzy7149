@@ -5,8 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
 import org.firstinspires.ftc.teamcode.Autonomous.Auto_V3;
-import org.firstinspires.ftc.teamcode.Autonomous.HubLevel;
-import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
+import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.ElevatorOld;
 
 @Autonomous(name = "Red Warehouse")
 @Disabled
@@ -19,17 +18,10 @@ public class RedWH extends Auto_V3 {
 
     @Override
     protected void auto() {
-        HubLevel liftHeight = commands.detectBarcode(tseDetector);
+        ElevatorOld.Level elevatorHeight = commands.detectBarcode(tseDetector);
 
-        //Set lift to correct level according to the vision
-        switch (liftHeight) {
-            case LOW:
-                commands.setLiftHeight(lift, Lift.LOW_HEIGHT);
-            case MIDDLE:
-                commands.setLiftHeight(lift, Lift.MIDDLE_HEIGHT);
-            case HIGH:
-                commands.setLiftHeight(lift, Lift.HIGH_HEIGHT);
-        }
+        //Set elevator to correct level according to the vision
+        commands.setElevatorHeight(elevator, elevatorHeight);
 
         //Drive to hub
         driveTo(24,0,0);
@@ -40,13 +32,13 @@ public class RedWH extends Auto_V3 {
         //Move back a little so that the intake doesn't hit the hub
         moveTo(20, 0);
 
-        //Put lift back down
-        lift.setTargetHeight(Lift.GROUND_HEIGHT);
+        //Put elevator back down
+        elevator.setTargetHeight(ElevatorOld.Level.GROUND);
 
         //Realign with the wall and turn towards the warehouse
         rotateTo(Math.toRadians(270));
         moveTo(0,0);
-        commands.setLiftHeight(lift, Lift.GROUND_HEIGHT);
+        commands.setElevatorHeight(elevator, ElevatorOld.Level.GROUND);
 
         //Start intaking
         intake.setIntakePower(1);
@@ -62,11 +54,11 @@ public class RedWH extends Auto_V3 {
 
         //Turn and move towards the hub
         driveTo(10,0,Math.toRadians(270));
-        lift.setTargetHeight(Lift.HIGH_HEIGHT);
+        elevator.setTargetHeight(ElevatorOld.Level.HIGH);
         driveTo(drive.getPoseEstimate().getX(), drive.getPoseEstimate().getY(), 0);
 
-        //Set lift to the highest height
-        commands.setLiftHeight(lift, Lift.HIGH_HEIGHT);
+        //Set elevator to the highest height
+        commands.setElevatorHeight(elevator, ElevatorOld.Level.HIGH);
 
         //Move forward
         driveTo(16,0,0);
@@ -77,15 +69,15 @@ public class RedWH extends Auto_V3 {
         //Drive a little back and turn
         driveTo(10,0, 0);
 
-        //Put lift back down
-        lift.setTargetHeight(Lift.GROUND_HEIGHT);
+        //Put elevator back down
+        elevator.setTargetHeight(ElevatorOld.Level.GROUND);
 
         //Realign with the wall and turn towards the warehouse
         driveTo(drive.getPoseEstimate().getX(), drive.getPoseEstimate().getY(), Math.toRadians(270));
 
         //Park in warehouse
         driveTo(0,0, Math.toRadians(270));
-        commands.setLiftHeight(lift, Lift.GROUND_HEIGHT);
+        commands.setElevatorHeight(elevator, ElevatorOld.Level.GROUND);
         driveTo(0,47, Math.toRadians(270));
     }
 }
