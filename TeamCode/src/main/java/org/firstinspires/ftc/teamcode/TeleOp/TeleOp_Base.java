@@ -40,6 +40,10 @@ public abstract class TeleOp_Base extends OpMode {
     ArrayList<Output> outputs;
 
     //Initialization
+    protected void initializeSources() {
+        inputs = new ArrayList<Input>();
+        outputs = new ArrayList<Output>();
+    }
     protected void initializeDrive() {
         if (!initializedDrive) {
             fLeft = hardwareMap.get(DcMotorEx.class, "fLeft");
@@ -126,6 +130,7 @@ public abstract class TeleOp_Base extends OpMode {
         turnJerk = new VelLimitsJerk(0);
     }
     protected void initializeAll() throws Exception {
+        initializeSources();
         initializeDrive();
         initializeBulkRead();
         initializeGyro();
