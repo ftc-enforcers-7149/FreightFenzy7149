@@ -29,10 +29,10 @@ public class Lift implements Output, Input {
 
     public static double GROUND_HEIGHT = 0;
     public static double BARRIER_HEIGHT = 11.1;
-    public static double LOW_HEIGHT = 11.1;
-    public static double MIDDLE_HEIGHT = 17;
-    public static double HIGH_HEIGHT = 22;
-    public static double MAX_HEIGHT = 25;
+    public static double LOW_HEIGHT = 5;
+    public static double MIDDLE_HEIGHT = 9.5;
+    public static double HIGH_HEIGHT = 18;
+    public static double MAX_HEIGHT = 28;
 
     //PIDF Controller
     private PIDFController controller;
