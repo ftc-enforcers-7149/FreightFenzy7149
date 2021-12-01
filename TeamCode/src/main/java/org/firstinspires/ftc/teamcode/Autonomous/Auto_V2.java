@@ -46,9 +46,6 @@ public abstract class Auto_V2 extends Autonomous_Base {
         else
             tseDetector.start(new TSEPipeline(0, 180, 320, 180));
 
-        startInputs();
-        startOutputs();
-
         /// Init Loop ///
 
         while (!isStarted() && !isStopRequested()) {
@@ -61,6 +58,9 @@ public abstract class Auto_V2 extends Autonomous_Base {
         /// Start ///
 
         tseDetector.stop();
+
+        startInputs();
+        startOutputs();
 
         /// Loop ///
 

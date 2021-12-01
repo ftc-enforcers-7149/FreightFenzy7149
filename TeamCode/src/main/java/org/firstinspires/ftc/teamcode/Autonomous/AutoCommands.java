@@ -70,7 +70,7 @@ public class AutoCommands {
         driveToGap(lift, stopWithin);
         driveThroughGap(drive, positioning, stopWithin);
         driveToFreightAndBack(drive, positioning, intake, stopWithin);
-        driveToHub(drive, lift, intake, stopWithin);
+        driveToHub(lift, intake);
     }
 
     public void driveToGap(Lift lift, boolean stop) {
@@ -125,12 +125,12 @@ public class AutoCommands {
             //Check wall and color sensor, adjust destination accordingly
             if (op.getAlliance() == Alliance.RED) {
                 destX = drive.getPoseEstimate().getX() - positioning.getRightDistance();
-                if (positioning.getLightDetected() > 0.7) destY = drive.getPoseEstimate().getY();
+                if (positioning.getLineDetected()) destY = drive.getPoseEstimate().getY();
                 else destY = drive.getPoseEstimate().getY() - 20;
             }
             else if (op.getAlliance() == Alliance.BLUE) {
                 destX = drive.getPoseEstimate().getX() - positioning.getLeftDistance();
-                if (positioning.getLightDetected() > 0.7) destY = drive.getPoseEstimate().getY();
+                if (positioning.getLineDetected()) destY = drive.getPoseEstimate().getY();
                 else destY = drive.getPoseEstimate().getY() + 20;
             }
 
@@ -159,13 +159,13 @@ public class AutoCommands {
 
             double dist = Math.sqrt((relX*relX) + (relY*relY));
 
-            if (dist <= SLOW_DIST) {
+            if (dist <= (stop ? SLOW_DIST : -1)) {
                 xPower *= Math.pow(dist / SLOW_DIST, 2);
                 yPower *= Math.pow(dist / SLOW_DIST, 2);
             }
 
             double max = Math.max(Math.abs(xPower), Math.abs(yPower));
-            if (dist <= CLOSE_DIST && max != 0) {
+            if (dist <= (stop ? CLOSE_DIST : -1) && max != 0) {
                 xPower /= max / MIN_SPEED;
                 yPower /= max / MIN_SPEED;
             }
@@ -196,6 +196,7 @@ public class AutoCommands {
     public void driveToFreightAndBack(MecanumDrive drive, Positioning positioning,
                                       Intake intake, boolean stop) {
         intake.setIntakePower(1);
+        positioning.startLineDetector();
 
         double destX = drive.getPoseEstimate().getX(),
                 destY = drive.getPoseEstimate().getY(),
@@ -304,7 +305,7 @@ public class AutoCommands {
             op.updateOutputs();
         }
 
-        intake.setIntakePower(0);
+        //intake.setIntakePower(0);
 
         destX = drive.getPoseEstimate().getX();
         destY = drive.getPoseEstimate().getY();
@@ -348,12 +349,12 @@ public class AutoCommands {
             //Check wall and color sensor, adjust destination accordingly
             if (op.getAlliance() == Alliance.RED) {
                 destX = drive.getPoseEstimate().getX() - positioning.getRightDistance();
-                if (positioning.getLightDetected() > 0.7) destY = drive.getPoseEstimate().getY();
+                if (positioning.getLineDetected()) break BACK;
                 else destY = drive.getPoseEstimate().getY() + 20;
             }
             else if (op.getAlliance() == Alliance.BLUE) {
                 destX = drive.getPoseEstimate().getX() - positioning.getLeftDistance();
-                if (positioning.getLightDetected() > 0.7) destY = drive.getPoseEstimate().getY();
+                if (positioning.getLineDetected()) break BACK;
                 else destY = drive.getPoseEstimate().getY() - 20;
             }
 
@@ -414,16 +415,16 @@ public class AutoCommands {
         if (op.getAlliance() == Alliance.RED) drive.setPoseEstimate(new Pose2d(0, -48, 270));
         else if (op.getAlliance() == Alliance.BLUE) drive.setPoseEstimate(new Pose2d(0, 48, 90));
 
-        if (stop) op.setMotorPowers(0, 0, 0, 0);
-    }
-    public void driveToHub(MecanumDrive drive, Lift lift, Intake intake, boolean stop) {
-        outtake(intake, 10);
+        positioning.stopLineDetector();
+
+        //Finish driving through gap
 
         if (op.getAlliance() == Alliance.RED)
-            op.driveTo(drive.getPoseEstimate().getX(), -24, 270, false);
+            op.driveTo(drive.getPoseEstimate().getX(), -24, 270, stop);
         else if (op.getAlliance() == Alliance.BLUE)
-            op.driveTo(drive.getPoseEstimate().getX(), 24, 90, false);
-
+            op.driveTo(drive.getPoseEstimate().getX(), 24, 90, stop);
+    }
+    public void driveToHub(Lift lift, Intake intake) {
         lift.setTargetHeight(Lift.HIGH_HEIGHT);
 
         if (op.getAlliance() == Alliance.RED) op.driveTo(35, -8, 45);

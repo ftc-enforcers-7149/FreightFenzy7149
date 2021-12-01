@@ -25,10 +25,13 @@ public class BlueWH extends Auto_V2 {
         switch (liftHeight) {
             case LOW:
                 commands.setLiftHeight(lift, Lift.LOW_HEIGHT);
+                break;
             case MIDDLE:
                 commands.setLiftHeight(lift, Lift.MIDDLE_HEIGHT);
+                break;
             case HIGH:
                 commands.setLiftHeight(lift, Lift.HIGH_HEIGHT);
+                break;
         }
 
         //Drive to hub

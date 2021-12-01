@@ -315,13 +315,13 @@ public abstract class Autonomous_Base extends LinearOpMode {
 
             double dist = Math.sqrt((relX*relX) + (relY*relY));
 
-            if (dist <= SLOW_DIST) {
+            if (dist <= (stop ? SLOW_DIST : -1)) {
                 xPower *= Math.pow(dist / SLOW_DIST, 2);
                 yPower *= Math.pow(dist / SLOW_DIST, 2);
             }
 
             double max = Math.max(Math.abs(xPower), Math.abs(yPower));
-            if (dist <= CLOSE_DIST && max != 0) {
+            if (dist <= (stop ? CLOSE_DIST : -1) && max != 0) {
                 xPower /= max / MIN_SPEED;
                 yPower /= max / MIN_SPEED;
             }

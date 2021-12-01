@@ -27,6 +27,9 @@ public class Tele_V2_BLUE extends TeleOp_Base {
     }
     private LiftPosition liftPos, lastLiftPos;
 
+    private boolean resetLift, lastResetLift;
+    private boolean manualOverride;
+
     @Override
     public void init() {
         try {
@@ -48,6 +51,12 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         addOutput(intake);
         addOutput(lift);
         addOutput(spinner);
+
+        lastLiftPower = 0;
+        liftPos = LiftPosition.GROUND;
+        lastLiftPos = LiftPosition.GROUND;
+        lastResetLift = false;
+        manualOverride = false;
     }
 
     @Override
@@ -89,7 +98,10 @@ public class Tele_V2_BLUE extends TeleOp_Base {
             }
         }
 
-        if (gamepad1.back) lift.setManualOverride(true);
+        if (resetLift && !lastResetLift) {
+            lift.setManualOverride(!manualOverride);
+            manualOverride = !manualOverride;
+        }
 
         if (lift.getLiftHeight() > 10) {
             lim = 0.6;
@@ -119,9 +131,9 @@ public class Tele_V2_BLUE extends TeleOp_Base {
     @Override
     protected void getInput() {
         //Headless
-        leftX = curveInput(gamepad1.left_stick_x, 5)*lim * 0.9;
-        leftY = curveInput(gamepad1.left_stick_y, 5)*lim * 0.9;
-        rightX = curveInput(gamepad1.right_stick_x, 5)*lim*0.75 * 0.8;
+        leftX = curveInput(gamepad1.left_stick_x, 1)*lim * 0.75;
+        leftY = curveInput(gamepad1.left_stick_y, 1)*lim * 0.75;
+        rightX = curveInput(gamepad1.right_stick_x, 1)*lim*0.75 * 0.75;
         resetAngle = gamepad1.y;
 
         if (gamepad1.right_trigger > 0.1 || gamepad1.left_trigger > 0.1)
@@ -138,12 +150,17 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         else if (gamepad1.dpad_left) liftPos = LiftPosition.MIDDLE;
         else if (gamepad1.dpad_right) liftPos = LiftPosition.LOW;
         else if (gamepad1.dpad_down) liftPos = LiftPosition.GROUND;
+
+        resetLift = gamepad1.back;
     }
 
     @Override
     protected void updateStateMachine() {
         lastLeftX = leftX; lastLeftY = leftY; lastRightX = rightX;
+
         lastLiftPower = liftPower;
         lastLiftPos = liftPos;
+
+        lastResetLift = resetLift;
     }
 }
