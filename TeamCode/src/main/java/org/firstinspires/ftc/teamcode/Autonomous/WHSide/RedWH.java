@@ -35,60 +35,26 @@ public class RedWH extends Auto_V2 {
         }
 
         //Drive to hub
-        driveTo(24,0,0);
+        driveTo(20, 0, 0);
 
         //Deliver pre-loaded block
-        commands.outtake(intake, 1500);
+        commands.outtake(intake, 1000);
 
         //Move back a little so that the intake doesn't hit the hub
-        moveTo(20, 0);
+        driveTo(10, 0, 0);
 
         //Put lift back down
         lift.setTargetHeight(Lift.GROUND_HEIGHT);
 
-        //Realign with the wall and turn towards the warehouse
-        rotateTo(Math.toRadians(270));
-        moveTo(0,0);
-        commands.setLiftHeight(lift, Lift.GROUND_HEIGHT);
+        //Cycles
+        for (int i = 0; i < 3; i++) {
+            commands.cycle(drive, positioning, lift, intake, false);
+        }
 
-        //Start intaking
-        intake.setIntakePower(1);
- 
-        //Drive into the warehouse
-        driveTo(0,-47, Math.toRadians(270));
+        //Park
+        commands.driveToGap(lift, false);
+        commands.driveThroughGap(drive, positioning, false);
 
-        //Stop intake
-        intake.setIntakePower(0);
-
-        //Drive backwards to the hub
-        driveTo(0,0, Math.toRadians(270));
-
-        //Turn and move towards the hub
-        driveTo(10,0,Math.toRadians(270));
-        lift.setTargetHeight(Lift.HIGH_HEIGHT);
-        driveTo(drive.getPoseEstimate().getX(), drive.getPoseEstimate().getY(), 0);
-
-        //Set lift to the highest height
-        commands.setLiftHeight(lift, Lift.HIGH_HEIGHT);
-
-        //Move forward
-        driveTo(16,0,0);
-
-        //Outtake the game element
-        commands.outtake(intake, 1500);
-
-        //Drive a little back and turn
-        driveTo(10,0, 0);
-
-        //Put lift back down
-        lift.setTargetHeight(Lift.GROUND_HEIGHT);
-
-        //Realign with the wall and turn towards the warehouse
-        driveTo(drive.getPoseEstimate().getX(), drive.getPoseEstimate().getY(), Math.toRadians(270));
-
-        //Park in warehouse
-        driveTo(0,0, Math.toRadians(270));
-        commands.setLiftHeight(lift, Lift.GROUND_HEIGHT);
-        driveTo(0,47, Math.toRadians(270));
+        driveTo(drive.getPoseEstimate().getX(), drive.getPoseEstimate().getY() - 10, 0);
     }
 }

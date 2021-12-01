@@ -76,8 +76,8 @@ public class AutoCommands {
     public void driveToGap(Lift lift, boolean stop) {
         lift.setTargetHeight(Lift.GROUND_HEIGHT);
 
-        if (op.getAlliance() == Alliance.RED) op.driveTo(5, -24, 270, stop);
-        else if (op.getAlliance() == Alliance.BLUE) op.driveTo(5, 24, 90, stop);
+        if (op.getAlliance() == Alliance.RED) op.driveTo(5, -24, Math.toRadians(270), stop);
+        else if (op.getAlliance() == Alliance.BLUE) op.driveTo(5, 24, Math.toRadians(90), stop);
     }
     public void driveThroughGap(MecanumDrive drive, Positioning positioning, boolean stop) {
         double destX = drive.getPoseEstimate().getX(),
@@ -188,8 +188,8 @@ public class AutoCommands {
         }
 
         //TODO: Get right positions
-        if (op.getAlliance() == Alliance.RED) drive.setPoseEstimate(new Pose2d(0, -48, 270));
-        else if (op.getAlliance() == Alliance.BLUE) drive.setPoseEstimate(new Pose2d(0, 48, 90));
+        if (op.getAlliance() == Alliance.RED) drive.setPoseEstimate(new Pose2d(0, -48, Math.toRadians(270)));
+        else if (op.getAlliance() == Alliance.BLUE) drive.setPoseEstimate(new Pose2d(0, 48, Math.toRadians(90)));
 
         if (stop) op.setMotorPowers(0, 0, 0, 0);
     }
@@ -412,23 +412,23 @@ public class AutoCommands {
         }
 
         //TODO: Get right positions
-        if (op.getAlliance() == Alliance.RED) drive.setPoseEstimate(new Pose2d(0, -48, 270));
-        else if (op.getAlliance() == Alliance.BLUE) drive.setPoseEstimate(new Pose2d(0, 48, 90));
+        if (op.getAlliance() == Alliance.RED) drive.setPoseEstimate(new Pose2d(0, -48, Math.toRadians(270)));
+        else if (op.getAlliance() == Alliance.BLUE) drive.setPoseEstimate(new Pose2d(0, 48, Math.toRadians(90)));
 
         positioning.stopLineDetector();
 
         //Finish driving through gap
 
         if (op.getAlliance() == Alliance.RED)
-            op.driveTo(drive.getPoseEstimate().getX(), -24, 270, stop);
+            op.driveTo(drive.getPoseEstimate().getX(), -24, Math.toRadians(270), stop);
         else if (op.getAlliance() == Alliance.BLUE)
-            op.driveTo(drive.getPoseEstimate().getX(), 24, 90, stop);
+            op.driveTo(drive.getPoseEstimate().getX(), 24, Math.toRadians(90), stop);
     }
     public void driveToHub(Lift lift, Intake intake) {
         lift.setTargetHeight(Lift.HIGH_HEIGHT);
 
-        if (op.getAlliance() == Alliance.RED) op.driveTo(35, -8, 45);
-        else if (op.getAlliance() == Alliance.BLUE) op.driveTo(35, 8, 315);
+        if (op.getAlliance() == Alliance.RED) op.driveTo(35, -8, Math.toRadians(45));
+        else if (op.getAlliance() == Alliance.BLUE) op.driveTo(35, 8, Math.toRadians(315));
 
         setLiftHeight(lift, Lift.HIGH_HEIGHT);
 
