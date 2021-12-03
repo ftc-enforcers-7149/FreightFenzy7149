@@ -21,14 +21,17 @@ public class BlueParkInUnit extends Auto_V2 {
     protected void auto() {
         HubLevel liftHeight = commands.detectBarcode(tseDetector);
 
+        POS_ACC = 1;
+        SLOW_DIST = 15;
+
         //Drive to the duckwheel
         driveTo(5, -4, 0);
 
         //Spin and stop duckwheel
-        commands.spinDuck(spinner, 4000);
+        commands.spinDuck(spinner, 2500);
 
         //Drive to hub
-        driveTo(34,26, Math.toRadians(60));
+        driveTo(32,25, Math.toRadians(60));
 
         //Set lift to correct level according to the vision
         switch (liftHeight) {
@@ -44,11 +47,13 @@ public class BlueParkInUnit extends Auto_V2 {
         }
 
         //Drive to hub and outtake
-        driveTo(36,30, Math.toRadians(60));
-        commands.outtake(intake, 1500);
+        driveTo(34,27, Math.toRadians(70));
+        commands.outtake(intake);
+
+        H_ACC = Math.toRadians(6);
 
         //Drive a little bit back and drop lift
-        driveTo(26,26, Math.toRadians(60));
+        driveTo(32,25, Math.toRadians(70));
         lift.setTargetHeight(Lift.GROUND_HEIGHT);
 
         //Align with the warehouse and park

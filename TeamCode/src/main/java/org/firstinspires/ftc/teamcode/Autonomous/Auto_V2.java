@@ -4,6 +4,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.CarouselSpinner;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Intake;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
 import org.firstinspires.ftc.teamcode.Subsystems.Sensors.Positioning;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.Input;
 import org.firstinspires.ftc.teamcode.Subsystems.Webcam.OpenCV;
 import org.firstinspires.ftc.teamcode.Subsystems.Webcam.TSEPipeline;
 
@@ -33,11 +34,13 @@ public abstract class Auto_V2 extends Autonomous_Base {
             throw new InterruptedException(e.getMessage());
         }
 
+        //Initialize subsystems
         positioning = new Positioning(hardwareMap, "distL", "distR", "bottomColor");
         intake = new Intake(hardwareMap, "intake", "intakeColor");
         lift = new Lift(hardwareMap, "lift", bReadEH);
         spinner = new CarouselSpinner(hardwareMap, "leftSpinner", "rightSpinner");
 
+        //Add inputs & outputs
         addInput(positioning);
         addInput(intake);
         addInput(lift);
@@ -45,6 +48,15 @@ public abstract class Auto_V2 extends Autonomous_Base {
         addOutput(lift);
         addOutput(spinner);
 
+        //Update global headless data as an input
+        addInput(new Input() {
+            @Override
+            public void updateInput() {
+                HEADING = gyro.getRawYaw();
+            }
+        });
+
+        //Initialize vision for either alliance
         tseDetector = new OpenCV(hardwareMap);
         if (getAlliance() == Alliance.RED)
             tseDetector.start(new TSEPipeline(320, 180, 320, 180));
@@ -53,6 +65,7 @@ public abstract class Auto_V2 extends Autonomous_Base {
 
         /// Init Loop ///
 
+        //Check vision
         while (!isStarted() && !isStopRequested()) {
             tseDetector.update();
             telemetry.addData("Hub Level: ", commands.detectBarcode(tseDetector));
@@ -61,6 +74,13 @@ public abstract class Auto_V2 extends Autonomous_Base {
         if (isStopRequested()) return;
 
         /// Start ///
+
+        resetStartTime();
+
+        //Set global variables
+        ALLIANCE = getAlliance();
+        RAN_AUTO = true;
+        HEADING = gyro.getRawYaw();
 
         tseDetector.stop();
 
@@ -71,14 +91,13 @@ public abstract class Auto_V2 extends Autonomous_Base {
 
         auto();
 
+        updateInputs();
+        updateOutputs();
+
         /// Stop ///
 
         stopInputs();
         stopOutputs();
-
-        ALLIANCE = getAlliance();
-        RAN_AUTO = true;
-        HEADING = gyro.getRawYaw();
 
         waitForTime(500);
     }
@@ -87,5 +106,9 @@ public abstract class Auto_V2 extends Autonomous_Base {
     protected final void addTelemetryData() {
         telemetry.addData("Position: ", drive.getPoseEstimate());
         telemetry.addData("Lift Height: ", lift.getLiftHeight());
+        telemetry.addData("Freight in Intake? ", intake.getFreightInIntake());
+        telemetry.addData("Left Distance: ",  positioning.getLeftDistance());
+        telemetry.addData("Right Distance: ", positioning.getRightDistance());
+        telemetry.addData("Line Detected? ", positioning.getLineDetected());
     }
 }

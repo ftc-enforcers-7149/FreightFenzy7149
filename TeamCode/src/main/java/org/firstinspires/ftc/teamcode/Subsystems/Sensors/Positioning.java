@@ -49,24 +49,19 @@ public class Positioning implements Input {
     }
 
     @Override
-    public void startInput() {
-        distanceLeft.startInput();
-        distanceRight.startInput();
-        //lightDetected.startInput();
-    }
-
-    @Override
     public void updateInput() {
         distanceLeft.updateInput();
         distanceRight.updateInput();
         lightDetected.updateInput();
     }
 
-    public void startLineDetector() {
+    public void startPositioning() {
+        distanceLeft.startInput();
+        distanceRight.startInput();
         lightDetected.startInput();
     }
-    public void stopLineDetector() {
-        lightDetected.stopInput();
+    public void stopPositioning() {
+        stopInput();
     }
 
     public double getLeftDistance() {

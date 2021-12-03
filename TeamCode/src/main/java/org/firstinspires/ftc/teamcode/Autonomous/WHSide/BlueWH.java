@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
+import org.firstinspires.ftc.teamcode.Autonomous.AutoCommands;
 import org.firstinspires.ftc.teamcode.Autonomous.Auto_V2;
 import org.firstinspires.ftc.teamcode.Autonomous.HubLevel;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
@@ -21,34 +22,43 @@ public class BlueWH extends Auto_V2 {
     protected void auto() {
         HubLevel liftHeight = commands.detectBarcode(tseDetector);
 
+        POS_ACC = 1;
+
         //Set lift to correct level according to the vision
         switch (liftHeight) {
             case LOW:
-                commands.setLiftHeight(lift, Lift.LOW_HEIGHT);
+                lift.setTargetHeight(Lift.LOW_HEIGHT);
                 break;
             case MIDDLE:
-                commands.setLiftHeight(lift, Lift.MIDDLE_HEIGHT);
+                lift.setTargetHeight(Lift.MIDDLE_HEIGHT);
                 break;
             case HIGH:
-                commands.setLiftHeight(lift, Lift.HIGH_HEIGHT);
+                lift.setTargetHeight(Lift.HIGH_HEIGHT);
                 break;
         }
 
-        //Drive to hub
-        driveTo(20, 0, 0);
+        //Drive to hub and wait for lift
+        driveTo(18, 0, 0);
+        customWait(() -> (lift.getLiftHeight() < lift.getTargetHeight() - 0.5));
 
         //Deliver pre-loaded block
-        commands.outtake(intake, 1000);
+        driveTo(20, 0, 0);
+        commands.outtake(intake);
 
         //Move back a little so that the intake doesn't hit the hub
-        driveTo(10, 0, 0);
+        driveTo(16, 0, 0);
 
         //Put lift back down
         lift.setTargetHeight(Lift.GROUND_HEIGHT);
 
         //Cycles
-        for (int i = 0; i < 3; i++) {
-            commands.cycle(drive, positioning, lift, intake, false);
+        while (opModeIsActive() && getRuntime() < 25) {
+            try {
+                commands.cycle(drive, positioning, lift, intake, false);
+            }
+            catch (AutoCommands.NoFreight nF) {
+                return;
+            }
         }
 
         //Park

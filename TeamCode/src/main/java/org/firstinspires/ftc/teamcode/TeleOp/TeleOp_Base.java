@@ -125,6 +125,11 @@ public abstract class TeleOp_Base extends OpMode {
             drive = new MecanumDrive(hardwareMap, bReadCH, bReadEH);
         drive.setPoseEstimate(createPose2d(0, 0, 0));
 
+        fLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
         inputs.add((hasCH?1:0) + (hasEH?1:0) + (initializedGyro?1:0), drive);
         outputs.add(0, drive);
         initializedDrive = true;

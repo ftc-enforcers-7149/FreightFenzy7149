@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.Autonomous;
 import com.acmerobotics.roadrunner.control.PIDFController;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.firstinspires.ftc.teamcode.Odometry.DriveWheels.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.CarouselSpinner;
@@ -45,28 +44,27 @@ public class AutoCommands {
         op.customWait(() -> (lift.getLiftHeight() < height - 0.5));
     }
 
-    public void outtake(Intake intake, long msTime) {
-        intake.setIntakePower(-0.75);
-        op.waitForTime(msTime);
+    public void outtake(Intake intake) {
+        intake.setIntakePower(1);
+        op.customWait(intake::getFreightInIntake);
         intake.setIntakePower(0);
     }
 
     public void spinDuck(CarouselSpinner spinner, long msTime) {
         if (op.getAlliance() == Alliance.RED) {
-            spinner.setLeftPower(0.75);
+            spinner.setLeftPower(1);
             op.waitForTime(msTime);
             spinner.setLeftPower(0);
         }
         else if (op.getAlliance() == Alliance.BLUE) {
-            spinner.setRightPower(0.75);
+            spinner.setRightPower(1);
             op.waitForTime(msTime);
             spinner.setRightPower(0);
         }
     }
 
-    //TODO: Assuming color sensor in FRONT of robot
     public void cycle(MecanumDrive drive, Positioning positioning,
-                      Lift lift, Intake intake, boolean stopWithin) {
+                      Lift lift, Intake intake, boolean stopWithin) throws NoFreight {
         driveToGap(lift, stopWithin);
         driveThroughGap(drive, positioning, stopWithin);
         driveToFreightAndBack(drive, positioning, intake, stopWithin);
@@ -80,6 +78,8 @@ public class AutoCommands {
         else if (op.getAlliance() == Alliance.BLUE) op.driveTo(5, 24, Math.toRadians(90), stop);
     }
     public void driveThroughGap(MecanumDrive drive, Positioning positioning, boolean stop) {
+        positioning.startPositioning();
+
         double destX = drive.getPoseEstimate().getX(),
                 destY = drive.getPoseEstimate().getY(),
                 destH = drive.getPoseEstimate().getHeading();
@@ -187,6 +187,8 @@ public class AutoCommands {
             op.updateOutputs();
         }
 
+        positioning.stopPositioning();
+
         //TODO: Get right positions
         if (op.getAlliance() == Alliance.RED) drive.setPoseEstimate(new Pose2d(0, -48, Math.toRadians(270)));
         else if (op.getAlliance() == Alliance.BLUE) drive.setPoseEstimate(new Pose2d(0, 48, Math.toRadians(90)));
@@ -194,9 +196,9 @@ public class AutoCommands {
         if (stop) op.setMotorPowers(0, 0, 0, 0);
     }
     public void driveToFreightAndBack(MecanumDrive drive, Positioning positioning,
-                                      Intake intake, boolean stop) {
+                                      Intake intake, boolean stop) throws NoFreight {
         intake.setIntakePower(1);
-        positioning.startLineDetector();
+        positioning.startPositioning();
 
         double destX = drive.getPoseEstimate().getX(),
                 destY = drive.getPoseEstimate().getY(),
@@ -307,6 +309,11 @@ public class AutoCommands {
 
         //intake.setIntakePower(0);
 
+        if (!intake.getFreightInIntake()) {
+            op.setMotorPowers(0, 0, 0, 0);
+            throw new NoFreight();
+        }
+
         destX = drive.getPoseEstimate().getX();
         destY = drive.getPoseEstimate().getY();
         destH = drive.getPoseEstimate().getHeading();
@@ -415,7 +422,7 @@ public class AutoCommands {
         if (op.getAlliance() == Alliance.RED) drive.setPoseEstimate(new Pose2d(0, -48, Math.toRadians(270)));
         else if (op.getAlliance() == Alliance.BLUE) drive.setPoseEstimate(new Pose2d(0, 48, Math.toRadians(90)));
 
-        positioning.stopLineDetector();
+        positioning.stopPositioning();
 
         //Finish driving through gap
 
@@ -432,6 +439,8 @@ public class AutoCommands {
 
         setLiftHeight(lift, Lift.HIGH_HEIGHT);
 
-        outtake(intake, 500);
+        outtake(intake);
     }
+
+    public class NoFreight extends Exception { }
 }

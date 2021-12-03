@@ -151,6 +151,10 @@ public class Lift implements Output, Input {
         usePID = true;
     }
 
+    public double getTargetHeight() {
+        return Math.abs(ticksToLiftInches(setPosition));
+    }
+
     /**
      * Manual override disables all features that use the encoder
      * This consists of the automatic PID control and over turn protection
