@@ -13,7 +13,8 @@ public abstract class ValueTimer<T> implements Input {
     private long delayTime; //amount of time (in milliseconds) that value is delayed
     private boolean isPaused = true; //if reading is paused
 
-    public ValueTimer(long delayTime) {
+    public ValueTimer(T initial, long delayTime) {
+        value = initial;
         this.delayTime = delayTime;
     }
 
@@ -25,10 +26,10 @@ public abstract class ValueTimer<T> implements Input {
     @Override
     public void updateInput() {
         //delay for reads
-       if(!isPaused && System.currentTimeMillis() - iTime > delayTime){
+        if(!isPaused && System.currentTimeMillis() - iTime > delayTime){
             value = readValue(); //reads inputted value
             iTime = System.currentTimeMillis(); //resets iTime for next loop
-       }
+        }
     }
 
     /**

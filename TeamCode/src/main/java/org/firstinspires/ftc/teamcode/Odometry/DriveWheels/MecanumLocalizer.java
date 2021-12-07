@@ -100,6 +100,7 @@ public class MecanumLocalizer implements Localizer {
     @Override
     public void setPoseEstimate(@NotNull Pose2d pose2d) {
         poseEstimate = pose2d;
+        drive.gyro.setYaw(Math.toDegrees(pose2d.getHeading()));
     }
 
     @Nullable

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.TeleOp;
 
+import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.CarouselSpinner;
@@ -7,6 +8,9 @@ import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Elevator;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Intake;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Scorer;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Turret;
+
+import static org.firstinspires.ftc.teamcode.GlobalData.HEADING;
+import static org.firstinspires.ftc.teamcode.GlobalData.RAN_AUTO;
 
 @TeleOp (name = "Tele_V2")
 //@Disabled
@@ -44,6 +48,8 @@ public class Tele_V3 extends TeleOp_Base {
         addOutput(spinner);
         addOutput(intake);
         addOutput(scorer);
+
+        if (RAN_AUTO) drive.setPoseEstimate(new Pose2d(0, 0, Math.toRadians(HEADING)));
     }
 
     @Override
@@ -58,7 +64,7 @@ public class Tele_V3 extends TeleOp_Base {
         getInput();
 
         // Drive
-        driveHeadless(gyro.getRawYaw(), resetAngle);
+        driveHeadless(gyro.getYaw(), resetAngle);
 
         //Intake
         if (gamepad2.right_trigger > 0.1 || gamepad2.left_trigger > 0.1)
@@ -87,9 +93,9 @@ public class Tele_V3 extends TeleOp_Base {
     @Override
     protected void getInput() {
         //Headless
-        leftX = curveInput(gamepad1.left_stick_x, 5)*lim;
-        leftY = curveInput(gamepad1.left_stick_y, 5)*lim;
-        rightX = curveInput(gamepad1.right_stick_x, 5)*lim*0.75;
+        leftX = curveInput(gamepad1.left_stick_x, 2)*lim;
+        leftY = curveInput(gamepad1.left_stick_y, 2)*lim;
+        rightX = curveInput(gamepad1.right_stick_x, 2)*lim*0.75;
         resetAngle = gamepad1.y;
     }
 

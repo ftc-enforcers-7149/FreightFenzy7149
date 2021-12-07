@@ -5,8 +5,13 @@ import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Elevator;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Intake;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Scorer;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Turret;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.Input;
 import org.firstinspires.ftc.teamcode.Subsystems.Webcam.OpenCV;
 import org.firstinspires.ftc.teamcode.Subsystems.Webcam.TSEPipeline;
+
+import static org.firstinspires.ftc.teamcode.GlobalData.HEADING;
+import static org.firstinspires.ftc.teamcode.GlobalData.ALLIANCE;
+import static org.firstinspires.ftc.teamcode.GlobalData.RAN_AUTO;
 
 public abstract class Auto_V3 extends Autonomous_Base {
 
@@ -44,6 +49,14 @@ public abstract class Auto_V3 extends Autonomous_Base {
         addOutput(intake);
         addOutput(scorer);
 
+        //Update global headless data as an input
+        addInput(new Input() {
+            @Override
+            public void updateInput() {
+                HEADING = gyro.getRawYaw();
+            }
+        });
+
         tseDetector = new OpenCV(hardwareMap);
         if (getAlliance() == Alliance.RED)
             tseDetector.start(new TSEPipeline(320, 180, 320, 180));
@@ -64,7 +77,17 @@ public abstract class Auto_V3 extends Autonomous_Base {
 
         /// Start ///
 
+        resetStartTime();
+
+        //Set global variables
+        ALLIANCE = getAlliance();
+        RAN_AUTO = true;
+        HEADING = gyro.getRawYaw();
+
         tseDetector.stop();
+
+        startInputs();
+        startOutputs();
 
         /// Loop ///
 
@@ -81,5 +104,6 @@ public abstract class Auto_V3 extends Autonomous_Base {
     @Override
     protected final void addTelemetryData() {
         telemetry.addData("Position: ", drive.getPoseEstimate());
+        telemetry.addData("Freight in Intake? ", intake.getFreightInIntake());
     }
 }

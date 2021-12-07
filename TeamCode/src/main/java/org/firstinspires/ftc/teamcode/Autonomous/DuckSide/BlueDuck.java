@@ -32,32 +32,32 @@ public class BlueDuck extends Auto_V3 {
         driveTo(34,26, Math.toRadians(60));
 
         //Set elevator to correct level according to the vision
-        commands.setElevatorHeight(elevator, elevatorHeight);
+        //commands.setElevatorHeight(elevator, elevatorHeight);
 
         //Drive to hub and outtake
         driveTo(36,30, Math.toRadians(60));
-        commands.outtake(intake, 1500);
+        commands.outtake(intake);
 
         H_ACC = Math.toRadians(6);
 
         //Drive a little bit back and drop elevator
         driveTo(32,26, Math.toRadians(60));
-        elevator.setTargetHeight(ElevatorOld.Level.GROUND);
+        //elevator.setTargetHeight(ElevatorOld.Level.GROUND);
 
         while (getRuntime() < 22) {
             updateInputs();
             updateOutputs();
         }
-        elevator.setTargetHeight(ElevatorOld.Level.GROUND);
+        //elevator.setTargetHeight(ElevatorOld.Level.GROUND);
 
         //Align with the warehouse and park
         driveTo(26,33, Math.toRadians(270));
-        commands.setElevatorHeight(elevator, ElevatorOld.Level.BARRIER);
+        //commands.setElevatorHeight(elevator, ElevatorOld.Level.BARRIER);
 
         SLOW_DIST = 20;
         driveTo(21,128, Math.toRadians(270));
 
         //Lower elevator all the way down for TeleOp
-        commands.setElevatorHeight(elevator, ElevatorOld.Level.GROUND);
+        //commands.setElevatorHeight(elevator, ElevatorOld.Level.GROUND);
     }
 }
