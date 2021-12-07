@@ -6,15 +6,15 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.Odometry.DriveWheels.MecanumDrive;
-import org.firstinspires.ftc.teamcode.Subsystems.BulkRead;
-import org.firstinspires.ftc.teamcode.Subsystems.Input;
-import org.firstinspires.ftc.teamcode.Subsystems.Output;
+import org.firstinspires.ftc.teamcode.Subsystems.Sensors.BulkRead;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.Input;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.Output;
 import org.firstinspires.ftc.teamcode.Subsystems.Sensors.Gyroscope;
-import org.firstinspires.ftc.teamcode.Subsystems.VelLimitsJerk;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.VelLimitsJerk;
 
 import java.util.ArrayList;
 
-import static org.firstinspires.ftc.teamcode.Subsystems.FixedRoadrunner.createPose2d;
+import static org.firstinspires.ftc.teamcode.Subsystems.Utils.FixedRoadrunner.createPose2d;
 
 public abstract class TeleOp_Base extends OpMode {
 
@@ -38,8 +38,14 @@ public abstract class TeleOp_Base extends OpMode {
     //Inputs & Outputs
     ArrayList<Input> inputs;
     ArrayList<Output> outputs;
+    private boolean initializedSources = false;
 
     //Initialization
+    protected void initializeSources() {
+        inputs = new ArrayList<Input>();
+        outputs = new ArrayList<Output>();
+        initializedSources = true;
+    }
     protected void initializeDrive() {
         if (!initializedDrive) {
             fLeft = hardwareMap.get(DcMotorEx.class, "fLeft");
@@ -77,6 +83,8 @@ public abstract class TeleOp_Base extends OpMode {
         initializedMotors = true;
     }
     protected void initializeBulkRead() {
+        if (!initializedSources) initializeSources();
+
         try {
             bReadEH = new BulkRead(hardwareMap, "Expansion Hub");
             inputs.add(0, bReadEH);
@@ -93,6 +101,8 @@ public abstract class TeleOp_Base extends OpMode {
         }
     }
     protected void initializeGyro() {
+        if (!initializedSources) initializeSources();
+
         if (!initializedDrive)
             gyro = new Gyroscope(hardwareMap);
         else
@@ -102,6 +112,8 @@ public abstract class TeleOp_Base extends OpMode {
         initializedGyro = true;
     }
     protected void initializeOdometry() throws Exception {
+        if (!initializedSources) initializeSources();
+
         if (!hasCH || !hasEH) throw new Exception("Missing \"Control Hub\". Check configuration file naming");
         if (initializedMotors && initializedGyro)
             drive = new MecanumDrive(hardwareMap, bReadCH, bReadEH, fLeft, fRight, bLeft, bRight, gyro);
@@ -112,6 +124,11 @@ public abstract class TeleOp_Base extends OpMode {
         else
             drive = new MecanumDrive(hardwareMap, bReadCH, bReadEH);
         drive.setPoseEstimate(createPose2d(0, 0, 0));
+
+        fLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         inputs.add((hasCH?1:0) + (hasEH?1:0) + (initializedGyro?1:0), drive);
         outputs.add(0, drive);
@@ -126,6 +143,7 @@ public abstract class TeleOp_Base extends OpMode {
         turnJerk = new VelLimitsJerk(0);
     }
     protected void initializeAll() throws Exception {
+        initializeSources();
         initializeDrive();
         initializeBulkRead();
         initializeGyro();

@@ -10,15 +10,15 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.Odometry.DriveWheels.MecanumDrive;
-import org.firstinspires.ftc.teamcode.Subsystems.BulkRead;
-import org.firstinspires.ftc.teamcode.Subsystems.Input;
-import org.firstinspires.ftc.teamcode.Subsystems.Output;
+import org.firstinspires.ftc.teamcode.Subsystems.Sensors.BulkRead;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.Input;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.Output;
 import org.firstinspires.ftc.teamcode.Subsystems.Sensors.Gyroscope;
 
 import java.util.ArrayList;
 import java.util.function.Supplier;
 
-import static org.firstinspires.ftc.teamcode.Subsystems.FixedRoadrunner.createPose2d;
+import static org.firstinspires.ftc.teamcode.Subsystems.Utils.FixedRoadrunner.createPose2d;
 
 @Config
 public abstract class Autonomous_Base extends LinearOpMode {
@@ -38,8 +38,14 @@ public abstract class Autonomous_Base extends LinearOpMode {
     //Inputs & Outputs
     ArrayList<Input> inputs;
     ArrayList<Output> outputs;
+    private boolean initializedSources = false;
 
     //Initialization
+    protected void initializeSources() {
+        inputs = new ArrayList<Input>();
+        outputs = new ArrayList<Output>();
+        initializedSources = true;
+    }
     protected void initializeDrive() {
         if (!initializedDrive) {
             fLeft = hardwareMap.get(DcMotorEx.class, "fLeft");
@@ -77,6 +83,8 @@ public abstract class Autonomous_Base extends LinearOpMode {
         initializedMotors = true;
     }
     protected void initializeBulkRead() {
+        if (!initializedSources) initializeSources();
+
         try {
             bReadEH = new BulkRead(hardwareMap, "Expansion Hub");
             inputs.add(0, bReadEH);
@@ -93,6 +101,8 @@ public abstract class Autonomous_Base extends LinearOpMode {
         }
     }
     protected void initializeGyro() {
+        if (!initializedSources) initializeSources();
+
         if (!initializedDrive)
             gyro = new Gyroscope(hardwareMap);
         else
@@ -102,6 +112,8 @@ public abstract class Autonomous_Base extends LinearOpMode {
         initializedGyro = true;
     }
     protected void initializeOdometry() throws Exception {
+        if (!initializedSources) initializeSources();
+
         if (!hasCH || !hasEH) throw new Exception("Missing \"Control Hub\". Check configuration file naming");
         if (initializedMotors && initializedGyro)
             drive = new MecanumDrive(hardwareMap, bReadCH, bReadEH, fLeft, fRight, bLeft, bRight, gyro);
@@ -121,6 +133,7 @@ public abstract class Autonomous_Base extends LinearOpMode {
         commands = new AutoCommands(this);
     }
     protected void initializeAll() throws Exception {
+        initializeSources();
         initializeDrive();
         initializeBulkRead();
         initializeGyro();
@@ -161,7 +174,7 @@ public abstract class Autonomous_Base extends LinearOpMode {
     }
 
     //How accurate each attribute should be at each point
-    public static double POS_ACC = 0.1;
+    public static double POS_ACC = 1;
     public static double H_ACC = Math.toRadians(1);
 
     public static double MIN_SPEED = 0.2;
@@ -206,6 +219,168 @@ public abstract class Autonomous_Base extends LinearOpMode {
             relX = destX - robotX;
             relY = destY - robotY;
             relH = deltaHeading(robotH, destH);
+
+            hWeight = hControl.update(Math.abs(relH));
+
+            if (Math.abs(relX) < POS_ACC) relX = 0;
+            if (Math.abs(relY) < POS_ACC) relY = 0;
+            if (Math.abs(relH) < H_ACC) hWeight = 0;
+
+            double driveAngle = deltaHeading(robotH, Math.atan2(relY, relX));
+
+            double xPower = Math.cos(driveAngle);
+            double yPower = Math.sin(driveAngle);
+            double hPower = Math.copySign(hWeight, relH);
+
+            double dist = Math.sqrt((relX*relX) + (relY*relY));
+
+            if (dist <= SLOW_DIST) {
+                xPower *= Math.pow(dist / SLOW_DIST, 2);
+                yPower *= Math.pow(dist / SLOW_DIST, 2);
+            }
+
+            double max = Math.max(Math.abs(xPower), Math.abs(yPower));
+            if (dist <= CLOSE_DIST && max != 0) {
+                xPower /= max / MIN_SPEED;
+                yPower /= max / MIN_SPEED;
+            }
+            else {
+                if (max < MIN_SPEED && max != 0) {
+                    xPower /= max / MIN_SPEED;
+                    yPower /= max / MIN_SPEED;
+                }
+                if (Math.abs(hPower) < MIN_TURN && Math.abs(hPower) > 0)
+                    hPower = Math.copySign(MIN_TURN, hPower);
+            }
+
+            drive.setWeightedDrivePower(new Pose2d(xPower, yPower, hPower));
+
+            telemetry.addData("X Power: ", xPower);
+            telemetry.addData("Y Power: ", yPower);
+            telemetry.addData("H Power: ", hPower);
+
+            updateOutputs();
+        }
+
+        setMotorPowers(0, 0, 0, 0);
+    }
+    public void driveTo(double destX, double destY, double destH, boolean stop) {
+        drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        PIDFController hControl = new PIDFController(H_PID);
+        hControl.setOutputBounds(0, 1);
+        hControl.setTargetPosition(0);
+
+        //Current robot position
+        double robotX = drive.getPoseEstimate().getX();
+        double robotY = drive.getPoseEstimate().getY();
+        double robotH = drive.getPoseEstimate().getHeading();
+
+        //Calculate relatives
+        double relX = destX - robotX;
+        double relY = destY - robotY;
+        double relH = deltaHeading(robotH, destH);
+
+        double hWeight;
+
+        //While robot is not at the current destination point
+        while (opModeIsActive() &&
+                (Math.abs(relX) > POS_ACC ||
+                        Math.abs(relY) > POS_ACC ||
+                        Math.abs(relH) > H_ACC)) {
+
+            updateInputs();
+
+            //Update robot position
+            robotX = drive.getPoseEstimate().getX();
+            robotY = drive.getPoseEstimate().getY();
+            robotH = drive.getPoseEstimate().getHeading();
+
+            //Calculate relatives
+            relX = destX - robotX;
+            relY = destY - robotY;
+            relH = deltaHeading(robotH, destH);
+
+            hWeight = hControl.update(Math.abs(relH));
+
+            if (Math.abs(relX) < POS_ACC) relX = 0;
+            if (Math.abs(relY) < POS_ACC) relY = 0;
+            if (Math.abs(relH) < H_ACC) hWeight = 0;
+
+            double driveAngle = deltaHeading(robotH, Math.atan2(relY, relX));
+
+            double xPower = Math.cos(driveAngle);
+            double yPower = Math.sin(driveAngle);
+            double hPower = Math.copySign(hWeight, relH);
+
+            double dist = Math.sqrt((relX*relX) + (relY*relY));
+
+            if (dist <= (stop ? SLOW_DIST : -1)) {
+                xPower *= Math.pow(dist / SLOW_DIST, 2);
+                yPower *= Math.pow(dist / SLOW_DIST, 2);
+            }
+
+            double max = Math.max(Math.abs(xPower), Math.abs(yPower));
+            if (dist <= (stop ? CLOSE_DIST : -1) && max != 0) {
+                xPower /= max / MIN_SPEED;
+                yPower /= max / MIN_SPEED;
+            }
+            else {
+                if (max < MIN_SPEED && max != 0) {
+                    xPower /= max / MIN_SPEED;
+                    yPower /= max / MIN_SPEED;
+                }
+                if (Math.abs(hPower) < MIN_TURN && Math.abs(hPower) > 0)
+                    hPower = Math.copySign(MIN_TURN, hPower);
+            }
+
+            drive.setWeightedDrivePower(new Pose2d(xPower, yPower, hPower));
+
+            telemetry.addData("X Power: ", xPower);
+            telemetry.addData("Y Power: ", yPower);
+            telemetry.addData("H Power: ", hPower);
+
+            updateOutputs();
+        }
+
+        if (stop) setMotorPowers(0, 0, 0, 0);
+    }
+    public void driveTo(Supplier<Double> destX, Supplier<Double> destY, Supplier<Double> destH) {
+        drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        PIDFController hControl = new PIDFController(H_PID);
+        hControl.setOutputBounds(0, 1);
+        hControl.setTargetPosition(0);
+
+        //Current robot position
+        double robotX = drive.getPoseEstimate().getX();
+        double robotY = drive.getPoseEstimate().getY();
+        double robotH = drive.getPoseEstimate().getHeading();
+
+        //Calculate relatives
+        double relX = destX.get() - robotX;
+        double relY = destY.get() - robotY;
+        double relH = deltaHeading(robotH, destH.get());
+
+        double hWeight;
+
+        //While robot is not at the current destination point
+        while (opModeIsActive() &&
+                (Math.abs(relX) > POS_ACC ||
+                        Math.abs(relY) > POS_ACC ||
+                        Math.abs(relH) > H_ACC)) {
+
+            updateInputs();
+
+            //Update robot position
+            robotX = drive.getPoseEstimate().getX();
+            robotY = drive.getPoseEstimate().getY();
+            robotH = drive.getPoseEstimate().getHeading();
+
+            //Calculate relatives
+            relX = destX.get() - robotX;
+            relY = destY.get() - robotY;
+            relH = deltaHeading(robotH, destH.get());
 
             hWeight = hControl.update(Math.abs(relH));
 

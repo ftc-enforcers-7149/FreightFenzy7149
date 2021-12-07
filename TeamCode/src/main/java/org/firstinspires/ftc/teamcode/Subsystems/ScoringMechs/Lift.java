@@ -8,10 +8,9 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.teamcode.Subsystems.BulkRead;
-import org.firstinspires.ftc.teamcode.Subsystems.Input;
-import org.firstinspires.ftc.teamcode.Subsystems.Output;
-import org.firstinspires.ftc.teamcode.Subsystems.Subsytem;
+import org.firstinspires.ftc.teamcode.Subsystems.Sensors.BulkRead;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.Input;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.Output;
 
 @Config
 public class Lift implements Output, Input {
@@ -30,10 +29,10 @@ public class Lift implements Output, Input {
 
     public static double GROUND_HEIGHT = 0;
     public static double BARRIER_HEIGHT = 11.1;
-    public static double LOW_HEIGHT = 11.1;
-    public static double MIDDLE_HEIGHT = 17;
-    public static double HIGH_HEIGHT = 22;
-    public static double MAX_HEIGHT = 25;
+    public static double LOW_HEIGHT = 5;
+    public static double MIDDLE_HEIGHT = 9.5;
+    public static double HIGH_HEIGHT = 18;
+    public static double MAX_HEIGHT = 28;
 
     //PIDF Controller
     private PIDFController controller;
@@ -152,6 +151,10 @@ public class Lift implements Output, Input {
         usePID = true;
     }
 
+    public double getTargetHeight() {
+        return Math.abs(ticksToLiftInches(setPosition));
+    }
+
     /**
      * Manual override disables all features that use the encoder
      * This consists of the automatic PID control and over turn protection
@@ -159,13 +162,11 @@ public class Lift implements Output, Input {
      */
     public void setManualOverride(boolean override) {
         manualOverride = override;
-    }
-
-    @Override
-    public void stop() {
-        lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        setPower(0);
-        updateOutput();
+        if (override) currPosition = 0;
+        else {
+            lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        }
     }
 
     /**
@@ -213,5 +214,12 @@ public class Lift implements Output, Input {
         liftPower = 0; lastLiftPower = 0;
         usePID = true;
         manualOverride = false;
+    }
+
+    @Override
+    public void stopOutput() {
+        lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        setPower(0);
+        updateOutput();
     }
 }

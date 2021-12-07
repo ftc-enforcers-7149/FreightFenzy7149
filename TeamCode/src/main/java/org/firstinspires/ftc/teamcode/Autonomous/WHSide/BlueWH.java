@@ -1,19 +1,16 @@
 package org.firstinspires.ftc.teamcode.Autonomous.WHSide;
 
-import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
+import org.firstinspires.ftc.teamcode.Autonomous.AutoCommands;
 import org.firstinspires.ftc.teamcode.Autonomous.Auto_V2;
-import org.firstinspires.ftc.teamcode.Autonomous.Autonomous_Base;
 import org.firstinspires.ftc.teamcode.Autonomous.HubLevel;
-import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.CarouselSpinner;
-import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Intake;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
-import org.firstinspires.ftc.teamcode.Subsystems.Webcam.OpenCV;
-import org.firstinspires.ftc.teamcode.Subsystems.Webcam.TSEPipeline;
-import org.opencv.core.RotatedRect;
+
+import java.util.function.Supplier;
 
 @Autonomous(name = "Blue Warehouse")
 @Disabled
@@ -28,71 +25,57 @@ public class BlueWH extends Auto_V2 {
     protected void auto() {
         HubLevel liftHeight = commands.detectBarcode(tseDetector);
 
+        POS_ACC = 1;
+
         //Set lift to correct level according to the vision
         switch (liftHeight) {
             case LOW:
-                commands.setLiftHeight(lift, Lift.LOW_HEIGHT);
+                lift.setTargetHeight(Lift.LOW_HEIGHT);
+                break;
             case MIDDLE:
-                commands.setLiftHeight(lift, Lift.MIDDLE_HEIGHT);
+                lift.setTargetHeight(Lift.MIDDLE_HEIGHT);
+                break;
             case HIGH:
-                commands.setLiftHeight(lift, Lift.HIGH_HEIGHT);
+                lift.setTargetHeight(Lift.HIGH_HEIGHT);
+                break;
         }
 
-        //Drive to hub
-        driveTo(16, 0, 0);
+        //Drive to hub and wait for lift
+        driveTo(18, 0, 0);
+        customWait(() -> (lift.getLiftHeight() < lift.getTargetHeight() - 0.5));
 
         //Deliver pre-loaded block
-        commands.outtake(intake, 1500);
+        driveTo(20, 0, 0);
+        commands.outtake(intake);
+        lift.setTargetHeight(Lift.GROUND_HEIGHT);
 
         //Move back a little so that the intake doesn't hit the hub
-        driveTo(10, 0, 0);
-
-        //Put lift back down
-        lift.setTargetHeight(Lift.GROUND_HEIGHT);
-
-        //Realign with the wall and turn towards the warehouse
-        driveTo(drive.getPoseEstimate().getX(), drive.getPoseEstimate().getY(), Math.toRadians(90));
-        driveTo(0, 0, Math.toRadians(90));
-        commands.setLiftHeight(lift, Lift.GROUND_HEIGHT);
-
-        //Start intaking
-        intake.setIntakePower(1);
-
-        //Drive into the warehouse
-        driveTo(0, 47, Math.toRadians(90));
-
-        //Stop intake
-        intake.setIntakePower(0);
-
-        //Drive backwards to the hub
-        driveTo(0, 0, Math.toRadians(90));
-
-        //Turn and move towards the hub
         driveTo(10, 0, Math.toRadians(90));
-        lift.setTargetHeight(Lift.HIGH_HEIGHT);
-        driveTo(drive.getPoseEstimate().getX(), drive.getPoseEstimate().getY(), 0);
 
-        //Set lift to the highest height
-        commands.setLiftHeight(lift, Lift.HIGH_HEIGHT);
+        //Drive to wall
+        driveTo(() -> (drive.getPoseEstimate().getX() - positioning.getLeftDistance()),
+                drive.getPoseEstimate()::getY, drive.getPoseEstimate()::getHeading);
 
-        //Move forward
-        driveTo(16, 0, 0);
+        waitForTime(3000); //Debug and safety
 
-        //Outtake the game element
-        commands.outtake(intake, 1500);
+        drive.setPoseEstimate(new Pose2d(0, drive.getPoseEstimate().getY(), Math.toRadians(90)));
 
-        //Drive a little back and turn
-        driveTo(10, 0, 0);
+        //Drive through gap
+        driveTo(0, 40, Math.toRadians(90));
 
-        //Put lift back down
-        lift.setTargetHeight(Lift.GROUND_HEIGHT);
+        // STOP HERE TO PARK NEAR THE GAP
 
-        //Realign with the wall and turn towards the warehouse
-        driveTo(drive.getPoseEstimate().getX(), drive.getPoseEstimate().getY(), Math.toRadians(90));
+        //Park along back wall
+        driveTo(24, 45, Math.toRadians(135));
+        driveTo(24, 64, Math.toRadians(180));
 
-        //Park in warehouse
-        driveTo(0, 0, Math.toRadians(90));
-        commands.setLiftHeight(lift, Lift.GROUND_HEIGHT);
-        driveTo(0, -47, Math.toRadians(90));
+        //Against wall
+        driveTo(drive.getPoseEstimate()::getX,
+                () -> (drive.getPoseEstimate().getY() + positioning.getRightDistance()),
+                drive.getPoseEstimate()::getHeading);
+
+        drive.setPoseEstimate(new Pose2d(
+                drive.getPoseEstimate().getX(), drive.getPoseEstimate().getY(), Math.toRadians(180))
+        );
     }
 }

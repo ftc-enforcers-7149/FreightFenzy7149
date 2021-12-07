@@ -5,50 +5,47 @@ import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.Subsystems.Input;
-import org.firstinspires.ftc.teamcode.Subsystems.Subsytem;
-import org.firstinspires.ftc.teamcode.Subsystems.ValueTimer;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.Input;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.ValueTimer;
 
 public class Positioning implements Input {
 
     private ValueTimer<Double> distanceLeft, distanceRight;
     public Rev2mDistanceSensor distL, distR;
 
+    private static final double L_OFFSET = 1.26;
+    private static final double R_OFFSET = 0;
+
     private ValueTimer<Double> lightDetected;
     public RevColorSensorV3 lineDetector;
+
+    private static final double LIGHT_THRESH = 0.09;
 
     public Positioning(HardwareMap hardwareMap, String distLName, String distRName, String lineName) {
         distL = hardwareMap.get(Rev2mDistanceSensor.class, distLName);
         distR = hardwareMap.get(Rev2mDistanceSensor.class, distRName);
         lineDetector = hardwareMap.get(RevColorSensorV3.class, lineName);
 
-        distanceLeft = new ValueTimer<Double>() {
+        distanceLeft = new ValueTimer<Double>(0.0, 500) {
             @Override
             public Double readValue() {
                 return distL.getDistance(DistanceUnit.INCH);
             }
         };
 
-        distanceRight = new ValueTimer<Double>() {
+        distanceRight = new ValueTimer<Double>(0.0, 500) {
             @Override
             public Double readValue() {
                 return distR.getDistance(DistanceUnit.INCH);
             }
         };
 
-        lightDetected = new ValueTimer<Double>() {
+        lightDetected = new ValueTimer<Double>(0.0, 0) {
             @Override
             public Double readValue() {
                 return lineDetector.getLightDetected();
             }
         };
-    }
-
-    @Override
-    public void start() {
-        distanceLeft.start();
-        distanceRight.start();
-        lightDetected.start();
     }
 
     @Override
@@ -58,22 +55,29 @@ public class Positioning implements Input {
         lightDetected.updateInput();
     }
 
+    public void startPositioning() {
+        distanceLeft.startInput();
+        distanceRight.startInput();
+        lightDetected.startInput();
+    }
+    public void stopPositioning() {
+        stopInput();
+    }
+
     public double getLeftDistance() {
-        return distanceLeft.getValue();
+        return distanceLeft.getValue() - L_OFFSET;
     }
-
     public double getRightDistance() {
-        return distanceRight.getValue();
+        return distanceRight.getValue() - R_OFFSET;
     }
-
-    public double getLightDetected() {
-        return lightDetected.getValue();
+    public boolean getLineDetected() {
+        return lightDetected.getValue() >= LIGHT_THRESH;
     }
 
     @Override
-    public void stop() {
-        distanceLeft.stop();
-        distanceRight.stop();
-        lightDetected.stop();
+    public void stopInput() {
+        distanceLeft.stopInput();
+        distanceRight.stopInput();
+        lightDetected.stopInput();
     }
 }

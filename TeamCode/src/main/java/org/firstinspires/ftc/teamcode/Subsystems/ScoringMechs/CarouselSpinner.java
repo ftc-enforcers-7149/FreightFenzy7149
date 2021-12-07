@@ -4,8 +4,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.teamcode.Subsystems.Output;
-import org.firstinspires.ftc.teamcode.Subsystems.Subsytem;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.Output;
 
 public class CarouselSpinner implements Output {
 
@@ -57,7 +56,7 @@ public class CarouselSpinner implements Output {
     }
 
     @Override
-    public void stop() {
+    public void stopOutput() {
         setLeftPower(0);
         setRightPower(0);
         updateOutput();

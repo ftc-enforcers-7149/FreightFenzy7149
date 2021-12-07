@@ -98,6 +98,11 @@ public class SimpleColorPipeline extends RectPipeline {
         bitmap = Bitmap.createBitmap(output.width(), output.height(), Bitmap.Config.RGB_565);
         Utils.matToBitmap(output, bitmap);
 
+        input.release();
+        cropped.release();
+        roiTemp.release();
+        hsvMat.release();
+
         return output;
     }
 }

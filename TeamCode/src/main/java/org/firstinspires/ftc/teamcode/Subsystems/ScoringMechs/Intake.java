@@ -6,9 +6,9 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.Subsystems.Input;
-import org.firstinspires.ftc.teamcode.Subsystems.Output;
-import org.firstinspires.ftc.teamcode.Subsystems.ValueTimer;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.Input;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.Output;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.ValueTimer;
 
 public class Intake implements Output, Input {
 
@@ -18,9 +18,10 @@ public class Intake implements Output, Input {
     //Sensors
     public RevColorSensorV3 intakeColorSensor;
 
-    private static final double minDistance = 2;
-    private ValueTimer<Double> colorDist;
-    private boolean useSensor;
+    private static final double minDistance = 1.5;
+    private ValueTimer<Double> distance;
+    private ValueTimer<Integer> redValue;
+    private final boolean useSensor;
 
     //State machine logic
     private double intakePower,  lastIntakePower;
@@ -31,10 +32,16 @@ public class Intake implements Output, Input {
 
         intakeColorSensor = hardwaremap.get(RevColorSensorV3.class, intakeColorSensorName);
 
-        colorDist = new ValueTimer<Double>() {
+        distance = new ValueTimer<Double>(0.0, 250) {
             @Override
             public Double readValue() {
                 return intakeColorSensor.getDistance(DistanceUnit.INCH);
+            }
+        };
+        redValue = new ValueTimer<Integer>(0, 250) {
+            @Override
+            public Integer readValue() {
+                return intakeColorSensor.red();
             }
         };
 
@@ -54,13 +61,11 @@ public class Intake implements Output, Input {
     }
 
     @Override
-    public void start() {
-        if (useSensor) colorDist.start();
-    }
-
-    @Override
     public void updateInput() {
-        if (useSensor) colorDist.updateInput();
+        if (useSensor) {
+            distance.updateInput();
+            redValue.updateInput();
+        }
     }
 
     @Override
@@ -81,22 +86,27 @@ public class Intake implements Output, Input {
     }
 
     public boolean getFreightInIntake () {
-        return useSensor && colorDist.getValue() < minDistance;
+        return useSensor && (distance.getValue() < minDistance || redValue.getValue() > 100);
     }
 
     @Override
     public void startInput() {
-        colorDist.start();
+        if (useSensor) {
+            distance.startInput();
+            redValue.startInput();
+        }
     }
 
     @Override
     public void stopInput() {
-        colorDist.stop();
+        if (useSensor) {
+            distance.stopInput();
+            redValue.stopInput();
+        }
     }
 
     @Override
-    public void stop() {
-        if (useSensor) colorDist.stop();
+    public void stopOutput() {
         setIntakePower(0);
         updateOutput();
     }
