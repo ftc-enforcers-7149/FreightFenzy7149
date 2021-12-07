@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Autonomous.DuckSide;
 
+import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
@@ -20,17 +21,19 @@ public class RedDuck extends Auto_V2 {
     protected void auto() {
         HubLevel liftHeight = commands.detectBarcode(tseDetector);
 
+        intake.setIntakePower(-0.1);
+
         POS_ACC = 1;
         SLOW_DIST = 15;
 
         //Drive to the duckwheel
-        driveTo(5, 4, 0);
+        driveTo(5, 6, 0);
 
         //Spin and stop duckwheel
-        commands.spinDuck(spinner, 2500);
+        commands.spinDuck(spinner, 2750);
 
         //Drive to hub
-        driveTo(32,-25, Math.toRadians(300));
+        driveTo(33,-26, Math.toRadians(310));
 
         //Set lift to correct level according to the vision
         switch (liftHeight) {
@@ -41,18 +44,18 @@ public class RedDuck extends Auto_V2 {
                 commands.setLiftHeight(lift, Lift.MIDDLE_HEIGHT);
                 break;
             case HIGH:
-                commands.setLiftHeight(lift, Lift.HIGH_HEIGHT);
+                commands.setLiftHeight(lift, Lift.HIGH_HEIGHT - 2);
                 break;
         }
 
         //Drive to hub and outtake
-        driveTo( 34,-27, Math.toRadians(300));
+        driveTo( 35,-28, Math.toRadians(310));
         commands.outtake(intake);
 
         H_ACC = Math.toRadians(3);
 
         //Drive a little bit back and drop lift
-        driveTo(32,-25, Math.toRadians(300));
+        driveTo(33,-26, Math.toRadians(310));
         lift.setTargetHeight(Lift.GROUND_HEIGHT);
 
         customWait(() -> (getRuntime() < 24));
@@ -63,9 +66,12 @@ public class RedDuck extends Auto_V2 {
         commands.setLiftHeight(lift, Lift.BARRIER_HEIGHT);
 
         SLOW_DIST = 20;
-        driveTo(20,-128, Math.toRadians(90));
+        POS_ACC = 3;
+        driveTo(43,-120, Math.toRadians(100));
 
         //Lower lift all the way down for TeleOp
         commands.setLiftHeight(lift, Lift.GROUND_HEIGHT);
+
+        driveTo(drive.getPoseEstimate().getX(), drive.getPoseEstimate().getY(), 0);
     }
 }

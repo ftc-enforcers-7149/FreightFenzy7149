@@ -32,13 +32,13 @@ public class Intake implements Output, Input {
 
         intakeColorSensor = hardwaremap.get(RevColorSensorV3.class, intakeColorSensorName);
 
-        distance = new ValueTimer<Double>(250) {
+        distance = new ValueTimer<Double>(0.0, 250) {
             @Override
             public Double readValue() {
                 return intakeColorSensor.getDistance(DistanceUnit.INCH);
             }
         };
-        redValue = new ValueTimer<Integer>(250) {
+        redValue = new ValueTimer<Integer>(0, 250) {
             @Override
             public Integer readValue() {
                 return intakeColorSensor.red();

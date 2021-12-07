@@ -60,6 +60,11 @@ public class Tele_V2_BLUE extends TeleOp_Base {
     }
 
     @Override
+    public void init_loop() {
+        telemetry.addData("HEADING: ", HEADING);
+    }
+
+    @Override
     public void start() {
         startInputs();
         startOutputs();
@@ -71,7 +76,7 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         getInput();
 
         // Drive
-        driveHeadless(gyro.getRawYaw(), resetAngle);
+        driveHeadless(gyro.getYaw(), resetAngle);
 
         // Intake
         if (gamepad2.right_trigger > 0.1 || gamepad2.left_trigger > 0.1)

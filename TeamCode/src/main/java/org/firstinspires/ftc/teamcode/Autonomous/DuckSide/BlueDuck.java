@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Autonomous.DuckSide;
 
+import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
@@ -20,6 +21,8 @@ public class BlueDuck extends Auto_V2 {
     protected void auto() {
         HubLevel liftHeight = commands.detectBarcode(tseDetector);
 
+        intake.setIntakePower(-0.1);
+
         POS_ACC = 1;
         SLOW_DIST = 15;
 
@@ -27,7 +30,7 @@ public class BlueDuck extends Auto_V2 {
         driveTo(5, -4, 0);
 
         //Spin and stop duckwheel
-        commands.spinDuck(spinner, 2500);
+        commands.spinDuck(spinner, 2750);
 
         //Drive to hub
         driveTo(32,25, Math.toRadians(60));
@@ -41,7 +44,7 @@ public class BlueDuck extends Auto_V2 {
                 commands.setLiftHeight(lift, Lift.MIDDLE_HEIGHT);
                 break;
             case HIGH:
-                commands.setLiftHeight(lift, Lift.HIGH_HEIGHT);
+                commands.setLiftHeight(lift, Lift.HIGH_HEIGHT - 2);
                 break;
         }
 
@@ -63,9 +66,12 @@ public class BlueDuck extends Auto_V2 {
         commands.setLiftHeight(lift, Lift.BARRIER_HEIGHT);
 
         SLOW_DIST = 20;
-        driveTo(15,128, Math.toRadians(270));
+        POS_ACC = 3;
+        driveTo(4,120, Math.toRadians(280));
 
         //Lower lift all the way down for TeleOp
         commands.setLiftHeight(lift, Lift.GROUND_HEIGHT);
+
+        driveTo(drive.getPoseEstimate().getX(), drive.getPoseEstimate().getY(), 0);
     }
 }

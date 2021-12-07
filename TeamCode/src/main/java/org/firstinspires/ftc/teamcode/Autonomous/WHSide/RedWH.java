@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Autonomous.WHSide;
 
+import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
@@ -8,6 +9,8 @@ import org.firstinspires.ftc.teamcode.Autonomous.AutoCommands;
 import org.firstinspires.ftc.teamcode.Autonomous.Auto_V2;
 import org.firstinspires.ftc.teamcode.Autonomous.HubLevel;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
+
+import java.util.function.Supplier;
 
 @Autonomous(name = "Red Warehouse")
 @Disabled
@@ -44,27 +47,35 @@ public class RedWH extends Auto_V2 {
         //Deliver pre-loaded block
         driveTo(20, 0, 0);
         commands.outtake(intake);
-
-        //Move back a little so that the intake doesn't hit the hub
-        driveTo(16, 0, 0);
-
-        //Put lift back down
         lift.setTargetHeight(Lift.GROUND_HEIGHT);
 
-        //Cycles
-        while (opModeIsActive() && getRuntime() < 25) {
-            try {
-                commands.cycle(drive, positioning, lift, intake, false);
-            }
-            catch (AutoCommands.NoFreight nF) {
-                return;
-            }
-        }
+        //Move back a little so that the intake doesn't hit the hub
+        driveTo(10, 0, Math.toRadians(270));
 
-        //Park
-        commands.driveToGap(lift, false);
-        commands.driveThroughGap(drive, positioning, false);
+        //Drive to wall
+        driveTo(() -> (drive.getPoseEstimate().getX() - positioning.getRightDistance()),
+                drive.getPoseEstimate()::getY, drive.getPoseEstimate()::getHeading);
 
-        driveTo(drive.getPoseEstimate().getX(), drive.getPoseEstimate().getY() - 10, 0);
+        waitForTime(3000); //Debug and safety
+
+        drive.setPoseEstimate(new Pose2d(0, drive.getPoseEstimate().getY(), Math.toRadians(270)));
+
+        //Drive through gap
+        driveTo(0, -40, Math.toRadians(270));
+
+        // STOP HERE TO PARK NEAR THE GAP
+
+        //Park along back wall
+        driveTo(24, -45, Math.toRadians(225));
+        driveTo(24, -64, Math.toRadians(180));
+
+        //Against wall
+        driveTo(drive.getPoseEstimate()::getX,
+                () -> (drive.getPoseEstimate().getY() - positioning.getLeftDistance()),
+                drive.getPoseEstimate()::getHeading);
+
+        drive.setPoseEstimate(new Pose2d(
+                drive.getPoseEstimate().getX(), drive.getPoseEstimate().getY(), Math.toRadians(180))
+        );
     }
 }

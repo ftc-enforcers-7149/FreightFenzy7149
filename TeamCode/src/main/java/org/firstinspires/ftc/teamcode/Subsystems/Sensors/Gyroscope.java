@@ -36,13 +36,13 @@ public class Gyroscope implements Input {
 
         imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
 
-        yawReading = new ValueTimer<Float>(0) {
+        yawReading = new ValueTimer<Float>(0f, 0) {
             @Override
             public Float readValue() {
                 return imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
             }
         };
-        angVelReading = new ValueTimer<Float>(0) {
+        angVelReading = new ValueTimer<Float>(0f, 0) {
             @Override
             public Float readValue() {
                 return imu.getAngularVelocity().zRotationRate;

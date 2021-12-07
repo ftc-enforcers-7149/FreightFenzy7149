@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Autonomous;
 
+import android.icu.text.MessagePattern;
+
 import com.acmerobotics.roadrunner.control.PIDFController;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -11,6 +13,8 @@ import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
 import org.firstinspires.ftc.teamcode.Subsystems.Sensors.Positioning;
 import org.firstinspires.ftc.teamcode.Subsystems.Webcam.OpenCV;
 import org.opencv.core.RotatedRect;
+
+import java.util.function.Supplier;
 
 import static org.firstinspires.ftc.teamcode.Autonomous.Autonomous_Base.CLOSE_DIST;
 import static org.firstinspires.ftc.teamcode.Autonomous.Autonomous_Base.H_ACC;
@@ -29,10 +33,23 @@ public class AutoCommands {
     }
 
     public HubLevel detectBarcode(OpenCV tseDetector) {
-        RotatedRect boundingRect = tseDetector.getRect();
-        if (boundingRect == null) return HubLevel.LOW;
-        if (boundingRect.center.x <= 640 / 4.0) {
-            return HubLevel.MIDDLE;
+        if (op.getAlliance() == Alliance.BLUE) {
+            RotatedRect boundingRect = tseDetector.getRect();
+            if (boundingRect == null) return HubLevel.LOW;
+            if (boundingRect.center.x <= 640 / 4.0) {
+                return HubLevel.MIDDLE;
+            } else {
+                return HubLevel.HIGH;
+            }
+        }
+        else if (op.getAlliance() == Alliance.RED) {
+            RotatedRect boundingRect = tseDetector.getRect();
+            if (boundingRect == null) return HubLevel.HIGH;
+            if (boundingRect.center.x <= 640 / 4.0) {
+                return HubLevel.LOW;
+            } else {
+                return HubLevel.MIDDLE;
+            }
         }
         else {
             return HubLevel.HIGH;
@@ -45,391 +62,104 @@ public class AutoCommands {
     }
 
     public void outtake(Intake intake) {
-        intake.setIntakePower(1);
-        op.customWait(intake::getFreightInIntake);
+        intake.setIntakePower(0.75);
+        long startTime = System.currentTimeMillis();
+        op.customWait(() -> (intake.getFreightInIntake() && System.currentTimeMillis() < startTime + 1500));
         intake.setIntakePower(0);
     }
 
     public void spinDuck(CarouselSpinner spinner, long msTime) {
         if (op.getAlliance() == Alliance.RED) {
-            spinner.setLeftPower(1);
+            spinner.setLeftPower(0.75);
             op.waitForTime(msTime);
             spinner.setLeftPower(0);
         }
         else if (op.getAlliance() == Alliance.BLUE) {
-            spinner.setRightPower(1);
+            spinner.setRightPower(0.75);
             op.waitForTime(msTime);
             spinner.setRightPower(0);
         }
     }
 
     public void cycle(MecanumDrive drive, Positioning positioning,
-                      Lift lift, Intake intake, boolean stopWithin) throws NoFreight {
-        driveToGap(lift, stopWithin);
-        driveThroughGap(drive, positioning, stopWithin);
-        driveToFreightAndBack(drive, positioning, intake, stopWithin);
+                      Lift lift, Intake intake) throws NoFreight {
+        driveToGap(drive, positioning, lift);
+        driveThroughGap(drive, positioning);
+        driveToFreightAndBack(drive, positioning, intake);
         driveToHub(lift, intake);
     }
 
-    public void driveToGap(Lift lift, boolean stop) {
+    public void driveToGap(MecanumDrive drive, Positioning positioning, Lift lift) {
         lift.setTargetHeight(Lift.GROUND_HEIGHT);
-
-        if (op.getAlliance() == Alliance.RED) op.driveTo(5, -24, Math.toRadians(270), stop);
-        else if (op.getAlliance() == Alliance.BLUE) op.driveTo(5, 24, Math.toRadians(90), stop);
+        driveWithWall(drive, positioning, 0, drive.getPoseEstimate()::getY);
     }
-    public void driveThroughGap(MecanumDrive drive, Positioning positioning, boolean stop) {
-        positioning.startPositioning();
-
-        double destX = drive.getPoseEstimate().getX(),
-                destY = drive.getPoseEstimate().getY(),
-                destH = drive.getPoseEstimate().getHeading();
-
+    public void driveThroughGap(MecanumDrive drive, Positioning positioning) {
         if (op.getAlliance() == Alliance.RED) {
-            destX = drive.getPoseEstimate().getX() - positioning.getRightDistance();
-            destY = drive.getPoseEstimate().getY() - 20;
-            destH = Math.toRadians(270);
+            driveWithWall(drive, positioning, 0, () -> {
+                if (positioning.getLineDetected()) return drive.getPoseEstimate().getY();
+                else return -36.0;
+            });
+            if (positioning.getLineDetected())
+                op.drive.setPoseEstimate(new Pose2d(0, -32, Math.toRadians(270)));
         }
         else if (op.getAlliance() == Alliance.BLUE) {
-            destX = drive.getPoseEstimate().getX() - positioning.getLeftDistance();
-            destY = drive.getPoseEstimate().getY() + 20;
-            destH = Math.toRadians(90);
+            driveWithWall(drive, positioning, 0, () -> {
+                if (positioning.getLineDetected()) return drive.getPoseEstimate().getY();
+                else return 36.0;
+            });
+            if (positioning.getLineDetected())
+                op.drive.setPoseEstimate(new Pose2d(0, 32, Math.toRadians(90)));
         }
-
-        //Initial state
-        drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        PIDFController hControl = new PIDFController(H_PID);
-        hControl.setOutputBounds(0, 1);
-        hControl.setTargetPosition(0);
-
-        //Current robot position
-        double robotX = drive.getPoseEstimate().getX();
-        double robotY = drive.getPoseEstimate().getY();
-        double robotH = drive.getPoseEstimate().getHeading();
-
-        //Calculate relatives
-        double relX = destX - robotX;
-        double relY = destY - robotY;
-        double relH = op.deltaHeading(robotH, destH);
-
-        double hWeight;
-
-        //Drive to line
-        while (op.opModeIsActive() &&
-                (Math.abs(relX) > 3 ||
-                        Math.abs(relY) > POS_ACC ||
-                        Math.abs(relH) > Math.toRadians(5))) {
-
-            op.updateInputs();
-
-            //Check wall and color sensor, adjust destination accordingly
-            if (op.getAlliance() == Alliance.RED) {
-                destX = drive.getPoseEstimate().getX() - positioning.getRightDistance();
-                if (positioning.getLineDetected()) destY = drive.getPoseEstimate().getY();
-                else destY = drive.getPoseEstimate().getY() - 20;
-            }
-            else if (op.getAlliance() == Alliance.BLUE) {
-                destX = drive.getPoseEstimate().getX() - positioning.getLeftDistance();
-                if (positioning.getLineDetected()) destY = drive.getPoseEstimate().getY();
-                else destY = drive.getPoseEstimate().getY() + 20;
-            }
-
-            //Normal driveTo code
-            //Update robot position
-            robotX = drive.getPoseEstimate().getX();
-            robotY = drive.getPoseEstimate().getY();
-            robotH = drive.getPoseEstimate().getHeading();
-
-            //Calculate relatives
-            relX = destX - robotX;
-            relY = destY - robotY;
-            relH = op.deltaHeading(robotH, destH);
-
-            hWeight = hControl.update(Math.abs(relH));
-
-            if (Math.abs(relX) < POS_ACC) relX = 0;
-            if (Math.abs(relY) < POS_ACC) relY = 0;
-            if (Math.abs(relH) < H_ACC) hWeight = 0;
-
-            double driveAngle = op.deltaHeading(robotH, Math.atan2(relY, relX));
-
-            double xPower = Math.cos(driveAngle);
-            double yPower = Math.sin(driveAngle);
-            double hPower = Math.copySign(hWeight, relH);
-
-            double dist = Math.sqrt((relX*relX) + (relY*relY));
-
-            if (dist <= (stop ? SLOW_DIST : -1)) {
-                xPower *= Math.pow(dist / SLOW_DIST, 2);
-                yPower *= Math.pow(dist / SLOW_DIST, 2);
-            }
-
-            double max = Math.max(Math.abs(xPower), Math.abs(yPower));
-            if (dist <= (stop ? CLOSE_DIST : -1) && max != 0) {
-                xPower /= max / MIN_SPEED;
-                yPower /= max / MIN_SPEED;
-            }
-            else {
-                if (max < MIN_SPEED && max != 0) {
-                    xPower /= max / MIN_SPEED;
-                    yPower /= max / MIN_SPEED;
-                }
-                if (Math.abs(hPower) < MIN_TURN && Math.abs(hPower) > 0)
-                    hPower = Math.copySign(MIN_TURN, hPower);
-            }
-
-            drive.setWeightedDrivePower(new Pose2d(xPower, yPower, hPower));
-
-            op.telemetry.addData("X Power: ", xPower);
-            op.telemetry.addData("Y Power: ", yPower);
-            op.telemetry.addData("H Power: ", hPower);
-
-            op.updateOutputs();
-        }
-
-        positioning.stopPositioning();
-
-        //TODO: Get right positions
-        if (op.getAlliance() == Alliance.RED) drive.setPoseEstimate(new Pose2d(0, -48, Math.toRadians(270)));
-        else if (op.getAlliance() == Alliance.BLUE) drive.setPoseEstimate(new Pose2d(0, 48, Math.toRadians(90)));
-
-        if (stop) op.setMotorPowers(0, 0, 0, 0);
     }
-    public void driveToFreightAndBack(MecanumDrive drive, Positioning positioning,
-                                      Intake intake, boolean stop) throws NoFreight {
-        intake.setIntakePower(1);
-        positioning.startPositioning();
+    public void driveToFreightAndBack(MecanumDrive drive, Positioning positioning, Intake intake) throws NoFreight {
+        intake.setIntakePower(-1);
 
-        double destX = drive.getPoseEstimate().getX(),
-                destY = drive.getPoseEstimate().getY(),
-                destH = drive.getPoseEstimate().getHeading();
-
+        //TO
         if (op.getAlliance() == Alliance.RED) {
-            destX = drive.getPoseEstimate().getX() - positioning.getRightDistance();
-            destY = drive.getPoseEstimate().getY() - 20;
-            destH = Math.toRadians(270);
+            driveWithWall(drive, positioning, 0, () -> {
+                if (intake.getFreightInIntake()) return drive.getPoseEstimate().getY();
+                else return -60.0;
+            });
         }
         else if (op.getAlliance() == Alliance.BLUE) {
-            destX = drive.getPoseEstimate().getX() - positioning.getLeftDistance();
-            destY = drive.getPoseEstimate().getY() + 20;
-            destH = Math.toRadians(90);
+            driveWithWall(drive, positioning, 0, () -> {
+                if (intake.getFreightInIntake()) return drive.getPoseEstimate().getY();
+                else return 60.0;
+            });
         }
-
-        //Initial state
-        drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        PIDFController hControl = new PIDFController(H_PID);
-        hControl.setOutputBounds(0, 1);
-        hControl.setTargetPosition(0);
-
-        //Current robot position
-        double robotX = drive.getPoseEstimate().getX();
-        double robotY = drive.getPoseEstimate().getY();
-        double robotH = drive.getPoseEstimate().getHeading();
-
-        //Calculate relatives
-        double relX = destX - robotX;
-        double relY = destY - robotY;
-        double relH = op.deltaHeading(robotH, destH);
-
-        double hWeight;
-
-        //Drive to line
-        TO: while (op.opModeIsActive() &&
-                (Math.abs(relX) > 3 ||
-                        Math.abs(relY) > POS_ACC ||
-                        Math.abs(relH) > Math.toRadians(5))) {
-
-            op.updateInputs();
-
-            //Check wall and color sensor, adjust destination accordingly
-            if (op.getAlliance() == Alliance.RED) {
-                destX = drive.getPoseEstimate().getX() - positioning.getRightDistance();
-                if (intake.getFreightInIntake()) break TO;
-                else destY = drive.getPoseEstimate().getY() - 20;
-            }
-            else if (op.getAlliance() == Alliance.BLUE) {
-                destX = drive.getPoseEstimate().getX() - positioning.getLeftDistance();
-                if (intake.getFreightInIntake()) break TO;
-                else destY = drive.getPoseEstimate().getY() + 20;
-            }
-
-            //Normal driveTo code
-            //Update robot position
-            robotX = drive.getPoseEstimate().getX();
-            robotY = drive.getPoseEstimate().getY();
-            robotH = drive.getPoseEstimate().getHeading();
-
-            //Calculate relatives
-            relX = destX - robotX;
-            relY = destY - robotY;
-            relH = op.deltaHeading(robotH, destH);
-
-            hWeight = hControl.update(Math.abs(relH));
-
-            if (Math.abs(relX) < POS_ACC) relX = 0;
-            if (Math.abs(relY) < POS_ACC) relY = 0;
-            if (Math.abs(relH) < H_ACC) hWeight = 0;
-
-            double driveAngle = op.deltaHeading(robotH, Math.atan2(relY, relX));
-
-            double xPower = Math.cos(driveAngle);
-            double yPower = Math.sin(driveAngle);
-            double hPower = Math.copySign(hWeight, relH);
-
-            double dist = Math.sqrt((relX*relX) + (relY*relY));
-
-            if (dist <= SLOW_DIST) {
-                xPower *= Math.pow(dist / SLOW_DIST, 2);
-                yPower *= Math.pow(dist / SLOW_DIST, 2);
-            }
-
-            double max = Math.max(Math.abs(xPower), Math.abs(yPower));
-            if (dist <= CLOSE_DIST && max != 0) {
-                xPower /= max / MIN_SPEED;
-                yPower /= max / MIN_SPEED;
-            }
-            else {
-                if (max < MIN_SPEED && max != 0) {
-                    xPower /= max / MIN_SPEED;
-                    yPower /= max / MIN_SPEED;
-                }
-                if (Math.abs(hPower) < MIN_TURN && Math.abs(hPower) > 0)
-                    hPower = Math.copySign(MIN_TURN, hPower);
-            }
-
-            drive.setWeightedDrivePower(new Pose2d(xPower, yPower, hPower));
-
-            op.telemetry.addData("X Power: ", xPower);
-            op.telemetry.addData("Y Power: ", yPower);
-            op.telemetry.addData("H Power: ", hPower);
-
-            op.updateOutputs();
-        }
-
-        //intake.setIntakePower(0);
 
         if (!intake.getFreightInIntake()) {
-            op.setMotorPowers(0, 0, 0, 0);
             throw new NoFreight();
         }
 
-        destX = drive.getPoseEstimate().getX();
-        destY = drive.getPoseEstimate().getY();
-        destH = drive.getPoseEstimate().getHeading();
+        intake.setIntakePower(-0.25);
 
+        //BACK
         if (op.getAlliance() == Alliance.RED) {
-            destX = drive.getPoseEstimate().getX() - positioning.getRightDistance();
-            destY = drive.getPoseEstimate().getY() + 20;
-            destH = Math.toRadians(270);
+            driveWithWall(drive, positioning, 0, () -> {
+                if (positioning.getLineDetected()) return drive.getPoseEstimate().getY();
+                else return -28.0;
+            });
+            if (positioning.getLineDetected())
+                op.drive.setPoseEstimate(new Pose2d(0, -32, Math.toRadians(270)));
         }
         else if (op.getAlliance() == Alliance.BLUE) {
-            destX = drive.getPoseEstimate().getX() - positioning.getLeftDistance();
-            destY = drive.getPoseEstimate().getY() - 20;
-            destH = Math.toRadians(90);
+            driveWithWall(drive, positioning, 0, () -> {
+                if (positioning.getLineDetected()) return drive.getPoseEstimate().getY();
+                else return 28.0;
+            });
+            if (positioning.getLineDetected())
+                op.drive.setPoseEstimate(new Pose2d(0, 32, Math.toRadians(90)));
         }
-
-        //Initial state
-        drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        hControl = new PIDFController(H_PID);
-        hControl.setOutputBounds(0, 1);
-        hControl.setTargetPosition(0);
-
-        //Current robot position
-        robotX = drive.getPoseEstimate().getX();
-        robotY = drive.getPoseEstimate().getY();
-        robotH = drive.getPoseEstimate().getHeading();
-
-        //Calculate relatives
-        relX = destX - robotX;
-        relY = destY - robotY;
-        relH = op.deltaHeading(robotH, destH);
-
-        BACK: while (op.opModeIsActive() &&
-                (Math.abs(relX) > 3 ||
-                        Math.abs(relY) > POS_ACC ||
-                        Math.abs(relH) > Math.toRadians(5))) {
-
-            op.updateInputs();
-
-            //Check wall and color sensor, adjust destination accordingly
-            if (op.getAlliance() == Alliance.RED) {
-                destX = drive.getPoseEstimate().getX() - positioning.getRightDistance();
-                if (positioning.getLineDetected()) break BACK;
-                else destY = drive.getPoseEstimate().getY() + 20;
-            }
-            else if (op.getAlliance() == Alliance.BLUE) {
-                destX = drive.getPoseEstimate().getX() - positioning.getLeftDistance();
-                if (positioning.getLineDetected()) break BACK;
-                else destY = drive.getPoseEstimate().getY() - 20;
-            }
-
-            //Normal driveTo code
-            //Update robot position
-            robotX = drive.getPoseEstimate().getX();
-            robotY = drive.getPoseEstimate().getY();
-            robotH = drive.getPoseEstimate().getHeading();
-
-            //Calculate relatives
-            relX = destX - robotX;
-            relY = destY - robotY;
-            relH = op.deltaHeading(robotH, destH);
-
-            hWeight = hControl.update(Math.abs(relH));
-
-            if (Math.abs(relX) < POS_ACC) relX = 0;
-            if (Math.abs(relY) < POS_ACC) relY = 0;
-            if (Math.abs(relH) < H_ACC) hWeight = 0;
-
-            double driveAngle = op.deltaHeading(robotH, Math.atan2(relY, relX));
-
-            double xPower = Math.cos(driveAngle);
-            double yPower = Math.sin(driveAngle);
-            double hPower = Math.copySign(hWeight, relH);
-
-            double dist = Math.sqrt((relX*relX) + (relY*relY));
-
-            if (dist <= SLOW_DIST) {
-                xPower *= Math.pow(dist / SLOW_DIST, 2);
-                yPower *= Math.pow(dist / SLOW_DIST, 2);
-            }
-
-            double max = Math.max(Math.abs(xPower), Math.abs(yPower));
-            if (dist <= CLOSE_DIST && max != 0) {
-                xPower /= max / MIN_SPEED;
-                yPower /= max / MIN_SPEED;
-            }
-            else {
-                if (max < MIN_SPEED && max != 0) {
-                    xPower /= max / MIN_SPEED;
-                    yPower /= max / MIN_SPEED;
-                }
-                if (Math.abs(hPower) < MIN_TURN && Math.abs(hPower) > 0)
-                    hPower = Math.copySign(MIN_TURN, hPower);
-            }
-
-            drive.setWeightedDrivePower(new Pose2d(xPower, yPower, hPower));
-
-            op.telemetry.addData("X Power: ", xPower);
-            op.telemetry.addData("Y Power: ", yPower);
-            op.telemetry.addData("H Power: ", hPower);
-
-            op.updateOutputs();
-        }
-
-        //TODO: Get right positions
-        if (op.getAlliance() == Alliance.RED) drive.setPoseEstimate(new Pose2d(0, -48, Math.toRadians(270)));
-        else if (op.getAlliance() == Alliance.BLUE) drive.setPoseEstimate(new Pose2d(0, 48, Math.toRadians(90)));
-
-        positioning.stopPositioning();
 
         //Finish driving through gap
 
-        if (op.getAlliance() == Alliance.RED)
-            op.driveTo(drive.getPoseEstimate().getX(), -24, Math.toRadians(270), stop);
-        else if (op.getAlliance() == Alliance.BLUE)
-            op.driveTo(drive.getPoseEstimate().getX(), 24, Math.toRadians(90), stop);
+        if (op.getAlliance() == Alliance.RED) {
+            driveWithWall(drive, positioning, 0, () -> -20.0);
+        }
+        else if (op.getAlliance() == Alliance.BLUE) {
+            driveWithWall(drive, positioning, 0, () -> 20.0);
+        }
     }
     public void driveToHub(Lift lift, Intake intake) {
         lift.setTargetHeight(Lift.HIGH_HEIGHT);
@@ -438,8 +168,44 @@ public class AutoCommands {
         else if (op.getAlliance() == Alliance.BLUE) op.driveTo(35, 8, Math.toRadians(315));
 
         setLiftHeight(lift, Lift.HIGH_HEIGHT);
-
         outtake(intake);
+    }
+
+    public void driveWithWall(MecanumDrive drive, Positioning positioning, double xOff, Supplier<Double> y) {
+        positioning.startPositioning();
+        if (xOff == 0) {
+            H_ACC = Math.toRadians(3);
+            POS_ACC = 2;
+        }
+
+        if (op.getAlliance() == Alliance.RED) {
+            op.driveTo(
+                    () -> {
+                        if (positioning.getRightDistance() > 10) return 5.0;
+                        else return drive.getPoseEstimate().getX() - positioning.getRightDistance() + xOff;
+                    },
+                    y,
+                    () -> Math.toRadians(270));
+            if (xOff == 0)
+                op.drive.setPoseEstimate(new Pose2d(0, drive.getPoseEstimate().getY(), Math.toRadians(270)));
+        }
+        else if (op.getAlliance() == Alliance.BLUE) {
+            op.driveTo(
+                    () -> {
+                        if (positioning.getRightDistance() > 10) return 5.0;
+                        else return drive.getPoseEstimate().getX() - positioning.getRightDistance() + xOff;
+                    },
+                    y,
+                    () -> Math.toRadians(90));
+            if (xOff == 0)
+                op.drive.setPoseEstimate(new Pose2d(0, drive.getPoseEstimate().getY(), Math.toRadians(90)));
+        }
+
+        if (xOff == 0) {
+            H_ACC = Math.toRadians(1);
+            POS_ACC = 1;
+        }
+        positioning.stopPositioning();
     }
 
     public class NoFreight extends Exception { }
