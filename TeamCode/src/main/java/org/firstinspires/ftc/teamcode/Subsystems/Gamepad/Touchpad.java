@@ -153,7 +153,7 @@ public class Touchpad {
     public void setLastFingerOneY(double lastFingerOneY) {
         this.lastFingerOneY = lastFingerOneY;
     }
-
+//
     public double getFingerTwoX() {
         return fingerTwoX;
     }
