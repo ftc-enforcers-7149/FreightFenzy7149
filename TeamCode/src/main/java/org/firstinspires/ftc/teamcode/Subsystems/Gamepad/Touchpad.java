@@ -26,6 +26,8 @@ public class Touchpad {
     public void update() {
 
         time = System.currentTimeMillis();
+        getVelocity();
+
         touchButton = gamepad.touchpad;
 
         if(gamepad.touchpad_finger_1 && gamepad.touchpad_finger_2) {
@@ -60,6 +62,7 @@ public class Touchpad {
 
         lastTouchButton = touchButton;
         lastNumFingers = numFingers;
+        lastTime = time;
 
     }
 
@@ -218,29 +221,23 @@ public class Touchpad {
 
     public boolean getVelocity() {
 
-        if(lastTime >= time + pollingTime) {
+        switch(numFingers) {
 
-            lastTime = time;
+            case 1:
+                v1.updateVector(fingerOneX, fingerOneY, time - lastTime);
+                v2.updateVector(0, 0, time - lastTime);
+                break;
 
-            switch(numFingers) {
+            case 2:
 
-                case 1:
+                v1.updateVector(fingerOneX, fingerOneY, time - lastTime);
+                v2.updateVector(fingerTwoX, fingerTwoY, time - lastTime);
+                break;
 
-                    v1.updateVector(fingerOneX, fingerOneY, time - lastTime);
-                    v2.updateVector(0, 0, time - lastTime);
-                    break;
-
-                case 2:
-
-                    v1.updateVector(fingerOneX, fingerOneY, time - lastTime);
-                    v2.updateVector(fingerTwoX, fingerTwoY, time - lastTime);
-                    break;
-
-                default:
-                    v1.updateVector(0, 0, 0);
-                    v2.updateVector(0, 0, 0);
-                    break;
-            }
+            default:
+                v1.updateVector(0, 0, time-lastTime);
+                v2.updateVector(0, 0, time-lastTime);
+                break;
         }
 
         return Math.abs(v1.getVelocity()) > 0 || Math.abs(v2.getVelocity()) > 0;
@@ -280,9 +277,9 @@ public class Touchpad {
             x = 0; y = 0; lastX = 0; lastY = 0; time = 0; lastTime = 0;
         }
 
-        public void updateVector(double x, double y, double time) {
+        public void updateVector(double newX, double newY, double newTime) {
             lastX = this.x; lastY = this.y; lastTime = this.time;
-            this.x = x; this.y = y; this.time = time;
+            this.x = newX; this.y = newY; this.time = newTime;
         }
 
         public double getDistance() {
