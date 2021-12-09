@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Gamepad;
 
-import com.acmerobotics.roadrunner.util.NanoClock;
 
 public class TouchButton {
 
@@ -38,7 +37,7 @@ public class TouchButton {
 
     public void update() {
 
-        time = NanoClock.system().seconds();
+        time = System.currentTimeMillis();
 
         if(lastTime >= time + pollingTime) {
 

@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchButton;
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Touchpad;
 
 @TeleOp(name="Gamepad Test")
-@Disabled
+//@Disabled
 public class GamepadTest extends OpMode {
 
     Touchpad touchpad;
@@ -45,8 +45,8 @@ public class GamepadTest extends OpMode {
         telemetry.addData("\nLeft swipe?: ", leftButton.getV1().getVelocity() != 0);
         telemetry.addData("Right swipe?: ", rightButton.getV1().getVelocity() != 0);
 
-        telemetry.addData("\nLeft swipe?: ", leftButton.getV1().getVelocity());
-        telemetry.addData("Right swipe?: ", rightButton.getV1().getVelocity());
+        telemetry.addData("\nLeft vel?: ", leftButton.getV1().getVelocity());
+        telemetry.addData("Right vel?: ", rightButton.getV1().getVelocity());
 
         touchpad.rumbleBlips(5);
     }

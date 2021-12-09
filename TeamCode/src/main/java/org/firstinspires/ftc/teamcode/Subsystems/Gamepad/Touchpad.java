@@ -12,6 +12,9 @@ public class Touchpad {
     private double fingerOneX, lastFingerOneX, fingerOneY, lastFingerOneY,
             fingerTwoX, lastFingerTwoX, fingerTwoY, lastFingerTwoY;
 
+    double time, lastTime = 0;
+    double pollingTime;
+    private VectorPacket v1 = new VectorPacket(), v2 = new VectorPacket();
     private double standardMult = 100;
 
     public Touchpad(Gamepad gamepad) {
@@ -22,10 +25,8 @@ public class Touchpad {
 
     public void update() {
 
-        lastTouchButton = touchButton;
+        time = System.currentTimeMillis();
         touchButton = gamepad.touchpad;
-
-        lastNumFingers = numFingers;
 
         if(gamepad.touchpad_finger_1 && gamepad.touchpad_finger_2) {
             numFingers = 2;
@@ -56,6 +57,9 @@ public class Touchpad {
             lastFingerTwoY = fingerTwoY;
             fingerTwoY = standardMult * gamepad.touchpad_finger_2_y;
         }
+
+        lastTouchButton = touchButton;
+        lastNumFingers = numFingers;
 
     }
 
@@ -185,6 +189,162 @@ public class Touchpad {
 
     public boolean getFingerOn() {
         return fingerOn;
+    }
+
+    /*public boolean isRange() {
+
+        switch(numFingers) {
+            case 1:
+                if((fingerOneX <= rightX && gFun.getFingerOneX() >= leftX)
+                        && (gFun.getFingerOneY() <= topY && gFun.getFingerOneY() >= bottomY))
+                    return true;
+                break;
+
+            case 2:
+                if(((gFun.getFingerOneX() <= rightX && gFun.getFingerOneX() >= leftX)
+                        && (gFun.getFingerOneY() <= topY && gFun.getFingerOneY() >= bottomY))
+                        ||
+                        ((gFun.getFingerTwoX() <= rightX && gFun.getFingerTwoX() >= leftX)
+                                && (gFun.getFingerTwoY() <= topY && gFun.getFingerTwoY() >= bottomY)))
+                    return true;
+                break;
+            default:
+                return false;
+        }
+
+        return false;
+
+    }*/
+
+    public boolean getVelocity() {
+
+        if(lastTime >= time + pollingTime) {
+
+            lastTime = time;
+
+            switch(numFingers) {
+
+                case 1:
+
+                    v1.updateVector(fingerOneX, fingerOneY, time - lastTime);
+                    v2.updateVector(0, 0, time - lastTime);
+                    break;
+
+                case 2:
+
+                    v1.updateVector(fingerOneX, fingerOneY, time - lastTime);
+                    v2.updateVector(fingerTwoX, fingerTwoY, time - lastTime);
+                    break;
+
+                default:
+                    v1.updateVector(0, 0, 0);
+                    v2.updateVector(0, 0, 0);
+                    break;
+            }
+        }
+
+        return Math.abs(v1.getVelocity()) > 0 || Math.abs(v2.getVelocity()) > 0;
+
+    }
+
+/*    public boolean isRange(double x, double y) {
+
+        if((x <= rightX && x >= leftX)
+                && (y <= topY && y >= bottomY)) {
+            return true;
+        }
+
+        return false;
+
+    }*/
+
+    public VectorPacket getV1() {
+        return v1;
+    }
+
+    public VectorPacket getV2() {
+        return v2;
+    }
+
+    public class VectorPacket {
+
+        private double x, y, lastX, lastY, time, lastTime;
+
+        public VectorPacket(double x, double y, double lastX, double lastY, double time, double lastTime) {
+
+            this.x = x; this.y = y; this.lastX = lastX; this.lastY = lastY; this.time = time; this.lastTime = lastTime;
+
+        }
+
+        public VectorPacket() {
+            x = 0; y = 0; lastX = 0; lastY = 0; time = 0; lastTime = 0;
+        }
+
+        public void updateVector(double x, double y, double time) {
+            lastX = this.x; lastY = this.y; lastTime = this.time;
+            this.x = x; this.y = y; this.time = time;
+        }
+
+        public double getDistance() {
+            return Math.sqrt((Math.pow((x - lastX), 2) + Math.pow((y - lastY), 2)));
+        }
+
+        public double getVelocity() {
+            return Math.sqrt(Math.pow(getXVel(), 2) + Math.pow(getYVel(), 2));
+        }
+
+        public double getAngle() {
+            return Math.toDegrees(Math.atan((y - lastY) /(x - lastX)));
+        }
+
+        public void setX(double x) {
+            this.x = x;
+        }
+
+        public void setLastX(double lastX) {
+            this.lastX  = x;
+        }
+
+        public void setY(double y) {
+            this.y = y;
+        }
+
+        public void setLastY(double lastY) {
+            this.lastY  = y;
+        }
+
+        public double getX() {
+            return x;
+        }
+
+        public double getY() {
+            return y;
+        }
+
+        public double getXVel() {
+            return (x - lastX) / (time - lastTime);
+        }
+
+        public double getYVel() {
+            return (y - lastY) / (time - lastTime);
+        }
+
+        public double getTime() {
+            return time;
+        }
+
+        public void setTime(double time) {
+            this.time = time;
+        }
+
+        public double getLastTime() {
+            return lastTime;
+        }
+
+        public void setLastTime(double lastTime) {
+            this.lastTime = lastTime;
+        }
+
     }
 
 }
