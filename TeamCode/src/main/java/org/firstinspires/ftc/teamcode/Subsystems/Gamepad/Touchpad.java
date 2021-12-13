@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.Subsystems.Gamepad;
 
 import com.qualcomm.robotcore.hardware.Gamepad;
 
+import java.util.HashMap;
+
 public class Touchpad {
 
     private Gamepad gamepad;
@@ -9,10 +11,14 @@ public class Touchpad {
     private boolean touchButton, lastTouchButton, fingerOn, lastFingerOn;
     private int numFingers, lastNumFingers;
 
-    private double fingerOneX, lastFingerOneX, fingerOneY, lastFingerOneY,
-            fingerTwoX, lastFingerTwoX, fingerTwoY, lastFingerTwoY;
+    private double fingerOneX, lastFingerOneX = 0, fingerOneY, lastFingerOneY = 0,
+            fingerTwoX, lastFingerTwoX = 0, fingerTwoY, lastFingerTwoY = 0;
 
+    double time, lastTime = 0;
+    double pollingTime = 200;
+    private VectorPacket v1 = new VectorPacket(), v2 = new VectorPacket();
     private double standardMult = 100;
+    HashMap<TouchButton, Boolean> touchButtons = new HashMap<TouchButton, Boolean>();
 
     public Touchpad(Gamepad gamepad) {
 
@@ -22,41 +28,84 @@ public class Touchpad {
 
     public void update() {
 
-        lastTouchButton = touchButton;
-        touchButton = gamepad.touchpad;
+        time = System.currentTimeMillis();
+         if(time - lastTime >= 200) {
+            touchButton = gamepad.touchpad;
 
-        lastNumFingers = numFingers;
+            if (gamepad.touchpad_finger_1 && gamepad.touchpad_finger_2) {
+                numFingers = 2;
+                fingerOn = true;
+            } else if (gamepad.touchpad_finger_1) {
+                numFingers = 1;
+                fingerOn = true;
+            } else {
+                numFingers = 0;
+                fingerOn = false;
+            }
 
-        if(gamepad.touchpad_finger_1 && gamepad.touchpad_finger_2) {
-            numFingers = 2;
+            if (numFingers >= 1) {
+                fingerOneX = standardMult * gamepad.touchpad_finger_1_x;
+                fingerOneY = standardMult * gamepad.touchpad_finger_1_y;
+            }
+
+            if (numFingers == 2) {
+                fingerTwoX = standardMult * gamepad.touchpad_finger_2_x;
+                fingerTwoY = standardMult * gamepad.touchpad_finger_2_y;
+            }
+
+            switch(numFingers) {
+
+                case 1:
+                    v1 = new VectorPacket(fingerOneX, fingerOneY, lastFingerOneX, lastFingerOneY, time, lastTime);
+                    v2 = new VectorPacket();
+                    break;
+
+                case 2:
+                    v1 = new VectorPacket(fingerOneX, fingerOneY, lastFingerOneX, lastFingerOneY, time / 1000, lastTime / 1000);
+                    v2 = new VectorPacket(fingerTwoX, fingerTwoY, lastFingerTwoX, lastFingerTwoY, time / 1000, lastTime / 1000);
+                    break;
+
+                default:
+                    v1 = new VectorPacket();
+                    v2 = new VectorPacket();
+                    break;
+            }
+
+            for (HashMap.Entry mapElement : touchButtons.entrySet()) {
+
+                TouchButton key = (TouchButton) mapElement.getKey();
+                key.setTouchButton(this);
+                touchButtons.replace(key, key.isRange());
+
+            }
+
+            //Updates lasts
+
+            if (numFingers >= 1) {
+                lastFingerOneX = fingerOneX;
+                lastFingerOneY = fingerOneY;
+            }
+            if (numFingers == 2) {
+                lastFingerTwoX = fingerTwoX;
+                lastFingerTwoY = fingerTwoY;
+            }
+
+            lastTouchButton = touchButton;
+            lastNumFingers = numFingers;
             lastFingerOn = fingerOn;
-            fingerOn = true;
-        }
-        else if(gamepad.touchpad_finger_1) {
-            numFingers = 1;
-            lastFingerOn = fingerOn;
-            fingerOn = true;
-        }
-        else {
-            numFingers = 0;
-            lastFingerOn = fingerOn;
-            fingerOn = false;
+            lastTime = time;
         }
 
-        if(numFingers >= 1) {
-            lastFingerOneX = fingerOneX;
-            fingerOneX = standardMult * gamepad.touchpad_finger_1_x;
-            lastFingerOneY = fingerOneY;
-            fingerOneY = standardMult * gamepad.touchpad_finger_1_y;
-        }
+    }
 
-        if(numFingers == 2) {
-            lastFingerTwoX = fingerTwoX;
-            fingerTwoX = standardMult * gamepad.touchpad_finger_2_x;
-            lastFingerTwoY = fingerTwoY;
-            fingerTwoY = standardMult * gamepad.touchpad_finger_2_y;
-        }
+    public void addButton(TouchButton button) {
 
+        touchButtons.put(button, false);
+
+    }
+
+    public HashMap<TouchButton, Boolean> getTouchButtons() {
+        return touchButtons;
     }
 
     public void rumble (Gamepad.RumbleEffect rumbleEffect) {
@@ -107,6 +156,10 @@ public class Touchpad {
         this.numFingers = numFingers;
     }
 
+    public double getStandardMult() {
+        return standardMult;
+    }
+
     public int getLastNumFingers() {
         return lastNumFingers;
     }
@@ -146,7 +199,7 @@ public class Touchpad {
     public void setLastFingerOneY(double lastFingerOneY) {
         this.lastFingerOneY = lastFingerOneY;
     }
-
+//
     public double getFingerTwoX() {
         return fingerTwoX;
     }
@@ -185,6 +238,135 @@ public class Touchpad {
 
     public boolean getFingerOn() {
         return fingerOn;
+    }
+
+    /*public boolean isRange() {
+
+        switch(numFingers) {
+            case 1:
+                if((fingerOneX <= rightX && gFun.getFingerOneX() >= leftX)
+                        && (gFun.getFingerOneY() <= topY && gFun.getFingerOneY() >= bottomY))
+                    return true;
+                break;
+
+            case 2:
+                if(((gFun.getFingerOneX() <= rightX && gFun.getFingerOneX() >= leftX)
+                        && (gFun.getFingerOneY() <= topY && gFun.getFingerOneY() >= bottomY))
+                        ||
+                        ((gFun.getFingerTwoX() <= rightX && gFun.getFingerTwoX() >= leftX)
+                                && (gFun.getFingerTwoY() <= topY && gFun.getFingerTwoY() >= bottomY)))
+                    return true;
+                break;
+            default:
+                return false;
+        }
+
+        return false;
+
+    }*/
+
+/*    public boolean isRange(double x, double y) {
+
+        if((x <= rightX && x >= leftX)
+                && (y <= topY && y >= bottomY)) {
+            return true;
+        }
+
+        return false;
+
+    }*/
+
+    public VectorPacket getV1() {
+        return v1;
+    }
+
+    public VectorPacket getV2() {
+        return v2;
+    }
+
+    public class VectorPacket {
+
+        private double x, y, lastX, lastY, time, lastTime;
+
+        public VectorPacket(double x, double y, double lastX, double lastY, double time, double lastTime) {
+
+            this.x = x; this.y = y; this.lastX = lastX; this.lastY = lastY; this.time = time; this.lastTime = lastTime;
+
+        }
+
+        public VectorPacket() {
+            x = 0; y = 0; lastX = 0; lastY = 0; time = 0; lastTime = 0;
+        }
+
+        public void updateVector(double newX, double newY, double newTime) {
+            lastX = this.x; lastY = this.y; lastTime = this.time;
+            this.x = newX; this.y = newY; this.time = newTime;
+        }
+
+        public double getDistance() {
+            return Math.sqrt((Math.pow((x - lastX), 2) + Math.pow((y - lastY), 2)));
+        }
+
+        public double getVelocity() {
+            return Math.sqrt(Math.pow(getXVel(), 2) + Math.pow(getYVel(), 2));
+        }
+
+        public double getAngle() {
+            return Math.toDegrees(Math.atan((y - lastY) /(x - lastX)));
+        }
+
+        public void setX(double x) {
+            this.x = x;
+        }
+
+        public void setLastX(double lastX) {
+            this.lastX  = x;
+        }
+
+        public void setY(double y) {
+            this.y = y;
+        }
+
+        public void setLastY(double lastY) {
+            this.lastY  = y;
+        }
+
+        public double getX() {
+            return x;
+        }
+
+        public double getLastX() {
+            return lastX;
+        }
+
+        public double getY() {
+            return y;
+        }
+
+        public double getXVel() {
+            return (x - lastX) / (time - lastTime);
+        }
+
+        public double getYVel() {
+            return (y - lastY) / (time - lastTime);
+        }
+
+        public double getTime() {
+            return time;
+        }
+
+        public void setTime(double time) {
+            this.time = time;
+        }
+
+        public double getLastTime() {
+            return lastTime;
+        }
+
+        public void setLastTime(double lastTime) {
+            this.lastTime = lastTime;
+        }
+
     }
 
 }
