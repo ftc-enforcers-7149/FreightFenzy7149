@@ -1,102 +1,42 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Gamepad;
 
-import com.acmerobotics.roadrunner.util.NanoClock;
 
 public class TouchButton {
 
-    Touchpad gFun;
-
-    double standardMult;
+    Touchpad touchpad;
+    String name;
     double leftX, rightX, bottomY, topY;
-    double time, lastTime = 0;
-    double pollingTime;
     private VectorPacket v1 = new VectorPacket(), v2 = new VectorPacket();
 
-    public TouchButton(Touchpad gFun, double leftX, double rightX, double bottomY, double topY, double pollingTime) {
+    public TouchButton(String name, double leftX, double rightX, double bottomY, double topY) {
 
-        this.gFun = gFun;
+        this.name = name;
         this.leftX = leftX;
         this.rightX = rightX;
         this.bottomY = bottomY;
         this.topY = topY;
-        this.pollingTime = pollingTime;
-        standardMult = 100;
 
     }
 
-    public TouchButton(Touchpad gFun, double leftX, double rightX, double bottomY, double topY, double pollingTime, double standardMult) {
-
-        this.gFun = gFun;
-        this.leftX = leftX;
-        this.rightX = rightX;
-        this.bottomY = bottomY;
-        this.topY = topY;
-        this.pollingTime = pollingTime;
-        this.standardMult = standardMult;
-
-    }
-
-    public void update() {
-
-        time = NanoClock.system().seconds();
-
-        if(lastTime >= time + pollingTime) {
-
-            lastTime = time;
-
-            switch(gFun.getNumFingers()) {
-
-                case 1:
-
-                    if(isRange(gFun.getFingerOneX(), gFun.getFingerOneY())) {
-
-                        v1.updateVector(gFun.getFingerOneX(), gFun.getFingerOneY(), time - lastTime);
-
-                    }
-
-                    v2.updateVector(0, 0, time - lastTime);
-                    break;
-
-                case 2:
-
-                    if(isRange(gFun.getFingerOneX(), gFun.getFingerOneY())) {
-
-                        v1.updateVector(gFun.getFingerOneX(), gFun.getFingerOneY(), time - lastTime);
-
-                    }
-
-                    if(isRange(gFun.getFingerOneX(), gFun.getFingerOneY())) {
-
-                        v2.updateVector(gFun.getFingerTwoX(), gFun.getFingerTwoY(), time - lastTime);
-
-                    }
-                    break;
-
-                default:
-
-                    v1.updateVector(0, 0, 0);
-                    v2.updateVector(0, 0, 0);
-                    break;
-            }
-        }
-
+    public void setTouchButton(Touchpad touch) {
+        touchpad = touch;
     }
 
     public boolean isRange() {
 
-        switch(gFun.getNumFingers()) {
+        switch(touchpad.getNumFingers()) {
             case 1:
-                if((gFun.getFingerOneX() <= rightX && gFun.getFingerOneX() >= leftX)
-                        && (gFun.getFingerOneY() <= topY && gFun.getFingerOneY() >= bottomY))
+                if((touchpad.getFingerOneX() <= rightX && touchpad.getFingerOneX() >= leftX)
+                        && (touchpad.getFingerOneY() <= topY && touchpad.getFingerOneY() >= bottomY))
                     return true;
                 break;
 
             case 2:
-                if(((gFun.getFingerOneX() <= rightX && gFun.getFingerOneX() >= leftX)
-                        && (gFun.getFingerOneY() <= topY && gFun.getFingerOneY() >= bottomY))
+                if(((touchpad.getFingerOneX() <= rightX && touchpad.getFingerOneX() >= leftX)
+                        && (touchpad.getFingerOneY() <= topY && touchpad.getFingerOneY() >= bottomY))
                         ||
-                        ((gFun.getFingerTwoX() <= rightX && gFun.getFingerTwoX() >= leftX)
-                        && (gFun.getFingerTwoY() <= topY && gFun.getFingerTwoY() >= bottomY)))
+                        ((touchpad.getFingerTwoX() <= rightX && touchpad.getFingerTwoX() >= leftX)
+                                && (touchpad.getFingerTwoY() <= topY && touchpad.getFingerTwoY() >= bottomY)))
                     return true;
                 break;
             default:
@@ -105,6 +45,10 @@ public class TouchButton {
 
         return false;
 
+    }
+
+    public String getName() {
+        return name;
     }
 
     public boolean isRange(double x, double y) {
@@ -215,21 +159,21 @@ public class TouchButton {
         VectorPacket v = new VectorPacket();
         boolean fingerOneInRange, fingerTwoInRange;
 
-        switch(gFun.getNumFingers()) {
+        switch(touchpad.getNumFingers()) {
 
             case 1:
 
-                fingerOneInRange = (gFun.getFingerOneX() <= rightX && gFun.getFingerOneX() >= leftX)
-                        && (gFun.getFingerOneY() <= topY && gFun.getFingerOneY() >= bottomY);
+                fingerOneInRange = (touchpad.getFingerOneX() <= rightX && touchpad.getFingerOneX() >= leftX)
+                        && (touchpad.getFingerOneY() <= topY && touchpad.getFingerOneY() >= bottomY);
 
                 if(fingerOneInRange) {
 
                     v.setTime(time);
                     v.setLastTime(lastTime);
-                    v.setX(gFun.getFingerOneX());
-                    v.setY(gFun.getFingerOneY());
-                    v.setLastX(gFun.getLastFingerOneX());
-                    v.setLastY(gFun.getLastFingerOneY());
+                    v.setX(touchpad.getFingerOneX());
+                    v.setY(touchpad.getFingerOneY());
+                    v.setLastX(touchpad.getLastFingerOneX());
+                    v.setLastY(touchpad.getLastFingerOneY());
 
                 }
                 break;
@@ -237,39 +181,39 @@ public class TouchButton {
             case 2:
 
                 //check for both first
-                fingerOneInRange = (gFun.getFingerOneX() <= rightX && gFun.getFingerOneX() >= leftX)
-                        && (gFun.getFingerOneY() <= topY && gFun.getFingerOneY() >= bottomY);
-                fingerTwoInRange = ((gFun.getFingerTwoX() <= rightX && gFun.getFingerTwoX() >= leftX)
-                        && (gFun.getFingerTwoY() <= topY && gFun.getFingerTwoY() >= bottomY));
+                fingerOneInRange = (touchpad.getFingerOneX() <= rightX && touchpad.getFingerOneX() >= leftX)
+                        && (touchpad.getFingerOneY() <= topY && touchpad.getFingerOneY() >= bottomY);
+                fingerTwoInRange = ((touchpad.getFingerTwoX() <= rightX && touchpad.getFingerTwoX() >= leftX)
+                        && (touchpad.getFingerTwoY() <= topY && touchpad.getFingerTwoY() >= bottomY));
 
                 if(fingerOneInRange && fingerTwoInRange) {
 
                     v.setTime(time);
                     v.setLastTime(lastTime);
-                    v.setX(gFun.getFingerOneX());
-                    v.setY(gFun.getFingerOneY());
-                    v.setLastX(gFun.getLastFingerOneX());
-                    v.setLastY(gFun.getLastFingerOneY());
+                    v.setX(touchpad.getFingerOneX());
+                    v.setY(touchpad.getFingerOneY());
+                    v.setLastX(touchpad.getLastFingerOneX());
+                    v.setLastY(touchpad.getLastFingerOneY());
 
                 }
                 else if (fingerTwoInRange) {
 
                     v.setTime(time);
                     v.setLastTime(lastTime);
-                    v.setX(gFun.getFingerTwoX());
-                    v.setY(gFun.getFingerTwoY());
-                    v.setLastX(gFun.getLastFingerTwoX());
-                    v.setLastY(gFun.getLastFingerTwoY());
+                    v.setX(touchpad.getFingerTwoX());
+                    v.setY(touchpad.getFingerTwoY());
+                    v.setLastX(touchpad.getLastFingerTwoX());
+                    v.setLastY(touchpad.getLastFingerTwoY());
 
                 }
                 else if(fingerOneInRange) {
 
                     v.setTime(time);
                     v.setLastTime(lastTime);
-                    v.setX((Math.abs(gFun.getFingerTwoX() - gFun.getFingerOneX())) / 2);
-                    v.setY((Math.abs(gFun.getFingerTwoY() - gFun.getFingerOneY())) / 2);
-                    v.setLastX((Math.abs(gFun.getLastFingerTwoX() - gFun.getLastFingerOneX())) / 2);
-                    v.setLastY((Math.abs(gFun.getLastFingerTwoY() - gFun.getLastFingerOneY())) / 2);
+                    v.setX((Math.abs(touchpad.getFingerTwoX() - touchpad.getFingerOneX())) / 2);
+                    v.setY((Math.abs(touchpad.getFingerTwoY() - touchpad.getFingerOneY())) / 2);
+                    v.setLastX((Math.abs(touchpad.getLastFingerTwoX() - touchpad.getLastFingerOneX())) / 2);
+                    v.setLastY((Math.abs(touchpad.getLastFingerTwoY() - touchpad.getLastFingerOneY())) / 2);
 
                 }
 
