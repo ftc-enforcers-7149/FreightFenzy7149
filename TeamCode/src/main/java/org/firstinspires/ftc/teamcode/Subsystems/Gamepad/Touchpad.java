@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.Subsystems.Gamepad;
 
 import com.qualcomm.robotcore.hardware.Gamepad;
 
+import java.util.HashMap;
+
 public class Touchpad {
 
     private Gamepad gamepad;
@@ -9,13 +11,14 @@ public class Touchpad {
     private boolean touchButton, lastTouchButton, fingerOn, lastFingerOn;
     private int numFingers, lastNumFingers;
 
-    private double fingerOneX, lastFingerOneX, fingerOneY, lastFingerOneY,
-            fingerTwoX, lastFingerTwoX, fingerTwoY, lastFingerTwoY;
+    private double fingerOneX, lastFingerOneX = 0, fingerOneY, lastFingerOneY = 0,
+            fingerTwoX, lastFingerTwoX = 0, fingerTwoY, lastFingerTwoY = 0;
 
     double time, lastTime = 0;
-    double pollingTime;
+    double pollingTime = 200;
     private VectorPacket v1 = new VectorPacket(), v2 = new VectorPacket();
     private double standardMult = 100;
+    HashMap<TouchButton, Boolean> touchButtons = new HashMap<TouchButton, Boolean>();
 
     public Touchpad(Gamepad gamepad) {
 
@@ -26,44 +29,83 @@ public class Touchpad {
     public void update() {
 
         time = System.currentTimeMillis();
-        getVelocity();
+         if(time - lastTime >= 200) {
+            touchButton = gamepad.touchpad;
 
-        touchButton = gamepad.touchpad;
+            if (gamepad.touchpad_finger_1 && gamepad.touchpad_finger_2) {
+                numFingers = 2;
+                fingerOn = true;
+            } else if (gamepad.touchpad_finger_1) {
+                numFingers = 1;
+                fingerOn = true;
+            } else {
+                numFingers = 0;
+                fingerOn = false;
+            }
 
-        if(gamepad.touchpad_finger_1 && gamepad.touchpad_finger_2) {
-            numFingers = 2;
+            if (numFingers >= 1) {
+                fingerOneX = standardMult * gamepad.touchpad_finger_1_x;
+                fingerOneY = standardMult * gamepad.touchpad_finger_1_y;
+            }
+
+            if (numFingers == 2) {
+                fingerTwoX = standardMult * gamepad.touchpad_finger_2_x;
+                fingerTwoY = standardMult * gamepad.touchpad_finger_2_y;
+            }
+
+            switch(numFingers) {
+
+                case 1:
+                    v1 = new VectorPacket(fingerOneX, fingerOneY, lastFingerOneX, lastFingerOneY, time, lastTime);
+                    v2 = new VectorPacket();
+                    break;
+
+                case 2:
+                    v1 = new VectorPacket(fingerOneX, fingerOneY, lastFingerOneX, lastFingerOneY, time / 1000, lastTime / 1000);
+                    v2 = new VectorPacket(fingerTwoX, fingerTwoY, lastFingerTwoX, lastFingerTwoY, time / 1000, lastTime / 1000);
+                    break;
+
+                default:
+                    v1 = new VectorPacket();
+                    v2 = new VectorPacket();
+                    break;
+            }
+
+            for (HashMap.Entry mapElement : touchButtons.entrySet()) {
+
+                TouchButton key = (TouchButton) mapElement.getKey();
+                key.setTouchButton(this);
+                touchButtons.replace(key, key.isRange());
+
+            }
+
+            //Updates lasts
+
+            if (numFingers >= 1) {
+                lastFingerOneX = fingerOneX;
+                lastFingerOneY = fingerOneY;
+            }
+            if (numFingers == 2) {
+                lastFingerTwoX = fingerTwoX;
+                lastFingerTwoY = fingerTwoY;
+            }
+
+            lastTouchButton = touchButton;
+            lastNumFingers = numFingers;
             lastFingerOn = fingerOn;
-            fingerOn = true;
-        }
-        else if(gamepad.touchpad_finger_1) {
-            numFingers = 1;
-            lastFingerOn = fingerOn;
-            fingerOn = true;
-        }
-        else {
-            numFingers = 0;
-            lastFingerOn = fingerOn;
-            fingerOn = false;
+            lastTime = time;
         }
 
-        if(numFingers >= 1) {
-            lastFingerOneX = fingerOneX;
-            fingerOneX = standardMult * gamepad.touchpad_finger_1_x;
-            lastFingerOneY = fingerOneY;
-            fingerOneY = standardMult * gamepad.touchpad_finger_1_y;
-        }
+    }
 
-        if(numFingers == 2) {
-            lastFingerTwoX = fingerTwoX;
-            fingerTwoX = standardMult * gamepad.touchpad_finger_2_x;
-            lastFingerTwoY = fingerTwoY;
-            fingerTwoY = standardMult * gamepad.touchpad_finger_2_y;
-        }
+    public void addButton(TouchButton button) {
 
-        lastTouchButton = touchButton;
-        lastNumFingers = numFingers;
-        lastTime = time;
+        touchButtons.put(button, false);
 
+    }
+
+    public HashMap<TouchButton, Boolean> getTouchButtons() {
+        return touchButtons;
     }
 
     public void rumble (Gamepad.RumbleEffect rumbleEffect) {
@@ -112,6 +154,10 @@ public class Touchpad {
 
     public void setNumFingers(int numFingers) {
         this.numFingers = numFingers;
+    }
+
+    public double getStandardMult() {
+        return standardMult;
     }
 
     public int getLastNumFingers() {
@@ -219,31 +265,6 @@ public class Touchpad {
 
     }*/
 
-    public boolean getVelocity() {
-
-        switch(numFingers) {
-
-            case 1:
-                v1.updateVector(fingerOneX, fingerOneY, time - lastTime);
-                v2.updateVector(0, 0, time - lastTime);
-                break;
-
-            case 2:
-
-                v1.updateVector(fingerOneX, fingerOneY, time - lastTime);
-                v2.updateVector(fingerTwoX, fingerTwoY, time - lastTime);
-                break;
-
-            default:
-                v1.updateVector(0, 0, time-lastTime);
-                v2.updateVector(0, 0, time-lastTime);
-                break;
-        }
-
-        return Math.abs(v1.getVelocity()) > 0 || Math.abs(v2.getVelocity()) > 0;
-
-    }
-
 /*    public boolean isRange(double x, double y) {
 
         if((x <= rightX && x >= leftX)
@@ -312,6 +333,10 @@ public class Touchpad {
 
         public double getX() {
             return x;
+        }
+
+        public double getLastX() {
+            return lastX;
         }
 
         public double getY() {
