@@ -1,12 +1,9 @@
 package org.firstinspires.ftc.teamcode.Testing;
 
-import android.text.method.Touch;
-
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchButton;
+import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchZone;
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Touchpad;
 
 import java.util.HashMap;
@@ -16,19 +13,19 @@ import java.util.HashMap;
 public class GamepadTest extends OpMode {
 
     Touchpad touchpad;
-    HashMap<TouchButton, Boolean> touchButtons;
+    HashMap<TouchZone, Boolean> touchButtons;
 
     public void init() {
 
         touchpad = new Touchpad(gamepad1);
-        touchpad.addButton(new TouchButton("test" ,0, 100, 0, 100));
+        touchpad.addButton(new TouchZone("test" ,0, 100, 0, 100));
 
     }
 
     public void loop() {
 
         touchpad.update();
-        touchButtons = touchpad.getTouchButtons();
+        touchButtons = touchpad.getTouchZones();
 
         telemetry.addData("Touch button?: ", (touchpad.isTouchButton()) ? "Yes" : "No");
         telemetry.addData("Number of fingers: ", touchpad.getNumFingers());
@@ -43,7 +40,7 @@ public class GamepadTest extends OpMode {
 
         for (HashMap.Entry mapElement : touchButtons.entrySet()) {
 
-            TouchButton key = (TouchButton) mapElement.getKey();
+            TouchZone key = (TouchZone) mapElement.getKey();
             telemetry.addData(key.getName() + ": ", mapElement.getValue());
 
         }

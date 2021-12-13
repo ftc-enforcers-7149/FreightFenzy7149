@@ -6,19 +6,49 @@ import java.util.HashMap;
 
 public class Touchpad {
 
+    //TODO: fix angle handling
+
+    // Gamepad for handling input
     private Gamepad gamepad;
 
+    // touchButton: touchpad "press"
+    // fingerOn: true - finger on the touchpad
+
     private boolean touchButton, lastTouchButton, fingerOn, lastFingerOn;
+
+    // number of fingers on the touchpad
     private int numFingers, lastNumFingers;
 
+    // positional variables
     private double fingerOneX, lastFingerOneX = 0, fingerOneY, lastFingerOneY = 0,
             fingerTwoX, lastFingerTwoX = 0, fingerTwoY, lastFingerTwoY = 0;
 
+    // time variables
     double time, lastTime = 0;
+
+    // how often the touchpad "updates"
     double pollingTime = 200;
+
+    // vector packets for storing velocity data
     private VectorPacket v1 = new VectorPacket(), v2 = new VectorPacket();
+
+    // standard unit multiplier
     private double standardMult = 100;
-    HashMap<TouchButton, Boolean> touchButtons = new HashMap<TouchButton, Boolean>();
+
+    // storage for touchButtons (zoned "buttons" on the gamepad)
+    HashMap<TouchZone, Boolean> touchZones = new HashMap<>();
+
+    public enum SwipeType {
+
+        BOOLEAN,
+        HORIZ_SWIPE,
+        VERT_SWIPE,
+        HORIZ_AXIS,
+        VERT_AXIS
+
+    }
+
+    // Constructor. pass in the tele-op gamepad
 
     public Touchpad(Gamepad gamepad) {
 
@@ -26,11 +56,23 @@ public class Touchpad {
 
     }
 
+    // Update method
+
     public void update() {
 
+        // Updates time
+
         time = System.currentTimeMillis();
+
+        // If we've hit the poll time
+
          if(time - lastTime >= 200) {
+
+             // Checks if touchpad press
+
             touchButton = gamepad.touchpad;
+
+            // Checks how many fingers are on the touchpad
 
             if (gamepad.touchpad_finger_1 && gamepad.touchpad_finger_2) {
                 numFingers = 2;
@@ -43,6 +85,8 @@ public class Touchpad {
                 fingerOn = false;
             }
 
+            // Checks the position of fingers and updates
+
             if (numFingers >= 1) {
                 fingerOneX = standardMult * gamepad.touchpad_finger_1_x;
                 fingerOneY = standardMult * gamepad.touchpad_finger_1_y;
@@ -52,6 +96,8 @@ public class Touchpad {
                 fingerTwoX = standardMult * gamepad.touchpad_finger_2_x;
                 fingerTwoY = standardMult * gamepad.touchpad_finger_2_y;
             }
+
+            // Updates the vectors of the fingers if applicable
 
             switch(numFingers) {
 
@@ -71,11 +117,11 @@ public class Touchpad {
                     break;
             }
 
-            for (HashMap.Entry mapElement : touchButtons.entrySet()) {
+            for (HashMap.Entry mapElement : touchZones.entrySet()) {
 
-                TouchButton key = (TouchButton) mapElement.getKey();
+                TouchZone key = (TouchZone) mapElement.getKey();
                 key.setTouchButton(this);
-                touchButtons.replace(key, key.isRange());
+                touchZones.replace(key, key.isRange());
 
             }
 
@@ -98,183 +144,150 @@ public class Touchpad {
 
     }
 
-    public void addButton(TouchButton button) {
+    public void handleSwipe(SwipeType s) {
 
-        touchButtons.put(button, false);
+        // UP AND HOLD
+        // DOWN AND HOLD
+        // LEFT AND HOLD
+        // RIGHT AND HOLD
+        // HORIZONTAL AXIS
+        // VERTICAL AXIS
 
     }
 
-    public HashMap<TouchButton, Boolean> getTouchButtons() {
-        return touchButtons;
-    }
+    // TODO: add in 2nd finger tracking
+    public boolean swipe (int finger, SwipeType s) {
 
-    public void rumble (Gamepad.RumbleEffect rumbleEffect) {
-        gamepad.runRumbleEffect(rumbleEffect);
-    }
+        switch(s) {
 
-    public void rumble (int duration) {
-        gamepad.rumble(duration);
-    }
+            case BOOLEAN:
+                return finger == 1 ? v1.getVelocity() != 0 : v2.getVelocity() != 0;
 
-    public void rumble(double rumble1, double rumble2, int duration) {
-        gamepad.rumble(rumble1, rumble2, duration);
-    }
+            case HORIZ_SWIPE:
+                // this can't be a one liner. or can it? check on that angle condition when the finger stops moving.
+                return finger == 1 ? (v1.getVelocity() != 0 || numFingers >= 1) && (v1.getAngle() <= 15 || v1.getAngle() >= -15)
+                        : (v2.getVelocity() != 0 || numFingers == 2) && (v2.getAngle() <= 15 || v2.getAngle() >= -15);
 
-    public void rumbleBlips(int blips) {
-        gamepad.rumbleBlips(blips);
-    }
+            case VERT_SWIPE:
+                return finger == 1 ? (v1.getVelocity() != 0 || numFingers >= 1) && (v1.getAngle() <= 75 || v1.getAngle() >= 105)
+                        : (v2.getVelocity() != 0 || numFingers == 2) && (v2.getAngle() <= 75 || v2.getAngle() >= 105);
 
-    public void startRumble() {
-        gamepad.rumble(Gamepad.RUMBLE_DURATION_CONTINUOUS);
-    }
-
-    public void stopRumble() {
-        gamepad.stopRumble();
-    }
-
-    public boolean isTouchButton() {
-        return touchButton;
-    }
-
-    public void setTouchButton(boolean touchButton) {
-        this.touchButton = touchButton;
-    }
-
-    public boolean isLastTouchButton() {
-        return lastTouchButton;
-    }
-
-    public void setLastTouchButton(boolean lastTouchButton) {
-        this.lastTouchButton = lastTouchButton;
-    }
-
-    public int getNumFingers() {
-        return numFingers;
-    }
-
-    public void setNumFingers(int numFingers) {
-        this.numFingers = numFingers;
-    }
-
-    public double getStandardMult() {
-        return standardMult;
-    }
-
-    public int getLastNumFingers() {
-        return lastNumFingers;
-    }
-
-    public void setLastNumFingers(int lastNumFingers) {
-        this.lastNumFingers = lastNumFingers;
-    }
-
-    public double getFingerOneX() {
-        return fingerOneX;
-    }
-
-    public void setFingerOneX(double fingerOneX) {
-        this.fingerOneX = fingerOneX;
-    }
-
-    public double getLastFingerOneX() {
-        return lastFingerOneX;
-    }
-
-    public void setLastFingerOneX(double lastFingerOneX) {
-        this.lastFingerOneX = lastFingerOneX;
-    }
-
-    public double getFingerOneY() {
-        return fingerOneY;
-    }
-
-    public void setFingerOneY(double fingerOneY) {
-        this.fingerOneY = fingerOneY;
-    }
-
-    public double getLastFingerOneY() {
-        return lastFingerOneY;
-    }
-
-    public void setLastFingerOneY(double lastFingerOneY) {
-        this.lastFingerOneY = lastFingerOneY;
-    }
-//
-    public double getFingerTwoX() {
-        return fingerTwoX;
-    }
-
-    public void setFingerTwoX(double fingerTwoX) {
-        this.fingerTwoX = fingerTwoX;
-    }
-
-    public double getLastFingerTwoX() {
-        return lastFingerTwoX;
-    }
-
-    public void setLastFingerTwoX(double lastFingerTwoX) {
-        this.lastFingerTwoX = lastFingerTwoX;
-    }
-
-    public double getFingerTwoY() {
-        return fingerTwoY;
-    }
-
-    public void setFingerTwoY(double fingerTwoY) {
-        this.fingerTwoY = fingerTwoY;
-    }
-
-    public double getLastFingerTwoY() {
-        return lastFingerTwoY;
-    }
-
-    public void setLastFingerTwoY(double lastFingerTwoY) {
-        this.lastFingerTwoY = lastFingerTwoY;
-    }
-
-    public boolean getLastFingerOn() {
-        return lastFingerOn;
-    }
-
-    public boolean getFingerOn() {
-        return fingerOn;
-    }
-
-    /*public boolean isRange() {
-
-        switch(numFingers) {
-            case 1:
-                if((fingerOneX <= rightX && gFun.getFingerOneX() >= leftX)
-                        && (gFun.getFingerOneY() <= topY && gFun.getFingerOneY() >= bottomY))
-                    return true;
-                break;
-
-            case 2:
-                if(((gFun.getFingerOneX() <= rightX && gFun.getFingerOneX() >= leftX)
-                        && (gFun.getFingerOneY() <= topY && gFun.getFingerOneY() >= bottomY))
-                        ||
-                        ((gFun.getFingerTwoX() <= rightX && gFun.getFingerTwoX() >= leftX)
-                                && (gFun.getFingerTwoY() <= topY && gFun.getFingerTwoY() >= bottomY)))
-                    return true;
-                break;
             default:
                 return false;
         }
 
-        return false;
+    }
 
-    }*/
+    public double axis(int finger, SwipeType s) {
 
-/*    public boolean isRange(double x, double y) {
+        switch(s) {
 
-        if((x <= rightX && x >= leftX)
-                && (y <= topY && y >= bottomY)) {
-            return true;
+            case HORIZ_AXIS:
+
+                return 0;
+
+            case VERT_SWIPE:
+                return 1;
+
+            default:
+                return 2;
         }
 
-        return false;
+    }
 
-    }*/
+    // Adds a TouchButton to the map of touchbuttons
+
+    public void addButton(TouchZone button) {
+
+        touchZones.put(button, false);
+
+    }
+
+    // Returns the HashMap of TouchButtons
+
+    public HashMap<TouchZone, Boolean> getTouchZones() {
+        return touchZones;
+    }
+
+    // rumble handling functions
+
+    public void rumble (Gamepad.RumbleEffect rumbleEffect) { gamepad.runRumbleEffect(rumbleEffect); }
+    public void rumble (int duration) {
+        gamepad.rumble(duration);
+    }
+    public void rumble(double rumble1, double rumble2, int duration) { gamepad.rumble(rumble1, rumble2, duration); }
+    public void rumbleBlips(int blips) {
+        gamepad.rumbleBlips(blips);
+    }
+    public void startRumble() {
+        gamepad.rumble(Gamepad.RUMBLE_DURATION_CONTINUOUS);
+    }
+    public void stopRumble() {
+        gamepad.stopRumble();
+    }
+
+    // standard getter/setters
+    public boolean isTouchButton() {
+        return touchButton;
+    }
+    public void setTouchButton(boolean touchButton) {
+        this.touchButton = touchButton;
+    }
+    public boolean isLastTouchButton() {
+        return lastTouchButton;
+    }
+    public void setLastTouchButton(boolean lastTouchButton) { this.lastTouchButton = lastTouchButton; }
+    public int getNumFingers() {
+        return numFingers;
+    }
+    public void setNumFingers(int numFingers) {
+        this.numFingers = numFingers;
+    }
+    public double getStandardMult() {
+        return standardMult;
+    }
+    public int getLastNumFingers() {
+        return lastNumFingers;
+    }
+    public void setLastNumFingers(int lastNumFingers) {
+        this.lastNumFingers = lastNumFingers;
+    }
+    public double getFingerOneX() {
+        return fingerOneX;
+    }
+    public void setFingerOneX(double fingerOneX) {
+        this.fingerOneX = fingerOneX;
+    }
+    public double getLastFingerOneX() {
+        return lastFingerOneX;
+    }
+    public void setLastFingerOneX(double lastFingerOneX) {
+        this.lastFingerOneX = lastFingerOneX;
+    }
+    public double getFingerOneY() {
+        return fingerOneY;
+    }
+    public void setFingerOneY(double fingerOneY) {
+        this.fingerOneY = fingerOneY;
+    }
+    public double getLastFingerOneY() {
+        return lastFingerOneY;
+    }
+    public void setLastFingerOneY(double lastFingerOneY) {
+        this.lastFingerOneY = lastFingerOneY;
+    }
+    public double getFingerTwoX() { return fingerTwoX; }
+    public void setFingerTwoX(double fingerTwoX) { this.fingerTwoX = fingerTwoX; }
+    public double getLastFingerTwoX() { return lastFingerTwoX; }
+    public void setLastFingerTwoX(double lastFingerTwoX) { this.lastFingerTwoX = lastFingerTwoX; }
+    public double getFingerTwoY() { return fingerTwoY; }
+    public void setFingerTwoY(double fingerTwoY) { this.fingerTwoY = fingerTwoY; }
+    public double getLastFingerTwoY() { return lastFingerTwoY; }
+    public void setLastFingerTwoY(double lastFingerTwoY) { this.lastFingerTwoY = lastFingerTwoY; }
+    public boolean getLastFingerOn() { return lastFingerOn; }
+    public boolean getFingerOn() { return fingerOn; }
+
+    // Returns the finger vector packets
 
     public VectorPacket getV1() {
         return v1;
@@ -284,9 +297,18 @@ public class Touchpad {
         return v2;
     }
 
+    // Vector packet handling class. Sure it may be redundant, but it's fun!
+
     public class VectorPacket {
 
+        // Important storage variables
+
         private double x, y, lastX, lastY, time, lastTime;
+
+        // deadzone var; if less than, v = 0;
+        private double deadzone = .001;
+
+        // Standard constructor when there's a starting point
 
         public VectorPacket(double x, double y, double lastX, double lastY, double time, double lastTime) {
 
@@ -294,13 +316,10 @@ public class Touchpad {
 
         }
 
+        // Zeroed constructor
+
         public VectorPacket() {
             x = 0; y = 0; lastX = 0; lastY = 0; time = 0; lastTime = 0;
-        }
-
-        public void updateVector(double newX, double newY, double newTime) {
-            lastX = this.x; lastY = this.y; lastTime = this.time;
-            this.x = newX; this.y = newY; this.time = newTime;
         }
 
         public double getDistance() {
@@ -308,7 +327,10 @@ public class Touchpad {
         }
 
         public double getVelocity() {
-            return Math.sqrt(Math.pow(getXVel(), 2) + Math.pow(getYVel(), 2));
+
+            double velocity = Math.sqrt(Math.pow(getXVel(), 2) + Math.pow(getYVel(), 2));
+            return velocity > deadzone ? velocity : 0;
+
         }
 
         public double getAngle() {
