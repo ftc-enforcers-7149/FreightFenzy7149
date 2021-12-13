@@ -3,24 +3,24 @@ package org.firstinspires.ftc.teamcode.Testing;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.ElevatorOld;
+import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Elevator;
 import org.firstinspires.ftc.teamcode.TeleOp.TeleOp_Base;
 
 @TeleOp(name = "Test Elevator PID")
 @Disabled
 public class TestElevatorPID extends TeleOp_Base {
 
-    private ElevatorOld elevator;
+    private Elevator elevator;
 
     private double elevatorPower;
 
-    private ElevatorOld.Level elevatorPos, lastElevatorPos;
+    private Elevator.Level elevatorPos, lastElevatorPos;
 
     @Override
     public void init() {
         initializeBulkRead();
 
-        elevator = new ElevatorOld(hardwareMap, "elevator", bReadEH);
+        elevator = new Elevator(hardwareMap, "elevator", bReadEH);
 
         addInput(elevator);
         addOutput(elevator);
@@ -40,7 +40,6 @@ public class TestElevatorPID extends TeleOp_Base {
         }
 
         telemetry.addData("Elevator Height (in): ", elevator.getHeight());
-        telemetry.addData("Elevator Motor Ticks: ", elevator.getMotorTicks());
         telemetry.addData("Target Position", elevatorPos);
 
         updateOutputs();
@@ -61,10 +60,10 @@ public class TestElevatorPID extends TeleOp_Base {
         else
             elevatorPower = 0;
 
-        if (gamepad1.dpad_up) elevatorPos = ElevatorOld.Level.HIGH;
-        else if (gamepad1.dpad_left) elevatorPos = ElevatorOld.Level.MIDDLE;
-        else if (gamepad1.dpad_right) elevatorPos = ElevatorOld.Level.LOW;
-        else if (gamepad1.dpad_down) elevatorPos = ElevatorOld.Level.GROUND;
+        if (gamepad1.dpad_up) elevatorPos = Elevator.Level.HIGH;
+        else if (gamepad1.dpad_left) elevatorPos = Elevator.Level.MIDDLE;
+        else if (gamepad1.dpad_right) elevatorPos = Elevator.Level.LOW;
+        else if (gamepad1.dpad_down) elevatorPos = Elevator.Level.GROUND;
     }
 
     @Override

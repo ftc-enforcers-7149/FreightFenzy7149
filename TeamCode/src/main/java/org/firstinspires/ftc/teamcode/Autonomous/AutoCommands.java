@@ -1,14 +1,10 @@
 package org.firstinspires.ftc.teamcode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.CarouselSpinner;
+import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Elevator;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Intake;
-import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.ElevatorOld;
 import org.firstinspires.ftc.teamcode.Subsystems.Webcam.OpenCV;
 import org.opencv.core.RotatedRect;
-
-import static org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.ElevatorOld.Level.HIGH;
-import static org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.ElevatorOld.Level.LOW;
-import static org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.ElevatorOld.Level.MIDDLE;
 
 public class AutoCommands {
 
@@ -18,44 +14,42 @@ public class AutoCommands {
         this.op = op;
     }
 
-    public ElevatorOld.Level detectBarcode(OpenCV tseDetector) {
+    public Elevator.Level detectBarcode(OpenCV tseDetector) {
         if (op.getAlliance() == Alliance.BLUE) {
             RotatedRect boundingRect = tseDetector.getRect();
-            if (boundingRect == null) return LOW;
+            if (boundingRect == null) return Elevator.Level.LOW;
             if (boundingRect.center.x <= 640 / 4.0) {
-                return MIDDLE;
+                return Elevator.Level.MIDDLE;
             } else {
-                return HIGH;
+                return Elevator.Level.HIGH;
             }
         }
         else if (op.getAlliance() == Alliance.RED) {
             RotatedRect boundingRect = tseDetector.getRect();
-            if (boundingRect == null) return HIGH;
+            if (boundingRect == null) return Elevator.Level.HIGH;
             if (boundingRect.center.x <= 640 / 4.0) {
-                return LOW;
+                return Elevator.Level.LOW;
             } else {
-                return MIDDLE;
+                return Elevator.Level.MIDDLE;
             }
         }
         else {
-            return HIGH;
+            return Elevator.Level.HIGH;
         }
     }
 
-    public void setElevatorHeight(ElevatorOld elevator, double height) {
+    public void setElevatorHeight(Elevator elevator, double height) {
         elevator.setTargetHeight(height);
         op.customWait(() -> (elevator.getHeight() < height - 0.5));
     }
 
-    public void setElevatorHeight(ElevatorOld elevator, ElevatorOld.Level level) {
+    public void setElevatorHeight(Elevator elevator, Elevator.Level level) {
         setElevatorHeight(elevator, level.height);
     }
 
     public void outtake(Intake intake) {
-        intake.setIntakePower(-0.75);
-        long startTime = System.currentTimeMillis();
-        op.customWait(() -> (intake.getFreightInIntake() && System.currentTimeMillis() < startTime + 1500));
-        intake.setIntakePower(0);
+        intake.outtakeUp();
+        op.customWait(intake::isBusy);
     }
 
     public void spinDuck(CarouselSpinner spinner, long msTime) {

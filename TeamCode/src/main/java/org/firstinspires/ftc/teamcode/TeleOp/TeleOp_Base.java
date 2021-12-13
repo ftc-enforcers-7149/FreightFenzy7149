@@ -14,6 +14,8 @@ import org.firstinspires.ftc.teamcode.Subsystems.Utils.VelLimitsJerk;
 
 import java.util.ArrayList;
 
+import static org.firstinspires.ftc.teamcode.GlobalData.HEADING;
+import static org.firstinspires.ftc.teamcode.GlobalData.RAN_AUTO;
 import static org.firstinspires.ftc.teamcode.Subsystems.Utils.FixedRoadrunner.createPose2d;
 
 public abstract class TeleOp_Base extends OpMode {
@@ -108,6 +110,8 @@ public abstract class TeleOp_Base extends OpMode {
         else
             gyro = drive.gyro;
 
+        if (RAN_AUTO) gyro.setOffset(HEADING);
+
         inputs.add((hasCH?1:0) + (hasEH?1:0), gyro);
         initializedGyro = true;
     }
@@ -142,13 +146,52 @@ public abstract class TeleOp_Base extends OpMode {
         xJerk = new VelLimitsJerk(0);
         turnJerk = new VelLimitsJerk(0);
     }
-    protected void initializeAll() throws Exception {
-        initializeSources();
-        initializeDrive();
-        initializeBulkRead();
-        initializeGyro();
-        initializeOdometry();
-        initializeVars();
+    protected void initializeAll() {
+        try {
+            initializeSources();
+            initializeDrive();
+            initializeBulkRead();
+            initializeGyro();
+            initializeOdometry();
+            initializeVars();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            telemetry.addLine(e.getMessage());
+            telemetry.update();
+            double errTime = System.currentTimeMillis();
+            while (System.currentTimeMillis() < errTime + 2500);
+            requestOpModeStop();
+        }
+    }
+    protected void initializeWithoutDrive() {
+        try {
+            initializeSources();
+            initializeBulkRead();
+            initializeGyro();
+            initializeVars();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            telemetry.addLine(e.getMessage());
+            telemetry.update();
+            double errTime = System.currentTimeMillis();
+            while (System.currentTimeMillis() < errTime + 2500);
+            requestOpModeStop();
+        }
+    }
+
+    @Override
+    public void start() {
+        RAN_AUTO = false;
+        startInputs();
+        startOutputs();
+    }
+
+    @Override
+    public void stop() {
+        stopInputs();
+        stopOutputs();
     }
 
     protected void addInput(Input input) {

@@ -2,10 +2,8 @@ package org.firstinspires.ftc.teamcode.Testing;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.Subsystems.Sensors.Gyroscope;
-import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.ElevatorOld;
+import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Elevator;
 import org.firstinspires.ftc.teamcode.TeleOp.TeleOp_Base;
 
 @TeleOp(name = "Slowed Driving")
@@ -13,11 +11,9 @@ import org.firstinspires.ftc.teamcode.TeleOp.TeleOp_Base;
 public class SlowedDriving extends TeleOp_Base {
 
     //Headless
-    protected Gyroscope gyro;
     private boolean resetAngle;
 
-    private ElevatorOld elevator;
-    private Servo wrist;
+    private Elevator elevator;
 
     @Override
     public void init() {
@@ -26,14 +22,10 @@ public class SlowedDriving extends TeleOp_Base {
         initializeGyro();
         initializeVars();
 
-        elevator = new ElevatorOld(hardwareMap, "elevator", bReadEH);
+        elevator = new Elevator(hardwareMap, "elevator", bReadEH);
 
         addInput(elevator);
         addOutput(elevator);
-
-        wrist = hardwareMap.servo.get("wrist");
-        wrist.setDirection(Servo.Direction.REVERSE);
-        wrist.setPosition(0.45);
     }
 
     @Override
@@ -42,7 +34,7 @@ public class SlowedDriving extends TeleOp_Base {
         getInput();
 
         // Drive
-        driveHeadlessSmooth(gyro.getNewRawYaw(), resetAngle);
+        driveHeadlessSmooth(gyro.getYaw(), resetAngle);
 
         // Elevator
         if (gamepad1.right_trigger > 0.1 || gamepad1.left_trigger > 0.1)
@@ -50,7 +42,7 @@ public class SlowedDriving extends TeleOp_Base {
         else
             elevator.setPower(0);
 
-        if (elevator.getHeight() > 5) {
+        if (elevator.getHeight() > 10) {
             setSmoothingTimes(1, 200, 200);
         }
         else {

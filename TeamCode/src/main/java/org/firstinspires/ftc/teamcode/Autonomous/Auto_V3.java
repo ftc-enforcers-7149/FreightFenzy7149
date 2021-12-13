@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.Autonomous;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.CarouselSpinner;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Elevator;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Intake;
-import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Scorer;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Turret;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Input;
 import org.firstinspires.ftc.teamcode.Subsystems.Webcam.OpenCV;
@@ -19,7 +18,6 @@ public abstract class Auto_V3 extends Autonomous_Base {
     protected Intake intake;
     protected Elevator elevator;
     protected Turret turret;
-    protected Scorer scorer;
 
     protected OpenCV tseDetector;
 
@@ -36,10 +34,9 @@ public abstract class Auto_V3 extends Autonomous_Base {
         }
 
         spinner = new CarouselSpinner(hardwareMap, "spinner");
-        intake = new Intake(hardwareMap, "intake", "intakeColor");
+        intake = new Intake(hardwareMap, "intake", "intakeColor", "outtakeColor");
         elevator = new Elevator(hardwareMap, "elevator", bReadEH);
         turret = new Turret(hardwareMap, "turret", bReadEH);
-        scorer = new Scorer(elevator, turret);
 
         addInput(intake);
         addInput(elevator);
@@ -47,13 +44,14 @@ public abstract class Auto_V3 extends Autonomous_Base {
 
         addOutput(spinner);
         addOutput(intake);
-        addOutput(scorer);
+        addOutput(elevator);
+        addOutput(turret);
 
         //Update global headless data as an input
         addInput(new Input() {
             @Override
             public void updateInput() {
-                HEADING = gyro.getRawYaw();
+                HEADING = gyro.getYaw();
             }
         });
 
@@ -82,7 +80,7 @@ public abstract class Auto_V3 extends Autonomous_Base {
         //Set global variables
         ALLIANCE = getAlliance();
         RAN_AUTO = true;
-        HEADING = gyro.getRawYaw();
+        HEADING = gyro.getYaw();
 
         tseDetector.stop();
 
@@ -104,6 +102,5 @@ public abstract class Auto_V3 extends Autonomous_Base {
     @Override
     protected final void addTelemetryData() {
         telemetry.addData("Position: ", drive.getPoseEstimate());
-        telemetry.addData("Freight in Intake? ", intake.getFreightInIntake());
     }
 }

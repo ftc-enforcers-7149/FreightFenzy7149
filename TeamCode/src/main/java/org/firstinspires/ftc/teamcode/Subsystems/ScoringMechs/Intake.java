@@ -10,66 +10,141 @@ import org.firstinspires.ftc.teamcode.Subsystems.Utils.Input;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Output;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.ValueTimer;
 
+import java.util.ArrayList;
+
 public class Intake implements Output, Input {
 
     //Intake servos
     public CRServo intake;
 
     //Sensors
-    public RevColorSensorV3 intakeColorSensor;
+    public RevColorSensorV3 intakeColor, outtakeColor;
 
     private static final double minDistance = 1.5;
-    private ValueTimer<Double> distance;
-    private ValueTimer<Integer> redValue;
-    private final boolean useSensor;
+    private static final double blockRedColor = 100;
+    private ValueTimer<Boolean> intakeDetected, intakeBlock, outtakeDetected;
 
     //State machine logic
     private double intakePower,  lastIntakePower;
 
-    public Intake(HardwareMap hardwaremap, String intakeServoName, String intakeColorSensorName) {
-        intake = hardwaremap.crservo.get(intakeServoName);
-        intake.setDirection(DcMotorSimple.Direction.FORWARD);
+    private enum IntakeState {
+        IDLE, INTAKE, OUTTAKE_UP, OUTTAKE_DOWN, TO_OUTTAKE, TO_INTAKE;
 
-        intakeColorSensor = hardwaremap.get(RevColorSensorV3.class, intakeColorSensorName);
-
-        distance = new ValueTimer<Double>(0.0, 250) {
-            @Override
-            public Double readValue() {
-                return intakeColorSensor.getDistance(DistanceUnit.INCH);
+        public IntakeState forward() {
+            switch (this) {
+                case IDLE:
+                    return INTAKE;
+                case INTAKE:
+                case TO_INTAKE:
+                    return TO_OUTTAKE;
+                case TO_OUTTAKE:
+                    return OUTTAKE_UP;
+                case OUTTAKE_UP:
+                case OUTTAKE_DOWN:
+                default:
+                    return IDLE;
             }
-        };
-        redValue = new ValueTimer<Integer>(0, 250) {
-            @Override
-            public Integer readValue() {
-                return intakeColorSensor.red();
-            }
-        };
+        }
 
-        intakePower = 0;
-        lastIntakePower = 0;
-        useSensor = true;
+        public IntakeState backward() {
+            switch (this) {
+                case IDLE:
+                case TO_INTAKE:
+                    return OUTTAKE_DOWN;
+                case TO_OUTTAKE:
+                    return TO_INTAKE;
+                case OUTTAKE_UP:
+                case OUTTAKE_DOWN:
+                case INTAKE:
+                default:
+                    return IDLE;
+            }
+        }
     }
+    private IntakeState state = IntakeState.IDLE;
+    private ArrayList<IntakeState> nextStates;
 
-    public Intake(HardwareMap hardwaremap, String intakeServoName) {
+    private long startTime;
+
+    public Intake(HardwareMap hardwaremap, String intakeServoName, String intakeColorName, String outtakeColorName) {
         intake = hardwaremap.crservo.get(intakeServoName);
-
         intake.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        intakeColor = hardwaremap.get(RevColorSensorV3.class, intakeColorName);
+        outtakeColor = hardwaremap.get(RevColorSensorV3.class, outtakeColorName);
+
+        intakeDetected = new ValueTimer<Boolean>(false, 250) {
+            @Override
+            public Boolean readValue() {
+                return intakeColor.getDistance(DistanceUnit.INCH) < minDistance;
+            }
+        };
+        intakeBlock = new ValueTimer<Boolean>(false, 250) {
+            @Override
+            public Boolean readValue() {
+                return intakeColor.red() > blockRedColor;
+            }
+        };
+        outtakeDetected = new ValueTimer<Boolean>(false, 250) {
+            @Override
+            public Boolean readValue() {
+                return outtakeColor.getDistance(DistanceUnit.INCH) < minDistance;
+            }
+        };
+
+        nextStates = new ArrayList<IntakeState>();
 
         intakePower = 0;
         lastIntakePower = 0;
-        useSensor = false;
     }
 
     @Override
     public void updateInput() {
-        if (useSensor) {
-            distance.updateInput();
-            redValue.updateInput();
-        }
+        intakeDetected.updateInput();
+        intakeBlock.updateInput();
+        outtakeDetected.updateInput();
     }
 
     @Override
     public void updateOutput() {
+        switch (state) {
+            case IDLE:
+                nextState();
+                break;
+            case INTAKE:
+                intakeDetected.setDelayTime(50);
+                if (!intakeDetected.getValue()) intakePower = 1;
+                else {
+                    intakeDetected.setDelayTime(250);
+                    nextState();
+                }
+                break;
+            case OUTTAKE_DOWN:
+                if (intakeDetected.getValue() && System.currentTimeMillis() < startTime + 1500) intakePower = -1;
+                else nextState();
+                break;
+            case OUTTAKE_UP:
+                if (outtakeDetected.getValue() && System.currentTimeMillis() < startTime + 1500) intakePower = 1;
+                else nextState();
+                break;
+            case TO_OUTTAKE:
+                outtakeDetected.setDelayTime(50);
+                if (!outtakeDetected.getValue() && System.currentTimeMillis() < startTime + 1500) intakePower = 1;
+                else {
+                    outtakeDetected.setDelayTime(250);
+                    nextState();
+                }
+                break;
+            case TO_INTAKE:
+                intakeDetected.setDelayTime(50);
+                if (!intakeDetected.getValue() && System.currentTimeMillis() < startTime + 1500) intakePower = -1;
+                else {
+                    intakeDetected.setDelayTime(250);
+                    nextState();
+                }
+                break;
+        }
+
         if (intakePower != lastIntakePower) {
             intake.setPower(intakePower);
         }
@@ -77,37 +152,64 @@ public class Intake implements Output, Input {
         lastIntakePower = intakePower;
     }
 
-    /**
-     * Set intake power
-     * @param intakePower Servo power [-1,1]
-     */
-    public void setIntakePower(double intakePower) {
-        this.intakePower = intakePower;
+    public void intake() {
+        nextStates.clear();
+        nextStates.add(IntakeState.INTAKE);
     }
 
-    public boolean getFreightInIntake () {
-        return useSensor && (distance.getValue() < minDistance || redValue.getValue() > 100);
+    public void outtakeUp() {
+        nextStates.clear();
+        nextStates.add(IntakeState.TO_OUTTAKE);
+        nextStates.add(IntakeState.OUTTAKE_UP);
+    }
+
+    public void outtakeDown() {
+        nextStates.clear();
+        if (outtakeDetected.getValue()) nextStates.add(IntakeState.TO_INTAKE);
+        nextStates.add(IntakeState.OUTTAKE_DOWN);
+    }
+
+    public boolean isBusy() {
+        return state != IntakeState.IDLE;
+    }
+
+    public void forward() {
+        nextStates.add(state.forward());
+    }
+
+    public void backward() {
+        nextStates.add(state.backward());
+    }
+
+    private void nextState() {
+        if (nextStates.size() > 0) {
+            state = nextStates.remove(0);
+            startTime = System.currentTimeMillis();
+        }
+        else {
+            intakePower = 0;
+            state = IntakeState.IDLE;
+        }
     }
 
     @Override
     public void startInput() {
-        if (useSensor) {
-            distance.startInput();
-            redValue.startInput();
-        }
+        intakeDetected.startInput();
+        //intakeBlock.startInput();
+        outtakeDetected.startInput();
     }
 
     @Override
     public void stopInput() {
-        if (useSensor) {
-            distance.stopInput();
-            redValue.stopInput();
-        }
+        intakeDetected.stopInput();
+        intakeBlock.stopInput();
+        outtakeDetected.stopInput();
     }
 
     @Override
     public void stopOutput() {
-        setIntakePower(0);
+        state = IntakeState.IDLE;
+        nextStates.clear();
         updateOutput();
     }
 }
