@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+
 public class Point {
 
     private double x, y;
@@ -12,12 +14,28 @@ public class Point {
         this(0, 0);
     }
 
+    public double distanceTo(Point p) {
+        return Math.sqrt(Math.pow(x - p.x, 2) + Math.pow(y - p.y, 2));
+    }
+
+    public double angleTo(Point p, AngleUnit angleUnit) {
+        double rads = Math.atan2(p.y - y, p.x - x);
+
+        switch (angleUnit) {
+            case DEGREES:
+                return Math.toDegrees(rads);
+            case RADIANS:
+            default:
+                return rads;
+        }
+    }
+
     public void setPoint(double x, double y) {
         this.x = x; this.y = y;
     }
 
     public void setPoint(Point p) {
-        this.x = p.getX(); this.y = p.getY();
+        this.x = p.x; this.y = p.y;
     }
 
     public void setX(double x) { this.x = x; }
