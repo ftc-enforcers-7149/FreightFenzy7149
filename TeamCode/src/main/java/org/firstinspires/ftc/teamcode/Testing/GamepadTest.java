@@ -3,13 +3,11 @@ package org.firstinspires.ftc.teamcode.Testing;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Slider;
-import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchZone;
+import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects.Slider;
+import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects.Swipe;
+import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects.TouchObject;
+import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects.Zone;
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Touchpad;
-import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObject;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 
 @TeleOp(name="Gamepad Test")
 //@Disabled
@@ -23,9 +21,15 @@ public class GamepadTest extends OpMode {
     public void init() {
 
         touchpad = new Touchpad(gamepad1);
-        touchpad.add(new TouchZone("topRight", touchpad, 0, 100, 0, 100));
-        touchpad.add(new TouchZone("bottomLeft", touchpad, -100, 0, -100, 0));
-        touchpad.add(new Slider("liftPos", touchpad, 1, 0, 1, Slider.SwipeType.VERT_AXIS));
+
+        try {
+            touchpad.add(new Zone("topRight", touchpad, false, 0, 100, 0, 100));
+            touchpad.add(new Zone("bottomLeft", touchpad, true, -100, 0, -100, 0));
+            touchpad.add(new Slider("liftPos", touchpad, 1, TouchObject.Type.Y_AXIS));
+            touchpad.add(new Swipe("rotateLeft", touchpad, 1, TouchObject.Type.LEFT_SWIPE));
+            touchpad.add(new Swipe("rotateRight", touchpad, 1, TouchObject.Type.RIGHT_SWIPE));
+        }
+        catch(Touchpad.DuplicateNameException ignored){}
 
     }
 
@@ -60,7 +64,7 @@ public class GamepadTest extends OpMode {
 
     public void getInput() {
 
-        rotateLeft = (boolean) touchpad.getObject("rotateLeft").update();
+        rotateLeft = touchpad.getObject("rotateLeft", Swipe.class).update();
 
     }
 

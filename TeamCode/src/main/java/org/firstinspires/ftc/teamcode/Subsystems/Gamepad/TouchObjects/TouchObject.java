@@ -1,23 +1,24 @@
-package org.firstinspires.ftc.teamcode.Subsystems.Gamepad;
+package org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects;
 
+import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Touchpad;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Scale;
 
 import java.lang.reflect.Type;
 
-public abstract class TouchObject<Object> {
+public abstract class TouchObject<T> {
 
     Touchpad touchpad;
     String name;
 
-    public enum SwipeType {
+    public enum Type {
 
         BOOLEAN,
         LEFT_SWIPE,
         RIGHT_SWIPE,
         UP_SWIPE,
         DOWN_SWIPE,
-        HORIZ_AXIS,
-        VERT_AXIS
+        X_AXIS,
+        Y_AXIS
 
     }
 
@@ -34,6 +35,6 @@ public abstract class TouchObject<Object> {
 
     }
 
-    public abstract Object update();
+    public abstract T update();
 
 }

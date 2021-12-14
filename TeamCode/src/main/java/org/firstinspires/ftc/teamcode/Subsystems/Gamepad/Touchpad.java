@@ -2,7 +2,11 @@ package org.firstinspires.ftc.teamcode.Subsystems.Gamepad;
 
 import com.qualcomm.robotcore.hardware.Gamepad;
 
+import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects.TouchObject;
+
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Touchpad {
 
@@ -36,7 +40,7 @@ public class Touchpad {
     private double standardMult = 100;
 
     // storage for touchButtons (zoned "buttons" on the gamepad)
-    ArrayList<TouchObject> touchObjects = new ArrayList<>();
+    List<TouchObject> touchObjects = new ArrayList<>();
 
     // finger deadzone
     double fingerDeadzone = 2;
@@ -136,50 +140,27 @@ public class Touchpad {
 
     }
 
-
-    /*
-    // TODO: implement TouchZone support
-    public boolean swipe (int finger, SwipeType s, String name) {
-        return false;
-    }
-
-    // TODO: implement finger two
-    public double axis(int finger, SwipeType s, Scale scale) {
-
-        switch(s) {
-
-            case HORIZ_AXIS:
-
-                return scale.output(fingerOneX);
-
-            case VERT_AXIS:
-                return scale.output(fingerOneY);
-
-            default:
-                return 0;
-        }
-
-    }*/
-
-    /*public double axis(int finger, SwipeType s, String name) {
-
-        return 0;
-
-    }*/
-
     // Adds a TouchButton to the map of touchbuttons
 
-    public void add(TouchObject implement) {
+    // TODO: add overlap check and create custom exception for overlaps
+    // TODO: add duplicate name exception
+    public void add(TouchObject implement) throws DuplicateNameException {
 
+        for(int i = 0; i < touchObjects.size(); i++) {
+
+            if(touchObjects.get(i).getName().equals(implement.getName()))
+                throw new DuplicateNameException("Use different object name!");
+
+        }
         touchObjects.add(implement);
 
     }
 
-    public TouchObject getObject(String name) {
+    public <T extends TouchObject> T getObject(String name, Class<T> type){
 
         for(int i = 0; i < touchObjects.size(); i++) {
 
-            if(touchObjects.get(i).getName().equals(name)) return touchObjects.get(i);
+            if(touchObjects.get(i).getName().equals(name)) return type.cast(touchObjects.get(i));
 
         }
 
@@ -189,7 +170,7 @@ public class Touchpad {
 
     // Returns the HashMap of TouchButtons
 
-    public ArrayList<TouchObject> getTouchObjects() {
+    public List<TouchObject> getTouchObjects() {
         return touchObjects;
     }
 
@@ -371,6 +352,26 @@ public class Touchpad {
 
         public void setLastTime(double lastTime) {
             this.lastTime = lastTime;
+        }
+
+    }
+
+    class ObjectOverlapException extends Exception {
+
+    }
+
+    public class DuplicateNameException extends Exception {
+
+        public DuplicateNameException(String str) {
+
+            super("DuplicateNameException: " + str);
+
+        }
+
+        public DuplicateNameException(String str, Throwable t) {
+
+            super(str, t);
+
         }
 
     }

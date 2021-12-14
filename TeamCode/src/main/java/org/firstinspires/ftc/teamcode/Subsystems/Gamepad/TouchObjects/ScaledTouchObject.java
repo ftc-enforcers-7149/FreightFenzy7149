@@ -1,6 +1,6 @@
-package org.firstinspires.ftc.teamcode.Subsystems.Gamepad;
+package org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects;
 
-import org.firstinspires.ftc.teamcode.Subsystems.Utils.Scale;
+import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Touchpad;
 
 public abstract class ScaledTouchObject<Object> extends TouchObject<Object> {
 
@@ -12,6 +12,14 @@ public abstract class ScaledTouchObject<Object> extends TouchObject<Object> {
         super(name, touchpad);
         this.lowerOut = lowerOut; this.upperOut = upperOut;
         this.exponent = exponent;
+    }
+
+    public ScaledTouchObject(String name, Touchpad touchpad) {
+
+        super(name, touchpad);
+        this.lowerOut = 0; this.upperOut = 1;
+        this.exponent = 1;
+
     }
 
     public double scale(double input) {

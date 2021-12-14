@@ -1,11 +1,13 @@
-package org.firstinspires.ftc.teamcode.Subsystems.Gamepad;
+package org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects;
+
+import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Touchpad;
 
 public class Swipe extends TouchObject<Boolean> {
 
     private int finger;
-    private SwipeType s;
+    private Type s;
 
-    public Swipe(String name, Touchpad touchpad, int finger, SwipeType s) {
+    public Swipe(String name, Touchpad touchpad, int finger, Type s) {
         super(name, touchpad);
         this.finger = finger;
         this.s = s;
@@ -27,6 +29,8 @@ public class Swipe extends TouchObject<Boolean> {
         boolean upSwipe = finger == 1 ? touchpad.getV1().getYVel() > 0 : touchpad.getV2().getYVel() > 0;
         boolean down = finger == 1 ? touchpad.getFingerOneY() < 0 : touchpad.getFingerTwoY() < 0;
         boolean downSwipe = finger == 1 ? touchpad.getV1().getYVel() < 0 : touchpad.getV2().getYVel() < 0;
+
+        if(!touchpad.getFingerOn()) return false;
 
         switch(s) {
 
