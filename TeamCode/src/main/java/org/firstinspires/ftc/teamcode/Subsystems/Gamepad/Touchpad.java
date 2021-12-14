@@ -213,61 +213,22 @@ public class Touchpad {
     public boolean isTouchButton() {
         return touchButton;
     }
-    public void setTouchButton(boolean touchButton) {
-        this.touchButton = touchButton;
-    }
-    public boolean isLastTouchButton() {
-        return lastTouchButton;
-    }
-    public void setLastTouchButton(boolean lastTouchButton) { this.lastTouchButton = lastTouchButton; }
-    public int getNumFingers() {
-        return numFingers;
-    }
-    public void setNumFingers(int numFingers) {
-        this.numFingers = numFingers;
-    }
-    public double getStandardMult() {
-        return standardMult;
-    }
-    public int getLastNumFingers() {
-        return lastNumFingers;
-    }
-    public void setLastNumFingers(int lastNumFingers) {
-        this.lastNumFingers = lastNumFingers;
-    }
     public double getFingerOneX() {
         return fingerOneX;
-    }
-    public void setFingerOneX(double fingerOneX) {
-        this.fingerOneX = fingerOneX;
     }
     public double getLastFingerOneX() {
         return lastFingerOneX;
     }
-    public void setLastFingerOneX(double lastFingerOneX) {
-        this.lastFingerOneX = lastFingerOneX;
-    }
     public double getFingerOneY() {
         return fingerOneY;
-    }
-    public void setFingerOneY(double fingerOneY) {
-        this.fingerOneY = fingerOneY;
     }
     public double getLastFingerOneY() {
         return lastFingerOneY;
     }
-    public void setLastFingerOneY(double lastFingerOneY) {
-        this.lastFingerOneY = lastFingerOneY;
-    }
     public double getFingerTwoX() { return fingerTwoX; }
-    public void setFingerTwoX(double fingerTwoX) { this.fingerTwoX = fingerTwoX; }
     public double getLastFingerTwoX() { return lastFingerTwoX; }
-    public void setLastFingerTwoX(double lastFingerTwoX) { this.lastFingerTwoX = lastFingerTwoX; }
     public double getFingerTwoY() { return fingerTwoY; }
-    public void setFingerTwoY(double fingerTwoY) { this.fingerTwoY = fingerTwoY; }
     public double getLastFingerTwoY() { return lastFingerTwoY; }
-    public void setLastFingerTwoY(double lastFingerTwoY) { this.lastFingerTwoY = lastFingerTwoY; }
-    public boolean getLastFingerOn() { return lastFingerOn; }
     public boolean getFingerOn() { return fingerOn; }
 
     // Returns the finger vector packets
@@ -324,24 +285,12 @@ public class Touchpad {
             this.x = x;
         }
 
-        public void setLastX(double lastX) {
-            this.lastX  = x;
-        }
-
         public void setY(double y) {
             this.y = y;
         }
 
-        public void setLastY(double lastY) {
-            this.lastY  = y;
-        }
-
         public double getX() {
             return x;
-        }
-
-        public double getLastX() {
-            return lastX;
         }
 
         public double getY() {
@@ -362,14 +311,6 @@ public class Touchpad {
 
         public void setTime(double time) {
             this.time = time;
-        }
-
-        public double getLastTime() {
-            return lastTime;
-        }
-
-        public void setLastTime(double lastTime) {
-            this.lastTime = lastTime;
         }
 
     }
