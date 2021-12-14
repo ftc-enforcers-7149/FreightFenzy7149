@@ -50,44 +50,42 @@ public class Touchpad implements Input {
         // time variables
         double time = System.currentTimeMillis();
 
-        // If we've hit the poll time
+        touchButton = gamepad.touchpad;
+
+        // Checks how many fingers are on the touchpad
+
+        if (gamepad.touchpad_finger_1 && gamepad.touchpad_finger_2) {
+            numFingers = 2;
+            fingerOn = true;
+        } else if (gamepad.touchpad_finger_1) {
+            numFingers = 1;
+            fingerOn = true;
+        } else {
+            numFingers = 0;
+            fingerOn = false;
+        }
+
+        // Checks the position of fingers and updates
+
+        if (numFingers >= 1) {
+            if(Math.abs((standardMult * gamepad.touchpad_finger_1_x) - lastFingerOneX) > fingerDeadzone)
+                fingerOneX = Math.round(standardMult * gamepad.touchpad_finger_1_x);
+
+            if(Math.abs((standardMult * gamepad.touchpad_finger_1_y) - lastFingerOneY) > fingerDeadzone)
+                fingerOneY = Math.round(standardMult * gamepad.touchpad_finger_1_y);
+        }
+
+        if (numFingers == 2) {
+            if(Math.abs((standardMult * gamepad.touchpad_finger_2_x) - lastFingerTwoX) > fingerDeadzone)
+                fingerTwoX = Math.round(standardMult * gamepad.touchpad_finger_2_x);
+
+            if(Math.abs((standardMult * gamepad.touchpad_finger_2_y) - lastFingerOneY) > fingerDeadzone)
+                fingerTwoY = Math.round(standardMult * gamepad.touchpad_finger_2_y);
+        }
+
+        // Polling time- specific functions
 
         if(time - lastTime >= pollingTime) {
-
-            // Checks if touchpad press
-
-            touchButton = gamepad.touchpad;
-
-            // Checks how many fingers are on the touchpad
-
-            if (gamepad.touchpad_finger_1 && gamepad.touchpad_finger_2) {
-                numFingers = 2;
-                fingerOn = true;
-            } else if (gamepad.touchpad_finger_1) {
-                numFingers = 1;
-                fingerOn = true;
-            } else {
-                numFingers = 0;
-                fingerOn = false;
-            }
-
-            // Checks the position of fingers and updates
-
-            if (numFingers >= 1) {
-                if(Math.abs((standardMult * gamepad.touchpad_finger_1_x) - lastFingerOneX) > fingerDeadzone)
-                    fingerOneX = Math.round(standardMult * gamepad.touchpad_finger_1_x);
-
-                if(Math.abs((standardMult * gamepad.touchpad_finger_1_y) - lastFingerOneY) > fingerDeadzone)
-                    fingerOneY = Math.round(standardMult * gamepad.touchpad_finger_1_y);
-            }
-
-            if (numFingers == 2) {
-                if(Math.abs((standardMult * gamepad.touchpad_finger_2_x) - lastFingerTwoX) > fingerDeadzone)
-                    fingerTwoX = Math.round(standardMult * gamepad.touchpad_finger_2_x);
-
-                if(Math.abs((standardMult * gamepad.touchpad_finger_2_y) - lastFingerOneY) > fingerDeadzone)
-                    fingerTwoY = Math.round(standardMult * gamepad.touchpad_finger_2_y);
-            }
 
             // Updates the vectors of the fingers if applicable
 
@@ -110,21 +108,22 @@ public class Touchpad implements Input {
             }
 
             //Updates lasts
-
-            if (numFingers >= 1) {
-                lastFingerOneX = fingerOneX;
-                lastFingerOneY = fingerOneY;
-            }
-            if (numFingers == 2) {
-                lastFingerTwoX = fingerTwoX;
-                lastFingerTwoY = fingerTwoY;
-            }
-
-            lastTouchButton = touchButton;
-            lastNumFingers = numFingers;
-            lastFingerOn = fingerOn;
             lastTime = time;
+
         }
+
+        if (numFingers >= 1) {
+            lastFingerOneX = fingerOneX;
+            lastFingerOneY = fingerOneY;
+        }
+        if (numFingers == 2) {
+            lastFingerTwoX = fingerTwoX;
+            lastFingerTwoY = fingerTwoY;
+        }
+
+        lastTouchButton = touchButton;
+        lastNumFingers = numFingers;
+        lastFingerOn = fingerOn;
 
     }
 

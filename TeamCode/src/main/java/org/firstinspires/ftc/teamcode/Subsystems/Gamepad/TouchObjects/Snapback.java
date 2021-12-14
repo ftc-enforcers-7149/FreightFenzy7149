@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Touchpad;
 
+//TODO: fix this jank ass implementation lolzies
 public class Snapback extends Slider {
 
     public Snapback(Touchpad touchpad, Double defaultValue, int finger, double lowerOut, double upperOut, double exponent, Type s) {

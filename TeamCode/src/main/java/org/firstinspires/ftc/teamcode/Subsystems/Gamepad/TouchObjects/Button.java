@@ -71,4 +71,5 @@ public class Button extends TouchObject<Boolean> {
 
         value = false;
     }
+
 }

@@ -36,6 +36,7 @@ public class GamepadTest extends TeleOp_Base {
         addInput(liftPos);
         addInput(rotateLeft);
         addInput(rotateRight);
+
     }
 
     public void loop() {
