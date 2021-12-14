@@ -21,18 +21,6 @@ public class Slider extends ScaledTouchObject<Double> {
         setUpperIn(100);
     }
 
-    public enum SwipeType {
-
-        BOOLEAN,
-        LEFT_SWIPE,
-        RIGHT_SWIPE,
-        UP_SWIPE,
-        DOWN_SWIPE,
-        HORIZ_AXIS,
-        VERT_AXIS
-
-    }
-
     public Double update() {
         switch(s) {
 

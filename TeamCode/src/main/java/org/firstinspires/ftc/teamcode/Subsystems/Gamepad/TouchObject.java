@@ -9,6 +9,18 @@ public abstract class TouchObject<Object> {
     Touchpad touchpad;
     String name;
 
+    public enum SwipeType {
+
+        BOOLEAN,
+        LEFT_SWIPE,
+        RIGHT_SWIPE,
+        UP_SWIPE,
+        DOWN_SWIPE,
+        HORIZ_AXIS,
+        VERT_AXIS
+
+    }
+
     public TouchObject(String name, Touchpad touchpad) {
 
         this.name = name;
