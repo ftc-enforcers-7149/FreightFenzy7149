@@ -1,27 +1,22 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Touchpad;
+import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils.Scale;
 
 public abstract class ScaledTouchObject<T> extends TouchObject<T> {
 
-    private final double lowerOut, upperOut, exponent, lowerIn, upperIn;
+    private final Scale scale;
 
-    public ScaledTouchObject(Touchpad touchpad, T defaultValue, double lowerIn, double upperIn, double lowerOut, double upperOut, double exponent) {
+    public ScaledTouchObject(Touchpad touchpad, T defaultValue, Scale scale) {
         super(touchpad, defaultValue);
-        this.lowerIn = lowerIn; this.upperIn = upperIn;
-        this.lowerOut = lowerOut; this.upperOut = upperOut;
-        this.exponent = exponent;
+        this.scale = scale;
     }
 
-    public ScaledTouchObject(Touchpad touchpad, T defaultValue, double lowerIn, double upperIn) {
-        this(touchpad, defaultValue, lowerIn, upperIn, 0, 1, 1);
+    public ScaledTouchObject(Touchpad touchpad, T defaultValue) {
+        this(touchpad, defaultValue, new Scale(0, 1, 0, 1));
     }
 
     public double scale(double input) {
-        double curve = Math.signum(input) * Math.abs(Math.pow(input, exponent));
-        double scaleFactor = ((upperOut - lowerOut) / (upperIn - lowerIn));
-        double scale = scaleFactor * curve + (upperOut - scaleFactor*upperIn);
-
-        return scale;
+        return scale.output(input);
     }
 }

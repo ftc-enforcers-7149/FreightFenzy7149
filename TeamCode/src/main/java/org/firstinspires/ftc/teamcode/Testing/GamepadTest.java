@@ -2,11 +2,13 @@ package org.firstinspires.ftc.teamcode.Testing;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects.Slider;
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects.Swipe;
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects.TouchObject;
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects.Button;
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Touchpad;
+import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils.Bounds;
 import org.firstinspires.ftc.teamcode.TeleOp.TeleOp_Base;
 
 @TeleOp(name="Gamepad Test")
@@ -24,11 +26,11 @@ public class GamepadTest extends TeleOp_Base {
         initializeVars();
 
         touchpad = new Touchpad(gamepad1);
-        topRight = new Button(touchpad, false, false, 0, 100, 0, 100);
-        bottomLeft = new Button(touchpad, false, true, -100, 0, -100, 0);
-        liftPos = new Slider(touchpad, 0d, 1, TouchObject.Type.Y_AXIS);
-        rotateLeft = new Swipe(touchpad, false, 1, TouchObject.Type.LEFT_SWIPE);
-        rotateRight = new Swipe(touchpad, false, 1, TouchObject.Type.RIGHT_SWIPE);
+        topRight = new Button(touchpad, false, Bounds.TOP_RIGHT, false);
+        bottomLeft = new Button(touchpad, false, Bounds.BOTTOM_LEFT, true);
+        liftPos = new Slider(touchpad, 0d, Slider.SliderType.Y_AXIS, 0, 20);
+        rotateLeft = new Swipe(touchpad, false, Swipe.SwipeType.LEFT_SWIPE);
+        rotateRight = new Swipe(touchpad, false, Swipe.SwipeType.RIGHT_SWIPE);
 
         addInput(touchpad);
         addInput(topRight);
@@ -44,23 +46,27 @@ public class GamepadTest extends TeleOp_Base {
 
         telemetry.addData("Number of fingers: ", touchpad.getNumFingers());
 
-        if(touchpad.getNumFingers() >= 1) {
-            telemetry.addData("\nFinger 1 X?: ", touchpad.getFingerOneX());
-            telemetry.addData("Finger 1 Y?: ", touchpad.getFingerOneY());
-        }
+        if(touchpad.getNumFingers() >= 1)
+            telemetry.addData("Finger 1: ", touchpad.getFingerOne());
+        else
+            telemetry.addLine();
 
-        if(touchpad.getNumFingers() == 2) {
-            telemetry.addData("\nFinger 2 X?: ", touchpad.getFingerTwoX());
-            telemetry.addData("Finger 2 Y?: ", touchpad.getFingerTwoY());
-        }
+        if(touchpad.getNumFingers() == 2)
+            telemetry.addData("Finger 2: ", touchpad.getFingerTwo());
+        else
+            telemetry.addLine();
+
+        telemetry.addLine();
 
         telemetry.addData("rotateLeft: ", rotateLeft.get());
         telemetry.addData("rotateRight: ", rotateRight.get());
         telemetry.addData("litPos: ", liftPos.get());
 
-        if(touchpad.getNumFingers() >= 1) telemetry.addData("Swipe?: ", touchpad.getV1().getVelocity());
-        telemetry.addData("Angle?: ", touchpad.getV1().getAngle());
-        if(touchpad.getNumFingers() == 2) telemetry.addData("Swipe 2?: ", touchpad.getV2().getVelocity());
+        telemetry.addLine();
+
+        if(touchpad.getNumFingers() >= 1) telemetry.addData("V1: ", touchpad.getV1().getVelocity());
+        telemetry.addData("V1 Angle: ", touchpad.getV1().getAngle(AngleUnit.DEGREES));
+        if(touchpad.getNumFingers() == 2) telemetry.addData("V2: ", touchpad.getV2().getVelocity());
     }
 
     @Override

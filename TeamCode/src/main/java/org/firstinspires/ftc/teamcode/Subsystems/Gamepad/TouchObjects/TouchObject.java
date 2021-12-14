@@ -6,20 +6,11 @@ import org.firstinspires.ftc.teamcode.Subsystems.Utils.Input;
 public abstract class TouchObject<T> implements Input {
 
     protected Touchpad touchpad;
-    protected T value;
-
-    public enum Type {
-        BOOLEAN,
-        LEFT_SWIPE,
-        RIGHT_SWIPE,
-        UP_SWIPE,
-        DOWN_SWIPE,
-        X_AXIS,
-        Y_AXIS
-    }
+    protected T value, defaultValue;
 
     public TouchObject(Touchpad touchpad, T defaultValue) {
         this.touchpad = touchpad;
+        this.defaultValue = defaultValue;
         value = defaultValue;
     }
 

@@ -1,52 +1,78 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Touchpad;
+import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils.Point;
+import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils.VectorPacket;
 
 public class Swipe extends TouchObject<Boolean> {
 
-    private final int finger;
-    private final Type s;
+    public enum SwipeType {
+        ANY_SWIPE,
+        LEFT_SWIPE,
+        RIGHT_SWIPE,
+        UP_SWIPE,
+        DOWN_SWIPE,
+    }
 
-    public Swipe(Touchpad touchpad, Boolean defaultValue, int finger, Type s) {
+    private final SwipeType s;
+
+    public Swipe(Touchpad touchpad, Boolean defaultValue, SwipeType s) {
         super(touchpad, defaultValue);
-        this.finger = finger;
         this.s = s;
     }
 
     @Override
     public void updateInput() {
-        boolean angleHoriz = finger == 1 ? touchpad.getV1().getAngle() >= -15 || touchpad.getV1().getAngle() <= 15
-                : touchpad.getV2().getAngle() >= -15 || touchpad.getV2().getAngle() <= 15;
-        boolean angleVert = finger == 1 ? touchpad.getV1().getAngle() >= 75 || touchpad.getV1().getAngle() <= 105
-                : touchpad.getV2().getAngle() >= 75 || touchpad.getV2().getAngle() <= 105;
-        boolean hold = finger == 1 ? touchpad.getLastFingerOneX() == touchpad.getFingerOneX() && touchpad.getLastFingerOneY() == touchpad.getFingerOneY()
-                : touchpad.getLastFingerTwoX() == touchpad.getFingerTwoX() && touchpad.getLastFingerTwoY() == touchpad.getFingerTwoY();
-        boolean left = finger == 1 ? touchpad.getFingerOneX() < 0 : touchpad.getFingerTwoX() < 0;
-        boolean leftSwipe = finger == 1 ? touchpad.getV1().getXVel() < 0 : touchpad.getV2().getXVel() < 0;
-        boolean right = finger == 1 ? touchpad.getFingerOneX() >= 0 : touchpad.getFingerTwoX() >= 0;
-        boolean rightSwipe = finger == 1 ? touchpad.getV1().getXVel() > 0 : touchpad.getV2().getXVel() > 0;
-        boolean up = finger == 1 ? touchpad.getFingerOneY() >= 0 : touchpad.getFingerTwoY() >= 0;
-        boolean upSwipe = finger == 1 ? touchpad.getV1().getYVel() > 0 : touchpad.getV2().getYVel() > 0;
-        boolean down = finger == 1 ? touchpad.getFingerOneY() < 0 : touchpad.getFingerTwoY() < 0;
-        boolean downSwipe = finger == 1 ? touchpad.getV1().getYVel() < 0 : touchpad.getV2().getYVel() < 0;
+        Point finger, lastFinger;
+        VectorPacket vel;
+        if (touchpad.getNumFingers() == 2) {
+            finger = touchpad.getFingerTwo();
+            lastFinger = touchpad.getLastFingerTwo();
+            vel = touchpad.getV2();
+        }
+        else if (touchpad.getNumFingers() == 1) {
+            finger = touchpad.getFingerOne();
+            lastFinger = touchpad.getLastFingerOne();
+            vel = touchpad.getV1();
+        }
+        else {
+            value = false;
+            return;
+        }
 
-        if(!touchpad.getFingerOn()) value = false;
+        double angle = vel.getAngle(AngleUnit.DEGREES);
+        boolean angleHorz = (angle >= 345 && angle <= 15) || (angle >= 165 && angle <= 195);
+        boolean angleVert = (angle >= 75 && angle <= 105) || (angle >= 255 && angle <= 285);
+
+        double swipeVel = vel.getVelocity();
+        boolean anySwipe = swipeVel > 0;
+        boolean leftSwipe = vel.getXVel() < 0 && angleHorz;
+        boolean rightSwipe = vel.getXVel() > 0 && angleHorz;
+        boolean downSwipe = vel.getYVel() < 0 && angleVert;
+        boolean upSwipe = vel.getYVel() > 0 && angleVert;
+
+        boolean hold = finger.distanceTo(lastFinger) < 1;
+        boolean left = finger.getX() < 0;
+        boolean right = finger.getX() > 0;
+        boolean down = finger.getX() < 0;
+        boolean up = finger.getY() > 0;
 
         switch(s) {
-            case BOOLEAN:
-                value = leftSwipe || rightSwipe;
+            case ANY_SWIPE:
+                value = anySwipe;
                 return;
             case LEFT_SWIPE:
-                value = (leftSwipe && angleHoriz) || ((!leftSwipe || !rightSwipe) && hold && left);
+                value = leftSwipe || (!anySwipe && hold && left);
                 return;
             case RIGHT_SWIPE:
-                value = (rightSwipe && angleHoriz) || ((!leftSwipe || !rightSwipe) && hold && right);
+                value = rightSwipe || (!anySwipe && hold && right);
                 return;
             case UP_SWIPE:
-                value = (upSwipe && angleVert) || ((!upSwipe || !downSwipe) && hold && up);
+                value = upSwipe || (!anySwipe && hold && up);
                 return;
             case DOWN_SWIPE:
-                value = (downSwipe && angleVert) || ((!upSwipe || !downSwipe) && hold && down);
+                value = downSwipe || (!anySwipe && hold && down);
                 return;
             default:
                 value = false;

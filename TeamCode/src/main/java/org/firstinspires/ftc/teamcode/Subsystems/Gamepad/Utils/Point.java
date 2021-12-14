@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils;
 
+import androidx.annotation.NonNull;
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 public class Point {
@@ -43,4 +45,10 @@ public class Point {
 
     public double getX() { return x; }
     public double getY() { return y; }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "(" + x + ", " + y + ")";
+    }
 }

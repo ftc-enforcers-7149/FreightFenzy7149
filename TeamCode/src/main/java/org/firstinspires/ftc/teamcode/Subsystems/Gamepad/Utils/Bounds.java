@@ -2,6 +2,12 @@ package org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils;
 
 public class Bounds {
 
+    public static final Bounds TOP_LEFT = new Bounds(-100, 0, 0, 100);
+    public static final Bounds BOTTOM_LEFT = new Bounds(-100, 0, -100, 0);
+    public static final Bounds TOP_RIGHT = new Bounds(0, 100, 0, 100);
+    public static final Bounds BOTTOM_RIGHT = new Bounds(0, 100, -100, 0);
+    public static final Bounds CENTER = new Bounds(-50, 50, -50, 50);
+
     private double leftX, rightX, bottomY, topY;
 
     public Bounds(double leftX, double rightX, double bottomY, double topY) {

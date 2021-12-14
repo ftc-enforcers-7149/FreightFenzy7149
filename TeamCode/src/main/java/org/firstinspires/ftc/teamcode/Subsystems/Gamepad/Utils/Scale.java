@@ -14,8 +14,6 @@ public class Scale {
 
     public double output(double input) {
         double scaleFactor = (upperOut - lowerOut) / (upperIn - lowerIn);
-        double scale = upperOut - scaleFactor*upperIn;
-
-        return scale;
+        return input * scaleFactor + lowerOut;
     }
 }
