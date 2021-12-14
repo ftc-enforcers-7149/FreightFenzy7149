@@ -19,6 +19,7 @@ public class Intake implements Output, Input {
 
     //Sensors
     public RevColorSensorV3 intakeColor, outtakeColor;
+    private boolean useSensor;
 
     private static final double minDistance = 1.5;
     private static final double blockRedColor = 100;
@@ -96,53 +97,86 @@ public class Intake implements Output, Input {
 
         intakePower = 0;
         lastIntakePower = 0;
+        useSensor = true;
+    }
+
+    public Intake(HardwareMap hardwaremap, String intakeServoName) {
+        intake = hardwaremap.crservo.get(intakeServoName);
+        intake.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        nextStates = new ArrayList<IntakeState>();
+
+        intakePower = 0;
+        lastIntakePower = 0;
+        useSensor = false;
     }
 
     @Override
     public void updateInput() {
-        intakeDetected.updateInput();
-        intakeBlock.updateInput();
-        outtakeDetected.updateInput();
+        if (useSensor) {
+            intakeDetected.updateInput();
+            intakeBlock.updateInput();
+            outtakeDetected.updateInput();
+        }
     }
 
     @Override
     public void updateOutput() {
-        switch (state) {
-            case IDLE:
-                nextState();
-                break;
-            case INTAKE:
-                intakeDetected.setDelayTime(50);
-                if (!intakeDetected.getValue()) intakePower = 1;
-                else {
-                    intakeDetected.setDelayTime(250);
+        if (useSensor) {
+            switch (state) {
+                case IDLE:
                     nextState();
-                }
-                break;
-            case OUTTAKE_DOWN:
-                if (intakeDetected.getValue() && System.currentTimeMillis() < startTime + 1500) intakePower = -1;
-                else nextState();
-                break;
-            case OUTTAKE_UP:
-                if (outtakeDetected.getValue() && System.currentTimeMillis() < startTime + 1500) intakePower = 1;
-                else nextState();
-                break;
-            case TO_OUTTAKE:
-                outtakeDetected.setDelayTime(50);
-                if (!outtakeDetected.getValue() && System.currentTimeMillis() < startTime + 1500) intakePower = 1;
-                else {
-                    outtakeDetected.setDelayTime(250);
-                    nextState();
-                }
-                break;
-            case TO_INTAKE:
-                intakeDetected.setDelayTime(50);
-                if (!intakeDetected.getValue() && System.currentTimeMillis() < startTime + 1500) intakePower = -1;
-                else {
-                    intakeDetected.setDelayTime(250);
-                    nextState();
-                }
-                break;
+                    break;
+                case INTAKE:
+                    intakeDetected.setDelayTime(50);
+                    if (!intakeDetected.getValue()) intakePower = 1;
+                    else {
+                        intakeDetected.setDelayTime(250);
+                        nextState();
+                    }
+                    break;
+                case OUTTAKE_DOWN:
+                    if (intakeDetected.getValue() && System.currentTimeMillis() < startTime + 1500)
+                        intakePower = -1;
+                    else nextState();
+                    break;
+                case OUTTAKE_UP:
+                    if (outtakeDetected.getValue() && System.currentTimeMillis() < startTime + 1500)
+                        intakePower = 1;
+                    else nextState();
+                    break;
+                case TO_OUTTAKE:
+                    outtakeDetected.setDelayTime(50);
+                    if (!outtakeDetected.getValue() && System.currentTimeMillis() < startTime + 1500)
+                        intakePower = 1;
+                    else {
+                        outtakeDetected.setDelayTime(250);
+                        nextState();
+                    }
+                    break;
+                case TO_INTAKE:
+                    intakeDetected.setDelayTime(50);
+                    if (!intakeDetected.getValue() && System.currentTimeMillis() < startTime + 1500)
+                        intakePower = -1;
+                    else {
+                        intakeDetected.setDelayTime(250);
+                        nextState();
+                    }
+                    break;
+            }
+        }
+        else {
+            switch (state) {
+                case IDLE:
+                    intakePower = 0;
+                    break;
+                case INTAKE:
+                    intakePower = 1;
+                    break;
+                case OUTTAKE_DOWN:
+                    intakePower = -1;
+                    break;
+            }
         }
 
         if (intakePower != lastIntakePower) {
@@ -154,19 +188,34 @@ public class Intake implements Output, Input {
 
     public void intake() {
         nextStates.clear();
-        nextStates.add(IntakeState.INTAKE);
+        if (useSensor) {
+            nextStates.add(IntakeState.INTAKE);
+        }
+        else {
+            state = IntakeState.INTAKE;
+        }
     }
 
     public void outtakeUp() {
         nextStates.clear();
-        nextStates.add(IntakeState.TO_OUTTAKE);
-        nextStates.add(IntakeState.OUTTAKE_UP);
+        if (useSensor) {
+            nextStates.add(IntakeState.TO_OUTTAKE);
+            nextStates.add(IntakeState.OUTTAKE_UP);
+        }
+        else {
+            state = IntakeState.INTAKE;
+        }
     }
 
     public void outtakeDown() {
         nextStates.clear();
-        if (outtakeDetected.getValue()) nextStates.add(IntakeState.TO_INTAKE);
-        nextStates.add(IntakeState.OUTTAKE_DOWN);
+        if (useSensor) {
+            if (outtakeDetected.getValue()) nextStates.add(IntakeState.TO_INTAKE);
+            nextStates.add(IntakeState.OUTTAKE_DOWN);
+        }
+        else {
+            state = IntakeState.OUTTAKE_DOWN;
+        }
     }
 
     public boolean isBusy() {
@@ -174,11 +223,37 @@ public class Intake implements Output, Input {
     }
 
     public void forward() {
-        nextStates.add(state.forward());
+        if (useSensor)
+            nextStates.add(state.forward());
+        else {
+            nextStates.clear();
+            switch (state) {
+                case IDLE:
+                    state = IntakeState.INTAKE;
+                    break;
+                case INTAKE:
+                case OUTTAKE_DOWN:
+                    state = IntakeState.IDLE;
+                    break;
+            }
+        }
     }
 
     public void backward() {
-        nextStates.add(state.backward());
+        if (useSensor)
+            nextStates.add(state.backward());
+        else {
+            nextStates.clear();
+            switch (state) {
+                case IDLE:
+                    state = IntakeState.OUTTAKE_DOWN;
+                    break;
+                case INTAKE:
+                case OUTTAKE_DOWN:
+                    state = IntakeState.IDLE;
+                    break;
+            }
+        }
     }
 
     private void nextState() {
@@ -194,16 +269,20 @@ public class Intake implements Output, Input {
 
     @Override
     public void startInput() {
-        intakeDetected.startInput();
-        //intakeBlock.startInput();
-        outtakeDetected.startInput();
+        if (useSensor) {
+            intakeDetected.startInput();
+            //intakeBlock.startInput();
+            outtakeDetected.startInput();
+        }
     }
 
     @Override
     public void stopInput() {
-        intakeDetected.stopInput();
-        intakeBlock.stopInput();
-        outtakeDetected.stopInput();
+        if (useSensor) {
+            intakeDetected.stopInput();
+            intakeBlock.stopInput();
+            outtakeDetected.stopInput();
+        }
     }
 
     @Override

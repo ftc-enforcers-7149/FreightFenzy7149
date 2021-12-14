@@ -171,7 +171,7 @@ public class Elevator implements Input, Output {
     }
 
     public double getHeight() {
-        return currHeight;
+        return !manualOverride ? currHeight : 0;
     }
 
     /**
