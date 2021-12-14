@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.Subsystems.Gamepad;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class Touchpad {
 
@@ -37,11 +36,10 @@ public class Touchpad {
     private double standardMult = 100;
 
     // storage for touchButtons (zoned "buttons" on the gamepad)
-    HashMap<TouchObject, Object> implementables = new HashMap<>();
+    ArrayList<TouchObject> touchObjects = new ArrayList<>();
 
     // finger deadzone
     double fingerDeadzone = 2;
-
 
 
     // Constructor. pass in the tele-op gamepad
@@ -119,13 +117,6 @@ public class Touchpad {
                     break;
             }
 
-            for (HashMap.Entry mapElement : implementables.entrySet()) {
-
-                TouchObject key = (TouchObject) mapElement.getKey();
-                implementables.replace(key, key.update());
-
-            }
-
             //Updates lasts
 
             if (numFingers >= 1) {
@@ -145,47 +136,8 @@ public class Touchpad {
 
     }
 
-    // TODO: add in 2nd finger tracking
-    /*public boolean swipe (int finger, SwipeType s) {
 
-        boolean angleHoriz = finger == 1 ? v1.getAngle() >= -15 || v1.getAngle() <= 15
-                : v2.getAngle() >= -15 || v2.getAngle() <= 15;
-        boolean angleVert = finger == 1 ? v1.getAngle() >= 75 || v1.getAngle() <= 105
-                : v2.getAngle() >= 75 || v2.getAngle() <= 105;
-        boolean hold = finger == 1 ? lastFingerOneX == fingerOneX && lastFingerOneY == fingerOneY
-                : lastFingerTwoX == fingerTwoX && lastFingerTwoY == fingerTwoY;
-        boolean left = finger == 1 ? fingerOneX < 0 : fingerTwoX < 0;
-        boolean leftSwipe = finger == 1 ? v1.getXVel() < 0 : v2.getXVel() < 0;
-        boolean right = finger == 1 ? fingerOneX >= 0 : fingerTwoX >= 0;
-        boolean rightSwipe = finger == 1 ? v1.getXVel() > 0 : v2.getXVel() > 0;
-        boolean up = finger == 1 ? fingerOneY >= 0 : fingerTwoY >= 0;
-        boolean upSwipe = finger == 1 ? v1.getYVel() > 0 : v2.getYVel() > 0;
-        boolean down = finger == 1 ? fingerOneY < 0 : fingerTwoY < 0;
-        boolean downSwipe = finger == 1 ? v1.getYVel() < 0 : v2.getYVel() < 0;
-
-        switch(s) {
-
-            case BOOLEAN:
-                return leftSwipe || rightSwipe;
-
-            case LEFT_SWIPE:
-                return ((leftSwipe && angleHoriz) || ((!leftSwipe || !rightSwipe) && hold && left));
-
-            case RIGHT_SWIPE:
-                return ((rightSwipe && angleHoriz) || ((!leftSwipe || !rightSwipe) && hold && right));
-
-            case UP_SWIPE:
-                return ((upSwipe && angleVert) || ((!upSwipe || !downSwipe) && hold && up));
-
-            case DOWN_SWIPE:
-                return ((downSwipe && angleVert) || ((!upSwipe || !downSwipe) && hold && down));
-
-            default:
-                return false;
-        }
-
-    }
-
+    /*
     // TODO: implement TouchZone support
     public boolean swipe (int finger, SwipeType s, String name) {
         return false;
@@ -219,29 +171,26 @@ public class Touchpad {
 
     public void add(TouchObject implement) {
 
-        implementables.put(implement, null);
+        touchObjects.add(implement);
+
+    }
+
+    public TouchObject getObject(String name) {
+
+        for(int i = 0; i < touchObjects.size(); i++) {
+
+            if(touchObjects.get(i).getName().equals(name)) return touchObjects.get(i);
+
+        }
+
+        return null;
 
     }
 
     // Returns the HashMap of TouchButtons
 
-    public HashMap<TouchObject, Object> getImplementables() {
-        return implementables;
-    }
-
-    public ArrayList<String> touchZonesToString() {
-
-        ArrayList<String> zones = new ArrayList<>();
-
-        for (HashMap.Entry mapElement : implementables.entrySet()) {
-
-            TouchZone key = (TouchZone) mapElement.getKey();
-            zones.add(key.getName() + ": " + mapElement.getValue());
-
-        }
-
-        return zones;
-
+    public ArrayList<TouchObject> getTouchObjects() {
+        return touchObjects;
     }
 
     // rumble handling functions

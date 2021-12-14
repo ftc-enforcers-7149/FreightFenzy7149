@@ -7,8 +7,8 @@ import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Slider;
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchZone;
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Touchpad;
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObject;
-import org.firstinspires.ftc.teamcode.Subsystems.Utils.Scale;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 @TeleOp(name="Gamepad Test")
@@ -16,7 +16,6 @@ import java.util.HashMap;
 public class GamepadTest extends OpMode {
 
     Touchpad touchpad;
-    HashMap<TouchObject, Object> implementables;
 
     boolean rotateLeft, rotateRight;
     double liftPos;
@@ -33,7 +32,6 @@ public class GamepadTest extends OpMode {
     public void loop() {
 
         touchpad.update();
-        implementables = touchpad.getImplementables();
 
         telemetry.addData("Number of fingers: ", touchpad.getNumFingers());
 
@@ -42,7 +40,7 @@ public class GamepadTest extends OpMode {
             telemetry.addData("Finger 1 Y?: ", touchpad.getFingerOneY());
         }
 
-        telemetry.addLine(touchpad.touchZonesToString().toString());
+        telemetry.addLine(touchpad.getTouchObjects().toString());
 
         if(touchpad.getNumFingers() == 2) {
             telemetry.addData("\nFinger 2 X?: ", touchpad.getFingerTwoX());
@@ -62,7 +60,7 @@ public class GamepadTest extends OpMode {
 
     public void getInput() {
 
-        rotateLeft = (boolean) implementables.get("liftPos");
+        rotateLeft = (boolean) touchpad.getObject("rotateLeft").update();
 
     }
 
