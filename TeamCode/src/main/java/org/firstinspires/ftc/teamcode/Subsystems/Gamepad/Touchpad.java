@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Subsystems.Gamepad;
 
 import com.qualcomm.robotcore.hardware.Gamepad;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Touchpad {
@@ -36,17 +37,12 @@ public class Touchpad {
     private double standardMult = 100;
 
     // storage for touchButtons (zoned "buttons" on the gamepad)
-    HashMap<TouchZone, Boolean> touchZones = new HashMap<>();
+    HashMap<TouchObject, Object> implementables = new HashMap<>();
 
-    public enum SwipeType {
+    // finger deadzone
+    double fingerDeadzone = 2;
 
-        BOOLEAN,
-        HORIZ_SWIPE,
-        VERT_SWIPE,
-        HORIZ_AXIS,
-        VERT_AXIS
 
-    }
 
     // Constructor. pass in the tele-op gamepad
 
@@ -88,13 +84,19 @@ public class Touchpad {
             // Checks the position of fingers and updates
 
             if (numFingers >= 1) {
-                fingerOneX = standardMult * gamepad.touchpad_finger_1_x;
-                fingerOneY = standardMult * gamepad.touchpad_finger_1_y;
+                if(Math.abs((standardMult * gamepad.touchpad_finger_1_x) - lastFingerOneX) > fingerDeadzone)
+                    fingerOneX = Math.round(standardMult * gamepad.touchpad_finger_1_x);
+
+                if(Math.abs((standardMult * gamepad.touchpad_finger_1_y) - lastFingerOneY) > fingerDeadzone)
+                    fingerOneY = Math.round(standardMult * gamepad.touchpad_finger_1_y);
             }
 
             if (numFingers == 2) {
-                fingerTwoX = standardMult * gamepad.touchpad_finger_2_x;
-                fingerTwoY = standardMult * gamepad.touchpad_finger_2_y;
+                if(Math.abs((standardMult * gamepad.touchpad_finger_2_x) - lastFingerTwoX) > fingerDeadzone)
+                    fingerTwoX = Math.round(standardMult * gamepad.touchpad_finger_2_x);
+
+                if(Math.abs((standardMult * gamepad.touchpad_finger_2_y) - lastFingerOneY) > fingerDeadzone)
+                    fingerTwoY = Math.round(standardMult * gamepad.touchpad_finger_2_y);
             }
 
             // Updates the vectors of the fingers if applicable
@@ -117,11 +119,10 @@ public class Touchpad {
                     break;
             }
 
-            for (HashMap.Entry mapElement : touchZones.entrySet()) {
+            for (HashMap.Entry mapElement : implementables.entrySet()) {
 
-                TouchZone key = (TouchZone) mapElement.getKey();
-                key.setTouchButton(this);
-                touchZones.replace(key, key.isRange());
+                TouchObject key = (TouchObject) mapElement.getKey();
+                implementables.replace(key, key.update());
 
             }
 
@@ -144,33 +145,40 @@ public class Touchpad {
 
     }
 
-    public void handleSwipe(SwipeType s) {
-
-        // UP AND HOLD
-        // DOWN AND HOLD
-        // LEFT AND HOLD
-        // RIGHT AND HOLD
-        // HORIZONTAL AXIS
-        // VERTICAL AXIS
-
-    }
-
     // TODO: add in 2nd finger tracking
-    public boolean swipe (int finger, SwipeType s) {
+    /*public boolean swipe (int finger, SwipeType s) {
+
+        boolean angleHoriz = finger == 1 ? v1.getAngle() >= -15 || v1.getAngle() <= 15
+                : v2.getAngle() >= -15 || v2.getAngle() <= 15;
+        boolean angleVert = finger == 1 ? v1.getAngle() >= 75 || v1.getAngle() <= 105
+                : v2.getAngle() >= 75 || v2.getAngle() <= 105;
+        boolean hold = finger == 1 ? lastFingerOneX == fingerOneX && lastFingerOneY == fingerOneY
+                : lastFingerTwoX == fingerTwoX && lastFingerTwoY == fingerTwoY;
+        boolean left = finger == 1 ? fingerOneX < 0 : fingerTwoX < 0;
+        boolean leftSwipe = finger == 1 ? v1.getXVel() < 0 : v2.getXVel() < 0;
+        boolean right = finger == 1 ? fingerOneX >= 0 : fingerTwoX >= 0;
+        boolean rightSwipe = finger == 1 ? v1.getXVel() > 0 : v2.getXVel() > 0;
+        boolean up = finger == 1 ? fingerOneY >= 0 : fingerTwoY >= 0;
+        boolean upSwipe = finger == 1 ? v1.getYVel() > 0 : v2.getYVel() > 0;
+        boolean down = finger == 1 ? fingerOneY < 0 : fingerTwoY < 0;
+        boolean downSwipe = finger == 1 ? v1.getYVel() < 0 : v2.getYVel() < 0;
 
         switch(s) {
 
             case BOOLEAN:
-                return finger == 1 ? v1.getVelocity() != 0 : v2.getVelocity() != 0;
+                return leftSwipe || rightSwipe;
 
-            case HORIZ_SWIPE:
-                // this can't be a one liner. or can it? check on that angle condition when the finger stops moving.
-                return finger == 1 ? (v1.getVelocity() != 0 || numFingers >= 1) && (v1.getAngle() <= 15 || v1.getAngle() >= -15)
-                        : (v2.getVelocity() != 0 || numFingers == 2) && (v2.getAngle() <= 15 || v2.getAngle() >= -15);
+            case LEFT_SWIPE:
+                return ((leftSwipe && angleHoriz) || ((!leftSwipe || !rightSwipe) && hold && left));
 
-            case VERT_SWIPE:
-                return finger == 1 ? (v1.getVelocity() != 0 || numFingers >= 1) && (v1.getAngle() <= 75 || v1.getAngle() >= 105)
-                        : (v2.getVelocity() != 0 || numFingers == 2) && (v2.getAngle() <= 75 || v2.getAngle() >= 105);
+            case RIGHT_SWIPE:
+                return ((rightSwipe && angleHoriz) || ((!leftSwipe || !rightSwipe) && hold && right));
+
+            case UP_SWIPE:
+                return ((upSwipe && angleVert) || ((!upSwipe || !downSwipe) && hold && up));
+
+            case DOWN_SWIPE:
+                return ((downSwipe && angleVert) || ((!upSwipe || !downSwipe) && hold && down));
 
             default:
                 return false;
@@ -178,35 +186,62 @@ public class Touchpad {
 
     }
 
-    public double axis(int finger, SwipeType s) {
+    // TODO: implement TouchZone support
+    public boolean swipe (int finger, SwipeType s, String name) {
+        return false;
+    }
+
+    // TODO: implement finger two
+    public double axis(int finger, SwipeType s, Scale scale) {
 
         switch(s) {
 
             case HORIZ_AXIS:
 
-                return 0;
+                return scale.output(fingerOneX);
 
-            case VERT_SWIPE:
-                return 1;
+            case VERT_AXIS:
+                return scale.output(fingerOneY);
 
             default:
-                return 2;
+                return 0;
         }
 
-    }
+    }*/
+
+    /*public double axis(int finger, SwipeType s, String name) {
+
+        return 0;
+
+    }*/
 
     // Adds a TouchButton to the map of touchbuttons
 
-    public void addButton(TouchZone button) {
+    public void add(TouchObject implement) {
 
-        touchZones.put(button, false);
+        implementables.put(implement, null);
 
     }
 
     // Returns the HashMap of TouchButtons
 
-    public HashMap<TouchZone, Boolean> getTouchZones() {
-        return touchZones;
+    public HashMap<TouchObject, Object> getImplementables() {
+        return implementables;
+    }
+
+    public ArrayList<String> touchZonesToString() {
+
+        ArrayList<String> zones = new ArrayList<>();
+
+        for (HashMap.Entry mapElement : implementables.entrySet()) {
+
+            TouchZone key = (TouchZone) mapElement.getKey();
+            zones.add(key.getName() + ": " + mapElement.getValue());
+
+        }
+
+        return zones;
+
     }
 
     // rumble handling functions
@@ -306,7 +341,7 @@ public class Touchpad {
         private double x, y, lastX, lastY, time, lastTime;
 
         // deadzone var; if less than, v = 0;
-        private double deadzone = .001;
+        private double deadzone = .005;
 
         // Standard constructor when there's a starting point
 

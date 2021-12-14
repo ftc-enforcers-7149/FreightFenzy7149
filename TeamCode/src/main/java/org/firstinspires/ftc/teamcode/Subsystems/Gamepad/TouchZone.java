@@ -1,15 +1,13 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Gamepad;
 
 
-public class TouchZone {
+public class TouchZone extends TouchObject<Boolean> {
 
-    Touchpad touchpad;
-    String name;
-    double leftX, rightX, bottomY, topY;
+    private double leftX, rightX, bottomY, topY;
 
-    public TouchZone(String name, double leftX, double rightX, double bottomY, double topY) {
+    public TouchZone(String name, Touchpad touchpad, double leftX, double rightX, double bottomY, double topY) {
 
-        this.name = name;
+        super(name, touchpad);
         this.leftX = leftX;
         this.rightX = rightX;
         this.bottomY = bottomY;
@@ -17,11 +15,8 @@ public class TouchZone {
 
     }
 
-    public void setTouchButton(Touchpad touch) {
-        touchpad = touch;
-    }
 
-    public boolean isRange() {
+    public Boolean update() {
 
         switch(touchpad.getNumFingers()) {
             case 1:
@@ -44,10 +39,6 @@ public class TouchZone {
 
         return false;
 
-    }
-
-    public String getName() {
-        return name;
     }
 
 }
