@@ -1,17 +1,13 @@
 package org.firstinspires.ftc.teamcode.Testing;
 
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects.Slider;
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects.Swipe;
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects.TouchObject;
-import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects.Zone;
+import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects.Button;
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Touchpad;
 import org.firstinspires.ftc.teamcode.TeleOp.TeleOp_Base;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 
 @TeleOp(name="Gamepad Test")
 //@Disabled
@@ -19,7 +15,7 @@ public class GamepadTest extends TeleOp_Base {
 
     Touchpad touchpad;
 
-    Zone topRight, bottomLeft;
+    Button topRight, bottomLeft;
     Slider liftPos;
     Swipe rotateLeft, rotateRight;
 
@@ -28,8 +24,8 @@ public class GamepadTest extends TeleOp_Base {
         initializeVars();
 
         touchpad = new Touchpad(gamepad1);
-        topRight = new Zone(touchpad, false, false, 0, 100, 0, 100);
-        bottomLeft = new Zone(touchpad, false, true, -100, 0, -100, 0);
+        topRight = new Button(touchpad, false, false, 0, 100, 0, 100);
+        bottomLeft = new Button(touchpad, false, true, -100, 0, -100, 0);
         liftPos = new Slider(touchpad, 0d, 1, TouchObject.Type.Y_AXIS);
         rotateLeft = new Swipe(touchpad, false, 1, TouchObject.Type.LEFT_SWIPE);
         rotateRight = new Swipe(touchpad, false, 1, TouchObject.Type.RIGHT_SWIPE);

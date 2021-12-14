@@ -12,11 +12,11 @@ public class Snapback extends Slider {
         super(touchpad, defaultValue, finger, s);
     }
 
-    public Snapback(Touchpad touchpad, Double defaultValue, Zone z, int finger, double lowerOut, double upperOut, double exponent, Type s) {
+    public Snapback(Touchpad touchpad, Double defaultValue, Button z, int finger, double lowerOut, double upperOut, double exponent, Type s) {
         super(touchpad, defaultValue, z, finger, lowerOut, upperOut, exponent, s);
     }
 
-    public Snapback(Touchpad touchpad, Double defaultValue, int finger, Zone z, Type s) {
+    public Snapback(Touchpad touchpad, Double defaultValue, int finger, Button z, Type s) {
         super(touchpad, defaultValue, finger, z, s);
     }
 

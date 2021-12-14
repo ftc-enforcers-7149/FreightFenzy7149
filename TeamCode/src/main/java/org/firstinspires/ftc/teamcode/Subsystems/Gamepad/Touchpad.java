@@ -2,12 +2,7 @@ package org.firstinspires.ftc.teamcode.Subsystems.Gamepad;
 
 import com.qualcomm.robotcore.hardware.Gamepad;
 
-import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects.TouchObject;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Input;
-
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Touchpad implements Input {
 

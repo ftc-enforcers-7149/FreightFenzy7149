@@ -2,12 +2,12 @@ package org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Touchpad;
 
-public class Zone extends TouchObject<Boolean> {
+public class Button extends TouchObject<Boolean> {
 
     private final double leftX, rightX, bottomY, topY;
     private final boolean click;
 
-    public Zone(Touchpad touchpad, Boolean defaultValue, boolean click, double leftX, double rightX, double bottomY, double topY) {
+    public Button(Touchpad touchpad, Boolean defaultValue, boolean click, double leftX, double rightX, double bottomY, double topY) {
         super(touchpad, defaultValue);
         this.click = click;
         this.leftX = leftX;
