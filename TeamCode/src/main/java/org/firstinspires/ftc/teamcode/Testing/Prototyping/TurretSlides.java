@@ -29,9 +29,12 @@ public class TurretSlides extends TeleOp_Base {
     public void init() {
         initializeWithoutDrive();
 
-        intake = new Intake(hardwareMap, "intake", "intakeColor", "outtakeColor");
-        elevator = new Elevator(hardwareMap, "elevator", bReadEH);
-        turret = new Turret(hardwareMap, "turret", bReadEH);
+        intake = new Intake(hardwareMap, "intake");//, "intakeColor", "outtakeColor");
+        elevator = new Elevator(hardwareMap, "elevator", bReadCH);
+        turret = new Turret(hardwareMap, "turret", bReadCH);
+
+        elevator.setManualOverride(true);
+        turret.setManualOverride(true);
 
         addInput(intake);
         addInput(elevator);
