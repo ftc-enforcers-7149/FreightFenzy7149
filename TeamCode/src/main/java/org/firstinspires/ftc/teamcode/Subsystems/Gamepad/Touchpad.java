@@ -3,12 +3,13 @@ package org.firstinspires.ftc.teamcode.Subsystems.Gamepad;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects.TouchObject;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.Input;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Touchpad {
+public class Touchpad implements Input {
 
     //TODO: fix angle handling
 
@@ -17,7 +18,6 @@ public class Touchpad {
 
     // touchButton: touchpad "press"
     // fingerOn: true - finger on the touchpad
-
     private boolean touchButton, lastTouchButton, fingerOn, lastFingerOn;
 
     // number of fingers on the touchpad
@@ -27,44 +27,37 @@ public class Touchpad {
     private double fingerOneX, lastFingerOneX = 0, fingerOneY, lastFingerOneY = 0,
             fingerTwoX, lastFingerTwoX = 0, fingerTwoY, lastFingerTwoY = 0;
 
-    // time variables
-    double time, lastTime = 0;
+    private double lastTime = 0;
 
     // how often the touchpad "updates"
-    double pollingTime = 200;
+    private final double pollingTime = 200;
 
     // vector packets for storing velocity data
     private VectorPacket v1 = new VectorPacket(), v2 = new VectorPacket();
 
     // standard unit multiplier
-    private double standardMult = 100;
-
-    // storage for touchButtons (zoned "buttons" on the gamepad)
-    List<TouchObject> touchObjects = new ArrayList<>();
+    private final double standardMult = 100;
 
     // finger deadzone
-    double fingerDeadzone = 2;
-
+    private final double fingerDeadzone = 2;
 
     // Constructor. pass in the tele-op gamepad
-
     public Touchpad(Gamepad gamepad) {
-
         this.gamepad = gamepad;
-
     }
 
     // Update method
-
-    public void update() {
+    @Override
+    public void updateInput() {
 
         // Updates time
 
-        time = System.currentTimeMillis();
+        // time variables
+        double time = System.currentTimeMillis();
 
         // If we've hit the poll time
 
-        if(time - lastTime >= 200) {
+        if(time - lastTime >= pollingTime) {
 
             // Checks if touchpad press
 
@@ -140,60 +133,7 @@ public class Touchpad {
 
     }
 
-    // Adds a TouchButton to the map of touchbuttons
-
-    // TODO: add overlap check and create custom exception for overlaps
-    // TODO: add duplicate name exception
-    public void add(TouchObject implement) throws DuplicateNameException {
-
-        for(int i = 0; i < touchObjects.size(); i++) {
-
-            if(touchObjects.get(i).getName().equals(implement.getName())) {
-                throw new DuplicateNameException("Use different object name!");
-            }
-
-        }
-        touchObjects.add(implement);
-
-    }
-
-    public void add(List<TouchObject> implement) throws DuplicateNameException {
-
-        for(int i = 0; i < implement.size(); i++) {
-
-            for(int j = 0; j < touchObjects.size(); j++) {
-
-                if(touchObjects.get(j).getName().equals(implement.get(i).getName()))
-                    throw new DuplicateNameException("Use different object name!");
-
-            }
-
-        }
-
-        touchObjects.addAll(implement);
-
-    }
-
-    public <T extends TouchObject> T getObject(String name, Class<T> type){
-
-        for(int i = 0; i < touchObjects.size(); i++) {
-
-            if(touchObjects.get(i).getName().equals(name)) return type.cast(touchObjects.get(i));
-
-        }
-
-        return null;
-
-    }
-
-    // Returns the HashMap of TouchButtons
-
-    public List<TouchObject> getTouchObjects() {
-        return touchObjects;
-    }
-
     // rumble handling functions
-
     public void rumble (Gamepad.RumbleEffect rumbleEffect) { gamepad.runRumbleEffect(rumbleEffect); }
     public void rumble (int duration) {
         gamepad.rumble(duration);
@@ -210,26 +150,17 @@ public class Touchpad {
     }
 
     // standard getter/setters
-    public boolean isTouchButton() {
-        return touchButton;
-    }
-    public double getFingerOneX() {
-        return fingerOneX;
-    }
-    public double getLastFingerOneX() {
-        return lastFingerOneX;
-    }
-    public double getFingerOneY() {
-        return fingerOneY;
-    }
-    public double getLastFingerOneY() {
-        return lastFingerOneY;
-    }
+    public boolean isTouchButton() { return touchButton; }
+    public double getFingerOneX() { return fingerOneX; }
+    public double getLastFingerOneX() { return lastFingerOneX; }
+    public double getFingerOneY() { return fingerOneY; }
+    public double getLastFingerOneY() { return lastFingerOneY; }
     public double getFingerTwoX() { return fingerTwoX; }
     public double getLastFingerTwoX() { return lastFingerTwoX; }
     public double getFingerTwoY() { return fingerTwoY; }
     public double getLastFingerTwoY() { return lastFingerTwoY; }
     public boolean getFingerOn() { return fingerOn; }
+    public int getNumFingers() { return numFingers; }
 
     // Returns the finger vector packets
 
@@ -314,25 +245,4 @@ public class Touchpad {
         }
 
     }
-
-    class ObjectOverlapException extends Exception {
-
-    }
-
-    public class DuplicateNameException extends Exception {
-
-        public DuplicateNameException(String str) {
-
-            super("DuplicateNameException: " + str);
-
-        }
-
-        public DuplicateNameException(String str, Throwable t) {
-
-            super(str, t);
-
-        }
-
-    }
-
 }

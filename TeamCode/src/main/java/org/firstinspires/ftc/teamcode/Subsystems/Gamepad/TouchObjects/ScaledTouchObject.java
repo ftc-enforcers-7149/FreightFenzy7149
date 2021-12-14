@@ -2,24 +2,19 @@ package org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Touchpad;
 
-public abstract class ScaledTouchObject<T> extends TouchObject {
+public abstract class ScaledTouchObject<T> extends TouchObject<T> {
 
-    private double lowerOut, upperOut;
-    private double lowerIn, upperIn;
-    private double exponent;
+    private final double lowerOut, upperOut, exponent, lowerIn, upperIn;
 
-    public ScaledTouchObject(String name, Touchpad touchpad, double exponent, double lowerOut, double upperOut) {
-        super(name, touchpad);
+    public ScaledTouchObject(Touchpad touchpad, T defaultValue, double lowerIn, double upperIn, double lowerOut, double upperOut, double exponent) {
+        super(touchpad, defaultValue);
+        this.lowerIn = lowerIn; this.upperIn = upperIn;
         this.lowerOut = lowerOut; this.upperOut = upperOut;
         this.exponent = exponent;
     }
 
-    public ScaledTouchObject(String name, Touchpad touchpad) {
-
-        super(name, touchpad);
-        this.lowerOut = 0; this.upperOut = 1;
-        this.exponent = 1;
-
+    public ScaledTouchObject(Touchpad touchpad, T defaultValue, double lowerIn, double upperIn) {
+        this(touchpad, defaultValue, lowerIn, upperIn, 0, 1, 1);
     }
 
     public double scale(double input) {
@@ -29,11 +24,4 @@ public abstract class ScaledTouchObject<T> extends TouchObject {
 
         return scale;
     }
-
-    public abstract void setLowerIn();
-    public abstract void setUpperIn();
-
-    public void setLowerIn(double lowerIn) { this.lowerIn = lowerIn; }
-    public void setUpperIn(double upperIn) { this.upperIn = upperIn; }
-
 }

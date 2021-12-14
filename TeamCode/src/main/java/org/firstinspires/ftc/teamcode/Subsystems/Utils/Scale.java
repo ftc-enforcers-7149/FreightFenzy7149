@@ -14,7 +14,6 @@ public class Scale {
     }
 
     public double output(double input) {
-
         double curve = Math.signum(input) * Math.abs(Math.pow(input, exponent));
         double scaleFactor = ((upperOut - lowerOut) / (upperIn - lowerIn));
         double scale = scaleFactor * curve + (upperOut - scaleFactor*upperIn);

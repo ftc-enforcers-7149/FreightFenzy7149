@@ -1,17 +1,14 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Touchpad;
-import org.firstinspires.ftc.teamcode.Subsystems.Utils.Scale;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.Input;
 
-import java.lang.reflect.Type;
+public abstract class TouchObject<T> implements Input {
 
-public abstract class TouchObject<T> {
-
-    Touchpad touchpad;
-    String name;
+    protected Touchpad touchpad;
+    protected T value;
 
     public enum Type {
-
         BOOLEAN,
         LEFT_SWIPE,
         RIGHT_SWIPE,
@@ -19,22 +16,16 @@ public abstract class TouchObject<T> {
         DOWN_SWIPE,
         X_AXIS,
         Y_AXIS
-
     }
 
-    public TouchObject(String name, Touchpad touchpad) {
-
-        this.name = name;
+    public TouchObject(Touchpad touchpad, T defaultValue) {
         this.touchpad = touchpad;
-
+        value = defaultValue;
     }
 
-    public String getName() {
-
-        return name;
-
+    @Override
+    public abstract void updateInput();
+    public final T get() {
+        return value;
     }
-
-    public abstract T get();
-
 }

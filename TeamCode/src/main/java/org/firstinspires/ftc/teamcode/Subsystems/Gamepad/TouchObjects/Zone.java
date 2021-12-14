@@ -1,37 +1,34 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects;
 
-
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Touchpad;
 
 public class Zone extends TouchObject<Boolean> {
 
-    private double leftX, rightX, bottomY, topY;
-    private boolean click;
+    private final double leftX, rightX, bottomY, topY;
+    private final boolean click;
 
-    public Zone(String name, Touchpad touchpad, boolean click, double leftX, double rightX, double bottomY, double topY) {
-
-        super(name, touchpad);
+    public Zone(Touchpad touchpad, Boolean defaultValue, boolean click, double leftX, double rightX, double bottomY, double topY) {
+        super(touchpad, defaultValue);
         this.click = click;
         this.leftX = leftX;
         this.rightX = rightX;
         this.bottomY = bottomY;
         this.topY = topY;
-
     }
 
-
-    public Boolean get() {
-
+    @Override
+    public void updateInput() {
         if(click) {
             switch (touchpad.getNumFingers()) {
                 case 1:
                     if ((touchpad.getFingerOneX() <= rightX
                             && touchpad.getFingerOneX() >= leftX)
                             && (touchpad.getFingerOneY() <= topY && touchpad.getFingerOneY() >= bottomY)
-                            && touchpad.isTouchButton())
-                        return true;
+                            && touchpad.isTouchButton()) {
+                        value = true;
+                        return;
+                    }
                     break;
-
                 case 2:
                     if (((touchpad.getFingerOneX() <= rightX && touchpad.getFingerOneX() >= leftX)
                             && (touchpad.getFingerOneY() <= topY && touchpad.getFingerOneY() >= bottomY)
@@ -39,36 +36,39 @@ public class Zone extends TouchObject<Boolean> {
                             ||
                             ((touchpad.getFingerTwoX() <= rightX && touchpad.getFingerTwoX() >= leftX)
                                     && (touchpad.getFingerTwoY() <= topY && touchpad.getFingerTwoY() >= bottomY)
-                            && touchpad.isTouchButton()))
-                        return true;
+                            && touchpad.isTouchButton())) {
+                        value = true;
+                        return;
+                    }
                     break;
                 default:
-                    return false;
+                    value = false;
             }
         }
         else {
             switch (touchpad.getNumFingers()) {
                 case 1:
                     if ((touchpad.getFingerOneX() <= rightX && touchpad.getFingerOneX() >= leftX)
-                            && (touchpad.getFingerOneY() <= topY && touchpad.getFingerOneY() >= bottomY))
-                        return true;
+                            && (touchpad.getFingerOneY() <= topY && touchpad.getFingerOneY() >= bottomY)) {
+                        value = true;
+                        return;
+                    }
                     break;
-
                 case 2:
                     if (((touchpad.getFingerOneX() <= rightX && touchpad.getFingerOneX() >= leftX)
                             && (touchpad.getFingerOneY() <= topY && touchpad.getFingerOneY() >= bottomY))
                             ||
                             ((touchpad.getFingerTwoX() <= rightX && touchpad.getFingerTwoX() >= leftX)
-                                    && (touchpad.getFingerTwoY() <= topY && touchpad.getFingerTwoY() >= bottomY)))
-                        return true;
+                                    && (touchpad.getFingerTwoY() <= topY && touchpad.getFingerTwoY() >= bottomY))) {
+                        value = true;
+                        return;
+                    }
                     break;
                 default:
-                    return false;
+                    value = false;
             }
         }
 
-        return false;
-
+        value = false;
     }
-
 }

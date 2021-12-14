@@ -4,17 +4,17 @@ import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Touchpad;
 
 public class Swipe extends TouchObject<Boolean> {
 
-    private int finger;
-    private Type s;
+    private final int finger;
+    private final Type s;
 
-    public Swipe(String name, Touchpad touchpad, int finger, Type s) {
-        super(name, touchpad);
+    public Swipe(Touchpad touchpad, Boolean defaultValue, int finger, Type s) {
+        super(touchpad, defaultValue);
         this.finger = finger;
         this.s = s;
     }
 
     @Override
-    public Boolean get() {
+    public void updateInput() {
         boolean angleHoriz = finger == 1 ? touchpad.getV1().getAngle() >= -15 || touchpad.getV1().getAngle() <= 15
                 : touchpad.getV2().getAngle() >= -15 || touchpad.getV2().getAngle() <= 15;
         boolean angleVert = finger == 1 ? touchpad.getV1().getAngle() >= 75 || touchpad.getV1().getAngle() <= 105
@@ -30,27 +30,26 @@ public class Swipe extends TouchObject<Boolean> {
         boolean down = finger == 1 ? touchpad.getFingerOneY() < 0 : touchpad.getFingerTwoY() < 0;
         boolean downSwipe = finger == 1 ? touchpad.getV1().getYVel() < 0 : touchpad.getV2().getYVel() < 0;
 
-        if(!touchpad.getFingerOn()) return false;
+        if(!touchpad.getFingerOn()) value = false;
 
         switch(s) {
-
             case BOOLEAN:
-                return leftSwipe || rightSwipe;
-
+                value = leftSwipe || rightSwipe;
+                return;
             case LEFT_SWIPE:
-                return ((leftSwipe && angleHoriz) || ((!leftSwipe || !rightSwipe) && hold && left));
-
+                value = (leftSwipe && angleHoriz) || ((!leftSwipe || !rightSwipe) && hold && left);
+                return;
             case RIGHT_SWIPE:
-                return ((rightSwipe && angleHoriz) || ((!leftSwipe || !rightSwipe) && hold && right));
-
+                value = (rightSwipe && angleHoriz) || ((!leftSwipe || !rightSwipe) && hold && right);
+                return;
             case UP_SWIPE:
-                return ((upSwipe && angleVert) || ((!upSwipe || !downSwipe) && hold && up));
-
+                value = (upSwipe && angleVert) || ((!upSwipe || !downSwipe) && hold && up);
+                return;
             case DOWN_SWIPE:
-                return ((downSwipe && angleVert) || ((!upSwipe || !downSwipe) && hold && down));
-
+                value = (downSwipe && angleVert) || ((!upSwipe || !downSwipe) && hold && down);
+                return;
             default:
-                return false;
+                value = false;
         }
     }
 }

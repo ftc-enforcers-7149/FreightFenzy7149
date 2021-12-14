@@ -8,13 +8,14 @@ import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects.Swipe;
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects.TouchObject;
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects.Zone;
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Touchpad;
+import org.firstinspires.ftc.teamcode.TeleOp.TeleOp_Base;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
 @TeleOp(name="Gamepad Test")
 //@Disabled
-public class GamepadTest extends OpMode {
+public class GamepadTest extends TeleOp_Base {
 
     Touchpad touchpad;
 
@@ -23,24 +24,26 @@ public class GamepadTest extends OpMode {
     Swipe rotateLeft, rotateRight;
 
     public void init() {
+        initializeSources();
+        initializeVars();
 
         touchpad = new Touchpad(gamepad1);
-        topRight = new Zone("topRight", touchpad, false, 0, 100, 0, 100);
-        bottomLeft = new Zone("bottomLeft", touchpad, true, -100, 0, -100, 0);
-        liftPos = new Slider("liftPos", touchpad, 1, TouchObject.Type.Y_AXIS);
-        rotateLeft = new Swipe("rotateLeft", touchpad, 1, TouchObject.Type.LEFT_SWIPE);
-        rotateRight = new Swipe("rotateRight", touchpad, 1, TouchObject.Type.RIGHT_SWIPE);
+        topRight = new Zone(touchpad, false, false, 0, 100, 0, 100);
+        bottomLeft = new Zone(touchpad, false, true, -100, 0, -100, 0);
+        liftPos = new Slider(touchpad, 0d, 1, TouchObject.Type.Y_AXIS);
+        rotateLeft = new Swipe(touchpad, false, 1, TouchObject.Type.LEFT_SWIPE);
+        rotateRight = new Swipe(touchpad, false, 1, TouchObject.Type.RIGHT_SWIPE);
 
-        try {
-            touchpad.add(new ArrayList<>(Arrays.asList(topRight, bottomLeft, liftPos, rotateLeft, rotateRight)));
-        }
-        catch(Touchpad.DuplicateNameException ignored){}
-
+        addInput(touchpad);
+        addInput(topRight);
+        addInput(bottomLeft);
+        addInput(liftPos);
+        addInput(rotateLeft);
+        addInput(rotateRight);
     }
 
     public void loop() {
-
-        touchpad.update();
+        updateInputs();
 
         telemetry.addData("Number of fingers: ", touchpad.getNumFingers());
 
@@ -48,8 +51,6 @@ public class GamepadTest extends OpMode {
             telemetry.addData("\nFinger 1 X?: ", touchpad.getFingerOneX());
             telemetry.addData("Finger 1 Y?: ", touchpad.getFingerOneY());
         }
-
-        telemetry.addLine(touchpad.getTouchObjects().toString());
 
         if(touchpad.getNumFingers() == 2) {
             telemetry.addData("\nFinger 2 X?: ", touchpad.getFingerTwoX());
@@ -60,11 +61,18 @@ public class GamepadTest extends OpMode {
         telemetry.addData("rotateRight: ", rotateRight.get());
         telemetry.addData("litPos: ", liftPos.get());
 
-        if(touchpad.getNumFingers() >= 1) telemetry.addData("Swipe?: ", touchpad.getV1().getVelocity()); telemetry.addData("Angle?: ", touchpad.getV1().getAngle());
+        if(touchpad.getNumFingers() >= 1) telemetry.addData("Swipe?: ", touchpad.getV1().getVelocity());
+        telemetry.addData("Angle?: ", touchpad.getV1().getAngle());
         if(touchpad.getNumFingers() == 2) telemetry.addData("Swipe 2?: ", touchpad.getV2().getVelocity());
+    }
 
-        //touchpad.rumbleBlips(25);
+    @Override
+    protected void getInput() {
 
     }
 
+    @Override
+    protected void updateStateMachine() {
+
+    }
 }
