@@ -20,7 +20,7 @@ public class Zone extends TouchObject<Boolean> {
     }
 
 
-    public Boolean update() {
+    public Boolean get() {
 
         if(click) {
             switch (touchpad.getNumFingers()) {

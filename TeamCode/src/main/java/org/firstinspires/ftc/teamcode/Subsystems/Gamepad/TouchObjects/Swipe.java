@@ -14,7 +14,7 @@ public class Swipe extends TouchObject<Boolean> {
     }
 
     @Override
-    public Boolean update() {
+    public Boolean get() {
         boolean angleHoriz = finger == 1 ? touchpad.getV1().getAngle() >= -15 || touchpad.getV1().getAngle() <= 15
                 : touchpad.getV2().getAngle() >= -15 || touchpad.getV2().getAngle() <= 15;
         boolean angleVert = finger == 1 ? touchpad.getV1().getAngle() >= 75 || touchpad.getV1().getAngle() <= 105

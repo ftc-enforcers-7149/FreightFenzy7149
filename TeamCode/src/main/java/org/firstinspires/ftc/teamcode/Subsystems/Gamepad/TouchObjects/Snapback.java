@@ -21,7 +21,7 @@ public class Snapback extends Slider {
     }
 
     @Override
-    public Double update() {
+    public Double get() {
 
         if(finger == 1 ? touchpad.getNumFingers() >= 1 : touchpad.getNumFingers() == 2) {
 
@@ -30,10 +30,10 @@ public class Snapback extends Slider {
 
                     case X_AXIS:
 
-                        if(z.update()) return finger == 1 ? scale.output(touchpad.getFingerOneX()) : scale.output(touchpad.getFingerTwoX());
+                        if(z.get()) return finger == 1 ? scale.output(touchpad.getFingerOneX()) : scale.output(touchpad.getFingerTwoX());
 
                     case Y_AXIS:
-                        if(z.update()) return finger == 1 ? scale.output(touchpad.getFingerOneY()) : scale.output(touchpad.getFingerOneY());
+                        if(z.get()) return finger == 1 ? scale.output(touchpad.getFingerOneY()) : scale.output(touchpad.getFingerOneY());
 
                     default:
                         return 0d;

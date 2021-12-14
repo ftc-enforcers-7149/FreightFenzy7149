@@ -35,6 +35,6 @@ public abstract class TouchObject<T> {
 
     }
 
-    public abstract T update();
+    public abstract T get();
 
 }

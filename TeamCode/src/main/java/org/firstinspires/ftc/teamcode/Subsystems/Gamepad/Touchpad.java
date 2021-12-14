@@ -148,11 +148,29 @@ public class Touchpad {
 
         for(int i = 0; i < touchObjects.size(); i++) {
 
-            if(touchObjects.get(i).getName().equals(implement.getName()))
+            if(touchObjects.get(i).getName().equals(implement.getName())) {
                 throw new DuplicateNameException("Use different object name!");
+            }
 
         }
         touchObjects.add(implement);
+
+    }
+
+    public void add(List<TouchObject> implement) throws DuplicateNameException {
+
+        for(int i = 0; i < implement.size(); i++) {
+
+            for(int j = 0; j < touchObjects.size(); j++) {
+
+                if(touchObjects.get(j).getName().equals(implement.get(i).getName()))
+                    throw new DuplicateNameException("Use different object name!");
+
+            }
+
+        }
+
+        touchObjects.addAll(implement);
 
     }
 
