@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Touchpad;
 
-public abstract class ScaledTouchObject<Object> extends TouchObject<Object> {
+public abstract class ScaledTouchObject<T> extends TouchObject {
 
     private double lowerOut, upperOut;
     private double lowerIn, upperIn;
