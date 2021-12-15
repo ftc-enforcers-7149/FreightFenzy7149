@@ -19,8 +19,8 @@ public class Slider extends ScaledTouchObject<Double> {
     public Slider(Touchpad touchpad, Double defaultValue, SliderType sliderType, Bounds bounds,
                   double lowerOut, double upperOut) {
         super(touchpad, defaultValue, new Scale(
-                sliderType == SliderType.X_AXIS ? bounds.getLeftX() : bounds.getBottomY(),
-                sliderType == SliderType.X_AXIS ? bounds.getRightX() : bounds.getTopY(),
+                sliderType == SliderType.X_AXIS ? bounds.getMinX() : bounds.getMinY(),
+                sliderType == SliderType.X_AXIS ? bounds.getMaxX() : bounds.getMaxY(),
                 lowerOut, upperOut
         ));
         this.sliderType = sliderType;
@@ -30,8 +30,8 @@ public class Slider extends ScaledTouchObject<Double> {
     public Slider(Touchpad touchpad, SliderType sliderType, Bounds bounds,
                   double lowerOut, double upperOut) {
         super(touchpad, 0d, new Scale(
-                sliderType == SliderType.X_AXIS ? bounds.getLeftX() : bounds.getBottomY(),
-                sliderType == SliderType.X_AXIS ? bounds.getRightX() : bounds.getTopY(),
+                sliderType == SliderType.X_AXIS ? bounds.getMinX() : bounds.getMinY(),
+                sliderType == SliderType.X_AXIS ? bounds.getMaxX() : bounds.getMaxY(),
                 lowerOut, upperOut
         ));
         this.sliderType = sliderType;
