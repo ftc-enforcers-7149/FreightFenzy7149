@@ -7,13 +7,9 @@ import java.util.ArrayList;
 
 public class PolygonBounds extends Bounds {
 
-    /*public static final PolygonBounds TOP_LEFT = new PolygonBounds(-100, 0, 0, 100);
-    public static final PolygonBounds BOTTOM_LEFT = new PolygonBounds(-100, 0, -100, 0);
-    public static final PolygonBounds TOP_RIGHT = new PolygonBounds(0, 100, 0, 100);
-    public static final PolygonBounds BOTTOM_RIGHT = new PolygonBounds(0, 100, -100, 0);
-    public static final PolygonBounds CENTER = new PolygonBounds(-50, 50, -50, 50);*/
-
     public PolygonBounds(ArrayList<Point> pointList) {
+
+        super();
 
         points = pointList;
         minX = points.get(0).getX();
@@ -32,7 +28,6 @@ public class PolygonBounds extends Bounds {
             if(tempY < maxY) minY = tempY;
 
         }
-
 
     }
 

@@ -30,6 +30,10 @@ public class Bounds {
         this.maxY = Math.max(p1.getY(), p2.getY());
     }
 
+    public Bounds() {
+        this(-100, 0, -100, 0);
+    }
+
     public boolean contains(Point p) {
 
         if ( p.getX() < minX || p.getX() > maxX || p.getY() < minY || p.getY() > maxY )
