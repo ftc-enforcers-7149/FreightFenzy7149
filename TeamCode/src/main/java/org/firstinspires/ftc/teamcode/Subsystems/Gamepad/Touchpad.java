@@ -14,10 +14,11 @@ public class Touchpad implements Input {
     private final Gamepad gamepad;
 
     // touchButton: touchpad "press"
-    private boolean touchButton, lastTouchButton;
+    private boolean buttonPressed, lastButtonPressed, buttonClicked, buttonReleased;
 
     // number of fingers on the touchpad
-    private int numFingers;
+    private int numFingers, lastNumFingers;
+    private boolean touchClicked, touchReleased;
 
     // positional variables
     private final Point fingerOne, lastFingerOne, fingerTwo, lastFingerTwo;
@@ -25,16 +26,13 @@ public class Touchpad implements Input {
     private long lastTime = 0;
 
     // how often the touchpad "updates"
-    private final double pollingTime = 200;
+    private final double POLL_TIME = 200;
 
     // vector packets for storing velocity data
     private final Touch v1, v2;
 
     // standard unit multiplier
-    private final double standardMult = 100;
-
-    // finger deadzone
-    private final double fingerDeadzone = 2;
+    private final double COORD_MULT = 100;
 
     // Constructor. pass in the tele-op gamepad
     public Touchpad(Gamepad gamepad) {
@@ -57,34 +55,37 @@ public class Touchpad implements Input {
         long time = System.currentTimeMillis();
 
         // Checks if touchpad press
-        touchButton = gamepad.touchpad;
+        buttonPressed = gamepad.touchpad;
+        buttonClicked = buttonPressed && !lastButtonPressed;
+        buttonReleased = !buttonPressed && lastButtonPressed;
 
         // Checks how many fingers are on the touchpad
-
+        // Checks the position of fingers and updates
         numFingers = 0;
         if (gamepad.touchpad_finger_1) {
             numFingers++;
 
-            double f1X = Math.round(10 * standardMult * gamepad.touchpad_finger_1_x) / 10.0;
-            double f1Y = Math.round(10 * standardMult * gamepad.touchpad_finger_1_y) / 10.0;
+            double f1X = Math.round(10 * COORD_MULT * gamepad.touchpad_finger_1_x) / 10.0;
+            double f1Y = Math.round(10 * COORD_MULT * gamepad.touchpad_finger_1_y) / 10.0;
 
             fingerOne.setPoint(f1X, f1Y);
         }
         if (gamepad.touchpad_finger_2) {
             numFingers++;
 
-            double f2X = Math.round(10 * standardMult * gamepad.touchpad_finger_2_x) / 10.0;
-            double f2Y = Math.round(10 * standardMult * gamepad.touchpad_finger_2_y) / 10.0;
+            double f2X = Math.round(10 * COORD_MULT * gamepad.touchpad_finger_2_x) / 10.0;
+            double f2Y = Math.round(10 * COORD_MULT * gamepad.touchpad_finger_2_y) / 10.0;
 
             fingerTwo.setPoint(f2X, f2Y);
         }
         else
             numFingers = 0;
 
-        // Checks the position of fingers and updates
+        touchClicked = numFingers > lastNumFingers;
+        touchReleased = numFingers < lastNumFingers;
 
         // If we've hit the poll time
-        if(time - lastTime >= pollingTime) {
+        if(time - lastTime >= POLL_TIME) {
             // Updates the vectors of the fingers if applicable
 
             switch(numFingers) {
@@ -114,12 +115,13 @@ public class Touchpad implements Input {
             lastFingerTwo.setPoint(fingerTwo);
         }
 
-        lastTouchButton = touchButton;
+        lastButtonPressed = buttonPressed;
+        lastNumFingers = numFingers;
     }
 
     // rumble handling functions
-    public void rumble (Gamepad.RumbleEffect rumbleEffect) { gamepad.runRumbleEffect(rumbleEffect); }
-    public void rumble (int duration) {
+    public void rumble(Gamepad.RumbleEffect rumbleEffect) { gamepad.runRumbleEffect(rumbleEffect); }
+    public void rumble(int duration) {
         gamepad.rumble(duration);
     }
     public void rumble(double rumble1, double rumble2, int duration) { gamepad.rumble(rumble1, rumble2, duration); }
@@ -134,8 +136,14 @@ public class Touchpad implements Input {
     }
 
     // standard getter/setters
-    public boolean isTouchButton() { return touchButton; }
+    public boolean isButtonPressed() { return buttonPressed; }
+    public boolean isButtonClicked() { return buttonClicked; }
+    public boolean isButtonReleased() { return buttonReleased; }
     public int getNumFingers() { return numFingers; }
+    public boolean isTouchPressed() { return numFingers >= 1; }
+    public boolean isTouchClicked() { return touchClicked; }
+    public boolean isTouchReleased() { return touchReleased; }
+
     public Point getFingerOne() { return fingerOne; }
     public Point getLastFingerOne() { return lastFingerOne; }
     public Point getFingerTwo() { return fingerTwo; }

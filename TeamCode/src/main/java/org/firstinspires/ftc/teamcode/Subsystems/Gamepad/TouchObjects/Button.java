@@ -25,14 +25,14 @@ public class Button extends TouchObject<Boolean> {
         switch (touchpad.getNumFingers()) {
             case 1:
                 if (bounds.contains(touchpad.getFingerOne())
-                        && (touchpad.isTouchButton() || !requireClick)) {
+                        && (touchpad.isButtonPressed() || !requireClick)) {
                     value = true;
                     return;
                 }
                 break;
             case 2:
                 if ((bounds.contains(touchpad.getFingerOne()) || bounds.contains(touchpad.getFingerTwo()))
-                        && (touchpad.isTouchButton() || !requireClick)) {
+                        && (touchpad.isButtonPressed() || !requireClick)) {
                     value = true;
                     return;
                 }
