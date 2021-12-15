@@ -1,9 +1,8 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Touchpad;
-import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils.Bounds;
+import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils.Bounds.Bounds;
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils.Point;
-import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils.Scale;
 
 public class Snapback extends Slider {
 

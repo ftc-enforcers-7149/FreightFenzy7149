@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.Subsystems.Gamepad;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils.Point;
-import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils.VectorPacket;
+import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils.Touch;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Input;
 
 public class Touchpad implements Input {
@@ -28,7 +28,7 @@ public class Touchpad implements Input {
     private final double pollingTime = 200;
 
     // vector packets for storing velocity data
-    private final VectorPacket v1, v2;
+    private final Touch v1, v2;
 
     // standard unit multiplier
     private final double standardMult = 100;
@@ -43,8 +43,8 @@ public class Touchpad implements Input {
         fingerOne = new Point(); lastFingerOne = new Point();
         fingerTwo = new Point(); lastFingerTwo = new Point();
 
-        v1 = new VectorPacket();
-        v2 = new VectorPacket();
+        v1 = new Touch();
+        v2 = new Touch();
     }
 
     // Update method
@@ -89,17 +89,17 @@ public class Touchpad implements Input {
 
             switch(numFingers) {
                 case 1:
-                    v1.setVectorPacket(new VectorPacket(fingerOne, lastFingerOne, time / 1000d, lastTime / 1000d));
-                    v2.setVectorPacket(new VectorPacket());
+                    v1.setVectorPacket(new Touch(fingerOne, lastFingerOne, time / 1000d, lastTime / 1000d));
+                    v2.setVectorPacket(new Touch());
                     break;
                 case 2:
-                    v1.setVectorPacket(new VectorPacket(fingerOne, lastFingerOne, time / 1000d, lastTime / 1000d));
-                    v2.setVectorPacket(new VectorPacket(fingerTwo, lastFingerTwo, time / 1000d, lastTime / 1000d));
+                    v1.setVectorPacket(new Touch(fingerOne, lastFingerOne, time / 1000d, lastTime / 1000d));
+                    v2.setVectorPacket(new Touch(fingerTwo, lastFingerTwo, time / 1000d, lastTime / 1000d));
                     break;
 
                 default:
-                    v1.setVectorPacket(new VectorPacket());
-                    v2.setVectorPacket(new VectorPacket());
+                    v1.setVectorPacket(new Touch());
+                    v2.setVectorPacket(new Touch());
                     break;
             }
 
@@ -143,10 +143,10 @@ public class Touchpad implements Input {
     public boolean getFingerOn() { return numFingers >= 1; }
 
     // Returns the finger vector packets
-    public VectorPacket getV1() {
+    public Touch getV1() {
         return v1;
     }
-    public VectorPacket getV2() {
+    public Touch getV2() {
         return v2;
     }
 }

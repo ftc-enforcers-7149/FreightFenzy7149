@@ -5,10 +5,9 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects.Slider;
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects.Swipe;
-import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects.TouchObject;
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects.Button;
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Touchpad;
-import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils.Bounds;
+import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils.Bounds.Bounds;
 import org.firstinspires.ftc.teamcode.TeleOp.TeleOp_Base;
 
 @TeleOp(name="Gamepad Test")

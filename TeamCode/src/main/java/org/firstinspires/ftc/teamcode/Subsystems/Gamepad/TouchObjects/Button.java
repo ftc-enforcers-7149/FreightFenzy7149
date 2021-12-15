@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Touchpad;
-import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils.Bounds;
+import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils.Bounds.Bounds;
 
 public class Button extends TouchObject<Boolean> {
 

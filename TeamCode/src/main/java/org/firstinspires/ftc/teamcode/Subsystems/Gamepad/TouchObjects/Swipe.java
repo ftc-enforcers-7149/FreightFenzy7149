@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Touchpad;
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils.Point;
-import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils.VectorPacket;
+import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils.Touch;
 
 public class Swipe extends TouchObject<Boolean> {
 
@@ -25,7 +25,7 @@ public class Swipe extends TouchObject<Boolean> {
     @Override
     public void updateInput() {
         Point finger, lastFinger;
-        VectorPacket vel;
+        Touch vel;
         if (touchpad.getNumFingers() == 2) {
             finger = touchpad.getFingerTwo();
             lastFinger = touchpad.getLastFingerTwo();

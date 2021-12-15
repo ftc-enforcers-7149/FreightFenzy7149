@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Touchpad;
-import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils.Bounds;
+import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils.Bounds.Bounds;
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils.Point;
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils.Scale;
 
@@ -27,9 +27,26 @@ public class Slider extends ScaledTouchObject<Double> {
         this.bounds = bounds;
     }
 
+    public Slider(Touchpad touchpad, SliderType sliderType, Bounds bounds,
+                  double lowerOut, double upperOut) {
+        super(touchpad, 0d, new Scale(
+                sliderType == SliderType.X_AXIS ? bounds.getLeftX() : bounds.getBottomY(),
+                sliderType == SliderType.X_AXIS ? bounds.getRightX() : bounds.getTopY(),
+                lowerOut, upperOut
+        ));
+        this.sliderType = sliderType;
+        this.bounds = bounds;
+    }
+
     public Slider(Touchpad touchpad, Double defaultValue, SliderType sliderType,
                   double lowerOut, double upperOut) {
         this(touchpad, defaultValue, sliderType,
+                new Bounds(-100, 100, -100, 100), lowerOut, upperOut);
+    }
+
+    public Slider(Touchpad touchpad, SliderType sliderType,
+                  double lowerOut, double upperOut) {
+        this(touchpad, 0d, sliderType,
                 new Bounds(-100, 100, -100, 100), lowerOut, upperOut);
     }
 

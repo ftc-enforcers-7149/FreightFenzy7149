@@ -1,10 +1,9 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Touchpad;
 
 // Vector packet handling class. Sure it may be redundant, but it's fun!
-public class VectorPacket {
+public class Touch {
 
     // Important storage variables
     private final Point pos, lastPos;
@@ -15,17 +14,17 @@ public class VectorPacket {
 
     // Standard constructor when there's a starting point
 
-    public VectorPacket(Point pos, Point lastPos, double time, double lastTime) {
+    public Touch(Point pos, Point lastPos, double time, double lastTime) {
         this.pos = pos; this.lastPos = lastPos; this.time = time; this.lastTime = lastTime;
     }
 
     // Zeroed constructor
 
-    public VectorPacket() {
+    public Touch() {
         pos = new Point(); lastPos = new Point(); time = 0; lastTime = 0;
     }
 
-    public void setVectorPacket(VectorPacket vP) {
+    public void setVectorPacket(Touch vP) {
         pos.setPoint(vP.pos); lastPos.setPoint(vP.pos);
         time = vP.time; lastTime = vP.lastTime;
     }
