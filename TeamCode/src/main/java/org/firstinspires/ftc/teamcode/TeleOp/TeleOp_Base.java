@@ -13,6 +13,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Sensors.Gyroscope;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.VelLimitsJerk;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import static org.firstinspires.ftc.teamcode.GlobalData.HEADING;
 import static org.firstinspires.ftc.teamcode.GlobalData.RAN_AUTO;
@@ -194,11 +195,11 @@ public abstract class TeleOp_Base extends OpMode {
         stopOutputs();
     }
 
-    protected void addInput(Input input) {
-        inputs.add(input);
+    protected void addInputs(Input... input) {
+        inputs.addAll(Arrays.asList(input));
     }
-    protected void addOutput(Output output) {
-        outputs.add(output);
+    protected void addOutputs(Output... output) {
+        outputs.addAll(Arrays.asList(output));
     }
 
     //Start

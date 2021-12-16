@@ -13,8 +13,6 @@ import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils.Bounds.PolygonBou
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils.Point;
 import org.firstinspires.ftc.teamcode.TeleOp.TeleOp_Base;
 
-import java.util.ArrayList;
-
 @TeleOp(name="Gamepad Test")
 //@Disabled
 public class GamepadTest extends TeleOp_Base {
@@ -43,14 +41,8 @@ public class GamepadTest extends TeleOp_Base {
         rotateRight = new Swipe(touchpad, false, Swipe.SwipeType.RIGHT_SWIPE);
         slidePos = new Snapback(touchpad, 0, Slider.SliderType.X_AXIS, 0, 20);
 
-        addInput(touchpad);
-        addInput(topRight);
-        addInput(bottomLeft);
-        addInput(liftPos);
-        addInput(rotateLeft);
-        addInput(rotateRight);
-        addInput(polyButton);
-        addInput(slidePos);
+        addInputs(touchpad, topRight, bottomLeft, liftPos, rotateLeft, rotateRight, polyButton,
+                slidePos);
     }
 
     public void loop() {

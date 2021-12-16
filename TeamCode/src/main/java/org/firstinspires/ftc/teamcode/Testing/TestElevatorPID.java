@@ -22,8 +22,8 @@ public class TestElevatorPID extends TeleOp_Base {
 
         elevator = new Elevator(hardwareMap, "elevator", bReadEH);
 
-        addInput(elevator);
-        addOutput(elevator);
+        addInputs(elevator);
+        addOutputs(elevator);
     }
 
     @Override

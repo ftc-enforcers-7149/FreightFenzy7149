@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Utils.Output;
 import org.firstinspires.ftc.teamcode.Subsystems.Sensors.Gyroscope;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.function.Supplier;
 
 import static org.firstinspires.ftc.teamcode.Subsystems.Utils.FixedRoadrunner.createPose2d;
@@ -132,20 +133,30 @@ public abstract class Autonomous_Base extends LinearOpMode {
     protected void initializeCommands() {
         commands = new AutoCommands(this);
     }
-    protected void initializeAll() throws Exception {
-        initializeSources();
-        initializeDrive();
-        initializeBulkRead();
-        initializeGyro();
-        initializeOdometry();
-        initializeCommands();
+    protected void initializeAll() {
+        try {
+            initializeSources();
+            initializeDrive();
+            initializeBulkRead();
+            initializeGyro();
+            initializeOdometry();
+            initializeCommands();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            telemetry.addLine(e.getMessage());
+            telemetry.update();
+            double errTime = System.currentTimeMillis();
+            while (System.currentTimeMillis() < errTime + 2500);
+            requestOpModeStop();
+        }
     }
 
-    protected void addInput(Input input) {
-        inputs.add(input);
+    protected void addInputs(Input... input) {
+        inputs.addAll(Arrays.asList(input));
     }
-    protected void addOutput(Output output) {
-        outputs.add(output);
+    protected void addOutputs(Output... output) {
+        outputs.addAll(Arrays.asList(output));
     }
 
     //Start

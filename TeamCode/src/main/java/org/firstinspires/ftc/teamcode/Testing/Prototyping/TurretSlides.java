@@ -37,13 +37,13 @@ public class TurretSlides extends TeleOp_Base {
         elevator.setManualOverride(true);
         turret.setManualOverride(true);
 
-        addInput(intake);
-        addInput(elevator);
-        addInput(turret);
+        addInputs(intake);
+        addInputs(elevator);
+        addInputs(turret);
 
-        addOutput(intake);
-        addOutput(elevator);
-        addOutput(turret);
+        addOutputs(intake);
+        addOutputs(elevator);
+        addOutputs(turret);
 
         lastForward = false; lastBackward = false;
         lastLiftPower = 0;

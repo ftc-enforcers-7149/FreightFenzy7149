@@ -42,14 +42,8 @@ public class TeleV3Blue extends TeleOp_Base {
         elevator = new Elevator(hardwareMap, "elevator", bReadEH);
         turret = new Turret(hardwareMap, "turret", bReadEH);
 
-        addInput(intake);
-        addInput(elevator);
-        addInput(turret);
-
-        addOutput(spinner);
-        addOutput(intake);
-        addOutput(elevator);
-        addOutput(turret);
+        addInputs(intake, elevator, turret);
+        addOutputs(spinner, intake, elevator, turret);
 
         lastForward = false; lastBackward = false;
         lastLiftPower = 0;

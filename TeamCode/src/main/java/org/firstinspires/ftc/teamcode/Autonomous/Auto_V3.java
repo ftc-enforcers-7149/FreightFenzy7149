@@ -26,29 +26,24 @@ public abstract class Auto_V3 extends Autonomous_Base {
     @Override
     public final void runOpMode() throws InterruptedException {
         /// Init ///
-        try {
-            initializeAll();
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new InterruptedException(e.getMessage());
-        }
+        initializeAll();
 
         spinner = new CarouselSpinner(hardwareMap, "spinner");
         intake = new Intake(hardwareMap, "intake", "intakeColor", "outtakeColor");
         elevator = new Elevator(hardwareMap, "elevator", bReadEH);
         turret = new Turret(hardwareMap, "turret", bReadEH);
 
-        addInput(intake);
-        addInput(elevator);
-        addInput(turret);
+        addInputs(intake);
+        addInputs(elevator);
+        addInputs(turret);
 
-        addOutput(spinner);
-        addOutput(intake);
-        addOutput(elevator);
-        addOutput(turret);
+        addOutputs(spinner);
+        addOutputs(intake);
+        addOutputs(elevator);
+        addOutputs(turret);
 
         //Update global headless data as an input
-        addInput(new Input() {
+        addInputs(new Input() {
             @Override
             public void updateInput() {
                 HEADING = gyro.getYaw();
