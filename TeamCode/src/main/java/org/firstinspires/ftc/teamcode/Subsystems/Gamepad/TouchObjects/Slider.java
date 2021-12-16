@@ -43,14 +43,12 @@ public class Slider extends ScaledTouchObject<Double> {
 
     public Slider(Touchpad touchpad, double defaultValue, SliderType sliderType,
                   double lowerOut, double upperOut) {
-        this(touchpad, defaultValue, sliderType,
-                new RectBounds(-COORD_MULT, COORD_MULT, -COORD_MULT, COORD_MULT), lowerOut, upperOut);
+        this(touchpad, defaultValue, sliderType, new RectBounds(), lowerOut, upperOut);
     }
 
     public Slider(Touchpad touchpad, SliderType sliderType,
                   double lowerOut, double upperOut) {
-        this(touchpad, 0d, sliderType,
-                new RectBounds(-COORD_MULT, COORD_MULT, -COORD_MULT, COORD_MULT), lowerOut, upperOut);
+        this(touchpad, 0d, sliderType, new RectBounds(), lowerOut, upperOut);
     }
 
     @Override

@@ -21,6 +21,6 @@ public class RectBounds extends PolygonBounds {
     }
 
     public RectBounds() {
-        this(-COORD_MULT, 0, -COORD_MULT, 0);
+        this(-COORD_MULT, COORD_MULT, -COORD_MULT, COORD_MULT);
     }
 }
