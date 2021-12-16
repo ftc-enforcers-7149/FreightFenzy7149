@@ -29,10 +29,11 @@ public class Touchpad implements Input {
     private final double POLL_TIME = 200;
 
     // vector packets for storing velocity data
-    private final Touch v1, v2;
+    private final Touch v1, v2, lastV1, lastV2;
 
     // standard unit multiplier
     private final double COORD_MULT = 100;
+    private final double DEADZONE = 2;
 
     // Constructor. pass in the tele-op gamepad
     public Touchpad(Gamepad gamepad) {
@@ -43,6 +44,9 @@ public class Touchpad implements Input {
 
         v1 = new Touch();
         v2 = new Touch();
+        lastV1 = new Touch();
+        lastV2 = new Touch();
+
     }
 
     // Update method
@@ -90,17 +94,31 @@ public class Touchpad implements Input {
 
             switch(numFingers) {
                 case 1:
-                    v1.setVectorPacket(new Touch(fingerOne, lastFingerOne, time / 1000d, lastTime / 1000d));
-                    v2.setVectorPacket(new Touch());
+                    if(Math.abs(fingerOne.getX() - lastFingerOne.getX()) < DEADZONE
+                            && Math.abs(fingerOne.getY() - lastFingerOne.getY()) < DEADZONE) {
+                        // the reason it sets last first is so that it can be one loop behind.
+                        lastV1.setTouch(v1);
+                        v1.setTouch(fingerOne, lastFingerOne, time / 1000d, lastTime / 1000d);
+                        v2.setTouch();
+                    }
                     break;
                 case 2:
-                    v1.setVectorPacket(new Touch(fingerOne, lastFingerOne, time / 1000d, lastTime / 1000d));
-                    v2.setVectorPacket(new Touch(fingerTwo, lastFingerTwo, time / 1000d, lastTime / 1000d));
+                    if(Math.abs(fingerOne.getX() - lastFingerOne.getX()) < DEADZONE
+                            && Math.abs(fingerOne.getY() - lastFingerOne.getY()) < DEADZONE) {
+                        lastV1.setTouch(v1);
+                        v1.setTouch(fingerOne, lastFingerOne, time / 1000d, lastTime / 1000d);
+                    }
+
+                    if(Math.abs(fingerTwo.getX() - lastFingerTwo.getX()) < DEADZONE
+                            && Math.abs(fingerTwo.getY() - lastFingerTwo.getY()) < DEADZONE) {
+                        lastV2.setTouch(v2);
+                        v2.setTouch(fingerTwo, lastFingerTwo, time / 1000d, lastTime / 1000d);
+                    }
                     break;
 
                 default:
-                    v1.setVectorPacket(new Touch());
-                    v2.setVectorPacket(new Touch());
+                    v1.setTouch();
+                    v2.setTouch();
                     break;
             }
 
@@ -156,5 +174,11 @@ public class Touchpad implements Input {
     }
     public Touch getV2() {
         return v2;
+    }
+    public Touch getLastV1() {
+        return v1;
+    }
+    public Touch getLastV2() {
+        return lastV2;
     }
 }

@@ -25,16 +25,18 @@ public class Swipe extends TouchObject<Boolean> {
     @Override
     public void updateInput() {
         Point finger, lastFinger;
-        Touch vel;
+        Touch vel, lastVel;
         if (touchpad.getNumFingers() == 2) {
             finger = touchpad.getFingerTwo();
             lastFinger = touchpad.getLastFingerTwo();
             vel = touchpad.getV2();
+            lastVel = touchpad.getLastV2();
         }
         else if (touchpad.getNumFingers() == 1) {
             finger = touchpad.getFingerOne();
             lastFinger = touchpad.getLastFingerOne();
             vel = touchpad.getV1();
+            lastVel = touchpad.getLastV1();
         }
         else {
             value = false;
@@ -53,10 +55,10 @@ public class Swipe extends TouchObject<Boolean> {
         boolean upSwipe = vel.getYVel() > 0 && angleVert;
 
         boolean hold = finger.distanceTo(lastFinger) < 1;
-        boolean left = finger.getX() < 0;
-        boolean right = finger.getX() > 0;
-        boolean down = finger.getX() < 0;
-        boolean up = finger.getY() > 0;
+        boolean left = lastVel.getXVel() < 0;
+        boolean right = lastVel.getXVel() > 0;
+        boolean down = lastVel.getYVel() < 0;
+        boolean up = lastVel.getYVel() > 0;
 
         switch(s) {
             case ANY_SWIPE:
