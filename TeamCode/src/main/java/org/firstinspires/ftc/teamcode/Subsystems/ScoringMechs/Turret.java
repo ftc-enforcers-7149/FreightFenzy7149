@@ -24,7 +24,7 @@ public class Turret implements Input, Output {
     private int offset = 0;
 
     //Convert motor ticks to rotations (using Gobilda's given equation)
-    private final double ticksPerMotorRot = (((1+(46.0/17))) * (1+(46.0/17))) * 28;
+    private final double ticksPerMotorRot = ((((1+(46/17d))) * (1+(46/11d))) * 28);
     private final double CHAIN_GEARING = 56.0/10; // Turret sprocket / motor sprocket
     private final double anglePerTick = ticksPerMotorRot * 2 * Math.PI / CHAIN_GEARING;
     private final double ticksPerAngle = CHAIN_GEARING / (ticksPerMotorRot * 2 * Math.PI);

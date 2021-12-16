@@ -1,16 +1,16 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Touchpad;
-import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils.Bounds.Bounds;
+import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils.Bounds.PolygonBounds;
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils.Point;
 
 public class Snapback extends Slider {
 
-    public Snapback(Touchpad touchpad, Double defaultValue, SliderType sliderType, Bounds bounds, double lowerOut, double upperOut) {
+    public Snapback(Touchpad touchpad, double defaultValue, SliderType sliderType, PolygonBounds bounds, double lowerOut, double upperOut) {
         super(touchpad, defaultValue, sliderType, bounds, lowerOut, upperOut);
     }
 
-    public Snapback(Touchpad touchpad, Double defaultValue, SliderType sliderType, double lowerOut, double upperOut) {
+    public Snapback(Touchpad touchpad, double defaultValue, SliderType sliderType, double lowerOut, double upperOut) {
         super(touchpad, defaultValue, sliderType, lowerOut, upperOut);
     }
 

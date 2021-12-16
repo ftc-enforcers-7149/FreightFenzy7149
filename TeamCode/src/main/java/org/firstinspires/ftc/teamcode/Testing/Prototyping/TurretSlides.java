@@ -1,12 +1,13 @@
 package org.firstinspires.ftc.teamcode.Testing.Prototyping;
 
-import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
-import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.CarouselSpinner;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Elevator;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Intake;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Turret;
 import org.firstinspires.ftc.teamcode.TeleOp.TeleOp_Base;
 
+@TeleOp(name = "Turret Slides")
 public class TurretSlides extends TeleOp_Base {
 
     private Intake intake;

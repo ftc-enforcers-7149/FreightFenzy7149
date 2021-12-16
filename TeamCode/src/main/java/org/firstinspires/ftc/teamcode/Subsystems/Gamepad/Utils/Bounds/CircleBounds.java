@@ -2,26 +2,28 @@ package org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils.Bounds;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils.Point;
 
+import static org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Touchpad.COORD_MULT;
+
 public class CircleBounds extends Bounds {
 
-    double r;
-    Point center;
+    public static final CircleBounds CENTER = new CircleBounds(0, 0, COORD_MULT/2);
+
+    private final Point center;
+    private final double r;
 
     public CircleBounds(Point center, double r) {
-
-        super(center.getX() - r, center.getX() + r, center.getY() - r, center.getY() + r);
+        super(Math.max(center.getX() - r, -COORD_MULT), Math.min(center.getX() + r, COORD_MULT),
+                Math.max(center.getY() - r, -COORD_MULT), Math.min(center.getY() + r, COORD_MULT));
         this.r = r;
         this.center = center;
+    }
 
+    public CircleBounds(double x, double y, double r) {
+        this(new Point(x, y), r);
     }
 
     @Override
     public boolean contains(Point p) {
-
-        if(super.contains(p)) return false;
-
-        return p.distanceTo(center) > r;
-
+        return p.distanceTo(center) <= r;
     }
-
 }

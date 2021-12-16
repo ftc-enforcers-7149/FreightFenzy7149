@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects.Snapback;
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects.Swipe;
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects.Button;
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Touchpad;
-import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils.Bounds.Bounds;
+import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils.Bounds.RectBounds;
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils.Bounds.PolygonBounds;
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils.Point;
 import org.firstinspires.ftc.teamcode.TeleOp.TeleOp_Base;
@@ -31,21 +31,17 @@ public class GamepadTest extends TeleOp_Base {
         initializeSources();
         initializeVars();
 
-        ArrayList<Point> polygon = new ArrayList<Point>();
-        polygon.add(new Point(-100, -100));
-        polygon.add(new Point(-100, 0));
-        polygon.add(new Point(0, 50));
-        polygon.add(new Point(100, 0));
-        polygon.add(new Point(100, -100));
+        PolygonBounds polygon = new PolygonBounds(new Point(-100, 100), new Point(-100, 0),
+                new Point(0, 50), new Point(100, 0), new Point(100, -100));
 
         touchpad = new Touchpad(gamepad1);
-        topRight = new Button(touchpad, false, Bounds.TOP_RIGHT, false);
-        bottomLeft = new Button(touchpad, false, Bounds.BOTTOM_LEFT, true);
-        polyButton = new Button(touchpad, false, new PolygonBounds(polygon), true);
-        liftPos = new Slider(touchpad, 0d, Slider.SliderType.Y_AXIS, 0, 20);
+        topRight = new Button(touchpad, false, RectBounds.TOP_RIGHT, false);
+        bottomLeft = new Button(touchpad, false, RectBounds.BOTTOM_LEFT, true);
+        polyButton = new Button(touchpad, false, polygon, true);
+        liftPos = new Slider(touchpad, 0, Slider.SliderType.Y_AXIS, 0, 20);
         rotateLeft = new Swipe(touchpad, false, Swipe.SwipeType.LEFT_SWIPE);
         rotateRight = new Swipe(touchpad, false, Swipe.SwipeType.RIGHT_SWIPE);
-        slidePos = new Snapback(touchpad, 0d, Slider.SliderType.X_AXIS, 0, 20);
+        slidePos = new Snapback(touchpad, 0, Slider.SliderType.X_AXIS, 0, 20);
 
         addInput(touchpad);
         addInput(topRight);
@@ -55,7 +51,6 @@ public class GamepadTest extends TeleOp_Base {
         addInput(rotateRight);
         addInput(polyButton);
         addInput(slidePos);
-
     }
 
     public void loop() {

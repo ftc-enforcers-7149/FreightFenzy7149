@@ -17,7 +17,7 @@ public class Swipe extends TouchObject<Boolean> {
 
     private final SwipeType s;
 
-    public Swipe(Touchpad touchpad, Boolean defaultValue, SwipeType s) {
+    public Swipe(Touchpad touchpad, boolean defaultValue, SwipeType s) {
         super(touchpad, defaultValue);
         this.s = s;
     }

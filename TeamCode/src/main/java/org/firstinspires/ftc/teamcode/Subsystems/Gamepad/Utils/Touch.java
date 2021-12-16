@@ -19,9 +19,7 @@ public class Touch {
     }
 
     public Touch(Touch touch) {
-
         pos = touch.pos; lastPos = touch.lastPos; time = touch.time; lastTime = touch.lastTime;
-
     }
 
     // Zeroed constructor
@@ -39,7 +37,7 @@ public class Touch {
         pos.setPoint(pos); lastPos.setPoint(lastPos); this.time = time; this.lastTime = lastTime;
     }
 
-    public void setTouch() {
+    public void resetTouch() {
         pos.setPoint(new Point()); lastPos.setPoint(new Point()); time = 0; lastTime = 0;
     }
 

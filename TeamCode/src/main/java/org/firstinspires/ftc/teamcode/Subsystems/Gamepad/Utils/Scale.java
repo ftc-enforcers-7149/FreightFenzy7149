@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils;
 
-// TODO: maybe make this an abstract function in a parent class where lower and upper in are declared per child class?
 public class Scale {
 
     private final double lowerIn, upperIn, lowerOut, upperOut;
@@ -14,6 +13,6 @@ public class Scale {
 
     public double output(double input) {
         double scaleFactor = (upperOut - lowerOut) / (upperIn - lowerIn);
-        return input * scaleFactor + lowerOut;
+        return scaleFactor * (input - lowerIn) + lowerOut;
     }
 }

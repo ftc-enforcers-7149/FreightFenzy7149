@@ -1,9 +1,12 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Touchpad;
-import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils.Bounds.Bounds;
+import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils.Bounds.PolygonBounds;
+import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils.Bounds.RectBounds;
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils.Point;
 import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils.Scale;
+
+import static org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Touchpad.COORD_MULT;
 
 //IMPORTANT PLEASE DONT SET VALUE TO 0 AUTOMATICALLY IN THIS CLASS THATS WHAT SNAPBACK IS FOR!
 public class Slider extends ScaledTouchObject<Double> {
@@ -14,9 +17,9 @@ public class Slider extends ScaledTouchObject<Double> {
     }
 
     protected final SliderType sliderType;
-    protected final Bounds bounds;
+    protected final PolygonBounds bounds;
 
-    public Slider(Touchpad touchpad, Double defaultValue, SliderType sliderType, Bounds bounds,
+    public Slider(Touchpad touchpad, double defaultValue, SliderType sliderType, PolygonBounds bounds,
                   double lowerOut, double upperOut) {
         super(touchpad, defaultValue, new Scale(
                 sliderType == SliderType.X_AXIS ? bounds.getMinX() : bounds.getMinY(),
@@ -27,7 +30,7 @@ public class Slider extends ScaledTouchObject<Double> {
         this.bounds = bounds;
     }
 
-    public Slider(Touchpad touchpad, SliderType sliderType, Bounds bounds,
+    public Slider(Touchpad touchpad, SliderType sliderType, PolygonBounds bounds,
                   double lowerOut, double upperOut) {
         super(touchpad, 0d, new Scale(
                 sliderType == SliderType.X_AXIS ? bounds.getMinX() : bounds.getMinY(),
@@ -38,16 +41,16 @@ public class Slider extends ScaledTouchObject<Double> {
         this.bounds = bounds;
     }
 
-    public Slider(Touchpad touchpad, Double defaultValue, SliderType sliderType,
+    public Slider(Touchpad touchpad, double defaultValue, SliderType sliderType,
                   double lowerOut, double upperOut) {
         this(touchpad, defaultValue, sliderType,
-                new Bounds(-100, 100, -100, 100), lowerOut, upperOut);
+                new RectBounds(-COORD_MULT, COORD_MULT, -COORD_MULT, COORD_MULT), lowerOut, upperOut);
     }
 
     public Slider(Touchpad touchpad, SliderType sliderType,
                   double lowerOut, double upperOut) {
         this(touchpad, 0d, sliderType,
-                new Bounds(-100, 100, -100, 100), lowerOut, upperOut);
+                new RectBounds(-COORD_MULT, COORD_MULT, -COORD_MULT, COORD_MULT), lowerOut, upperOut);
     }
 
     @Override

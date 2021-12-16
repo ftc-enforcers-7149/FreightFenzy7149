@@ -26,14 +26,14 @@ public class Touchpad implements Input {
     private long lastTime = 0;
 
     // how often the touchpad "updates"
-    private final double POLL_TIME = 200;
+    private static final double POLL_TIME = 200;
 
     // vector packets for storing velocity data
     private final Touch v1, v2, lastV1, lastV2;
 
     // standard unit multiplier
-    private final double COORD_MULT = 100;
-    private final double DEADZONE = 2;
+    public static final double COORD_MULT = 100;
+    private static final double DEADZONE = 2;
 
     // Constructor. pass in the tele-op gamepad
     public Touchpad(Gamepad gamepad) {
@@ -99,7 +99,7 @@ public class Touchpad implements Input {
                         // the reason it sets last first is so that it can be one loop behind.
                         lastV1.setTouch(v1);
                         v1.setTouch(fingerOne, lastFingerOne, time / 1000d, lastTime / 1000d);
-                        v2.setTouch();
+                        v2.resetTouch();
                     }
                     break;
                 case 2:
@@ -117,8 +117,8 @@ public class Touchpad implements Input {
                     break;
 
                 default:
-                    v1.setTouch();
-                    v2.setTouch();
+                    v1.resetTouch();
+                    v2.resetTouch();
                     break;
             }
 

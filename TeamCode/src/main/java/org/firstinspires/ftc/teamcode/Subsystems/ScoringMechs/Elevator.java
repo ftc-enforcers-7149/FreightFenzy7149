@@ -24,7 +24,7 @@ public class Elevator implements Input, Output {
     private int offset = 0;
 
     //Convert motor ticks to rotations (using Gobilda's given equation)
-    private final double ticksPerRot = (((1+(46.0/17))) * (1+(46.0/17))) * 28;
+    private final double ticksPerRot = ((((1+(46/11d))) * (1+(46/11d))) * 28);
     private final double heightPerRot = 3.14961; //10 Teeth * Chain pitch = 80mm (in inches)
     private final double ticksPerInch = ticksPerRot / heightPerRot;
     private final double inchesPerTick = heightPerRot / ticksPerRot;
