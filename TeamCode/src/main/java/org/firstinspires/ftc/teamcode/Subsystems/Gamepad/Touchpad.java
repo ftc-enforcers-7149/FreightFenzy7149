@@ -78,7 +78,7 @@ public class Touchpad implements Input {
 
             fingerTwo.setPoint(f2X, f2Y);
         }
-        else
+        else if(!gamepad.touchpad_finger_1 && !gamepad.touchpad_finger_2)
             numFingers = 0;
 
         touchClicked = numFingers > lastNumFingers;

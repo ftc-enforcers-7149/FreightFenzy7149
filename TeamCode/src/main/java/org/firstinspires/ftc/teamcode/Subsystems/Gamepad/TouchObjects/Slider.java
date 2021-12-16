@@ -63,9 +63,9 @@ public class Slider extends ScaledTouchObject<Double> {
                     value = scale(fingerOne.getX());
                 return;
             case Y_AXIS:
-                if (bounds.contains(fingerTwo))
+                if (touchpad.getNumFingers() == 2 && bounds.contains(fingerTwo))
                     value = scale(fingerTwo.getY());
-                else if (bounds.contains(fingerOne))
+                else if (touchpad.getNumFingers() == 1 && bounds.contains(fingerOne))
                     value = scale(fingerOne.getY());
                 return;
             default:
