@@ -60,6 +60,7 @@ public class Swipe extends TouchObject<Boolean> {
         boolean down = lastVel.getYVel() < 0;
         boolean up = lastVel.getYVel() > 0;
 
+        //
         switch(s) {
             case ANY_SWIPE:
                 value = anySwipe;
