@@ -24,7 +24,7 @@ public class TurretSlides extends TeleOp_Base {
     private boolean manualOverride;
 
     //Turret control
-    private double angle, lastAngle;
+    private double angle, lastAngle, turnPower;
 
     @Override
     public void init() {
@@ -37,13 +37,8 @@ public class TurretSlides extends TeleOp_Base {
         elevator.setManualOverride(true);
         turret.setManualOverride(true);
 
-        addInputs(intake);
-        addInputs(elevator);
-        addInputs(turret);
-
-        addOutputs(intake);
-        addOutputs(elevator);
-        addOutputs(turret);
+        addInputs(intake, elevator, turret);
+        addOutputs(intake, elevator, turret);
 
         lastForward = false; lastBackward = false;
         lastLiftPower = 0;
@@ -82,8 +77,9 @@ public class TurretSlides extends TeleOp_Base {
         }
 
         //Turret
-        if (angle != lastAngle)
-            turret.setTargetAngle(angle);
+        //if (angle != lastAngle)
+        //    turret.setTargetAngle(angle);
+        turret.setPower(turnPower);
 
         updateOutputs();
         updateStateMachine();
@@ -103,12 +99,12 @@ public class TurretSlides extends TeleOp_Base {
         rightX = curveInput(gamepad1.right_stick_x, 2)*lim*0.75;
 
         //Intake
-        forward = gamepad2.right_trigger >= 0.2;
-        backward = gamepad2.left_trigger >= 0.2;
+        forward = gamepad2.right_bumper;
+        backward = gamepad2.left_bumper;
 
         //Elevator
-        if (gamepad1.right_trigger > 0.1 || gamepad1.left_trigger > 0.1)
-            liftPower = gamepad1.right_trigger - gamepad1.left_trigger;
+        if (gamepad2.right_trigger > 0.1 || gamepad2.left_trigger > 0.1)
+            liftPower = gamepad2.right_trigger - gamepad2.left_trigger;
         else
             liftPower = 0;
 
@@ -127,6 +123,8 @@ public class TurretSlides extends TeleOp_Base {
         //Turret
         if (gamepad2.right_stick_y != 0 && gamepad2.right_stick_x != 0)
             angle = Math.atan2(-gamepad2.right_stick_y, gamepad2.right_stick_x) - Math.toRadians(gyro.getYaw());
+
+        turnPower = gamepad2.left_stick_x;
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.acmerobotics.roadrunner.control.PIDFController;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Sensors.BulkRead;
@@ -53,6 +54,8 @@ public class Turret implements Input, Output {
 
     public Turret(HardwareMap hardwareMap, String turretName, BulkRead bRead) {
         turret = hardwareMap.get(DcMotorEx.class, turretName);
+        turret.setDirection(DcMotorSimple.Direction.REVERSE);
+        turret.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         this.bRead = bRead;
 
         initPID();
@@ -63,6 +66,8 @@ public class Turret implements Input, Output {
 
     public Turret(HardwareMap hardwareMap, String turretName) {
         turret = hardwareMap.get(DcMotorEx.class, turretName);
+        turret.setDirection(DcMotorSimple.Direction.REVERSE);
+        turret.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         initPID();
         initVars();

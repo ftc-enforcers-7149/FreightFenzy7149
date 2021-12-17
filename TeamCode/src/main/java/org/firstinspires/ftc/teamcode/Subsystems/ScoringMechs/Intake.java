@@ -69,7 +69,7 @@ public class Intake implements Output, Input {
 
     public Intake(HardwareMap hardwaremap, String intakeServoName, String intakeColorName, String outtakeColorName) {
         intake = hardwaremap.crservo.get(intakeServoName);
-        intake.setDirection(DcMotorSimple.Direction.FORWARD);
+        intake.setDirection(DcMotorSimple.Direction.REVERSE);
 
         intakeColor = hardwaremap.get(RevColorSensorV3.class, intakeColorName);
         outtakeColor = hardwaremap.get(RevColorSensorV3.class, outtakeColorName);
@@ -102,7 +102,7 @@ public class Intake implements Output, Input {
 
     public Intake(HardwareMap hardwaremap, String intakeServoName) {
         intake = hardwaremap.crservo.get(intakeServoName);
-        intake.setDirection(DcMotorSimple.Direction.FORWARD);
+        intake.setDirection(DcMotorSimple.Direction.REVERSE);
 
         nextStates = new ArrayList<IntakeState>();
 

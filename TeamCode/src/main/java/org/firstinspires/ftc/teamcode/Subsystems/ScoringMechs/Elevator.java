@@ -4,6 +4,7 @@ import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.acmerobotics.roadrunner.control.PIDFController;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Sensors.BulkRead;
@@ -63,6 +64,8 @@ public class Elevator implements Input, Output {
 
     public Elevator(HardwareMap hardwareMap, String elevatorName, BulkRead bRead) {
         elevator = hardwareMap.get(DcMotorEx.class, elevatorName);
+        elevator.setDirection(DcMotorSimple.Direction.REVERSE);
+        elevator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         this.bRead = bRead;
 
         initPID();
@@ -73,6 +76,8 @@ public class Elevator implements Input, Output {
 
     public Elevator(HardwareMap hardwareMap, String elevatorName) {
         elevator = hardwareMap.get(DcMotorEx.class, elevatorName);
+        elevator.setDirection(DcMotorSimple.Direction.REVERSE);
+        elevator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         initPID();
         initVars();
