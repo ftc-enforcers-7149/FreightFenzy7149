@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Sensors.Encoder;
 
@@ -25,46 +26,49 @@ public class AdamFourBar extends OpMode {
     private CRServo intake;
     Encoder liftEnc;
 
-    boolean lRotate, rRotate, liftUp, liftDown, incrementLiftUp, incrementLiftDown, inIntake, outIntake;
+    double rotateInput, liftInput;
+    boolean incrementLiftUp, incrementLiftDown, inIntake, outIntake;
     boolean moving = false;
 
     public void init() {
-
-        rotate = hardwareMap.get(DcMotorEx.class, "rotate");
-        lift = hardwareMap.get(DcMotorEx.class, "lift");
+        rotate = hardwareMap.get(DcMotorEx.class, "turret");
+        lift = hardwareMap.get(DcMotorEx.class, "elevator");
 
         liftEnc = new Encoder(lift);
 
         intake = hardwareMap.crservo.get("intake");
 
+        rotate.setDirection(DcMotorSimple.Direction.REVERSE);
+        lift.setDirection(DcMotorSimple.Direction.REVERSE);
+
         rotate.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         rotate.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rotate.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+        rotate.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
     public void loop() {
-
         updateInput();
 
-        if(lRotate && !rRotate) rotate.setPower(.3);
-        else if(rRotate && !lRotate) rotate.setPower(-.3);
-        else rotate.setPower(0);
+        rotate.setPower(rotateInput);
 
-        if(liftDown && !liftUp && !moving) desiredAngle = 0;
-        else if(liftUp && !liftDown && !moving) desiredAngle = 180;
+        //if(liftDown && !liftUp && !moving) desiredAngle = 0;
+        //else if(liftUp && !liftDown && !moving) desiredAngle = 180;
 
-        if(incrementLiftDown && desiredAngle > downAngle && !moving) desiredAngle -= 2;
-        else if (incrementLiftUp && desiredAngle < upAngle && !moving) desiredAngle += 2;
+        //if(incrementLiftDown && desiredAngle > downAngle && !moving) desiredAngle -= 2;
+        //else if (incrementLiftUp && desiredAngle < upAngle && !moving) desiredAngle += 2;
 
-        if(gamepad1.a) intake.setPower(0.7);
-        else if(gamepad1.y) intake.setPower(-0.7);
+        lift.setPower(liftInput);
+
+        if(gamepad1.right_bumper) intake.setPower(1);
+        else if(gamepad1.left_bumper) intake.setPower(-1);
         else intake.setPower(0);
 
-        moving = updatePosition();
-
+        //moving = updatePosition();
     }
 
     public boolean updatePosition() {
@@ -88,10 +92,11 @@ public class AdamFourBar extends OpMode {
 
     public void updateInput() {
 
-        lRotate = gamepad1.left_trigger > .10;
-        rRotate = gamepad1.right_trigger > .10;
-        liftUp = gamepad1.dpad_up;
-        liftDown = gamepad1.dpad_down;
+        rotateInput = gamepad1.left_stick_x;
+        if (gamepad1.right_trigger > 0.1 || gamepad1.left_trigger > 0.1)
+            liftInput = gamepad1.right_trigger - gamepad1.left_trigger;
+        else
+            liftInput = 0;
         incrementLiftUp = gamepad1.x;
         incrementLiftDown = gamepad1.b;
         inIntake = gamepad1.y;

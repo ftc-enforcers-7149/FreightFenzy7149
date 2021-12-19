@@ -94,8 +94,9 @@ public class Touchpad implements Input {
 
             switch(numFingers) {
                 case 1:
-                    if(Math.abs(fingerOne.getX() - lastFingerOne.getX()) < DEADZONE
-                            && Math.abs(fingerOne.getY() - lastFingerOne.getY()) < DEADZONE) {
+                    //TODO: This won't have good behavior
+                    if(Math.abs(fingerOne.getX() - lastFingerOne.getX()) > DEADZONE
+                            && Math.abs(fingerOne.getY() - lastFingerOne.getY()) > DEADZONE) {
                         // the reason it sets last first is so that it can be one loop behind.
                         lastV1.setTouch(v1);
                         v1.setTouch(fingerOne, lastFingerOne, time / 1000d, lastTime / 1000d);
@@ -103,14 +104,14 @@ public class Touchpad implements Input {
                     }
                     break;
                 case 2:
-                    if(Math.abs(fingerOne.getX() - lastFingerOne.getX()) < DEADZONE
-                            && Math.abs(fingerOne.getY() - lastFingerOne.getY()) < DEADZONE) {
+                    if(Math.abs(fingerOne.getX() - lastFingerOne.getX()) > DEADZONE
+                            && Math.abs(fingerOne.getY() - lastFingerOne.getY()) > DEADZONE) {
                         lastV1.setTouch(v1);
                         v1.setTouch(fingerOne, lastFingerOne, time / 1000d, lastTime / 1000d);
                     }
 
-                    if(Math.abs(fingerTwo.getX() - lastFingerTwo.getX()) < DEADZONE
-                            && Math.abs(fingerTwo.getY() - lastFingerTwo.getY()) < DEADZONE) {
+                    if(Math.abs(fingerTwo.getX() - lastFingerTwo.getX()) > DEADZONE
+                            && Math.abs(fingerTwo.getY() - lastFingerTwo.getY()) > DEADZONE) {
                         lastV2.setTouch(v2);
                         v2.setTouch(fingerTwo, lastFingerTwo, time / 1000d, lastTime / 1000d);
                     }
