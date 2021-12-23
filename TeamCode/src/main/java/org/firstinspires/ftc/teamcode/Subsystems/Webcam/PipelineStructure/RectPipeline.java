@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Subsystems.Webcam;
+package org.firstinspires.ftc.teamcode.Subsystems.Webcam.PipelineStructure;
 
 import android.graphics.Bitmap;
 
@@ -146,8 +146,7 @@ public abstract class RectPipeline extends OpenCvPipeline {
      * @return New, cropped mat image
      */
     protected final Mat cropMat(Mat mat, int posX, int posY, int width, int height) {
-        Rect cropRect = new Rect(posX, posY, width, height);
-        return new Mat(mat, cropRect);
+        return new Mat(mat, new Rect(posX, posY, width, height));
     }
 
     /**

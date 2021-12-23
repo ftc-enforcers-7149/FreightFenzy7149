@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Webcam;
 
+import org.firstinspires.ftc.teamcode.Subsystems.Webcam.PipelineStructure.SimpleColorPipeline;
 import org.opencv.core.Scalar;
 
 public class TSEPipeline extends SimpleColorPipeline {

@@ -1,8 +1,5 @@
-package org.firstinspires.ftc.teamcode.Subsystems.Webcam;
+package org.firstinspires.ftc.teamcode.Matttu.VisionStructure;
 
-import android.graphics.Bitmap;
-
-import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
@@ -14,7 +11,7 @@ import org.opencv.imgproc.Imgproc;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SimpleColorPipeline extends RectPipeline {
+public class SimpleColorVision extends RectVision {
 
     //These scalars are the lower and upper possible values for the color
     private final Scalar lowerBound, upperBound;
@@ -22,32 +19,20 @@ public class SimpleColorPipeline extends RectPipeline {
     //What color to draw bounding rect
     private final Scalar drawColor;
 
-    private int posX, posY;
-    private int width, height;
-
-    SimpleColorPipeline(Scalar lowerBound, Scalar upperBound, Scalar drawColor) {
-        this(lowerBound, upperBound, drawColor, 0, 0, 0, 0);
+    public SimpleColorVision(Scalar lowerBound, Scalar upperBound, Scalar drawColor) {
+        this(lowerBound, upperBound, drawColor, 0, 0, 640, 360);
     }
 
-    SimpleColorPipeline(Scalar lowerBound, Scalar upperBound, Scalar drawColor,
-                        int posX, int posY, int width, int height) {
+    public SimpleColorVision(Scalar lowerBound, Scalar upperBound, Scalar drawColor,
+                             int posX, int posY, int width, int height) {
+        super(posX, posY, width, height);
+
         this.lowerBound = lowerBound; this.upperBound = upperBound;
         this.drawColor = drawColor;
-
-        this.posX = posX; this.posY = posY;
-        this.width = width; this.height = height;
-
-        //Instantiate the bitmap with the right WIDTH and HEIGHT
-        bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
     }
 
     @Override
-    public Mat processFrame(Mat input) {
-        Mat output = input.clone();
-
-        //Crop image to only the needed portion
-        Mat cropped = cropMat(input, posX, posY, width, height);
-
+    public void processCroppedInput(Mat cropped) {
         //Roi stands for 'region of interest'. For us, the entire image is a region of interest
         //This will later hold the actual color mask
         Mat roiTemp = new Mat(cropped.width(), cropped.height(), cropped.type());
@@ -83,9 +68,6 @@ public class SimpleColorPipeline extends RectPipeline {
             if (rect.size.width * rect.size.height > maxArea) {
                 maxArea = rect.size.width * rect.size.height;
                 boundingRect = rect.clone();
-
-                //Draw the rectangle on the original image for output / debugging
-                drawFromCropped(output, boundingRect, drawColor, posX, posY);
             }
         }
 
@@ -94,15 +76,13 @@ public class SimpleColorPipeline extends RectPipeline {
             boundingRect = null;
         }
 
-        //Convert the original image (with drawn rectangle) to a bitmap for output
-        bitmap = Bitmap.createBitmap(output.width(), output.height(), Bitmap.Config.RGB_565);
-        Utils.matToBitmap(output, bitmap);
-
-        input.release();
-        cropped.release();
         roiTemp.release();
         hsvMat.release();
+    }
 
-        return output;
+    @Override
+    protected void drawOutput(Mat output) {
+        //Draw the rectangle on the original image for output / debugging
+        drawFromCropped(output, boundingRect, drawColor, 2);
     }
 }
