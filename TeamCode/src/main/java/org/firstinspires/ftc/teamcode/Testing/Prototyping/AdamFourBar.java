@@ -23,6 +23,7 @@ public class AdamFourBar extends OpMode {
     private double downAngle = 0, upAngle = 180;
 
     private DcMotorEx rotate, lift;
+    private DcMotor fLeft, fRight, bLeft, bRight;
     private CRServo intake;
     Encoder liftEnc;
 
@@ -33,6 +34,16 @@ public class AdamFourBar extends OpMode {
     public void init() {
         rotate = hardwareMap.get(DcMotorEx.class, "turret");
         lift = hardwareMap.get(DcMotorEx.class, "elevator");
+
+        fLeft = hardwareMap.get(DcMotorEx.class, "fLeft");
+        fRight = hardwareMap.get(DcMotorEx.class, "fRight");
+        bLeft = hardwareMap.get(DcMotorEx.class, "bLeft");
+        bRight = hardwareMap.get(DcMotorEx.class, "bRight");
+
+        fLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        fRight.setDirection(DcMotorSimple.Direction.FORWARD);
+        bLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        bRight.setDirection(DcMotorSimple.Direction.FORWARD);
 
         liftEnc = new Encoder(lift);
 
@@ -55,6 +66,28 @@ public class AdamFourBar extends OpMode {
         updateInput();
 
         rotate.setPower(rotateInput);
+
+        if (gamepad1.right_stick_y > 0.1) {
+            fRight.setPower(gamepad1.right_stick_y);
+            bRight.setPower(gamepad1.right_stick_y);
+        } else if (gamepad1.right_stick_y < -0.1) {
+            fRight.setPower(gamepad1.right_stick_y);
+            bRight.setPower(gamepad1.right_stick_y);
+        } else {
+            fRight.setPower(0);
+            bRight.setPower(0);
+        }
+
+        if (gamepad1.left_stick_y > 0.1) {
+            fLeft.setPower(gamepad1.left_stick_y);
+            bLeft.setPower(gamepad1.left_stick_y);
+        } else if (gamepad1.left_stick_y < -0.1) {
+            fLeft.setPower(gamepad1.left_stick_y);
+            bLeft.setPower(gamepad1.left_stick_y);
+        } else {
+            fLeft.setPower(0);
+            bLeft.setPower(0);
+        }
 
         //if(liftDown && !liftUp && !moving) desiredAngle = 0;
         //else if(liftUp && !liftDown && !moving) desiredAngle = 180;
@@ -101,7 +134,6 @@ public class AdamFourBar extends OpMode {
         incrementLiftDown = gamepad1.b;
         inIntake = gamepad1.y;
         outIntake = gamepad1.a;
-
     }
 
 }
