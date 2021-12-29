@@ -17,19 +17,14 @@ public class AdamFourBar extends OpMode {
     private final double ANGLE_PER_TICK = TICKS_PER_REV * 2 * Math.PI / CHAIN_GEARING;
     private final double TICKS_PER_ANGLE = CHAIN_GEARING / (TICKS_PER_REV * 2 * Math.PI);
 
-    private double currentAngle, desiredAngle = 0;
-    private double deadzone = 1; // degree
-
-    private double downAngle = 0, upAngle = 180;
-
     private DcMotorEx rotate, lift;
     private DcMotor fLeft, fRight, bLeft, bRight;
     private CRServo intake;
-    Encoder liftEnc;
 
     double rotateInput, liftInput;
-    boolean incrementLiftUp, incrementLiftDown, inIntake, outIntake;
-    boolean moving = false;
+    boolean inIntake, outIntake;
+
+    boolean holdUp;
 
     public void init() {
         rotate = hardwareMap.get(DcMotorEx.class, "turret");
@@ -45,11 +40,14 @@ public class AdamFourBar extends OpMode {
         bLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         bRight.setDirection(DcMotorSimple.Direction.FORWARD);
 
-        liftEnc = new Encoder(lift);
+        fLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        fRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        bLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        bRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         intake = hardwareMap.crservo.get("intake");
 
-        rotate.setDirection(DcMotorSimple.Direction.REVERSE);
+        rotate.setDirection(DcMotorSimple.Direction.FORWARD);
         lift.setDirection(DcMotorSimple.Direction.REVERSE);
 
         rotate.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -60,80 +58,75 @@ public class AdamFourBar extends OpMode {
 
         rotate.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        holdUp = false;
     }
 
     public void loop() {
         updateInput();
+        driveTankArcade();
 
-        rotate.setPower(rotateInput);
+        if (Math.abs(gamepad1.right_stick_x) >= 0.1 && rotateInput == 0)
+            rotate.setPower(-0.7 * gamepad1.right_stick_x);
+        else if (Math.abs(gamepad1.right_stick_x) < 0.1 && rotateInput != 0)
+            rotate.setPower((rotateInput - 0.75 * gamepad1.right_stick_x) / 2);
+        else
+            rotate.setPower(rotateInput);
 
-        if (gamepad1.right_stick_y > 0.1) {
-            fRight.setPower(gamepad1.right_stick_y);
-            bRight.setPower(gamepad1.right_stick_y);
-        } else if (gamepad1.right_stick_y < -0.1) {
-            fRight.setPower(gamepad1.right_stick_y);
-            bRight.setPower(gamepad1.right_stick_y);
-        } else {
-            fRight.setPower(0);
-            bRight.setPower(0);
-        }
+        if (liftInput != 0)
+            lift.setPower(liftInput);
+        else if (holdUp)
+            lift.setPower(0.08);
+        else
+            lift.setPower(0);
 
-        if (gamepad1.left_stick_y > 0.1) {
-            fLeft.setPower(gamepad1.left_stick_y);
-            bLeft.setPower(gamepad1.left_stick_y);
-        } else if (gamepad1.left_stick_y < -0.1) {
-            fLeft.setPower(gamepad1.left_stick_y);
-            bLeft.setPower(gamepad1.left_stick_y);
-        } else {
-            fLeft.setPower(0);
-            bLeft.setPower(0);
-        }
-
-        //if(liftDown && !liftUp && !moving) desiredAngle = 0;
-        //else if(liftUp && !liftDown && !moving) desiredAngle = 180;
-
-        //if(incrementLiftDown && desiredAngle > downAngle && !moving) desiredAngle -= 2;
-        //else if (incrementLiftUp && desiredAngle < upAngle && !moving) desiredAngle += 2;
-
-        lift.setPower(liftInput);
-
-        if(gamepad1.right_bumper) intake.setPower(1);
-        else if(gamepad1.left_bumper) intake.setPower(-1);
+        if(inIntake) intake.setPower(1);
+        else if(outIntake) intake.setPower(-1);
         else intake.setPower(0);
-
-        //moving = updatePosition();
-    }
-
-    public boolean updatePosition() {
-
-        currentAngle = liftEnc.getCurrentPosition() * ANGLE_PER_TICK;
-
-        if(Math.abs(currentAngle - desiredAngle) < deadzone) return false;
-
-        if(desiredAngle < currentAngle) {
-            lift.setPower(-0.2);
-            return true;
-        }
-        else if(desiredAngle > currentAngle) {
-            lift.setPower(0.2);
-            return true;
-        }
-
-        return false;
-
     }
 
     public void updateInput() {
+        if (gamepad2.right_trigger > 0.1 || gamepad2.left_trigger > 0.1)
+            rotateInput = (gamepad2.right_trigger - gamepad2.left_trigger) * 0.75;
+        else
+            rotateInput = 0;
 
-        rotateInput = gamepad1.left_stick_x;
-        if (gamepad1.right_trigger > 0.1 || gamepad1.left_trigger > 0.1)
-            liftInput = gamepad1.right_trigger - gamepad1.left_trigger;
+        if (-gamepad2.left_stick_y > 0.1) {
+            liftInput = -gamepad2.left_stick_y * 0.7;
+            holdUp = true;
+        }
+        else if (-gamepad2.left_stick_y < -0.1) {
+            liftInput = -gamepad2.left_stick_y * 0.7;
+            holdUp = false;
+        }
         else
             liftInput = 0;
-        incrementLiftUp = gamepad1.x;
-        incrementLiftDown = gamepad1.b;
-        inIntake = gamepad1.y;
-        outIntake = gamepad1.a;
+
+        inIntake = gamepad2.right_bumper;
+        outIntake = gamepad2.left_bumper;
     }
 
+    protected void driveTankArcade() {
+        double drivePower = gamepad1.left_stick_y;
+        double turnPower = -gamepad1.right_stick_x;
+
+        double vL = drivePower + turnPower;
+        double vR = drivePower - turnPower;
+
+        double max = Math.max(Math.abs(vL), Math.abs(vR));
+
+        if (max > 1) {
+            vL /= max;
+            vR /= max;
+        }
+
+        setMotorPowers(vL, vR, vL, vR);
+    }
+
+    protected void setMotorPowers(double vFL, double vFR, double vBL, double vBR) {
+        fLeft.setPower(vFL);
+        fRight.setPower(vFR);
+        bLeft.setPower(vBL);
+        bRight.setPower(vBR);
+    }
 }

@@ -383,5 +383,4 @@ public abstract class TeleOp_Base extends OpMode {
         bLeft.setPower(vBL);
         bRight.setPower(vBR);
     }
-
 }
