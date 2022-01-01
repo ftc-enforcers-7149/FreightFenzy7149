@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.TeleOp;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.CarouselSpinner;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Intake;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
@@ -23,12 +24,15 @@ public class Tele_V2_BLUE extends TeleOp_Base {
     private double liftPower, lastLiftPower;
 
     private enum LiftPosition {
-        GROUND, LOW, MIDDLE, HIGH;
+        GROUND, HUB, LOW, MIDDLE, HIGH;
     }
-    private LiftPosition liftPos, lastLiftPos;
+    private LiftPosition liftPos = LiftPosition.GROUND, liftToggle = LiftPosition.HIGH, lastLiftPos, lastLiftToggle;
 
+    private boolean intakeBlock, lastIntakeBlock;
     private boolean resetLift, lastResetLift;
     private boolean manualOverride;
+    private boolean toggleIntake, lastToggleIntake, toggleLift, lastToggleLift, toggleLiftUp, lastToggleLiftUp, liftUp;
+    private boolean freightInIntake;
 
     @Override
     public void init() {
@@ -78,15 +82,7 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         // Drive
         driveHeadless(gyro.getYaw(), resetAngle);
 
-        // Intake
-        if (gamepad2.right_trigger > 0.1 || gamepad2.left_trigger > 0.1)
-            intake.setIntakePower(gamepad2.right_trigger - gamepad2.left_trigger);
-        else intake.setIntakePower(0);
-
-        // Lift
-        if (liftPower != lastLiftPower)
-            lift.setPower(liftPower);
-        else if (liftPos != lastLiftPos) {
+        if (liftPos != lastLiftPos) {
             switch (liftPos) {
                 case HIGH:
                     lift.setTargetHeight(Lift.HIGH_HEIGHT);
@@ -101,6 +97,12 @@ public class Tele_V2_BLUE extends TeleOp_Base {
                     lift.setTargetHeight(0);
                     break;
             }
+        }
+
+        if (intakeBlock != lastIntakeBlock) {
+
+            intake.setIntakePower(intakeBlock ? (intake.getFreightInIntake() ? -0.2 : -1 ) : 1);
+
         }
 
         if (resetLift && !lastResetLift) {
@@ -122,6 +124,7 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         // Telemetry
         telemetry.addData("Lift Height: ", lift.getLiftHeight());
         telemetry.addData("Freight in Intake: ", intake.getFreightInIntake());
+        telemetry.addData("Intake dist: ", intake.distance.getValue());
 
         updateOutputs();
         updateStateMachine();
@@ -139,23 +142,47 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         leftX = curveInput(gamepad1.left_stick_x, 1)*lim * 0.75;
         leftY = curveInput(gamepad1.left_stick_y, 1)*lim * 0.75;
         rightX = curveInput(gamepad1.right_stick_x, 1)*lim*0.75 * 0.75;
+
+        freightInIntake = intake.getFreightInIntake();
+
+        toggleIntake = gamepad1.right_bumper;
+        if(toggleIntake && !lastToggleIntake) {
+
+            intakeBlock = !intakeBlock;
+
+        }
+
+        toggleLift = gamepad1.left_bumper;
+        if(toggleLift && !lastToggleLift) {
+
+            switch(liftPos) {
+
+                case GROUND:
+                case LOW:
+                    liftToggle = LiftPosition.HIGH;
+                    break;
+                case MIDDLE:
+                    liftToggle = LiftPosition.LOW;
+                    break;
+                case HIGH:
+                    liftToggle = LiftPosition.MIDDLE;
+                    break;
+
+            }
+
+        }
+
+        toggleLiftUp = gamepad1.right_trigger > 0.2;
+        if(toggleLiftUp && !lastToggleLiftUp) {
+            liftUp = !liftUp;
+        }
+
+        if(liftUp) liftPos = liftToggle;
+        else liftPos = LiftPosition.GROUND;
+
+        if(gamepad1.left_trigger > 0.2) liftPos = LiftPosition.LOW;
+
         resetAngle = gamepad1.y;
-
-        if (gamepad1.right_trigger > 0.1 || gamepad1.left_trigger > 0.1)
-            liftPower = gamepad1.right_trigger - gamepad1.left_trigger;
-        else
-            liftPower = 0;
-
-        if (gamepad2.dpad_up) liftPos = LiftPosition.HIGH;
-        else if (gamepad2.dpad_left) liftPos = LiftPosition.MIDDLE;
-        else if (gamepad2.dpad_right) liftPos = LiftPosition.LOW;
-        else if (gamepad2.dpad_down) liftPos = LiftPosition.GROUND;
-
-        if (gamepad1.dpad_up) liftPos = LiftPosition.HIGH;
-        else if (gamepad1.dpad_left) liftPos = LiftPosition.MIDDLE;
-        else if (gamepad1.dpad_right) liftPos = LiftPosition.LOW;
-        else if (gamepad1.dpad_down) liftPos = LiftPosition.GROUND;
-
         resetLift = gamepad1.back;
     }
 
@@ -167,5 +194,11 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         lastLiftPos = liftPos;
 
         lastResetLift = resetLift;
+
+        lastToggleIntake = toggleIntake;
+        lastToggleLift = toggleLift;
+        lastLiftToggle = liftToggle;
+        lastToggleLiftUp = toggleLiftUp;
+        lastIntakeBlock = intakeBlock;
     }
 }
