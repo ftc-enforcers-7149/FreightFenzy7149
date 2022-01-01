@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.CarouselSpinner;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Intake;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
@@ -14,10 +15,6 @@ import static org.firstinspires.ftc.teamcode.GlobalData.RAN_AUTO;
 @TeleOp (name = "BLUE Tele_V2")
 //@Disabled
 public class Tele_V2_BLUE extends TeleOp_Base {
-
-    //LED
-    public LED led;
-    private boolean ledEnabled; //true if LED is enabled
 
     //Headless
     private boolean resetAngle;
@@ -31,12 +28,13 @@ public class Tele_V2_BLUE extends TeleOp_Base {
     private enum LiftPosition {
         GROUND, HUB, LOW, MIDDLE, HIGH;
     }
-    private LiftPosition liftPos = LiftPosition.GROUND, liftToggle = LiftPosition.HIGH, lastLiftPos, lastLiftToggle;
+    private LiftPosition liftPos, liftToggle, lastLiftPos;
 
     private boolean intakeBlock, lastIntakeBlock;
     private boolean resetLift, lastResetLift;
     private boolean manualOverride;
     private boolean toggleIntake, lastToggleIntake, toggleLift, lastToggleLift, toggleLiftUp, lastToggleLiftUp, liftUp;
+    private boolean killswitch, toggleKillswitch, lastToggleKillswitch;
     private boolean freightInIntake;
 
     @Override
@@ -64,10 +62,13 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         lastLiftPower = 0;
         liftPos = LiftPosition.GROUND;
         lastLiftPos = LiftPosition.GROUND;
+        liftToggle = LiftPosition.GROUND;
         lastResetLift = false;
+        lastToggleLift = false;
+        lastIntakeBlock = false;
+        lastToggleKillswitch = false;
+        lastToggleLiftUp = false;
         manualOverride = false;
-
-        ledEnable();
     }
 
     @Override
@@ -85,7 +86,6 @@ public class Tele_V2_BLUE extends TeleOp_Base {
     public void loop() {
         updateInputs();
         getInput();
-        ledUpdate();
 
         // Drive
         driveHeadless(gyro.getYaw(), resetAngle);
@@ -107,12 +107,16 @@ public class Tele_V2_BLUE extends TeleOp_Base {
             }
         }
 
-        if (intakeBlock != lastIntakeBlock) {
+        if (!killswitch) {
 
-            intake.setIntakePower(intakeBlock ? (intake.getFreightInIntake() ? -0.2 : -1 ) : 1);
+            if(!intakeBlock && !freightInIntake) intakeBlock = true;
+            intake.setIntakePower(intakeBlock ? (freightInIntake ? -0.2 : -1 ) : 1);
+
 
         }
-
+        else {
+            intake.setIntakePower(0);
+        }
         if (resetLift && !lastResetLift) {
             lift.setManualOverride(!manualOverride);
             manualOverride = !manualOverride;
@@ -127,7 +131,7 @@ public class Tele_V2_BLUE extends TeleOp_Base {
 
         // Carousel
         spinner.setLeftPower(gamepad1.x ? -1 : 0);
-        spinner.setRightPower(gamepad1.b ? 1 : 0);
+        spinner.setRightPower(gamepad1.x ? -1 : 0);
 
         // Telemetry
         telemetry.addData("Lift Height: ", lift.getLiftHeight());
@@ -142,7 +146,6 @@ public class Tele_V2_BLUE extends TeleOp_Base {
     public void stop() {
         stopInputs();
         stopOutputs();
-        ledDisable();
     }
 
     @Override
@@ -193,6 +196,11 @@ public class Tele_V2_BLUE extends TeleOp_Base {
 
         resetAngle = gamepad1.y;
         resetLift = gamepad1.back;
+
+        toggleKillswitch = gamepad1.a;
+        if(toggleKillswitch && !lastToggleKillswitch) {
+            killswitch = !killswitch;
+        }
     }
 
     @Override
@@ -206,32 +214,8 @@ public class Tele_V2_BLUE extends TeleOp_Base {
 
         lastToggleIntake = toggleIntake;
         lastToggleLift = toggleLift;
-        lastLiftToggle = liftToggle;
         lastToggleLiftUp = toggleLiftUp;
         lastIntakeBlock = intakeBlock;
-    }
-
-    /**
-     * disable LEDs
-     */
-    public void ledDisable(){
-        ledEnabled = false;
-    }
-
-    /**
-     * enable LEDs
-     */
-    public void ledEnable(){
-        ledEnabled = true;
-    }
-
-
-    /**
-     * sets LEDs to value.
-     * main lED code
-     */
-    public void ledUpdate() {
-        if (intake.getFreightInIntake()) led.green();
-        else led.red();
+        lastToggleKillswitch = toggleKillswitch;
     }
 }
