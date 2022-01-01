@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.Testing.Prototyping;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Elevator;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Intake;
@@ -14,6 +16,8 @@ public class TurretSlides extends TeleOp_Base {
     private Elevator elevator;
     private Turret turret;
 
+    private CRServo spinner;
+
     //Intake control
     private boolean forward, lastForward, backward, lastBackward;
 
@@ -26,13 +30,18 @@ public class TurretSlides extends TeleOp_Base {
     //Turret control
     private double angle, lastAngle, turnPower;
 
+    boolean holdUp;
+
     @Override
     public void init() {
-        initializeWithoutDrive();
+        initializeAll();
 
         intake = new Intake(hardwareMap, "intake");//, "intakeColor", "outtakeColor");
         elevator = new Elevator(hardwareMap, "elevator", bReadCH);
         turret = new Turret(hardwareMap, "turret", bReadCH);
+
+        spinner = hardwareMap.crservo.get("spinner");
+        spinner.setDirection(DcMotorSimple.Direction.REVERSE);
 
         elevator.setManualOverride(true);
         turret.setManualOverride(true);
@@ -46,6 +55,7 @@ public class TurretSlides extends TeleOp_Base {
         lastLevel = Elevator.Level.GROUND;
         lastResetLift = false;
         manualOverride = false;
+        holdUp = false;
     }
 
     @Override
@@ -53,13 +63,20 @@ public class TurretSlides extends TeleOp_Base {
         updateInputs();
         getInput();
 
+        driveHeadless(gyro.getYaw(), gamepad1.y);
+
         //Intake
         if (forward && !lastForward) intake.forward();
         else if (backward && !lastBackward) intake.backward();
 
         // Elevator
         if (liftPower != lastLiftPower)
-            elevator.setPower(liftPower);
+            if (liftPower != 0)
+                elevator.setPower(liftPower);
+            else if (holdUp)
+                elevator.setPower(0.08);
+            else
+                elevator.setPower(0);
         else if (level != lastLevel) {
             elevator.setTargetHeight(level);
         }
@@ -79,7 +96,41 @@ public class TurretSlides extends TeleOp_Base {
         //Turret
         //if (angle != lastAngle)
         //    turret.setTargetAngle(angle);
-        turret.setPower(turnPower);
+
+        if (gamepad2.a && Math.abs(gamepad1.right_stick_x) >= 0.3 && turnPower == 0) {
+            turnPower = -0.6 * gamepad1.right_stick_x;
+            if ((turnPower > 0 && turret.turret.getCurrentPosition() < 2 * 3184.02) ||
+                    (turnPower < 0 && turret.turret.getCurrentPosition() > -2 * 3184.02))
+                turret.setPower(turnPower);
+            else
+                turret.setPower(0);
+        }
+        else if (gamepad2.a && Math.abs(gamepad1.right_stick_x) >= 0.3 && turnPower != 0) {
+            turnPower = (turnPower - 0.6 * gamepad1.right_stick_x) / 2;
+            if ((turnPower > 0 && turret.turret.getCurrentPosition() < 2 * 3184.02) ||
+                    (turnPower < 0 && turret.turret.getCurrentPosition() > -2 * 3184.02))
+                turret.setPower(turnPower);
+            else
+                turret.setPower(0);
+        }
+        else {
+            if ((turnPower > 0 && turret.turret.getCurrentPosition() < 2 * 3184.02) ||
+                    (turnPower < 0 && turret.turret.getCurrentPosition() > -2 * 3184.02))
+                turret.setPower(turnPower);
+            else
+                turret.setPower(0);
+        }
+
+        if (gamepad1.b)
+            spinner.setPower(1);
+        else if (gamepad1.x)
+            spinner.setPower(-1);
+        else
+            spinner.setPower(0);
+
+        //telemetry.addData("Elevator Height: ", elevator.getCurrHeightAAA());
+        telemetry.addData("Turret Ticks: ", turret.turret.getCurrentPosition());
+        telemetry.addData("Turret Angle: ", turret.getAngle());
 
         updateOutputs();
         updateStateMachine();
@@ -103,10 +154,11 @@ public class TurretSlides extends TeleOp_Base {
         backward = gamepad2.left_bumper;
 
         //Elevator
-        if (gamepad2.right_trigger > 0.1 || gamepad2.left_trigger > 0.1)
-            liftPower = gamepad2.right_trigger - gamepad2.left_trigger;
-        else
-            liftPower = 0;
+        //if (gamepad2.right_trigger > 0.1 || gamepad2.left_trigger > 0.1)
+        //    turnPower = gamepad2.right_trigger - gamepad2.left_trigger;
+        //else
+        //    turnPower = 0;
+        turnPower = gamepad2.left_stick_x * 0.5;
 
         if (gamepad2.dpad_up) level = Elevator.Level.HIGH;
         else if (gamepad2.dpad_left) level = Elevator.Level.MIDDLE;
@@ -124,7 +176,16 @@ public class TurretSlides extends TeleOp_Base {
         if (gamepad2.right_stick_y != 0 && gamepad2.right_stick_x != 0)
             angle = Math.atan2(-gamepad2.right_stick_y, gamepad2.right_stick_x) - Math.toRadians(gyro.getYaw());
 
-        turnPower = gamepad2.left_stick_x;
+        if (-gamepad2.left_stick_y > 0.1) {
+            liftPower = -gamepad2.left_stick_y;
+            holdUp = true;
+        }
+        else if (-gamepad2.left_stick_y < -0.1) {
+            liftPower = -gamepad2.left_stick_y;
+            holdUp = false;
+        }
+        else
+            liftPower = 0;
     }
 
     @Override

@@ -25,14 +25,14 @@ public class Turret implements Input, Output {
     private int offset = 0;
 
     //Convert motor ticks to rotations (using Gobilda's given equation)
-    private final double ticksPerMotorRot = ((((1+(46/17d))) * (1+(46/11d))) * 28);
-    private final double CHAIN_GEARING = 56.0/10; // Turret sprocket / motor sprocket
+    private final double ticksPerMotorRot = ((((1+(46/11d))) * (1+(46/11d))) * 28);
+    private final double CHAIN_GEARING = 42.0/10; // Turret sprocket / motor sprocket
     private final double anglePerTick = ticksPerMotorRot * 2 * Math.PI / CHAIN_GEARING;
     private final double ticksPerAngle = CHAIN_GEARING / (ticksPerMotorRot * 2 * Math.PI);
     private final double ticksPerRotation = angleToTicks(2 * Math.PI); //Per output rotation
 
-    private final double LEFTMOST = -ticksPerRotation * 1.5;
-    private final double RIGHTMOST = ticksPerRotation * 1.5;
+    private final double LEFTMOST = -ticksPerRotation * 2;
+    private final double RIGHTMOST = ticksPerRotation * 2;
 
     private double currAngle = 0;
 
@@ -54,6 +54,8 @@ public class Turret implements Input, Output {
 
     public Turret(HardwareMap hardwareMap, String turretName, BulkRead bRead) {
         turret = hardwareMap.get(DcMotorEx.class, turretName);
+        turret.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        turret.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         turret.setDirection(DcMotorSimple.Direction.REVERSE);
         turret.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         this.bRead = bRead;
@@ -66,6 +68,8 @@ public class Turret implements Input, Output {
 
     public Turret(HardwareMap hardwareMap, String turretName) {
         turret = hardwareMap.get(DcMotorEx.class, turretName);
+        turret.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        turret.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         turret.setDirection(DcMotorSimple.Direction.REVERSE);
         turret.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 

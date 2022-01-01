@@ -25,7 +25,7 @@ public class Elevator implements Input, Output {
     private int offset = 0;
 
     //Convert motor ticks to rotations (using Gobilda's given equation)
-    private final double ticksPerRot = ((((1+(46/11d))) * (1+(46/11d))) * 28);
+    private final double ticksPerRot = ((((1+(46/17d))) * (1+(46/11d))) * 28);
     private final double heightPerRot = 3.14961; //10 Teeth * Chain pitch = 80mm (in inches)
     private final double ticksPerInch = ticksPerRot / heightPerRot;
     private final double inchesPerTick = heightPerRot / ticksPerRot;
@@ -177,6 +177,10 @@ public class Elevator implements Input, Output {
 
     public double getHeight() {
         return !manualOverride ? currHeight : 0;
+    }
+
+    public double getCurrHeightAAA() {
+        return currHeight;
     }
 
     /**
