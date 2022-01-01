@@ -6,6 +6,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.CarouselSpinner;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Intake;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.LED.LED;
 
 import static org.firstinspires.ftc.teamcode.GlobalData.HEADING;
 import static org.firstinspires.ftc.teamcode.GlobalData.RAN_AUTO;
@@ -13,6 +14,10 @@ import static org.firstinspires.ftc.teamcode.GlobalData.RAN_AUTO;
 @TeleOp (name = "BLUE Tele_V2")
 //@Disabled
 public class Tele_V2_BLUE extends TeleOp_Base {
+
+    //LED
+    public LED led;
+    private boolean ledEnabled; //true if LED is enabled
 
     //Headless
     private boolean resetAngle;
@@ -61,6 +66,8 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         lastLiftPos = LiftPosition.GROUND;
         lastResetLift = false;
         manualOverride = false;
+
+        ledEnable();
     }
 
     @Override
@@ -78,6 +85,7 @@ public class Tele_V2_BLUE extends TeleOp_Base {
     public void loop() {
         updateInputs();
         getInput();
+        ledUpdate();
 
         // Drive
         driveHeadless(gyro.getYaw(), resetAngle);
@@ -134,6 +142,7 @@ public class Tele_V2_BLUE extends TeleOp_Base {
     public void stop() {
         stopInputs();
         stopOutputs();
+        ledDisable();
     }
 
     @Override
@@ -200,5 +209,29 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         lastLiftToggle = liftToggle;
         lastToggleLiftUp = toggleLiftUp;
         lastIntakeBlock = intakeBlock;
+    }
+
+    /**
+     * disable LEDs
+     */
+    public void ledDisable(){
+        ledEnabled = false;
+    }
+
+    /**
+     * enable LEDs
+     */
+    public void ledEnable(){
+        ledEnabled = true;
+    }
+
+
+    /**
+     * sets LEDs to value.
+     * main lED code
+     */
+    public void ledUpdate() {
+        if (intake.getFreightInIntake()) led.green();
+        else led.red();
     }
 }
