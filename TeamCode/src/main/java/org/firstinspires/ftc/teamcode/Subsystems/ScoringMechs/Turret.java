@@ -24,22 +24,37 @@ public class Turret implements Input, Output {
     private int currPosition = 0;
     private int offset = 0;
 
-    //Convert motor ticks to rotations (using Gobilda's given equation)
-    private final double ticksPerMotorRot = ((((1+(46/11d))) * (1+(46/11d))) * 28);
-    private final double CHAIN_GEARING = 42.0/10; // Turret sprocket / motor sprocket
-    private final double anglePerTick = ticksPerMotorRot * 2 * Math.PI / CHAIN_GEARING;
-    private final double ticksPerAngle = CHAIN_GEARING / (ticksPerMotorRot * 2 * Math.PI);
-    private final double ticksPerRotation = angleToTicks(2 * Math.PI); //Per output rotation
+    public class EncoderData {
+        //Convert motor ticks to rotations (using Gobilda's given equation)
+        public final double ticksPerMotorRot;
+        public final double gearing; // Turret sprocket / motor sprocket
+        public final double ticksPerRotation; //Per output rotation
+        public final double ticksPerAngle;
+        public final double anglePerTick;
 
-    private final double LEFTMOST = -ticksPerRotation * 2;
-    private final double RIGHTMOST = ticksPerRotation * 2;
+        public EncoderData() {
+            this((((1+(46/11d))) * (1+(46/11d))) * 28, 42/10d);
+        }
+        public EncoderData(double ticksPerMotorRot, double gearing) {
+            this.ticksPerMotorRot = ticksPerMotorRot;
+            this.gearing = gearing;
+            ticksPerRotation = ticksPerMotorRot * gearing; //Per output rotation
+            ticksPerAngle = ticksPerRotation / 2;
+            anglePerTick = ticksPerMotorRot * 2 * Math.PI / gearing;
+        }
+    }
+
+    public EncoderData encoder;
+
+    private double LEFTMOST;
+    private double RIGHTMOST;
 
     private double currAngle = 0;
 
     //PIDF Controller
     private PIDFController controller;
     private double output, lastOutput;
-    public static PIDCoefficients pidCoeffs = new PIDCoefficients(0.01, 0, 0);
+    public static PIDCoefficients pidCoeffs = new PIDCoefficients(0, 0, 0);
     private int setPosition = 0;
     private double setAngle = 0;
 
@@ -60,6 +75,8 @@ public class Turret implements Input, Output {
         turret.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         this.bRead = bRead;
 
+        encoder = new EncoderData();
+
         initPID();
         initVars();
 
@@ -72,6 +89,47 @@ public class Turret implements Input, Output {
         turret.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         turret.setDirection(DcMotorSimple.Direction.REVERSE);
         turret.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        encoder = new EncoderData();
+
+        initPID();
+        initVars();
+
+        useBR = false;
+    }
+
+    public Turret(HardwareMap hardwareMap, String turretName, BulkRead bRead, boolean smithlol) {
+        turret = hardwareMap.get(DcMotorEx.class, turretName);
+        turret.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        turret.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        turret.setDirection(DcMotorSimple.Direction.REVERSE);
+        turret.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        this.bRead = bRead;
+
+        if (smithlol)
+            encoder = new EncoderData((((1+(46/17d))) * (1+(46/11d))) * 28, 1);
+        else
+            encoder = new EncoderData();
+
+        encoder = new EncoderData();
+
+        initPID();
+        initVars();
+
+        useBR = true;
+    }
+
+    public Turret(HardwareMap hardwareMap, String turretName, boolean smithlol) {
+        turret = hardwareMap.get(DcMotorEx.class, turretName);
+        turret.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        turret.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        turret.setDirection(DcMotorSimple.Direction.REVERSE);
+        turret.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        if (smithlol)
+            encoder = new EncoderData((((1+(46/17d))) * (1+(46/11d))) * 28, 1);
+        else
+            encoder = new EncoderData();
 
         initPID();
         initVars();
@@ -86,7 +144,7 @@ public class Turret implements Input, Output {
 
     private void setCurrAngle(double angle) {
         setCurrPosition(angleToTicks(angle));
-        if (usePID && !manualOverride) setTargetAngle(setAngle);
+        if (usePID && !manualOverride) setTargetAngle(angle);
     }
 
     /**
@@ -95,7 +153,7 @@ public class Turret implements Input, Output {
      * @return Angle of rotation [-PI, PI]
      */
     private double ticksToAngle(int ticks) {
-        double angle = (ticks * anglePerTick) % (2 * Math.PI);
+        double angle = (ticks * encoder.anglePerTick) % (2 * Math.PI);
         if (angle > Math.PI) angle -= 2 * Math.PI;
         return angle;
     }
@@ -106,7 +164,7 @@ public class Turret implements Input, Output {
      * @return Motor ticks
      */
     private int angleToTicks(double angle) {
-        return (int) (angle * ticksPerAngle);
+        return (int) (angle * encoder.ticksPerAngle);
     }
 
     private int angleToTicksSmart(double angle) {
@@ -120,8 +178,8 @@ public class Turret implements Input, Output {
 
         int position = currPosition + angleToTicks(angleDifference);
 
-        if (position < LEFTMOST) return position + (int) ticksPerRotation;
-        else if (position > RIGHTMOST) return position - (int) ticksPerRotation;
+        if (position < LEFTMOST) return position + (int) encoder.ticksPerRotation;
+        else if (position > RIGHTMOST) return position - (int) encoder.ticksPerRotation;
         else return position;
     }
 
@@ -141,8 +199,8 @@ public class Turret implements Input, Output {
             output = controller.update(currPosition); //Update PID
 
             //Stop the motor when at rotation limits
-            if ((setPosition <= LEFTMOST && currAngle < LEFTMOST - 0.05) ||
-                    (setPosition >= RIGHTMOST && currAngle > RIGHTMOST + 0.05)) {
+            if ((setPosition <= LEFTMOST && currAngle <= LEFTMOST) ||
+                    (setPosition >= RIGHTMOST && currAngle >= RIGHTMOST)) {
                 output = 0;
             }
             if (output != lastOutput) {
@@ -155,8 +213,8 @@ public class Turret implements Input, Output {
         //Use motor power to move turret
         else {
             if (!manualOverride &&
-                    ((turretPower < 0 && currAngle < LEFTMOST - 0.05)
-                            || (turretPower > 0 && currAngle > RIGHTMOST + 0.05))) turretPower = 0;
+                    ((turretPower < 0 && currAngle <= LEFTMOST)
+                            || (turretPower > 0 && currAngle >= RIGHTMOST))) turretPower = 0;
 
             if (turretPower != lastTurretPower) {
                 turret.setPower(turretPower);
@@ -201,11 +259,20 @@ public class Turret implements Input, Output {
      */
     public void setManualOverride(boolean override) {
         manualOverride = override;
-        if (override) setCurrPosition(0);
+        if (!override) setCurrPosition(0);
     }
 
     public double getAngle() {
         return currAngle;
+    }
+
+    public boolean atAngle() {
+        return currAngle > setAngle - 0.03 && currAngle < setAngle + 0.03;
+    }
+
+    public void setPID(double P, double I, double D) {
+        pidCoeffs = new PIDCoefficients();
+        initPID();
     }
 
     private void initPID() {
@@ -216,6 +283,9 @@ public class Turret implements Input, Output {
     private void initVars() {
         output = 0; lastOutput = 0;
         setPosition = 0;
+
+        LEFTMOST = -encoder.ticksPerRotation * 2;
+        RIGHTMOST = encoder.ticksPerRotation * 2;
     }
 
     @Override

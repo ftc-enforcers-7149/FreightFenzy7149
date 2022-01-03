@@ -86,20 +86,16 @@ public class AdamFourBar extends OpMode {
         driveTankArcade();
         //driveTankHeadless();
 
-        if (gamepad2.a) {
-            rotate.setPower(rotateInput);
-        }
-        else if (Math.abs(gamepad1.right_stick_x) >= 0.3 && rotateInput == 0) {
+        if (gamepad2.a && Math.abs(gamepad1.right_stick_x) >= 0.5 && rotateInput == 0) {
             rotateInput = -0.7 * gamepad1.right_stick_x;
             rotate.setPower(rotateInput);
         }
-        else if (Math.abs(gamepad1.right_stick_x) >= 0.3 && rotateInput != 0) {
+        else if (gamepad2.a && Math.abs(gamepad1.right_stick_x) >= 0.5 && rotateInput != 0) {
             rotateInput = (rotateInput - 0.7 * gamepad1.right_stick_x) / 2;
             rotate.setPower(rotateInput);
         }
-        else {
+        else
             rotate.setPower(rotateInput);
-        }
 
         if (liftInput != 0)
             lift.setPower(liftInput);
@@ -132,10 +128,7 @@ public class AdamFourBar extends OpMode {
     }
 
     public void updateInput() {
-        if (gamepad2.right_trigger > 0.1 || gamepad2.left_trigger > 0.1)
-            rotateInput = (gamepad2.right_trigger - gamepad2.left_trigger) * 0.75;
-        else
-            rotateInput = 0;
+        rotateInput = gamepad2.left_stick_x * 0.5;
 
         if (-gamepad2.left_stick_y > 0.1) {
             liftInput = -gamepad2.left_stick_y * 0.7;
@@ -148,8 +141,8 @@ public class AdamFourBar extends OpMode {
         else
             liftInput = 0;
 
-        inIntake = gamepad2.right_bumper;
-        outIntake = gamepad2.left_bumper;
+        inIntake = gamepad2.right_trigger > 0.1;
+        outIntake = gamepad2.left_trigger > 0.1;
     }
 
     protected void driveTankArcade() {

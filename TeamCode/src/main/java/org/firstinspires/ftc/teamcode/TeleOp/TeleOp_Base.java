@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.TeleOp;
 
+import com.acmerobotics.roadrunner.control.PIDCoefficients;
+import com.acmerobotics.roadrunner.control.PIDFController;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -26,6 +28,11 @@ public abstract class TeleOp_Base extends OpMode {
     protected DcMotorEx fLeft, fRight, bLeft, bRight;
     protected Gyroscope gyro;
     private boolean initializedMotors = false, initializedDrive = false, initializedGyro = false;
+
+    //Heading control
+    public static PIDCoefficients H_PID = new PIDCoefficients(-0.5, 0, -0.05);
+    private PIDFController hControl;
+    protected double setAngle;
 
     //Control objects
     protected BulkRead bReadCH, bReadEH;
@@ -112,6 +119,10 @@ public abstract class TeleOp_Base extends OpMode {
             gyro = drive.gyro;
 
         if (RAN_AUTO) gyro.setOffset(HEADING);
+
+        hControl = new PIDFController(H_PID);
+        hControl.setOutputBounds(0, 1);
+        hControl.setTargetPosition(0);
 
         inputs.add((hasCH?1:0) + (hasEH?1:0), gyro);
         initializedGyro = true;
@@ -287,6 +298,45 @@ public abstract class TeleOp_Base extends OpMode {
 
         setMotorPowers(vFL, vFR, vBL, vBR);
     }
+    protected void driveHeadlessHoldAngle(boolean reset) {
+        double angle = gyro.getYaw();
+
+        if (reset) {
+            gyro.setYaw(0);
+            angle = 0;
+        }
+
+        if (rightX == 0)
+            setAngle = angle;
+
+        double turnPower = hControl.update(deltaHeading(Math.toRadians(angle), Math.toRadians(setAngle)));
+
+        double r = Math.hypot(leftX, leftY) * Math.sqrt(2);
+        double robotAngle = Math.atan2(leftY, leftX) - Math.toRadians(Gyroscope.cvtTrigAng(angle - offset)) - 3 * Math.PI / 4;
+
+        double vFL = r * Math.sin(robotAngle) + rightX + turnPower;
+        double vFR = r * Math.cos(robotAngle) - rightX - turnPower;
+        double vBL = r * Math.cos(robotAngle) + rightX + turnPower;
+        double vBR = r * Math.sin(robotAngle) - rightX - turnPower;
+
+        double max = Math.max(
+                Math.max(
+                        Math.abs(vFL),
+                        Math.abs(vFR)),
+                Math.max(
+                        Math.abs(vBL),
+                        Math.abs(vBR))
+        );
+
+        if (max > lim) {
+            vFL /= max / lim;
+            vFR /= max / lim;
+            vBL /= max / lim;
+            vBR /= max / lim;
+        }
+
+        setMotorPowers(vFL, vFR, vBL, vBR);
+    }
     protected void driveTank() {
         if (leftY != lastLeftY || rightY != lastRightY) {
             double vL = leftY;
@@ -382,5 +432,19 @@ public abstract class TeleOp_Base extends OpMode {
         fRight.setPower(vFR);
         bLeft.setPower(vBL);
         bRight.setPower(vBR);
+    }
+
+    /**
+     * @param robotH Robot heading in radians
+     * @param destH Destination heading in radians
+     * @return Shortest heading difference in radians
+     */
+    protected double deltaHeading(double robotH, double destH) {
+        double diff = destH - robotH;
+
+        if (diff < -Math.PI) diff += Math.PI * 2;
+        if (diff > Math.PI) diff -= Math.PI * 2;
+
+        return diff;
     }
 }
