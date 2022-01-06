@@ -28,7 +28,7 @@ public class Bucket implements Input, Output {
 
     //Bucket positions
     public enum Position {
-        IN(0), HOLD(0.55), OUT(1);
+        IN(0), HOLD(0.65), OUT(1);
 
         public final double position;
 
@@ -94,33 +94,37 @@ public class Bucket implements Input, Output {
     }
 
     public void intake(boolean intake) {
-        if (intake) transitionState(State.INTAKE);
-        else {
+        if (intake) {
+            transitionState(State.INTAKE);
             holdToggle = false;
-            holdToggle();
         }
+        else
+            holdToggle();
     }
 
     public void hold(boolean hold) {
         if (hold) transitionState(State.HOLD);
         else transitionState(State.IDLE);
+
+        holdToggle = hold;
     }
 
     public void holdToggle() {
         hold(!holdToggle);
-        holdToggle = !holdToggle;
     }
 
     public void outtake(boolean outtake) {
-        if (outtake) transitionState(State.OUTTAKE);
-        else {
+        if (outtake) {
+            transitionState(State.OUTTAKE);
             holdToggle = false;
-            holdToggle();
         }
+        else
+            holdToggle();
     }
 
     public void idle() {
         transitionState(State.IDLE);
+        holdToggle = false;
     }
 
     private void transitionState(State newState) {
@@ -130,26 +134,21 @@ public class Bucket implements Input, Output {
             switch (currState) {
                 case INTAKE:
                     setBucketPosition(Position.IN);
-                    intakePower = 0.6;
+                    intakePower = 0.8;
                     break;
                 case OUTTAKE:
                     setBucketPosition(Position.OUT);
-                    intakePower = 0.3;
+                    intakePower = 0;
                     break;
                 case HOLD:
                     if (lastState == State.INTAKE)
-                        //interp = new Interp(this.position, Position.HOLD.position, 200, Interp.Method.SMOOTH_ACCEL, 4);
-                        setBucketPosition(Position.HOLD);
+                        intakePower = -0.3;
                     else
-                        setBucketPosition(Position.HOLD);
-                    intakePower = 0;
+                        intakePower = 0;
+                    setBucketPosition(Position.HOLD);
                     break;
                 case IDLE:
-                    if (lastState == State.HOLD)
-                        //interp = new Interp(this.position, Position.IN.position, 200, Interp.Method.SMOOTH_ACCEL, 4);
-                        setBucketPosition(Position.IN);
-                    else
-                        setBucketPosition(Position.IN);
+                    setBucketPosition(Position.IN);
                     intakePower = 0;
                     break;
             }
@@ -168,7 +167,7 @@ public class Bucket implements Input, Output {
                 break;
             case HOLD:
             case IDLE:
-                intakePower = 0;
+                //intakePower = 0;
                 //if (intakePower > 0) transitionState(State.INTAKE);
                 //else if (intakePower < 0) transitionState(State.OUTTAKE);
                 break;

@@ -51,6 +51,8 @@ public class TurretSlides extends TeleOp_Base {
         addInputs(elevator, turret, bucket);
         addOutputs(elevator, turret, bucket);
 
+        bucket.hold(true);
+
         level = Elevator.Level.GROUND;
         lastLevel = Elevator.Level.GROUND;
     }
@@ -67,10 +69,11 @@ public class TurretSlides extends TeleOp_Base {
         if (!outtake && !intake && !hold && !idle) {
             if (lastOuttake) bucket.outtake(false);
             else if (lastIntake) bucket.intake(false);
+            else if (lastIdle) bucket.setIntakePower(0);
         } else if (outtake && !lastOuttake) bucket.outtake(true);
         else if (intake && !lastIntake) bucket.intake(true);
         else if (hold && !lastHold) bucket.holdToggle();
-        else if (idle && !lastIdle) bucket.idle();
+        else if (idle && !lastIdle) bucket.setIntakePower(-1);
 
         // Elevator
         if (liftPower != lastLiftPower)
