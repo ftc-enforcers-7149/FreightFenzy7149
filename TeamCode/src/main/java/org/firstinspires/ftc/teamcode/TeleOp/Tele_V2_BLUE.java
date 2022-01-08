@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.TeleOp;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -12,8 +13,8 @@ import org.firstinspires.ftc.teamcode.Subsystems.Utils.LED.LED;
 import static org.firstinspires.ftc.teamcode.GlobalData.HEADING;
 import static org.firstinspires.ftc.teamcode.GlobalData.RAN_AUTO;
 
-@TeleOp (name = "BLUE Tele_V2")
-//@Disabled
+@TeleOp (name = "BLUE Tele_V2 OLD")
+@Disabled
 public class Tele_V2_BLUE extends TeleOp_Base {
 
     //Headless
@@ -136,7 +137,6 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         // Telemetry
         telemetry.addData("Lift Height: ", lift.getLiftHeight());
         telemetry.addData("Freight in Intake: ", intake.getFreightInIntake());
-        telemetry.addData("Intake dist: ", intake.distance.getValue());
 
         updateOutputs();
         updateStateMachine();
