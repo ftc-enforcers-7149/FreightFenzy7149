@@ -1,15 +1,16 @@
-/*
 package org.firstinspires.ftc.teamcode.Testing;
 
+import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
-import org.firstinspires.ftc.teamcode.Autonomous.AutoCommands;
 import org.firstinspires.ftc.teamcode.Autonomous.Auto_V2;
+import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
+
+import java.util.function.Supplier;
 
 @Autonomous(name = "Test Red Cycles")
-@Disabled
+//@Disabled
 public class RedCycles extends Auto_V2 {
 
     @Override
@@ -19,55 +20,88 @@ public class RedCycles extends Auto_V2 {
 
     @Override
     public void auto() {
-        POS_ACC = 2;
+        drive.setPoseEstimate(new Pose2d(6.75, -65.75, 0));
+
+        POS_ACC = 0.5;
 
         //Pre-Setup
-        driveTo(16, 0, 0);
+        driveTo(30.75, -65.75, Math.toRadians(45));
 
-        //Move to gap
-        driveTo(0, -18, Math.toRadians(270));
+        //Align with wall
+        lift.setTargetHeight(Lift.LOW_HEIGHT);
+        waitForTime(2000);
+        driveToWall();
 
         //Drive through gap
-        positioning.startPositioning();
-        driveTo(() -> (drive.getPoseEstimate().getX() - positioning.getRightDistance()),
-                () -> {
-                    if (positioning.getLineDetected()) return drive.getPoseEstimate().getY();
-                    else return drive.getPoseEstimate().getY() - 20;
-                }, () -> Math.toRadians(270));
-        positioning.stopPositioning();
+        lift.setTargetHeight(Lift.GROUND_HEIGHT);
+        intake.setIntakePower(-1);
+        driveIntoWarehouse();
+
+        //Intake / Don't hit wall
+        intake();
     }
 
-    private void testToGap() {
-        driveTo(16, 0, 0);
-        commands.driveToGap(drive, positioning, lift);
-        drive.stopOutput();
+    private void driveToWall() {
+        distCorrect.startRunning();
+
+        H_ACC = Math.toRadians(3);
+        POS_ACC = 1.5;
+
+        driveTo(() -> {
+                    if (deltaHeading(drive.getPoseEstimate().getHeading(), Math.toRadians(270)) > Math.toRadians(3))
+                        return 6.5;
+                    else
+                        return drive.getPoseEstimate().getX() - (distCorrect.getSideWall() - 6.75);
+                },
+                () -> -80.0,
+                () -> Math.toRadians(270)
+        );
+
+        drive.setPoseEstimate(new Pose2d(
+                distCorrect.getSideWall(),
+                drive.getPoseEstimate().getY(),
+                Math.toRadians(270)));
+
+        H_ACC = Math.toRadians(1);
+        POS_ACC = 0.5;
+
+        distCorrect.stopRunning();
     }
 
-    private void testThroughGap() {
-        commands.driveThroughGap(drive, positioning);
-        setMotorPowers(0, 0, 0, 0);
+    private void driveIntoWarehouse() {
+        distCorrect.startRunning();
+
+        driveTo(() -> drive.getPoseEstimate().getX() - (distCorrect.getSideWall() - 6.75),
+                () -> -120.0,
+                () -> Math.toRadians(270)
+        );
+
+        drive.setPoseEstimate(new Pose2d(distCorrect.correctPoseWithDist(), Math.toRadians(270)));
+
+        distCorrect.stopRunning();
     }
 
-    private void testToFreight() {
-        try {
-            commands.driveToFreightAndBack(drive, positioning, intake);
+    private void intake() {
+        distCorrect.startRunning();
+
+        lift.setTargetHeight(Lift.GROUND_HEIGHT);
+        intake.setIntakePower(-1);
+
+        fLeft.setPower(0.4);
+        fRight.setPower(0.4);
+        bLeft.setPower(0.4);
+        bRight.setPower(0.4);
+
+        while (opModeIsActive() &&
+                !intake.getFreightInIntake() &&
+                distCorrect.getFrontDistance() > 10) {
+            updateInputs();
+            updateOutputs();
         }
-        catch (AutoCommands.NoFreight ignored) {}
-        finally {
-            setMotorPowers(0, 0, 0, 0);
-        }
-    }
 
-    private void testToHub() {
-        commands.driveToHub(lift, intake);
+        fLeft.setPower(0);
+        fRight.setPower(0);
+        bLeft.setPower(0);
+        bRight.setPower(0);
     }
-
-    private void testCycle() {
-        try {
-            commands.cycle(drive, positioning, lift, intake);
-        }
-        catch (AutoCommands.NoFreight ignored) {
-            setMotorPowers(0, 0, 0, 0);
-        }
-    }
-}*/
+}

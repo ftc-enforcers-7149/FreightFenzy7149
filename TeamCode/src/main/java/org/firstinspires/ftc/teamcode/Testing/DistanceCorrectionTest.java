@@ -13,21 +13,18 @@ public class DistanceCorrectionTest extends Auto_V2 {
     @Override
     public void auto() {
         while(opModeIsActive()) {
-
             updateInputs();
 
-            distCorrect.correctPoseWithDist(drive, getAlliance());
+            drive.setPoseEstimate(distCorrect.correctPoseWithDist());
             telemetry.addData("Pose x:", drive.getPoseEstimate().getX());
             telemetry.addData("Pose y:", drive.getPoseEstimate().getY());
 
             updateOutputs();
-            updateTelemetry();
-
         }
     }
 
     @Override
     protected Alliance getAlliance() {
-        return Alliance.RED;
+        return Alliance.BLUE;
     }
 }
