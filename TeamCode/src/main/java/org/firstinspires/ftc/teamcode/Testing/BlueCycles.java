@@ -1,3 +1,4 @@
+/*
 package org.firstinspires.ftc.teamcode.Testing;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -27,14 +28,16 @@ public class BlueCycles extends Auto_V2 {
         //testCycle();
 
         //Cycles
-        /*while (opModeIsActive() && getRuntime() < 25) {
+        */
+/*while (opModeIsActive() && getRuntime() < 25) {
             try {
                 commands.cycle(drive, positioning, lift, intake, false);
             }
             catch (AutoCommands.NoFreight nF) {
                 return;
             }
-        }*/
+        }*//*
+
     }
 
     private void testToGap() {
@@ -70,4 +73,4 @@ public class BlueCycles extends Auto_V2 {
             setMotorPowers(0, 0, 0, 0);
         }
     }
-}
+}*/

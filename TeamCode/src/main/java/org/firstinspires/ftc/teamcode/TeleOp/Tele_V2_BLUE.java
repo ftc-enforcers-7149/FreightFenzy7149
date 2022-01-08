@@ -3,12 +3,9 @@ package org.firstinspires.ftc.teamcode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.CarouselSpinner;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Intake;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
-import org.firstinspires.ftc.teamcode.Subsystems.Utils.LED.LED;
 
 import static org.firstinspires.ftc.teamcode.GlobalData.HEADING;
 import static org.firstinspires.ftc.teamcode.GlobalData.RAN_AUTO;
@@ -34,7 +31,7 @@ public class Tele_V2_BLUE extends TeleOp_Base {
     private boolean intakeBlock, lastIntakeBlock;
     private boolean resetLift, lastResetLift;
     private boolean manualOverride;
-    private boolean toggleIntake, lastToggleIntake, toggleLift, lastToggleLift, toggleLiftUp, lastToggleLiftUp, liftUp;
+    private boolean toggleIntake, lastToggleIntake, toggleLift, lastToggleLift, toggleLiftUp, lastToggleLiftUp, liftUp, toggleLiftLow, lastToggleLiftLow, liftLow, lastLiftUp, lastLiftLow;
     private boolean killswitch, toggleKillswitch, lastToggleKillswitch;
     private boolean freightInIntake;
 
@@ -63,13 +60,14 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         lastLiftPower = 0;
         liftPos = LiftPosition.GROUND;
         lastLiftPos = LiftPosition.GROUND;
-        liftToggle = LiftPosition.GROUND;
+        liftToggle = LiftPosition.HIGH;
         lastResetLift = false;
         lastToggleLift = false;
         lastIntakeBlock = false;
         lastToggleKillswitch = false;
         lastToggleLiftUp = false;
         manualOverride = false;
+        intakeBlock = true;
     }
 
     @Override
@@ -88,8 +86,61 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         updateInputs();
         getInput();
 
+        if(toggleKillswitch && !lastToggleKillswitch) {
+            killswitch = !killswitch;
+        }
+
+        if(toggleIntake) {
+            intakeBlock = false;
+        }
+        else {
+            intakeBlock = true;
+        }
+        /*if(!freightInIntake) intakeBlock = true*/;
+
         // Drive
         driveHeadless(gyro.getYaw(), resetAngle);
+
+        if(toggleLift && !lastToggleLift) {
+
+            switch(liftToggle) {
+                case LOW:
+                    liftToggle = LiftPosition.HIGH;
+                    break;
+                case MIDDLE:
+                    liftToggle = LiftPosition.LOW;
+                    break;
+                case HIGH:
+                    liftToggle = LiftPosition.MIDDLE;
+                    break;
+
+            }
+
+        }
+
+        if(toggleLiftUp && !lastToggleLiftUp) {
+            liftUp = !liftUp;
+        }
+
+        if(toggleLiftLow && !lastToggleLiftLow) liftLow = !liftLow;
+
+        if(liftUp && !liftLow) {
+            liftPos = liftToggle;
+        }
+        else if(!liftUp && liftLow) {
+            liftPos = LiftPosition.LOW;
+        }
+        else if(liftUp && liftLow && !lastLiftUp){
+            liftPos = liftToggle;
+            liftLow = false;
+        }
+        else if(liftUp && liftLow && !lastLiftLow){
+            liftPos = LiftPosition.LOW;
+            liftUp = false;
+        }
+        else {
+            liftPos = LiftPosition.GROUND;
+        }
 
         if (liftPos != lastLiftPos) {
             switch (liftPos) {
@@ -110,14 +161,13 @@ public class Tele_V2_BLUE extends TeleOp_Base {
 
         if (!killswitch) {
 
-            if(!intakeBlock && !freightInIntake) intakeBlock = true;
-            intake.setIntakePower(intakeBlock ? (freightInIntake ? -0.2 : -1 ) : 1);
-
+            intake.setIntakePower(intakeBlock ? (freightInIntake ? -0.2 : -1) : 1);
 
         }
         else {
             intake.setIntakePower(0);
         }
+
         if (resetLift && !lastResetLift) {
             lift.setManualOverride(!manualOverride);
             manualOverride = !manualOverride;
@@ -156,51 +206,18 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         rightX = curveInput(gamepad1.right_stick_x, 1)*lim*0.75 * 0.75;
 
         freightInIntake = intake.getFreightInIntake();
-
         toggleIntake = gamepad1.right_bumper;
-        if(toggleIntake && !lastToggleIntake) {
-
-            intakeBlock = !intakeBlock;
-
-        }
 
         toggleLift = gamepad1.left_bumper;
-        if(toggleLift && !lastToggleLift) {
+        toggleLiftUp = gamepad1.right_trigger > 0.1;
+        toggleLiftLow = gamepad1.left_trigger > 0.1;
 
-            switch(liftPos) {
-
-                case GROUND:
-                case LOW:
-                    liftToggle = LiftPosition.HIGH;
-                    break;
-                case MIDDLE:
-                    liftToggle = LiftPosition.LOW;
-                    break;
-                case HIGH:
-                    liftToggle = LiftPosition.MIDDLE;
-                    break;
-
-            }
-
-        }
-
-        toggleLiftUp = gamepad1.right_trigger > 0.2;
-        if(toggleLiftUp && !lastToggleLiftUp) {
-            liftUp = !liftUp;
-        }
-
-        if(liftUp) liftPos = liftToggle;
-        else liftPos = LiftPosition.GROUND;
-
-        if(gamepad1.left_trigger > 0.2) liftPos = LiftPosition.LOW;
 
         resetAngle = gamepad1.y;
         resetLift = gamepad1.back;
 
         toggleKillswitch = gamepad1.a;
-        if(toggleKillswitch && !lastToggleKillswitch) {
-            killswitch = !killswitch;
-        }
+
     }
 
     @Override
@@ -217,5 +234,8 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         lastToggleLiftUp = toggleLiftUp;
         lastIntakeBlock = intakeBlock;
         lastToggleKillswitch = toggleKillswitch;
+        lastToggleLiftLow = toggleLiftLow;
+        lastLiftUp = liftUp;
+        lastLiftLow = liftLow;
     }
 }

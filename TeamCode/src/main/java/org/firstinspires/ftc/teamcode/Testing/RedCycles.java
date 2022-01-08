@@ -1,3 +1,4 @@
+/*
 package org.firstinspires.ftc.teamcode.Testing;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -69,4 +70,4 @@ public class RedCycles extends Auto_V2 {
             setMotorPowers(0, 0, 0, 0);
         }
     }
-}
+}*/
