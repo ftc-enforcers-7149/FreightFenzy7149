@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Autonomous.WHSide;
 
+import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
@@ -18,39 +19,40 @@ public class BlueWH extends Auto_V3 {
 
     @Override
     protected void auto() {
+        drive.setPoseEstimate(new Pose2d(0,27,0));
         Elevator.Level elevatorHeight = commands.detectBarcode(tseDetector);
 
         //Set elevator to correct level according to the vision
         commands.setElevatorHeight(elevator, elevatorHeight);
 
         //Drive to hub
-        driveTo(16, 0, 0);
+        driveTo(16, 27, 0);
 
         //Deliver pre-loaded block
         commands.outtake(intake);
 
         //Move back a little so that the intake doesn't hit the hub
-        driveTo(10, 0, 0);
+        driveTo(10, 27, 0);
 
         //Put elevator back down
         elevator.setTargetHeight(Elevator.Level.GROUND);
 
         //Realign with the wall and turn towards the warehouse
         driveTo(drive.getPoseEstimate().getX(), drive.getPoseEstimate().getY(), Math.toRadians(90));
-        driveTo(0, 0, Math.toRadians(90));
+        driveTo(0, 27, Math.toRadians(90));
         commands.setElevatorHeight(elevator, Elevator.Level.GROUND);
 
         //Start intaking
         intake.intake();
 
         //Drive into the warehouse
-        driveTo(0, 47, Math.toRadians(90));
+        driveTo(0, 74, Math.toRadians(90));
 
         //Drive backwards to the hub
-        driveTo(0, 0, Math.toRadians(90));
+        driveTo(0, 27, Math.toRadians(90));
 
         //Turn and move towards the hub
-        driveTo(10, 0, Math.toRadians(90));
+        driveTo(10, 27, Math.toRadians(90));
         elevator.setTargetHeight(Elevator.Level.HIGH);
         driveTo(drive.getPoseEstimate().getX(), drive.getPoseEstimate().getY(), 0);
 
@@ -58,13 +60,13 @@ public class BlueWH extends Auto_V3 {
         commands.setElevatorHeight(elevator, Elevator.Level.HIGH);
 
         //Move forward
-        driveTo(16, 0, 0);
+        driveTo(16, 27, 0);
 
         //Outtake the game element
         commands.outtake(intake);
 
         //Drive a little back and turn
-        driveTo(10, 0, 0);
+        driveTo(10, 27, 0);
 
         //Put elevator back down
         elevator.setTargetHeight(Elevator.Level.GROUND);
@@ -73,8 +75,8 @@ public class BlueWH extends Auto_V3 {
         driveTo(drive.getPoseEstimate().getX(), drive.getPoseEstimate().getY(), Math.toRadians(90));
 
         //Park in warehouse
-        driveTo(0, 0, Math.toRadians(90));
+        driveTo(0, 27, Math.toRadians(90));
         commands.setElevatorHeight(elevator, Elevator.Level.GROUND);
-        driveTo(0, -47, Math.toRadians(90));
+        driveTo(0, -20, Math.toRadians(90));
     }
 }
