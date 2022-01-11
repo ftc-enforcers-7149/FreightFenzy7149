@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils;
+package Touchpad.Utils;
 
 import androidx.annotation.NonNull;
 
@@ -52,3 +52,4 @@ public class Point {
         return "(" + x + ", " + y + ")";
     }
 }
+

@@ -1,16 +1,17 @@
 package org.firstinspires.ftc.teamcode.Testing;
 
+import com.enforcers7149.touchpadplusplus.src.TouchObjects.Button;
+import com.enforcers7149.touchpadplusplus.src.TouchObjects.Slider;
+import com.enforcers7149.touchpadplusplus.src.TouchObjects.Snapback;
+import com.enforcers7149.touchpadplusplus.src.TouchObjects.Swipe;
+import com.enforcers7149.touchpadplusplus.src.Touchpad;
+import com.enforcers7149.touchpadplusplus.src.Utils.Bounds.PolygonBounds;
+import com.enforcers7149.touchpadplusplus.src.Utils.Bounds.RectBounds;
+import com.enforcers7149.touchpadplusplus.src.Utils.Point;
+import com.enforcers7149.touchpadplusplus.src.Utils.TouchpadHandler;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects.Slider;
-import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects.Snapback;
-import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects.Swipe;
-import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.TouchObjects.Button;
-import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Touchpad;
-import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils.Bounds.RectBounds;
-import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils.Bounds.PolygonBounds;
-import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Utils.Point;
 import org.firstinspires.ftc.teamcode.TeleOp.TeleOp_Base;
 
 @TeleOp(name="Gamepad Test")
@@ -24,6 +25,7 @@ public class GamepadTest extends TeleOp_Base {
     Slider liftPos;
     Snapback slidePos;
     Swipe rotateLeft, rotateRight;
+    TouchpadHandler tHandle;
 
     public void init() {
         initializeSources();
@@ -41,13 +43,13 @@ public class GamepadTest extends TeleOp_Base {
         rotateRight = new Swipe(touchpad, false, Swipe.SwipeType.RIGHT_SWIPE);
         slidePos = new Snapback(touchpad, 0, Slider.SliderType.X_AXIS, 0, 20);
 
-        addInputs(touchpad, topRight, bottomLeft, liftPos, rotateLeft, rotateRight, polyButton,
-                slidePos);
+        tHandle = new TouchpadHandler(touchpad, topRight, bottomLeft, polyButton, liftPos, rotateLeft, rotateRight, slidePos);
+
     }
 
     public void loop() {
 
-        updateInputs();
+        getInput();
 
         telemetry.addData("Number of fingers: ", touchpad.getNumFingers());
 
@@ -79,6 +81,9 @@ public class GamepadTest extends TeleOp_Base {
 
     @Override
     protected void getInput() {
+
+        updateInputs();
+        tHandle.updateInputs();
 
     }
 
