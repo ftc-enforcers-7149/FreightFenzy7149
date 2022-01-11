@@ -62,9 +62,9 @@ public class AutoCommands {
     }
 
     public void outtake(Intake intake) {
-        intake.setIntakePower(0.75);
+        intake.setIntakePower(1);
         long startTime = System.currentTimeMillis();
-        op.customWait(() -> (intake.getFreightInIntake() && System.currentTimeMillis() < startTime + 1500));
+        op.customWait(() -> (System.currentTimeMillis() < startTime + 750));
         intake.setIntakePower(0);
     }
 

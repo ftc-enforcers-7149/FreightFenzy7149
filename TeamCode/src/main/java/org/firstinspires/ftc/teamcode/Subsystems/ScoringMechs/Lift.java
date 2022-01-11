@@ -107,9 +107,9 @@ public class Lift implements Output, Input {
             output = controller.update(currPosition); //Update PID
 
             //Stop the motor when at rest on the floor
-            /*if (setPosition == 0 && currPosition < liftInchesToTicks(0.01)) {
+            if (setPosition == Lift.GROUND_HEIGHT && currPosition < Lift.GROUND_HEIGHT-liftInchesToTicks(0.01)) {
                 output = 0;
-            }*/
+            }
             if (output != lastOutput) {
                 lift.setPower(output);
 

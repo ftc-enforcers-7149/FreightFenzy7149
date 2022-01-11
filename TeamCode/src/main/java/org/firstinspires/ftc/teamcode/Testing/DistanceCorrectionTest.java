@@ -12,6 +12,8 @@ public class DistanceCorrectionTest extends Auto_V2 {
 
     @Override
     public void auto() {
+        distCorrect.startRunning();
+
         while(opModeIsActive()) {
             updateInputs();
 

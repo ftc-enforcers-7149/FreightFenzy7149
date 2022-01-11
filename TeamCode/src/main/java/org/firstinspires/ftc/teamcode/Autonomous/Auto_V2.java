@@ -91,15 +91,16 @@ public abstract class Auto_V2 extends Autonomous_Base {
 
         auto();
 
-        updateInputs();
-        updateOutputs();
+        setMotorPowers(0, 0, 0, 0);
+        lift.setPower(0.05);
+        intake.setIntakePower(0);
+
+        customWait(() -> (!isStopRequested()));
 
         /// Stop ///
 
         stopInputs();
         stopOutputs();
-
-        waitForTime(500);
     }
 
     @Override

@@ -176,7 +176,7 @@ public abstract class Autonomous_Base extends LinearOpMode {
     }
 
     //How accurate each attribute should be at each point
-    public static double POS_ACC = 1;
+    public static double POS_ACC = 0.5;
     public static double H_ACC = Math.toRadians(1);
 
     public static double MIN_SPEED = 0.2;
@@ -405,6 +405,88 @@ public abstract class Autonomous_Base extends LinearOpMode {
 
             double max = Math.max(Math.abs(xPower), Math.abs(yPower));
             if (dist <= CLOSE_DIST && max != 0) {
+                xPower /= max / MIN_SPEED;
+                yPower /= max / MIN_SPEED;
+            }
+            else {
+                if (max < MIN_SPEED && max != 0) {
+                    xPower /= max / MIN_SPEED;
+                    yPower /= max / MIN_SPEED;
+                }
+                if (Math.abs(hPower) < MIN_TURN && Math.abs(hPower) > 0)
+                    hPower = Math.copySign(MIN_TURN, hPower);
+            }
+
+            drive.setWeightedDrivePower(new Pose2d(xPower, yPower, hPower));
+
+            telemetry.addData("X Power: ", xPower);
+            telemetry.addData("Y Power: ", yPower);
+            telemetry.addData("H Power: ", hPower);
+
+            updateOutputs();
+        }
+
+        setMotorPowers(0, 0, 0, 0);
+    }
+    public void driveTo(Supplier<Double> destX, Supplier<Double> destY, Supplier<Double> destH,
+                        boolean stop) {
+        drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        PIDFController hControl = new PIDFController(H_PID);
+        hControl.setOutputBounds(0, 1);
+        hControl.setTargetPosition(0);
+
+        //Current robot position
+        double robotX = drive.getPoseEstimate().getX();
+        double robotY = drive.getPoseEstimate().getY();
+        double robotH = drive.getPoseEstimate().getHeading();
+
+        //Calculate relatives
+        double relX = destX.get() - robotX;
+        double relY = destY.get() - robotY;
+        double relH = deltaHeading(robotH, destH.get());
+
+        double hWeight;
+
+        //While robot is not at the current destination point
+        while (opModeIsActive() &&
+                (Math.abs(relX) > POS_ACC ||
+                        Math.abs(relY) > POS_ACC ||
+                        Math.abs(relH) > H_ACC)) {
+
+            updateInputs();
+
+            //Update robot position
+            robotX = drive.getPoseEstimate().getX();
+            robotY = drive.getPoseEstimate().getY();
+            robotH = drive.getPoseEstimate().getHeading();
+
+            //Calculate relatives
+            relX = destX.get() - robotX;
+            relY = destY.get() - robotY;
+            relH = deltaHeading(robotH, destH.get());
+
+            hWeight = hControl.update(Math.abs(relH));
+
+            if (Math.abs(relX) < POS_ACC) relX = 0;
+            if (Math.abs(relY) < POS_ACC) relY = 0;
+            if (Math.abs(relH) < H_ACC) hWeight = 0;
+
+            double driveAngle = deltaHeading(robotH, Math.atan2(relY, relX));
+
+            double xPower = Math.cos(driveAngle);
+            double yPower = Math.sin(driveAngle);
+            double hPower = Math.copySign(hWeight, relH);
+
+            double dist = Math.sqrt((relX*relX) + (relY*relY));
+
+            if (dist <= (stop ? SLOW_DIST : -1)) {
+                xPower *= Math.pow(dist / SLOW_DIST, 2);
+                yPower *= Math.pow(dist / SLOW_DIST, 2);
+            }
+
+            double max = Math.max(Math.abs(xPower), Math.abs(yPower));
+            if (dist <= (stop ? CLOSE_DIST : -1) && max != 0) {
                 xPower /= max / MIN_SPEED;
                 yPower /= max / MIN_SPEED;
             }
