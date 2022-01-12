@@ -5,7 +5,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.CarouselSpinner;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Intake;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
-import org.firstinspires.ftc.teamcode.Subsystems.Utils.LED.LED;
 
 import static org.firstinspires.ftc.teamcode.GlobalData.HEADING;
 import static org.firstinspires.ftc.teamcode.GlobalData.RAN_AUTO;
@@ -13,26 +12,61 @@ import static org.firstinspires.ftc.teamcode.GlobalData.RAN_AUTO;
 @TeleOp (name = "RED Tele_V2")
 //@Disabled
 public class Tele_V2_RED extends TeleOp_Base {
-    //LED
-    public LED led;
-    private boolean ledEnabled; //true if LED is enabled
 
     //Headless
     private boolean resetAngle;
 
+    //Control objects
     private Intake intake;
     private Lift lift;
     private CarouselSpinner spinner;
 
-    private double liftPower, lastLiftPower;
-
+    //Lift
     private enum LiftPosition {
-        GROUND, LOW, MIDDLE, HIGH;
+        GROUND(Lift.GROUND_HEIGHT),
+        LOW(Lift.LOW_HEIGHT),
+        MIDDLE(Lift.MIDDLE_HEIGHT),
+        HIGH(Lift.HIGH_HEIGHT),
+        CAP_DOWN(Lift.HIGH_HEIGHT - 2),
+        CAP(Lift.MAX_HEIGHT);
+
+        public double pos;
+
+        LiftPosition(double pos) {
+            this.pos = pos;
+        }
+
+        public LiftPosition cycleBackward() {
+            switch (this) {
+                case HIGH: return MIDDLE;
+                case MIDDLE: return LOW;
+                case LOW:
+                default: return HIGH;
+            }
+        }
     }
-    private LiftPosition liftPos, lastLiftPos;
+    private LiftPosition liftPos = LiftPosition.GROUND, lastLiftPos = LiftPosition.GROUND;
+    private LiftPosition allianceLevel = LiftPosition.HIGH;
+
+    private boolean toggleAllianceHub, lastToggleAllianceHub;
+    private boolean atAllianceLevel;
+    private boolean toggleSharedHub, lastToggleSharedHub;
+    private boolean atSharedLevel;
+    private boolean toggleCapping, lastToggleCapping;
+    private boolean capping, capDown;
+    private boolean switchAllianceLevel, lastSwitchAllianceLevel;
 
     private boolean resetLift, lastResetLift;
     private boolean manualOverride;
+
+    //Intake
+    private boolean freightInIntake, lastFreightInIntake;
+    private boolean outtake, lastOuttake;
+    private boolean stopIntake, lastStopIntake;
+    private boolean killSwitch;
+
+    //Spinner
+    private boolean spin, lastSpin;
 
     @Override
     public void init() {
@@ -55,13 +89,6 @@ public class Tele_V2_RED extends TeleOp_Base {
         addOutput(intake);
         addOutput(lift);
         addOutput(spinner);
-
-        lastLiftPower = 0;
-        liftPos = LiftPosition.GROUND;
-        lastLiftPos = LiftPosition.GROUND;
-        lastResetLift = false;
-        manualOverride = false;
-        ledEnable();
     }
 
     @Override
@@ -79,40 +106,9 @@ public class Tele_V2_RED extends TeleOp_Base {
     public void loop() {
         updateInputs();
         getInput();
-        ledUpdate();
 
         // Drive
         driveHeadless(gyro.getYaw(), resetAngle);
-
-        // Intake
-        if (gamepad2.right_trigger > 0.1 || gamepad2.left_trigger > 0.1)
-            intake.setIntakePower(gamepad2.right_trigger - gamepad2.left_trigger);
-        else intake.setIntakePower(0);
-
-        // Lift
-        if (liftPower != lastLiftPower)
-            lift.setPower(liftPower);
-        else if (liftPos != lastLiftPos) {
-            switch (liftPos) {
-                case HIGH:
-                    lift.setTargetHeight(Lift.HIGH_HEIGHT);
-                    break;
-                case MIDDLE:
-                    lift.setTargetHeight(Lift.MIDDLE_HEIGHT);
-                    break;
-                case LOW:
-                    lift.setTargetHeight(Lift.LOW_HEIGHT);
-                    break;
-                case GROUND:
-                    lift.setTargetHeight(0);
-                    break;
-            }
-        }
-
-        if (resetLift && !lastResetLift) {
-            lift.setManualOverride(!manualOverride);
-            manualOverride = !manualOverride;
-        }
 
         if (lift.getLiftHeight() > 10) {
             lim = 0.6;
@@ -121,9 +117,72 @@ public class Tele_V2_RED extends TeleOp_Base {
             lim = 1;
         }
 
+        //Lift
+
+        //Change height
+        if (switchAllianceLevel && !lastSwitchAllianceLevel) {
+            if (liftPos == LiftPosition.CAP)
+                capDown = !capDown;
+            else
+                allianceLevel = allianceLevel.cycleBackward();
+        }
+
+        if (toggleAllianceHub && !lastToggleAllianceHub) {
+            atAllianceLevel = (lastLiftPos != allianceLevel && lastLiftPos != LiftPosition.CAP
+                                && lastLiftPos != LiftPosition.CAP_DOWN);
+            atSharedLevel = false;
+            capping = false;
+        }
+        else if (toggleSharedHub && !lastToggleSharedHub) {
+            atAllianceLevel = false;
+            atSharedLevel = (lastLiftPos != LiftPosition.LOW);
+            capping = false;
+        }
+        else if (toggleCapping && !lastToggleCapping) {
+            atAllianceLevel = false;
+            atSharedLevel = false;
+            capping = (lastLiftPos != LiftPosition.CAP);
+        }
+
+        if (capping) {
+            if (capDown)
+                liftPos = LiftPosition.CAP_DOWN;
+            else
+                liftPos = LiftPosition.CAP;
+        }
+        else {
+            capDown = false;
+            if (atAllianceLevel) liftPos = allianceLevel;
+            else if (atSharedLevel) liftPos = LiftPosition.LOW;
+            else liftPos = LiftPosition.GROUND;
+        }
+
+        //Set height
+        if (liftPos != lastLiftPos) {
+            lift.setTargetHeight(liftPos.pos);
+        }
+
+        //Reset
+        if (resetLift && !lastResetLift) {
+            lift.setManualOverride(!manualOverride);
+            manualOverride = !manualOverride;
+        }
+
+        //Intake
+        if (stopIntake && !lastStopIntake) killSwitch = !killSwitch;
+
+        if (outtake)
+            intake.setIntakePower(1);
+        else if (killSwitch)
+            intake.setIntakePower(0);
+        else if (freightInIntake)
+            intake.setIntakePower(-0.2);
+        else
+            intake.setIntakePower(-1);
+
         // Carousel
-        spinner.setLeftPower(gamepad1.x ? 1 : 0);
-        spinner.setRightPower(gamepad1.b ? -1 : 0);
+        spinner.setLeftPower(spin ? -1 : 0);
+        spinner.setRightPower(spin ? 1 : 0);
 
         // Telemetry
         telemetry.addData("Lift Height: ", lift.getLiftHeight());
@@ -137,9 +196,6 @@ public class Tele_V2_RED extends TeleOp_Base {
     public void stop() {
         stopInputs();
         stopOutputs();
-        ledDisable();
-
-        RAN_AUTO = false;
     }
 
     @Override
@@ -150,55 +206,41 @@ public class Tele_V2_RED extends TeleOp_Base {
         rightX = curveInput(gamepad1.right_stick_x, 1)*lim*0.75 * 0.75;
         resetAngle = gamepad1.y;
 
-        if (gamepad1.right_trigger > 0.1 || gamepad1.left_trigger > 0.1)
-            liftPower = gamepad1.right_trigger - gamepad1.left_trigger;
-        else
-            liftPower = 0;
-
-        if (gamepad2.dpad_up) liftPos = LiftPosition.HIGH;
-        else if (gamepad2.dpad_left) liftPos = LiftPosition.MIDDLE;
-        else if (gamepad2.dpad_right) liftPos = LiftPosition.LOW;
-        else if (gamepad2.dpad_down) liftPos = LiftPosition.GROUND;
-
-        if (gamepad1.dpad_up) liftPos = LiftPosition.HIGH;
-        else if (gamepad1.dpad_left) liftPos = LiftPosition.MIDDLE;
-        else if (gamepad1.dpad_right) liftPos = LiftPosition.LOW;
-        else if (gamepad1.dpad_down) liftPos = LiftPosition.GROUND;
-
+        //Lift
+        lastLiftPos = liftPos;
+        toggleAllianceHub = gamepad1.right_trigger > 0.2;
+        toggleSharedHub = gamepad1.left_trigger > 0.2;
+        toggleCapping = gamepad1.b;
+        switchAllianceLevel = gamepad1.left_bumper;
         resetLift = gamepad1.back;
+
+        //Intake
+        freightInIntake = intake.getFreightInIntake();
+        outtake = gamepad1.right_bumper;
+        stopIntake = gamepad1.a;
+
+        //Spinner
+        spin = gamepad1.x;
     }
 
     @Override
     protected void updateStateMachine() {
+        //Headless
         lastLeftX = leftX; lastLeftY = leftY; lastRightX = rightX;
 
-        lastLiftPower = liftPower;
-        lastLiftPos = liftPos;
-
+        //Lift
+        lastToggleAllianceHub = toggleAllianceHub;
+        lastToggleSharedHub = toggleSharedHub;
+        lastToggleCapping = toggleCapping;
+        lastSwitchAllianceLevel = switchAllianceLevel;
         lastResetLift = resetLift;
-    }
 
-    /**
-     * disable LEDs
-     */
-    public void ledDisable(){
-        ledEnabled = false;
-    }
+        //Intake
+        lastFreightInIntake = freightInIntake;
+        lastOuttake = outtake;
+        lastStopIntake = stopIntake;
 
-    /**
-     * enable LEDs
-     */
-    public void ledEnable(){
-        ledEnabled = true;
-    }
-
-
-    /**
-     * sets LEDs to value.
-     * main lED code
-     */
-    public void ledUpdate() {
-        if (intake.getFreightInIntake()) led.green();
-        else led.red();
+        //Spinner
+        lastSpin = spin;
     }
 }
