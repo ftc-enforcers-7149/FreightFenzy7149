@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Autonomous;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.CarouselSpinner;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Intake;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
@@ -57,11 +59,8 @@ public abstract class Auto_V2 extends Autonomous_Base {
         });
 
         //Initialize vision for either alliance
-        tseDetector = new OpenCV(hardwareMap);
-        if (getAlliance() == Alliance.RED)
-            tseDetector.start(new TSEPipeline(320, 180, 320, 180));
-        else
-            tseDetector.start(new TSEPipeline(0, 180, 320, 180));
+        tseDetector = new OpenCV(hardwareMap, FtcDashboard.getInstance());
+        tseDetector.start(new TSEPipeline(0, 350, 360, 100));
 
         /// Init Loop ///
 

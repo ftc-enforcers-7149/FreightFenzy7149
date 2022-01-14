@@ -64,7 +64,7 @@ public class Intake implements Output, Input {
     public void updateInput() {
         if (useSensor) {
             distance.updateInput();
-            redValue.updateInput();
+            //redValue.updateInput();
         }
     }
 
@@ -86,14 +86,22 @@ public class Intake implements Output, Input {
     }
 
     public boolean getFreightInIntake () {
-        return useSensor && (distance.getValue() < minDistance /*|| redValue.getValue() > 100*/);
+        return useSensor && (distance.getValue() < minDistance);
+    }
+
+    public void startScanningIntake() {
+        distance.setDelayTime(0);
+    }
+
+    public void stopScanningIntake() {
+        distance.setDelayTime(250);
     }
 
     @Override
     public void startInput() {
         if (useSensor) {
             distance.startInput();
-            redValue.startInput();
+            //redValue.startInput();
         }
     }
 
@@ -101,7 +109,7 @@ public class Intake implements Output, Input {
     public void stopInput() {
         if (useSensor) {
             distance.stopInput();
-            redValue.stopInput();
+            //redValue.stopInput();
         }
     }
 

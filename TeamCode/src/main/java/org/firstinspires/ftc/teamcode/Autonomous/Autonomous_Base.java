@@ -413,7 +413,7 @@ public abstract class Autonomous_Base extends LinearOpMode {
                     xPower /= max / MIN_SPEED;
                     yPower /= max / MIN_SPEED;
                 }
-                if (Math.abs(hPower) < MIN_TURN && Math.abs(hPower) > 0)
+                if (hPower != 0 && Math.abs(hPower) < MIN_TURN)
                     hPower = Math.copySign(MIN_TURN, hPower);
             }
 
@@ -534,6 +534,9 @@ public abstract class Autonomous_Base extends LinearOpMode {
      * @return Shortest heading difference in radians
      */
     protected double deltaHeading(double robotH, double destH) {
+        if (robotH < 0) robotH += Math.PI * 2;
+        if (destH < 0) destH += Math.PI * 2;
+
         double diff = destH - robotH;
 
         if (diff < -Math.PI) diff += Math.PI * 2;

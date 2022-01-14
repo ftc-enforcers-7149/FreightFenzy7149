@@ -54,11 +54,38 @@ public class DistanceCorrection implements Input {
         running = false;
     }
 
-    public Vector2d correctPoseWithDist() {
-        double distX = alliance.equals(Alliance.BLUE) ? lDist.getValue() : rDist.getValue();
-        double distY = (FIELD_Y - fDist.getValue()) * (alliance.equals(Alliance.BLUE) ? 1 : -1);
+    /**
+     * Returns a robot position (x, y) based on its heading and distance sensor readings
+     * Only works when in the appropriate warehouse
+     * @param angle The robot's heading, in radians
+     * @return A new robot position
+     */
+    public Vector2d correctPoseWithDist(double angle) {
+        if (alliance == Alliance.BLUE) {
+            double leftDist = lDist.getValue();
+            double frontDist = fDist.getValue();
 
-        return new Vector2d(distX, distY);
+            double robotX = leftDist * sensorMultiplier(angle);
+            double robotY = 144 - frontDist * sensorMultiplier(angle);
+
+            return new Vector2d(robotX, robotY);
+        }
+        else {
+            double rightDist = rDist.getValue();
+            double frontDist = fDist.getValue();
+
+            double robotX = rightDist * sensorMultiplier(angle);
+            double robotY = frontDist * sensorMultiplier(angle) - 144;
+
+            return new Vector2d(robotX, robotY);
+        }
+    }
+
+    private double sensorMultiplier(double angle) {
+        if (alliance == Alliance.BLUE)
+            return Math.cos(Math.abs(Math.toRadians(90) - angle));
+        else
+            return Math.cos(Math.abs(Math.toRadians(270) - angle));
     }
 
     public double getSideWall() {
