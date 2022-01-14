@@ -17,8 +17,8 @@ public class AutoCommands {
     public HubLevel detectBarcode(OpenCV tseDetector) {
         if (op.getAlliance() == Alliance.BLUE) {
             RotatedRect boundingRect = tseDetector.getRect();
-            if (boundingRect == null) return HubLevel.LOW;
-            if (boundingRect.center.x <= 360 / 4.0) {
+            if (boundingRect == null || boundingRect.size.area() < 100) return HubLevel.LOW;
+            if (boundingRect.center.x <= 360 / 2.0) {
                 return HubLevel.MIDDLE;
             } else {
                 return HubLevel.HIGH;
@@ -26,8 +26,8 @@ public class AutoCommands {
         }
         else if (op.getAlliance() == Alliance.RED) {
             RotatedRect boundingRect = tseDetector.getRect();
-            if (boundingRect == null) return HubLevel.HIGH;
-            if (boundingRect.center.x <= 360 / 4.0) {
+            if (boundingRect == null || boundingRect.size.area() < 100) return HubLevel.HIGH;
+            if (boundingRect.center.x <= 360 / 2.0) {
                 return HubLevel.LOW;
             } else {
                 return HubLevel.MIDDLE;

@@ -59,7 +59,7 @@ public abstract class Auto_V2 extends Autonomous_Base {
         });
 
         //Initialize vision for either alliance
-        tseDetector = new OpenCV(hardwareMap, FtcDashboard.getInstance());
+        tseDetector = new OpenCV(hardwareMap);
         tseDetector.start(new TSEPipeline(0, 350, 360, 100));
 
         /// Init Loop ///

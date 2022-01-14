@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Testing;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -9,7 +10,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Gamepad.Touchpad;
 import java.util.HashMap;
 
 @TeleOp(name="Gamepad Test")
-//@Disabled
+@Disabled
 public class GamepadTest extends OpMode {
 
     Touchpad touchpad;
