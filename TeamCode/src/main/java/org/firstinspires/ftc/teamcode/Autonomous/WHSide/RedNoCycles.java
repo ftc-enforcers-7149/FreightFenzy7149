@@ -24,8 +24,6 @@ public class RedNoCycles extends Auto_V2 {
         drive.setPoseEstimate(new Pose2d(6.75, -78.25, 0));
 
         //Score pre-loaded
-        intake.setIntakePower(-0.2);
-
         switch (commands.detectBarcode(tseDetector)) {
             case LOW:
                 lift.setTargetHeight(Lift.LOW_HEIGHT);
@@ -39,32 +37,17 @@ public class RedNoCycles extends Auto_V2 {
                 break;
         }
 
-        driveTo(35, -77, Math.toRadians(30));
-        commands.outtake(intake);
+        driveTo(31, -69, Math.toRadians(30));
+        commands.outtake(intake, 1250);
 
-        //Cycles
-        int cycle = 0;
+        //Align with wall
+        driveToWall();
 
-        while (opModeIsActive()) {
-            //Align with wall
-            driveToWall();
+        //Drive through gap
+        driveIntoWarehouse();
 
-            //Drive through gap
-            driveIntoWarehouse();
-
-            //Intake / Don't hit wall
-            intake(Math.min(28 - (cycle * 2), 12));
-            //Park if running out of time
-            if (getRuntime() > 25) return;
-
-            //Drive out through gap
-            driveOutOfWarehouse();
-
-            //Drive to and score in hub
-            scoreInHub();
-
-            cycle++;
-        }
+        //Intake / Don't hit wall
+        intake(28);
     }
 
     private void driveToWall() {
@@ -172,51 +155,5 @@ public class RedNoCycles extends Auto_V2 {
         distCorrect.stopRunning();
 
         intake.setIntakePower(-0.2);
-    }
-
-    private void driveOutOfWarehouse() {
-        distCorrect.startRunning();
-
-        POS_ACC = 2;
-
-        driveTo(() -> {
-                    if (Math.abs(drive.getPoseEstimate().getY() + 70) > POS_ACC * 3)
-                        return drive.getPoseEstimate().getX() - 16;
-                    else
-                        return drive.getPoseEstimate().getX();
-                },
-                () -> {
-                    drive.setPoseEstimate(new Pose2d(drive.getPoseEstimate().getX(),
-                                                     drive.getPoseEstimate().getY(),
-                                                     Math.toRadians(270)));
-
-                    if (distCorrect.getSideWall() > 15)
-                        return -95.0;
-                    else
-                        return -70.0;
-                },
-                () -> Math.toRadians(270)
-        );
-
-        drive.setPoseEstimate(new Pose2d(
-                distCorrect.getSideWall(),
-                drive.getPoseEstimate().getY(),
-                Math.toRadians(270)));
-
-        POS_ACC = 0.5;
-
-        distCorrect.stopRunning();
-    }
-
-    private void scoreInHub() {
-        lift.setTargetHeight(Lift.HIGH_HEIGHT);
-
-        POS_ACC = 1;
-        H_ACC = Math.toRadians(4);
-        driveTo(35, -74, Math.toRadians(20));
-        POS_ACC = 0.5;
-        H_ACC = Math.toRadians(1);
-
-        commands.outtake(intake);
     }
 }
