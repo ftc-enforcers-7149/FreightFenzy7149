@@ -36,7 +36,7 @@ public class RedCycles extends Auto_V2 {
                 break;
         }
 
-        driveTo(33, -69, Math.toRadians(25));
+        driveTo(31, -69, Math.toRadians(30));
         commands.outtake(intake, 1250);
 
         //Cycles
@@ -50,7 +50,7 @@ public class RedCycles extends Auto_V2 {
             driveIntoWarehouse();
 
             //Intake / Don't hit wall
-            intake(Math.max(24 - (cycle * 7), 12));
+            intake(Math.max(18 - (cycle * 8), 12));
             //Park if running out of time
             if (getRuntime() > 26) return;
 
@@ -71,7 +71,7 @@ public class RedCycles extends Auto_V2 {
         POS_ACC = 2;
 
         driveTo(() -> {
-                    if (deltaHeading(drive.getPoseEstimate().getHeading(), Math.toRadians(280)) > Math.toRadians(3))
+                    if (Math.abs(deltaHeading(drive.getPoseEstimate().getHeading(), Math.toRadians(280))) > Math.toRadians(3))
                         return 7.5;
                     else {
                         lift.setTargetHeight(Lift.LOW_HEIGHT);
@@ -147,8 +147,10 @@ public class RedCycles extends Auto_V2 {
         POS_ACC = 0.5;
         H_ACC = Math.toRadians(1);
 
-        double robotHeading = drive.getPoseEstimate().getHeading();
-        drive.setPoseEstimate(new Pose2d(distCorrect.correctPoseWithDist(robotHeading), robotHeading));
+        if (distCorrect.getFrontDistance() < 50) {
+            double robotHeading = drive.getPoseEstimate().getHeading();
+            drive.setPoseEstimate(new Pose2d(distCorrect.correctPoseWithDist(robotHeading), robotHeading));
+        }
 
         intake.stopScanningIntake();
         distCorrect.stopRunning();
@@ -163,30 +165,35 @@ public class RedCycles extends Auto_V2 {
         SLOW_DIST = 2;
 
         driveTo(() -> {
-                    if (Math.abs(drive.getPoseEstimate().getY() + 70) > POS_ACC * 3)
+                    if (Math.abs(drive.getPoseEstimate().getY() + 78) > POS_ACC * 3)
                         return drive.getPoseEstimate().getX() - 10;
                     else
                         return drive.getPoseEstimate().getX();
                 },
                 () -> {
                     if (distCorrect.getSideWall() > 15)
-                        return -95.0;
+                        return -85.0;
                     else {
-                        drive.setPoseEstimate(new Pose2d(drive.getPoseEstimate().getX(),
+                        /*drive.setPoseEstimate(new Pose2d(drive.getPoseEstimate().getX(),
                                 drive.getPoseEstimate().getY(),
-                                Math.toRadians(270)));
+                                Math.toRadians(270)));*/
                         SLOW_DIST = 15;
 
-                        return -70.0;
+                        return -78.0;
                     }
                 },
                 () -> {
+                    if (distCorrect.getFrontDistance() < 40) {
+                        double robotHeading = drive.getPoseEstimate().getHeading();
+                        drive.setPoseEstimate(new Pose2d(distCorrect.correctPoseWithDist(robotHeading), robotHeading));
+                    }
+
                     if (distCorrect.getSideWall() > 15)
                         return Math.toRadians(271);
                     else
                         return Math.toRadians(270);
                 }
-        );
+        , 3000);
 
         drive.setPoseEstimate(new Pose2d(
                 distCorrect.getSideWall(),
@@ -203,7 +210,7 @@ public class RedCycles extends Auto_V2 {
 
         POS_ACC = 1;
         H_ACC = Math.toRadians(4);
-        driveTo(35, -74, Math.toRadians(20));
+        driveTo(35, -80, Math.toRadians(20));
         POS_ACC = 0.5;
         H_ACC = Math.toRadians(1);
 

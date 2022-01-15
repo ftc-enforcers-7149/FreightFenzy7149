@@ -105,6 +105,8 @@ public abstract class Auto_V2 extends Autonomous_Base {
     @Override
     protected final void addTelemetryData() {
         telemetry.addData("Position: ", drive.getPoseEstimate());
+        telemetry.addData("Front Distance: ", distCorrect.getFrontDistance());
+        telemetry.addData("Side Distance: ", distCorrect.getSideWall());
         telemetry.addData("Lift Height: ", lift.getLiftHeight());
         telemetry.addData("Freight in Intake? ", intake.getFreightInIntake());
     }
