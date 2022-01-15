@@ -8,7 +8,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
 
 import org.firstinspires.ftc.teamcode.Odometry.DriveWheels.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Subsystems.Sensors.BulkRead;
@@ -179,8 +178,10 @@ public abstract class Autonomous_Base extends LinearOpMode {
     public static double POS_ACC = 0.5;
     public static double H_ACC = Math.toRadians(1);
 
-    public static double MIN_SPEED = 0.1;
-    public static double MIN_TURN = 0.15;
+    public static double SPEED_MULT = 1;
+
+    public static double MIN_SPEED = 0.15;
+    public static double MIN_TURN = 0.2;
     public static double CLOSE_DIST = 0;
 
     public static double SLOW_DIST = 15;
@@ -230,9 +231,9 @@ public abstract class Autonomous_Base extends LinearOpMode {
 
             double driveAngle = deltaHeading(robotH, Math.atan2(relY, relX));
 
-            double xPower = Math.cos(driveAngle);
-            double yPower = Math.sin(driveAngle);
-            double hPower = Math.copySign(hWeight, relH);
+            double xPower = Math.cos(driveAngle) * SPEED_MULT;
+            double yPower = Math.sin(driveAngle) * SPEED_MULT;
+            double hPower = Math.copySign(hWeight, relH) * SPEED_MULT;
 
             double dist = Math.sqrt((relX*relX) + (relY*relY));
 

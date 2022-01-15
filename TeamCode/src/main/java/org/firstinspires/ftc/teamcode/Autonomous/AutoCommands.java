@@ -46,7 +46,7 @@ public class AutoCommands {
     public void outtake(Intake intake) {
         intake.setIntakePower(1);
         long startTime = System.currentTimeMillis();
-        op.customWait(() -> (System.currentTimeMillis() < startTime + 1000));
+        op.customWait(() -> (System.currentTimeMillis() < startTime + 1100));
         intake.setIntakePower(0);
     }
 

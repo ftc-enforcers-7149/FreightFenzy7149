@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Sensors;
 
 import com.acmerobotics.roadrunner.geometry.Vector2d;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -11,11 +11,11 @@ import org.firstinspires.ftc.teamcode.Subsystems.Utils.ValueTimer;
 
 public class DistanceCorrection implements Input {
 
-    private DistanceSensor sensorL, sensorR, sensorF;
+    private Rev2mDistanceSensor sensorL, sensorR, sensorF;
     private ValueTimer<Double> lDist, rDist, fDist;
-    private static double FIELD_X = 144, FIELD_Y = 144, F_OFFSET = 6.75 - 2.65, L_R_OFFSET = 7.5 - 0.3;
+    private static final double FIELD_X = 144, FIELD_Y = 144, F_OFFSET = 6.75 - 2.65, L_R_OFFSET = 7.5 - 0.3;
 
-    private Alliance alliance;
+    private final Alliance alliance;
 
     private boolean running;
 
@@ -23,7 +23,7 @@ public class DistanceCorrection implements Input {
                               Alliance alliance) {
 
         if (alliance == Alliance.BLUE) {
-            sensorL = hardwareMap.get(DistanceSensor.class, distLName);
+            sensorL = hardwareMap.get(Rev2mDistanceSensor.class, distLName);
             lDist = new ValueTimer<Double>(0.0, 0) {
                 @Override
                 public Double readValue() {
@@ -32,7 +32,7 @@ public class DistanceCorrection implements Input {
             };
         }
         else {
-            sensorR = hardwareMap.get(DistanceSensor.class, distRName);
+            sensorR = hardwareMap.get(Rev2mDistanceSensor.class, distRName);
             rDist = new ValueTimer<Double>(0.0, 0) {
                 @Override
                 public Double readValue() {
@@ -41,7 +41,7 @@ public class DistanceCorrection implements Input {
             };
         }
 
-        sensorF = hardwareMap.get(DistanceSensor.class, distFName);
+        sensorF = hardwareMap.get(Rev2mDistanceSensor.class, distFName);
         fDist = new ValueTimer<Double>(0.0, 0) {
             @Override
             public Double readValue() {
