@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Autonomous.DuckSide;
 
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
@@ -19,10 +20,11 @@ public class RedParkInUnit extends Auto_V2 {
 
     @Override
     protected void auto() {
+        drive.setPoseEstimate(new Vector2d(0, -12.75));
+
         HubLevel liftHeight = commands.detectBarcode(tseDetector);
 
         POS_ACC = 1;
-        SLOW_DIST = 15;
 
         //Drive to the duckwheel
         driveTo(5, 4, 0);

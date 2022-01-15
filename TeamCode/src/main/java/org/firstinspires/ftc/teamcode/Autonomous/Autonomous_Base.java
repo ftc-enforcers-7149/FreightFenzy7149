@@ -179,8 +179,8 @@ public abstract class Autonomous_Base extends LinearOpMode {
     public static double POS_ACC = 0.5;
     public static double H_ACC = Math.toRadians(1);
 
-    public static double MIN_SPEED = 0.2;
-    public static double MIN_TURN = 0.1;
+    public static double MIN_SPEED = 0.1;
+    public static double MIN_TURN = 0.15;
     public static double CLOSE_DIST = 0;
 
     public static double SLOW_DIST = 15;
@@ -429,7 +429,7 @@ public abstract class Autonomous_Base extends LinearOpMode {
         setMotorPowers(0, 0, 0, 0);
     }
     public void driveTo(Supplier<Double> destX, Supplier<Double> destY, Supplier<Double> destH,
-                        boolean stop) {
+                        long timeOut) {
         drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         PIDFController hControl = new PIDFController(H_PID);
@@ -448,8 +448,10 @@ public abstract class Autonomous_Base extends LinearOpMode {
 
         double hWeight;
 
+        long startTime = System.currentTimeMillis();
+
         //While robot is not at the current destination point
-        while (opModeIsActive() &&
+        while (opModeIsActive() && System.currentTimeMillis() < startTime + timeOut &&
                 (Math.abs(relX) > POS_ACC ||
                         Math.abs(relY) > POS_ACC ||
                         Math.abs(relH) > H_ACC)) {
@@ -480,13 +482,13 @@ public abstract class Autonomous_Base extends LinearOpMode {
 
             double dist = Math.sqrt((relX*relX) + (relY*relY));
 
-            if (dist <= (stop ? SLOW_DIST : -1)) {
+            if (dist <= SLOW_DIST) {
                 xPower *= Math.pow(dist / SLOW_DIST, 2);
                 yPower *= Math.pow(dist / SLOW_DIST, 2);
             }
 
             double max = Math.max(Math.abs(xPower), Math.abs(yPower));
-            if (dist <= (stop ? CLOSE_DIST : -1) && max != 0) {
+            if (dist <= CLOSE_DIST && max != 0) {
                 xPower /= max / MIN_SPEED;
                 yPower /= max / MIN_SPEED;
             }
@@ -495,7 +497,7 @@ public abstract class Autonomous_Base extends LinearOpMode {
                     xPower /= max / MIN_SPEED;
                     yPower /= max / MIN_SPEED;
                 }
-                if (Math.abs(hPower) < MIN_TURN && Math.abs(hPower) > 0)
+                if (hPower != 0 && Math.abs(hPower) < MIN_TURN)
                     hPower = Math.copySign(MIN_TURN, hPower);
             }
 

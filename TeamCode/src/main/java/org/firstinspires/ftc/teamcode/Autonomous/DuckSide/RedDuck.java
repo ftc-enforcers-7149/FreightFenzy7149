@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Autonomous.DuckSide;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
@@ -19,6 +20,8 @@ public class RedDuck extends Auto_V2 {
 
     @Override
     protected void auto() {
+        drive.setPoseEstimate(new Vector2d(0, -12.75));
+
         HubLevel liftHeight = commands.detectBarcode(tseDetector);
 
         intake.setIntakePower(-0.1);
