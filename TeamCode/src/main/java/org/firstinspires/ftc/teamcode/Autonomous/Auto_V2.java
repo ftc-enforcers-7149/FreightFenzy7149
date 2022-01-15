@@ -54,7 +54,7 @@ public abstract class Auto_V2 extends Autonomous_Base {
         addInput(new Input() {
             @Override
             public void updateInput() {
-                HEADING = gyro.getRawYaw();
+                HEADING = drive.getPoseEstimate().getHeading();
             }
         });
 
@@ -79,7 +79,7 @@ public abstract class Auto_V2 extends Autonomous_Base {
         //Set global variables
         ALLIANCE = getAlliance();
         RAN_AUTO = true;
-        HEADING = gyro.getRawYaw();
+        HEADING = drive.getPoseEstimate().getHeading();
 
         tseDetector.stop();
 

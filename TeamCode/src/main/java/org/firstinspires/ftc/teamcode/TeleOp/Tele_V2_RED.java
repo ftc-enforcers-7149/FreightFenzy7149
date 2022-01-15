@@ -27,7 +27,7 @@ public class Tele_V2_RED extends TeleOp_Base {
         LOW(Lift.LOW_HEIGHT),
         MIDDLE(Lift.MIDDLE_HEIGHT),
         HIGH(Lift.HIGH_HEIGHT),
-        CAP_DOWN(Lift.HIGH_HEIGHT - 2),
+        CAP_DOWN(Lift.HIGH_HEIGHT),
         CAP(Lift.MAX_HEIGHT);
 
         public double pos;
@@ -83,6 +83,7 @@ public class Tele_V2_RED extends TeleOp_Base {
         spinner = new CarouselSpinner(hardwareMap, "leftSpinner", "rightSpinner");
 
         if (RAN_AUTO) gyro.setOffset(HEADING);
+        RAN_AUTO = false;
 
         addInput(intake);
         addInput(lift);

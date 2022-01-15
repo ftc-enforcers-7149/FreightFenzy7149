@@ -109,11 +109,6 @@ public class RedCycles extends Auto_V2 {
         POS_ACC = 2;
         H_ACC = Math.toRadians(20);
 
-        /*driveTo(() -> drive.getPoseEstimate().getX() - 2,
-                () -> -80.0,
-                () -> Math.toRadians(268),
-         1500);*/
-
         drive.setWeightedDrivePower(new Pose2d(0.5, -0.4, 0));
         long driveStartTime = System.currentTimeMillis();
         customWait(() -> !intake.getFreightInIntake() &&
@@ -186,9 +181,6 @@ public class RedCycles extends Auto_V2 {
                     if (distCorrect.getSideWall() > 15)
                         return -85.0;
                     else {
-                        /*drive.setPoseEstimate(new Pose2d(drive.getPoseEstimate().getX(),
-                                drive.getPoseEstimate().getY(),
-                                Math.toRadians(270)));*/
                         SLOW_DIST = 15;
                         SPEED_MULT = 0.8;
 

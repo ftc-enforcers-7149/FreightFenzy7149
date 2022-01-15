@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.Autonomous.Auto_V2;
 import org.firstinspires.ftc.teamcode.Subsystems.Sensors.DistanceCorrection;
 
 @Autonomous(name = "Distance Correction Test")
-@Disabled
+//@Disabled
 public class DistanceCorrectionTest extends Auto_V2 {
 
     @Override
@@ -22,6 +22,7 @@ public class DistanceCorrectionTest extends Auto_V2 {
             drive.setPoseEstimate(distCorrect.correctPoseWithDist(drive.getPoseEstimate().getHeading()));
             telemetry.addData("Pose x:", drive.getPoseEstimate().getX());
             telemetry.addData("Pose y:", drive.getPoseEstimate().getY());
+            telemetry.addData("Distance F Health:", distCorrect.getSensorF().getDeviceClient().getHealthStatus());
 
             updateOutputs();
         }

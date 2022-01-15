@@ -11,7 +11,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Utils.ValueTimer;
 
 public class DistanceCorrection implements Input {
 
-    private Rev2mDistanceSensor sensorL, sensorR, sensorF;
+    public Rev2mDistanceSensor sensorL, sensorR, sensorF;
     private ValueTimer<Double> lDist, rDist, fDist;
     private static final double FIELD_X = 144, FIELD_Y = 144, F_OFFSET = 6.75 - 2.65, L_R_OFFSET = 7.5 - 0.3;
 
@@ -130,5 +130,17 @@ public class DistanceCorrection implements Input {
     @Override
     public void stopInput() {
         stopRunning();
+    }
+
+    public Rev2mDistanceSensor getSensorL() {
+        return sensorL;
+    }
+
+    public Rev2mDistanceSensor getSensorR() {
+        return sensorR;
+    }
+
+    public Rev2mDistanceSensor getSensorF() {
+        return sensorF;
     }
 }

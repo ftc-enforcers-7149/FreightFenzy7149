@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.Autonomous.DuckSide;
 
-import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
@@ -20,23 +19,23 @@ public class BlueDuck extends Auto_V2 {
 
     @Override
     protected void auto() {
-        drive.setPoseEstimate(new Vector2d(0, 12.75));
+        drive.setPoseEstimate(new Vector2d(0, 15));
 
         HubLevel liftHeight = commands.detectBarcode(tseDetector);
 
-        intake.setIntakePower(-0.1);
+        intake.setIntakePower(-0.2);
 
         POS_ACC = 1;
         SLOW_DIST = 15;
 
         //Drive to the duckwheel
-        driveTo(5, -4, 0);
+        driveTo(5, -8, 0);
 
         //Spin and stop duckwheel
         commands.spinDuck(spinner, 2750);
 
         //Drive to hub
-        driveTo(32,25, Math.toRadians(60));
+        driveTo(33,30, Math.toRadians(60));
 
         //Set lift to correct level according to the vision
         switch (liftHeight) {
@@ -52,13 +51,13 @@ public class BlueDuck extends Auto_V2 {
         }
 
         //Drive to hub and outtake
-        driveTo(34,27, Math.toRadians(70));
-        commands.outtake(intake);
+        driveTo(35,32, Math.toRadians(70));
+        commands.outtake(intake, 1250);
 
         H_ACC = Math.toRadians(6);
 
         //Drive a little bit back and drop lift
-        driveTo(32,25, Math.toRadians(70));
+        driveTo(33,30, Math.toRadians(70));
         lift.setTargetHeight(Lift.GROUND_HEIGHT);
 
         customWait(() -> (getRuntime() < 24));
@@ -70,7 +69,7 @@ public class BlueDuck extends Auto_V2 {
 
         SLOW_DIST = 20;
         POS_ACC = 3;
-        driveTo(4,120, Math.toRadians(280));
+        driveTo(15,120, Math.toRadians(280));
 
         //Lower lift all the way down for TeleOp
         commands.setLiftHeight(lift, Lift.GROUND_HEIGHT);
