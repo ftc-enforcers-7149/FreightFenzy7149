@@ -43,7 +43,7 @@ public class SimpleColorPipeline extends RectPipeline {
 
     @Override
     public Mat processFrame(Mat input) {
-        Mat output = input.clone();
+        //Mat output = input.clone();
 
         //Crop image to only the needed portion
         Mat cropped = cropMat(input, posX, posY, width, height);
@@ -80,29 +80,30 @@ public class SimpleColorPipeline extends RectPipeline {
             RotatedRect rect = Imgproc.minAreaRect(areaPoints);
 
             //Override the largest rectangle
-            if (rect.size.width * rect.size.height > maxArea) {
+            if (rect.size != null && rect.size.width * rect.size.height > maxArea) {
                 maxArea = rect.size.width * rect.size.height;
                 boundingRect = rect.clone();
 
                 //Draw the rectangle on the original image for output / debugging
-                drawFromCropped(output, boundingRect, drawColor, posX, posY);
+                //drawFromCropped(output, boundingRect, drawColor, posX, posY);
             }
         }
 
         //If no rectangles were found, reset boundingRect to null (nothing)
         if (maxArea == 0) {
-            boundingRect = null;
+            boundingRect = new RotatedRect(); //null;
         }
 
         //Convert the original image (with drawn rectangle) to a bitmap for output
-        bitmap = Bitmap.createBitmap(output.width(), output.height(), Bitmap.Config.RGB_565);
-        Utils.matToBitmap(output, bitmap);
+        //bitmap = Bitmap.createBitmap(output.width(), output.height(), Bitmap.Config.RGB_565);
+        //Utils.matToBitmap(output, bitmap);
 
-        input.release();
+        //input.release();
         cropped.release();
         roiTemp.release();
         hsvMat.release();
 
-        return output;
+        //return output;
+        return input;
     }
 }

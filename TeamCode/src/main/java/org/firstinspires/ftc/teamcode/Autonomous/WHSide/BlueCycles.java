@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
 
 import java.util.function.Supplier;
 
-@Autonomous(name = "Blue Cycles")
+@Autonomous(name = "Blue WH Cycles")
 //@Disabled
 public class    BlueCycles extends Auto_V2 {
 
@@ -26,7 +26,7 @@ public class    BlueCycles extends Auto_V2 {
         //Score pre-loaded
         switch (commands.detectBarcode(tseDetector)) {
             case LOW:
-                lift.setTargetHeight(Lift.LOW_HEIGHT);
+                lift.setTargetHeight(Lift.LOW_HEIGHT + 1);
                 break;
             case MIDDLE:
                 lift.setTargetHeight(Lift.MIDDLE_HEIGHT);
@@ -37,7 +37,9 @@ public class    BlueCycles extends Auto_V2 {
                 break;
         }
 
-        driveTo(31, 69, Math.toRadians(330));
+        SPEED_MULT = 0.8;
+        driveTo(32, 68, Math.toRadians(330));
+        SPEED_MULT = 1;
         commands.outtake(intake, 1250);
 
         //Cycles
@@ -53,7 +55,10 @@ public class    BlueCycles extends Auto_V2 {
             //Intake / Don't hit wall
             intake(Math.max(20 - (cycle * 8), 12));
             //Park if running out of time
-            if (getRuntime() > 26) return;
+            if (getRuntime() > 26) {
+                commands.setLiftHeight(lift, Lift.GROUND_HEIGHT);
+                return;
+            }
 
             //Drive out through gap
             driveOutOfWarehouse();
@@ -86,6 +91,7 @@ public class    BlueCycles extends Auto_V2 {
         long driveStartTime = System.currentTimeMillis();
         drive.setWeightedDrivePower(new Pose2d(0.005, 0.5, 0));
         customWait(() -> (distCorrect.getSideWall() > 8.2) && System.currentTimeMillis() < driveStartTime + 1000);
+        waitForTime(300);
         drive.setWeightedDrivePower(new Pose2d(0, 0, 0));
 
         drive.setPoseEstimate(new Pose2d(
@@ -172,7 +178,7 @@ public class    BlueCycles extends Auto_V2 {
         SPEED_MULT = 0.5;
 
         driveTo(() -> {
-                    if (Math.abs(drive.getPoseEstimate().getY() - 78) > POS_ACC * 3)
+                    if (Math.abs(drive.getPoseEstimate().getY() - 74) > POS_ACC * 3)
                         return drive.getPoseEstimate().getX() - 10;
                     else
                         return drive.getPoseEstimate().getX();
@@ -184,11 +190,12 @@ public class    BlueCycles extends Auto_V2 {
                         SLOW_DIST = 15;
                         SPEED_MULT = 0.8;
 
-                        return 78.0;
+                        return 74.0;
                     }
                 },
                 () -> {
-                    if (distCorrect.getFrontDistance() < 40) {
+                    if (distCorrect.getFrontDistance() < 40 &&
+                        distCorrect.getSideWall() < 20) {
                         double robotHeading = drive.getPoseEstimate().getHeading();
                         drive.setPoseEstimate(new Pose2d(distCorrect.correctPoseWithDist(robotHeading), robotHeading));
                     }
@@ -198,7 +205,7 @@ public class    BlueCycles extends Auto_V2 {
                     else
                         return Math.toRadians(90);
                 }
-        , 3000);
+        , 2000);
 
         drive.setPoseEstimate(new Pose2d(
                 distCorrect.getSideWall(),
@@ -216,7 +223,7 @@ public class    BlueCycles extends Auto_V2 {
 
         POS_ACC = 1;
         H_ACC = Math.toRadians(4);
-        driveTo(35, 75, Math.toRadians(335));
+        driveTo(35, 70, Math.toRadians(335));
         POS_ACC = 0.5;
         H_ACC = Math.toRadians(1);
 

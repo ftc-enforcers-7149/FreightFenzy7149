@@ -182,8 +182,8 @@ public class Tele_V2_BLUE extends TeleOp_Base {
             intake.setIntakePower(-1);
 
         // Carousel
-        spinner.setLeftPower(spin ? 1 : 0);
-        spinner.setRightPower(spin ? -1 : 0);
+        spinner.setLeftPower(spin ? -1 : 0);
+        spinner.setRightPower(spin ? 1 : 0);
 
         // Telemetry
         telemetry.addData("Lift Height: ", lift.getLiftHeight());

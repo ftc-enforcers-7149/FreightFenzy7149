@@ -20,42 +20,51 @@ public class RedParkInUnit extends Auto_V2 {
 
     @Override
     protected void auto() {
-        drive.setPoseEstimate(new Vector2d(0, -12.75));
+        drive.setPoseEstimate(new Vector2d(0, -15));
 
         HubLevel liftHeight = commands.detectBarcode(tseDetector);
 
+        intake.setIntakePower(-0.2);
+
         POS_ACC = 1;
+        SLOW_DIST = 15;
 
         //Drive to the duckwheel
-        driveTo(5, 4, 0);
+        driveTo(8, 12, 0);
 
         //Spin and stop duckwheel
-        commands.spinDuck(spinner, 2500);
-
-        //Drive to hub
-        driveTo(32,-25, Math.toRadians(300));
+        commands.spinDuck(spinner, 2750);
 
         //Set lift to correct level according to the vision
         switch (liftHeight) {
             case LOW:
-                commands.setLiftHeight(lift, Lift.LOW_HEIGHT);
+                lift.setTargetHeight(Lift.LOW_HEIGHT + 1);
                 break;
             case MIDDLE:
-                commands.setLiftHeight(lift, Lift.MIDDLE_HEIGHT);
+                lift.setTargetHeight(Lift.MIDDLE_HEIGHT);
                 break;
             case HIGH:
-                commands.setLiftHeight(lift, Lift.HIGH_HEIGHT);
+                lift.setTargetHeight(Lift.HIGH_HEIGHT);
                 break;
         }
 
-        //Drive to hub and outtake
-        driveTo( 34,-27, Math.toRadians(300));
-        commands.outtake(intake);
+        //Drive to hub
+        driveTo(32,-29, Math.toRadians(320));
 
-        H_ACC = Math.toRadians(3);
+        //Drive to hub and outtake
+        driveTo( 34,-32, Math.toRadians(320));
+        commands.outtake(intake, 1250);
+
+        H_ACC = Math.toRadians(6);
 
         //Drive a little bit back and drop lift
-        driveTo(32,-25, Math.toRadians(300));
+        driveTo(31,-32, Math.toRadians(320));
+        lift.setTargetHeight(Lift.GROUND_HEIGHT);
+
+        H_ACC = Math.toRadians(6);
+
+        //Drive a little bit back and drop lift
+        driveTo(31,-32, Math.toRadians(320));
         lift.setTargetHeight(Lift.GROUND_HEIGHT);
 
         //Align with the warehouse and park
