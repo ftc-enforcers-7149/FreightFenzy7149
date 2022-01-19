@@ -8,6 +8,7 @@ import com.acmerobotics.roadrunner.drive.DriveSignal;
 import com.acmerobotics.roadrunner.followers.HolonomicPIDVAFollower;
 import com.acmerobotics.roadrunner.followers.TrajectoryFollower;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder;
 import com.acmerobotics.roadrunner.trajectory.constraints.AngularVelocityConstraint;
@@ -45,8 +46,8 @@ import static org.firstinspires.ftc.teamcode.Odometry.DriveWheels.DriveConstants
 @Config
 public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
         implements Input, Output {
-    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(0, 0, 0);
-    public static PIDCoefficients HEADING_PID = new PIDCoefficients(0, 0, 0);
+    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(4, 0, 1);
+    public static PIDCoefficients HEADING_PID = new PIDCoefficients(2, 0, 0.3);
 
     public static double LATERAL_MULTIPLIER = 1.09115622611;
 
@@ -485,6 +486,10 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
 
     public static TrajectoryAccelerationConstraint getAccelerationConstraint(double maxAccel) {
         return new ProfileAccelerationConstraint(maxAccel);
+    }
+
+    public void setPoseEstimate(Vector2d vector) {
+        setPoseEstimate(new Pose2d(vector, getPoseEstimate().getHeading()));
     }
 
     public void pauseTrajectory() {
