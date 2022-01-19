@@ -28,11 +28,11 @@ public class Lift implements Output, Input {
     public static final int STAGES = 2;
 
     public static double GROUND_HEIGHT = 0;
-    public static double BARRIER_HEIGHT = 11.1;
-    public static double LOW_HEIGHT = 5;
-    public static double MIDDLE_HEIGHT = 9.5;
-    public static double HIGH_HEIGHT = 18;
-    public static double MAX_HEIGHT = 28;
+    public static double BARRIER_HEIGHT = 6;
+    public static double LOW_HEIGHT = 6;
+    public static double MIDDLE_HEIGHT = 11;
+    public static double HIGH_HEIGHT = 17.5;
+    public static double MAX_HEIGHT = 22;
 
     //PIDF Controller
     private PIDFController controller;
@@ -107,9 +107,9 @@ public class Lift implements Output, Input {
             output = controller.update(currPosition); //Update PID
 
             //Stop the motor when at rest on the floor
-            /*if (setPosition == 0 && currPosition < liftInchesToTicks(0.01)) {
+            if (setPosition == Lift.GROUND_HEIGHT && currPosition < Lift.GROUND_HEIGHT-liftInchesToTicks(0.01)) {
                 output = 0;
-            }*/
+            }
             if (output != lastOutput) {
                 lift.setPower(output);
 

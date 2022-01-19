@@ -1,11 +1,13 @@
 package org.firstinspires.ftc.teamcode.Testing.Prototyping;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 @TeleOp(name="Adam Four Bar")
+@Disabled
 public class AdamFourBar extends OpMode {
 
    private DcMotor rotate, lift;

@@ -35,14 +35,13 @@ public class OpenCV {
     }
 
     public void start(RectPipeline rectPipeline) {
-        pipeline = rectPipeline;
-        webcam.setPipeline(pipeline);
+        setPipeline(rectPipeline);
 
         webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
             public void onOpened() {
                 //Starts streaming with width, height, and rotation
-                webcam.startStreaming(640, 360, OpenCvCameraRotation.UPRIGHT);
+                webcam.startStreaming(640, 360, OpenCvCameraRotation.SIDEWAYS_LEFT);
             }
 
             @Override
@@ -50,6 +49,11 @@ public class OpenCV {
 
             }
         });
+    }
+
+    public void setPipeline(RectPipeline rectPipeline) {
+        pipeline = rectPipeline;
+        webcam.setPipeline(pipeline);
     }
 
     public void update() {
