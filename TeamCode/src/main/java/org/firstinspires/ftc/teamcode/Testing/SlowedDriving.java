@@ -50,7 +50,7 @@ public class SlowedDriving extends TeleOp_Base {
         else
             lift.setPower(0);
 
-        if (lift.getLiftHeight() > 5) {
+        if (lift.getHeight() > 5) {
             setSmoothingTimes(1, 200, 200);
         }
         else {
@@ -58,7 +58,7 @@ public class SlowedDriving extends TeleOp_Base {
         }
 
         // Telemetry
-        telemetry.addData("Lift Height: ", lift.getLiftHeight());
+        telemetry.addData("Lift Height: ", lift.getHeight());
 
         updateOutputs();
         updateStateMachine();

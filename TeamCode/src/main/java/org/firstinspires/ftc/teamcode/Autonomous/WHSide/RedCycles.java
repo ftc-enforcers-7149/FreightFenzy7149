@@ -5,14 +5,13 @@ import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
-import org.firstinspires.ftc.teamcode.Autonomous.Auto_V2;
+import org.firstinspires.ftc.teamcode.Autonomous.Auto_V2_5;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
-
-import java.util.function.Supplier;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.Levels;
 
 @Autonomous(name = "Red WH Cycles")
 //@Disabled
-public class RedCycles extends Auto_V2 {
+public class RedCycles extends Auto_V2_5 {
 
     @Override
     protected Alliance getAlliance() {
@@ -24,18 +23,7 @@ public class RedCycles extends Auto_V2 {
         drive.setPoseEstimate(new Pose2d(6.75, -78.25, 0));
 
         //Score pre-loaded
-        switch (commands.detectBarcode(tseDetector)) {
-            case LOW:
-                lift.setTargetHeight(Lift.LOW_HEIGHT + 1);
-                break;
-            case MIDDLE:
-                lift.setTargetHeight(Lift.MIDDLE_HEIGHT);
-                break;
-            case HIGH:
-            default:
-                lift.setTargetHeight(Lift.HIGH_HEIGHT);
-                break;
-        }
+        lift.setTargetHeight(commands.detectBarcode(tseDetector));
 
         SPEED_MULT = 0.8;
         driveTo(31, -64, Math.toRadians(30));
@@ -56,7 +44,7 @@ public class RedCycles extends Auto_V2 {
             intake(Math.max(20 - (cycle * 8), 12));
             //Park if running out of time
             if (getRuntime() > 26) {
-                commands.setLiftHeight(lift, Lift.GROUND_HEIGHT);
+                commands.setLiftHeight(lift, Levels.GROUND);
                 return;
             }
 
@@ -80,7 +68,7 @@ public class RedCycles extends Auto_V2 {
                     if (Math.abs(deltaHeading(drive.getPoseEstimate().getHeading(), Math.toRadians(280))) > Math.toRadians(3))
                         return 7.5;
                     else {
-                        lift.setTargetHeight(Lift.LOW_HEIGHT);
+                        lift.setTargetHeight(Levels.GROUND);
                         return drive.getPoseEstimate().getX();
                     }
                 },
@@ -109,7 +97,7 @@ public class RedCycles extends Auto_V2 {
         distCorrect.startRunning();
         intake.startScanningIntake();
 
-        lift.setTargetHeight(Lift.GROUND_HEIGHT);
+        lift.setTargetHeight(Levels.GROUND);
         intake.setIntakePower(-1);
 
         POS_ACC = 2;
@@ -137,7 +125,7 @@ public class RedCycles extends Auto_V2 {
         distCorrect.startRunning();
         intake.startScanningIntake();
 
-        lift.setTargetHeight(Lift.GROUND_HEIGHT);
+        lift.setTargetHeight(Levels.GROUND);
         intake.setIntakePower(-1);
 
         POS_ACC = 6;
@@ -219,7 +207,7 @@ public class RedCycles extends Auto_V2 {
     }
 
     private void scoreInHub() {
-        lift.setTargetHeight(Lift.HIGH_HEIGHT);
+        lift.setTargetHeight(Levels.HIGH);
 
         POS_ACC = 1;
         H_ACC = Math.toRadians(4);

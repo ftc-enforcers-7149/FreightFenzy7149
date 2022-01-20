@@ -6,14 +6,13 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
-import org.firstinspires.ftc.teamcode.Autonomous.Auto_V2;
+import org.firstinspires.ftc.teamcode.Autonomous.Auto_V2_5;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
-
-import java.util.function.Supplier;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.Levels;
 
 @Autonomous(name = "Blue WH No Cycles")
 @Disabled
-public class BlueNoCycles extends Auto_V2 {
+public class BlueNoCycles extends Auto_V2_5 {
 
     @Override
     protected Alliance getAlliance() {
@@ -25,18 +24,7 @@ public class BlueNoCycles extends Auto_V2 {
         drive.setPoseEstimate(new Pose2d(6.75, 78.25, 0));
 
         //Score pre-loaded
-        switch (commands.detectBarcode(tseDetector)) {
-            case LOW:
-                lift.setTargetHeight(Lift.LOW_HEIGHT + 1);
-                break;
-            case MIDDLE:
-                lift.setTargetHeight(Lift.MIDDLE_HEIGHT);
-                break;
-            case HIGH:
-            default:
-                lift.setTargetHeight(Lift.HIGH_HEIGHT);
-                break;
-        }
+        lift.setTargetHeight(commands.detectBarcode(tseDetector));
 
         SPEED_MULT = 0.8;
         driveTo(32, 68, Math.toRadians(330));
@@ -52,7 +40,7 @@ public class BlueNoCycles extends Auto_V2 {
         //Intake / Don't hit wall
         intake(20);
 
-        commands.setLiftHeight(lift, Lift.GROUND_HEIGHT);
+        commands.setLiftHeight(lift, Levels.GROUND);
     }
 
     private void driveToWall() {
@@ -65,7 +53,7 @@ public class BlueNoCycles extends Auto_V2 {
                     if (Math.abs(deltaHeading(drive.getPoseEstimate().getHeading(), Math.toRadians(80))) > Math.toRadians(3))
                         return 7.5;
                     else {
-                        lift.setTargetHeight(Lift.LOW_HEIGHT);
+                        lift.setTargetHeight(Levels.LOW);
                         return drive.getPoseEstimate().getX();
                     }
                 },
@@ -93,7 +81,7 @@ public class BlueNoCycles extends Auto_V2 {
         distCorrect.startRunning();
         intake.startScanningIntake();
 
-        lift.setTargetHeight(Lift.GROUND_HEIGHT);
+        lift.setTargetHeight(Levels.GROUND);
         intake.setIntakePower(-1);
 
         POS_ACC = 2;
@@ -121,7 +109,7 @@ public class BlueNoCycles extends Auto_V2 {
         distCorrect.startRunning();
         intake.startScanningIntake();
 
-        lift.setTargetHeight(Lift.GROUND_HEIGHT);
+        lift.setTargetHeight(Levels.GROUND);
         intake.setIntakePower(-1);
 
         POS_ACC = 6;

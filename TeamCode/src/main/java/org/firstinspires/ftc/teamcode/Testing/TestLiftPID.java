@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Sensors.BulkRead;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.Levels;
 import org.firstinspires.ftc.teamcode.TeleOp.TeleOp_Base;
 
 @TeleOp(name = "Test Lift PID")
@@ -16,10 +17,7 @@ public class TestLiftPID extends TeleOp_Base {
 
     private double liftPower;
 
-    private enum LiftPosition {
-        GROUND, LOW, MIDDLE, HIGH;
-    }
-    private LiftPosition liftPos, lastLiftPos;
+    private Levels liftPos, lastLiftPos;
 
     @Override
     public void init() {
@@ -41,23 +39,10 @@ public class TestLiftPID extends TeleOp_Base {
         }
 
         if (liftPos != lastLiftPos) {
-            switch (liftPos) {
-                case HIGH:
-                    lift.setTargetHeight(Lift.HIGH_HEIGHT);
-                    break;
-                case MIDDLE:
-                    lift.setTargetHeight(Lift.MIDDLE_HEIGHT);
-                    break;
-                case LOW:
-                    lift.setTargetHeight(Lift.LOW_HEIGHT);
-                    break;
-                case GROUND:
-                    lift.setTargetHeight(0);
-                    break;
-            }
+            lift.setTargetHeight(liftPos);
         }
 
-        telemetry.addData("Lift Height (in): ", lift.getLiftHeight());
+        telemetry.addData("Lift Height (in): ", lift.getHeight());
         telemetry.addData("Lift Motor Ticks: ", lift.getMotorTicks());
         telemetry.addData("Target Position", liftPos);
 
@@ -79,10 +64,10 @@ public class TestLiftPID extends TeleOp_Base {
         else
             liftPower = 0;
 
-        if (gamepad1.dpad_up) liftPos = LiftPosition.HIGH;
-        else if (gamepad1.dpad_left) liftPos = LiftPosition.MIDDLE;
-        else if (gamepad1.dpad_right) liftPos = LiftPosition.LOW;
-        else if (gamepad1.dpad_down) liftPos = LiftPosition.GROUND;
+        if (gamepad1.dpad_up) liftPos = Levels.HIGH;
+        else if (gamepad1.dpad_left) liftPos = Levels.MIDDLE;
+        else if (gamepad1.dpad_right) liftPos = Levels.LOW;
+        else if (gamepad1.dpad_down) liftPos = Levels.GROUND;
     }
 
     @Override

@@ -2,15 +2,13 @@ package org.firstinspires.ftc.teamcode.Testing;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
-import org.firstinspires.ftc.teamcode.Autonomous.Auto_V2;
-import org.firstinspires.ftc.teamcode.Subsystems.Sensors.DistanceCorrection;
+import org.firstinspires.ftc.teamcode.Autonomous.Auto_V2_5;
 
 @Autonomous(name = "Distance Correction Test")
 @Disabled
-public class DistanceCorrectionTest extends Auto_V2 {
+public class DistanceCorrectionTest extends Auto_V2_5 {
 
     @Override
     public void auto() {

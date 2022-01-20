@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Autonomous;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.CarouselSpinner;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Intake;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.Levels;
 import org.firstinspires.ftc.teamcode.Subsystems.Webcam.OpenCV;
 import org.opencv.core.RotatedRect;
 
@@ -14,40 +15,45 @@ public class AutoCommands {
         this.op = op;
     }
 
-    public HubLevel detectBarcode(OpenCV tseDetector) {
+    public Levels detectBarcode(OpenCV tseDetector) {
         try {
             if (op.getAlliance() == Alliance.BLUE) {
                 RotatedRect boundingRect = tseDetector.getRect();
 
-                if (boundingRect == null || boundingRect.size.area() < 1500) return HubLevel.LOW;
+                if (boundingRect == null || boundingRect.size.area() < 1500) return Levels.LOW;
                 if (boundingRect.center.x <= 360 / 2.0) {
-                    return HubLevel.MIDDLE;
+                    return Levels.MIDDLE;
                 } else {
-                    return HubLevel.HIGH;
+                    return Levels.HIGH;
                 }
             } else if (op.getAlliance() == Alliance.RED) {
                 RotatedRect boundingRect = tseDetector.getRect();
-                if (boundingRect == null || boundingRect.size.area() < 1500) return HubLevel.HIGH;
+                if (boundingRect == null || boundingRect.size.area() < 1500) return Levels.HIGH;
                 if (boundingRect.center.x <= 360 / 2.0) {
-                    return HubLevel.LOW;
+                    return Levels.LOW;
                 } else {
-                    return HubLevel.MIDDLE;
+                    return Levels.MIDDLE;
                 }
             } else {
-                return HubLevel.HIGH;
+                return Levels.HIGH;
             }
         }
         catch(Exception e){
             if (op.getAlliance() == Alliance.BLUE)
-                return HubLevel.LOW;
+                return Levels.LOW;
             else
-                return HubLevel.HIGH;
+                return Levels.HIGH;
         }
     }
 
     public void setLiftHeight(Lift lift, double height) {
         lift.setTargetHeight(height);
-        op.customWait(() -> (lift.getLiftHeight() < height - 0.5));
+        op.customWait(() -> (lift.getHeight() < height - 0.5));
+    }
+
+    public void setLiftHeight(Lift lift, Levels level) {
+        lift.setTargetHeight(level);
+        op.customWait(() -> (lift.getHeight() < level.height - 0.5));
     }
 
     public void outtake(Intake intake) {

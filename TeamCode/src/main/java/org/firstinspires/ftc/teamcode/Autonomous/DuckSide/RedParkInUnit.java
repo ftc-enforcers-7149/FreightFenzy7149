@@ -5,13 +5,12 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
-import org.firstinspires.ftc.teamcode.Autonomous.Auto_V2;
-import org.firstinspires.ftc.teamcode.Autonomous.HubLevel;
-import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
+import org.firstinspires.ftc.teamcode.Autonomous.Auto_V2_5;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.Levels;
 
 @Autonomous(name = "Red Duck - Unit Park")
 @Disabled
-public class RedParkInUnit extends Auto_V2 {
+public class RedParkInUnit extends Auto_V2_5 {
 
     @Override
     protected Alliance getAlliance() {
@@ -22,7 +21,7 @@ public class RedParkInUnit extends Auto_V2 {
     protected void auto() {
         drive.setPoseEstimate(new Vector2d(0, -15));
 
-        HubLevel liftHeight = commands.detectBarcode(tseDetector);
+        Levels liftHeight = commands.detectBarcode(tseDetector);
 
         intake.setIntakePower(-0.2);
 
@@ -30,23 +29,13 @@ public class RedParkInUnit extends Auto_V2 {
         SLOW_DIST = 15;
 
         //Drive to the duckwheel
-        driveTo(8, 12, 0);
+        driveTo(8, 13, 0);
 
         //Spin and stop duckwheel
-        commands.spinDuck(spinner, 2750);
+        commands.spinDuck(spinner, 3000);
 
         //Set lift to correct level according to the vision
-        switch (liftHeight) {
-            case LOW:
-                lift.setTargetHeight(Lift.LOW_HEIGHT + 1);
-                break;
-            case MIDDLE:
-                lift.setTargetHeight(Lift.MIDDLE_HEIGHT);
-                break;
-            case HIGH:
-                lift.setTargetHeight(Lift.HIGH_HEIGHT);
-                break;
-        }
+        lift.setTargetHeight(liftHeight);
 
         //Drive to hub
         driveTo(32,-29, Math.toRadians(320));
@@ -59,19 +48,13 @@ public class RedParkInUnit extends Auto_V2 {
 
         //Drive a little bit back and drop lift
         driveTo(31,-32, Math.toRadians(320));
-        lift.setTargetHeight(Lift.GROUND_HEIGHT);
-
-        H_ACC = Math.toRadians(6);
-
-        //Drive a little bit back and drop lift
-        driveTo(31,-32, Math.toRadians(320));
-        lift.setTargetHeight(Lift.GROUND_HEIGHT);
+        lift.setTargetHeight(Levels.GROUND);
 
         //Align with the warehouse and park
         driveTo(26,-20, Math.toRadians(270));
         driveTo(26,12, Math.toRadians(270));
 
         //Lower lift all the way down for TeleOp
-        commands.setLiftHeight(lift, Lift.GROUND_HEIGHT);
+        commands.setLiftHeight(lift, Levels.GROUND);
     }
 }

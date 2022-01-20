@@ -4,13 +4,12 @@ import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
-import org.firstinspires.ftc.teamcode.Autonomous.Auto_V2;
-import org.firstinspires.ftc.teamcode.Autonomous.HubLevel;
-import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
+import org.firstinspires.ftc.teamcode.Autonomous.Auto_V2_5;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.Levels;
 
 @Autonomous(name = "Blue Duck - WH Park")
 //@Disabled
-public class BlueDuck extends Auto_V2 {
+public class BlueDuck extends Auto_V2_5 {
 
     @Override
     protected Alliance getAlliance() {
@@ -21,7 +20,7 @@ public class BlueDuck extends Auto_V2 {
     protected void auto() {
         drive.setPoseEstimate(new Vector2d(0, 15));
 
-        HubLevel liftHeight = commands.detectBarcode(tseDetector);
+        Levels liftHeight = commands.detectBarcode(tseDetector);
 
         intake.setIntakePower(-0.2);
 
@@ -35,17 +34,7 @@ public class BlueDuck extends Auto_V2 {
         commands.spinDuck(spinner, 3000);
 
         //Set lift to correct level according to the vision
-        switch (liftHeight) {
-            case LOW:
-                lift.setTargetHeight(Lift.LOW_HEIGHT + 1);
-                break;
-            case MIDDLE:
-                lift.setTargetHeight(Lift.MIDDLE_HEIGHT);
-                break;
-            case HIGH:
-                lift.setTargetHeight(Lift.HIGH_HEIGHT);
-                break;
-        }
+        lift.setTargetHeight(liftHeight);
 
         //Drive to hub
         driveTo(29,26, Math.toRadians(40));
@@ -58,21 +47,21 @@ public class BlueDuck extends Auto_V2 {
 
         //Drive a little bit back and drop lift
         driveTo(27,29, Math.toRadians(40));
-        lift.setTargetHeight(Lift.GROUND_HEIGHT);
+        lift.setTargetHeight(Levels.GROUND);
 
         customWait(() -> (getRuntime() < 24));
-        lift.setTargetHeight(Lift.BARRIER_HEIGHT);
+        lift.setTargetHeight(Levels.LOW);
 
         //Align with the warehouse and park
         driveTo(20,33, Math.toRadians(270));
-        commands.setLiftHeight(lift, Lift.BARRIER_HEIGHT);
+        commands.setLiftHeight(lift, Levels.LOW);
 
         SLOW_DIST = 20;
         POS_ACC = 3;
         driveTo(20,120, Math.toRadians(280));
 
         //Lower lift all the way down for TeleOp
-        commands.setLiftHeight(lift, Lift.GROUND_HEIGHT);
+        commands.setLiftHeight(lift, Levels.GROUND);
 
         driveTo(drive.getPoseEstimate().getX() - 2, drive.getPoseEstimate().getY(), 0);
     }

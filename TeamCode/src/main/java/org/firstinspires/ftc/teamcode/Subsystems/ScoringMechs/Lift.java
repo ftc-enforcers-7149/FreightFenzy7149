@@ -10,7 +10,11 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Sensors.BulkRead;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Input;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.Levels;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Output;
+
+import static org.firstinspires.ftc.teamcode.Subsystems.Utils.Levels.GROUND;
+import static org.firstinspires.ftc.teamcode.Subsystems.Utils.Levels.MAX;
 
 @Config
 public class Lift implements Output, Input {
@@ -20,27 +24,27 @@ public class Lift implements Output, Input {
 
     //Bulk Read
     private BulkRead bRead;
-    private boolean useBRead;
+    private boolean useBR;
+
+    //Input
+    private int currPosition;
+    private int offset;
 
     //Convert motor ticks to rotations (using Gobilda's given equation)
-    private final double toRot = (((1+(46.0/17))) * (1+(46.0/17))) * 28;
+    private final double ticksPerRot = ((((1+(46/17d))) * (1+(46/17d))) * 28);
     public static final double PULLEY_CIRCUMFERENCE = 2.8285; //inches
     public static final int STAGES = 2;
+    private final double heightPerRot = PULLEY_CIRCUMFERENCE * STAGES;
+    private final double ticksPerInch = ticksPerRot / heightPerRot;
+    private final double inchesPerTick = heightPerRot / ticksPerRot;
 
-    public static double GROUND_HEIGHT = 0;
-    public static double BARRIER_HEIGHT = 6;
-    public static double LOW_HEIGHT = 6;
-    public static double MIDDLE_HEIGHT = 11;
-    public static double HIGH_HEIGHT = 17.5;
-    public static double MAX_HEIGHT = 22;
+    private double currHeight;
 
     //PIDF Controller
     private PIDFController controller;
     private double output, lastOutput;
     public static PIDCoefficients pidCoeffs = new PIDCoefficients(0.01, 0, 0);
-
-    //Position (in motor ticks) to run to
-    private int currPosition, setPosition;
+    private int setPosition;
 
     //Power to use if not running PID
     private double liftPower, lastLiftPower;
@@ -61,7 +65,7 @@ public class Lift implements Output, Input {
         initPID();
         initVars();
 
-        useBRead = false;
+        useBR = false;
     }
 
     public Lift(HardwareMap hardwareMap, String liftName, BulkRead bRead) {
@@ -75,13 +79,12 @@ public class Lift implements Output, Input {
         initVars();
 
         this.bRead = bRead;
-        useBRead = true;
+        useBR = true;
     }
 
     public Lift(HardwareMap hardwareMap, String liftName, BulkRead bRead, boolean reset) {
         lift = hardwareMap.get(DcMotorEx.class, liftName);
-        if (reset)
-            lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        if (reset) lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         lift.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -90,14 +93,21 @@ public class Lift implements Output, Input {
         initVars();
 
         this.bRead = bRead;
-        useBRead = true;
+        useBR = true;
+    }
+
+    private void setCurrPosition(int position) {
+        offset = position - currPosition;
+        currPosition = position;
     }
 
     @Override
     public void updateInput() {
         //Get motor ticks
-        if (useBRead) currPosition = -bRead.getMotorPos(lift);
-        else currPosition = lift.getCurrentPosition();
+        if (useBR) currPosition = -bRead.getMotorPos(lift) + offset;
+        else currPosition = lift.getCurrentPosition() + offset;
+
+        currHeight = inchesPerTick * currPosition;
     }
 
     @Override
@@ -107,7 +117,7 @@ public class Lift implements Output, Input {
             output = controller.update(currPosition); //Update PID
 
             //Stop the motor when at rest on the floor
-            if (setPosition == Lift.GROUND_HEIGHT && currPosition < Lift.GROUND_HEIGHT-liftInchesToTicks(0.01)) {
+            if (setPosition == GROUND.height && currPosition < GROUND.height - 0.05) {
                 output = 0;
             }
             if (output != lastOutput) {
@@ -119,7 +129,9 @@ public class Lift implements Output, Input {
 
         //Use motor power to move lift
         else {
-            if (!manualOverride && liftPower < 0 && getLiftHeight() < -0.05) liftPower = 0;
+            if (!manualOverride && (
+                    (liftPower < 0 && currHeight < -0.05) ||
+                    (liftPower > 0 && currHeight > MAX.height + 0.05))) liftPower = 0;
 
             if (liftPower != lastLiftPower) {
                 lift.setPower(liftPower);
@@ -136,8 +148,13 @@ public class Lift implements Output, Input {
     public void setPower(double power) {
         liftPower = power;
 
-        if (usePID) lastLiftPower = -2;
-        usePID = false;
+        if (power != 0) {
+            if (usePID) lastLiftPower = -2; //Impossible value so power != lastPower
+            usePID = false;
+        }
+        else if (!manualOverride) { //Hold position
+            setTargetHeight(getHeight());
+        }
     }
 
     /**
@@ -146,13 +163,17 @@ public class Lift implements Output, Input {
      */
     public void setTargetHeight(double inches) {
         //Keep bounds between 0 and MAX_HEIGHT
-        setPosition = liftInchesToTicks(Math.min(Math.max(inches, 0), MAX_HEIGHT));
+        setPosition = inchesToTicks(Math.min(Math.max(inches, GROUND.height), MAX.height));
         controller.setTargetPosition(setPosition);
         usePID = true;
     }
 
-    public double getTargetHeight() {
-        return Math.abs(ticksToLiftInches(setPosition));
+    /**
+     * Set a target height for the elevator, starting the PID
+     * @param level Target level
+     */
+    public void setTargetHeight(Levels level) {
+        setTargetHeight(level.height);
     }
 
     /**
@@ -162,45 +183,24 @@ public class Lift implements Output, Input {
      */
     public void setManualOverride(boolean override) {
         manualOverride = override;
-        if (override) currPosition = 0;
-        else {
-            lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        }
+        if (override) setCurrPosition(0);
     }
 
-    /**
-     * Gets the current position of the motor
-     * @return Motor ticks
-     */
-    public int getMotorTicks() {
+    public double getHeight() {
+        return !manualOverride ? currHeight : 0;
+    }
+
+    public double getMotorTicks() {
         return currPosition;
     }
 
     /**
-     * Gets the current height of the lift
-     * @return Height in inches
-     */
-    public double getLiftHeight() {
-        return ticksToLiftInches(currPosition);
-    }
-
-    /**
-     * Converts motor ticks to the amount of inches of lift
-     * @param ticks Motor ticks
-     * @return Amount of inches of lift
-     */
-    private double ticksToLiftInches(int ticks) {
-        return (ticks / toRot) * PULLEY_CIRCUMFERENCE * STAGES;
-    }
-
-    /**
-     * Converts amount of inches of lift to motor ticks
-     * @param inches Amount of inches of lift
+     * Converts amount of inches of height to motor ticks
+     * @param inches Amount of inches of height
      * @return Motor ticks
      */
-    private int liftInchesToTicks(double inches) {
-        return (int) ((inches / STAGES / PULLEY_CIRCUMFERENCE) * toRot);
+    private int inchesToTicks(double inches) {
+        return (int) (inches * ticksPerInch);
     }
 
     private void initPID() {
@@ -209,16 +209,13 @@ public class Lift implements Output, Input {
     }
 
     private void initVars() {
-        output = 0; lastOutput = 0;
-        setPosition = 0;
-        liftPower = 0; lastLiftPower = 0;
         usePID = true;
-        manualOverride = false;
     }
 
     @Override
     public void stopOutput() {
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        setManualOverride(true);
         setPower(0);
         updateOutput();
     }

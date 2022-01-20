@@ -15,7 +15,7 @@ import static org.firstinspires.ftc.teamcode.GlobalData.ALLIANCE;
 import static org.firstinspires.ftc.teamcode.GlobalData.HEADING;
 import static org.firstinspires.ftc.teamcode.GlobalData.RAN_AUTO;
 
-public abstract class Auto_V2 extends Autonomous_Base {
+public abstract class Auto_V2_5 extends Autonomous_Base {
 
     protected Intake intake;
     protected Lift lift;
@@ -107,7 +107,7 @@ public abstract class Auto_V2 extends Autonomous_Base {
         telemetry.addData("Position: ", drive.getPoseEstimate());
         telemetry.addData("Front Distance: ", distCorrect.getFrontDistance());
         telemetry.addData("Side Distance: ", distCorrect.getSideWall());
-        telemetry.addData("Lift Height: ", lift.getLiftHeight());
+        telemetry.addData("Lift Height: ", lift.getHeight());
         telemetry.addData("Freight in Intake? ", intake.getFreightInIntake());
     }
 }
