@@ -49,7 +49,7 @@ public class Tele_V2_BLUE extends TeleOp_Base {
 
     //Intake
     private boolean freightInIntake, lastFreightInIntake;
-    private double outtake, lastOuttake, in, lastIn;
+    private boolean outtake, lastOuttake, in, lastIn;
     private boolean stopIntake, lastStopIntake;
     private boolean killSwitch;
 
@@ -113,7 +113,7 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         //Change height
         if (switchAllianceLevel && !lastSwitchAllianceLevel) {
             if (liftPos == Levels.CAP)
-                capDown = !capDown;
+                capDown = true;
             else
                 allianceLevel = cycleBackward(allianceLevel);
         }
@@ -136,8 +136,12 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         }
 
         if (capping) {
-            if (capDown)
+            if (capDown) {
                 liftPos = Levels.HIGH;
+                atAllianceLevel = true;
+                allianceLevel = Levels.HIGH;
+                capping = false;
+            }
             else
                 liftPos = Levels.CAP;
         }
@@ -160,31 +164,31 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         }
 
         //Intake
-        if (stopIntake && !lastStopIntake) killSwitch = !killSwitch;
-
-        if (in > 0.1) {
-            intake.setIntakePower(in);
+        if (in) {
+            intake.setIntakePower(1);
             intake.setPaddle(MotorIntake.PaddlePosition.BACK);
             intake.setLatch(MotorIntake.LatchPosition.OPEN);
         }
-        else if (lastIn > 0.1) {
-            intake.setIntakePower(0);
+        else if (lastIn) {
             intake.setPaddle(MotorIntake.PaddlePosition.BACK);
             intake.setLatch(MotorIntake.LatchPosition.CLOSED);
         }
-        else if (outtake > 0.1) {
-            intake.setIntakePower(-outtake);
+
+        if (outtake) {
+            if (liftPos == Levels.LOW)
+                intake.setIntakePower(0.333);
+            else
+                intake.setIntakePower(-0.333);
             intake.setPaddle(MotorIntake.PaddlePosition.OUT);
             intake.setLatch(MotorIntake.LatchPosition.OPEN);
         }
-        else if (lastOuttake > 0.1) {
-            intake.setIntakePower(0);
+        else if (lastOuttake) {
             intake.setPaddle(MotorIntake.PaddlePosition.BACK);
             intake.setLatch(MotorIntake.LatchPosition.OPEN);
         }
-        else {
-            intake.setIntakePower(0);
-        }
+
+        if (!in && !outtake) intake.setIntakePower(0);
+
         /*else if (killSwitch)
             intake.setIntakePower(0);
         else if (freightInIntake)
@@ -228,9 +232,11 @@ public class Tele_V2_BLUE extends TeleOp_Base {
 
         //Intake
         freightInIntake = intake.getFreightInIntake();
-        outtake = gamepad2.left_trigger;
-        in = gamepad2.right_trigger;
-        stopIntake = gamepad2.a;
+        stopIntake = gamepad1.a;
+        if (stopIntake && !lastStopIntake) killSwitch = !killSwitch;
+
+        outtake = gamepad1.right_bumper;
+        in = !killSwitch;
 
         //Spinner
         spin = gamepad1.x;

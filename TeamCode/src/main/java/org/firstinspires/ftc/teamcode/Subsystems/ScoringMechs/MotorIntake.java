@@ -29,7 +29,8 @@ public class MotorIntake implements Input, Output {
 
     public enum PaddlePosition {
         BACK(0),
-        OUT(1);
+        OUT(1),
+        IDLE(0);
 
         public final double pos;
 
@@ -39,7 +40,8 @@ public class MotorIntake implements Input, Output {
     }
     public enum LatchPosition {
         OPEN(0),
-        CLOSED(0.8);
+        CLOSED(0.8),
+        IDLE(0);
 
         public final double pos;
 
@@ -48,8 +50,8 @@ public class MotorIntake implements Input, Output {
         }
     }
 
-    private PaddlePosition currPaddle = PaddlePosition.BACK, lastPaddle = PaddlePosition.BACK;
-    private LatchPosition currLatch = LatchPosition.OPEN, lastLatch = LatchPosition.OPEN;
+    private PaddlePosition currPaddle = PaddlePosition.BACK, lastPaddle = PaddlePosition.IDLE;
+    private LatchPosition currLatch = LatchPosition.OPEN, lastLatch = LatchPosition.IDLE;
 
     public MotorIntake(HardwareMap hardwaremap,
                        String motorName, String paddleName, String latchName,

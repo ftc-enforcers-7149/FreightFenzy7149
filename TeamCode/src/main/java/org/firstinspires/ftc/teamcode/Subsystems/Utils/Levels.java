@@ -9,7 +9,7 @@ public enum Levels {
     MIDDLE(8.5 + LEVEL_OFFSET),
     HIGH(14.75 + LEVEL_OFFSET),
     CAP(20.25 + CAP_OFFSET),
-    MAX(25);
+    MAX(22);
 
     public final double height;
 
