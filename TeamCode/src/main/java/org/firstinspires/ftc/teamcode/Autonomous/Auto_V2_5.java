@@ -1,12 +1,9 @@
 package org.firstinspires.ftc.teamcode.Autonomous;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.CarouselSpinner;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Intake;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
 import org.firstinspires.ftc.teamcode.Subsystems.Sensors.DistanceCorrection;
-import org.firstinspires.ftc.teamcode.Subsystems.Sensors.Positioning;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Input;
 import org.firstinspires.ftc.teamcode.Subsystems.Webcam.OpenCV;
 import org.firstinspires.ftc.teamcode.Subsystems.Webcam.TSEPipeline;
@@ -39,7 +36,7 @@ public abstract class Auto_V2_5 extends Autonomous_Base {
         //Initialize subsystems
         intake = new Intake(hardwareMap, "intake", "intakeColor");
         lift = new Lift(hardwareMap, "lift", bReadEH);
-        spinner = new CarouselSpinner(hardwareMap, "leftSpinner", "rightSpinner");
+        spinner = new CarouselSpinner(hardwareMap, "spinner");
         distCorrect = new DistanceCorrection(hardwareMap, "distL", "distR", "distF", getAlliance());
 
         //Add inputs & outputs

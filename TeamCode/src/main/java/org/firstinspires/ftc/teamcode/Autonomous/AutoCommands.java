@@ -72,14 +72,14 @@ public class AutoCommands {
 
     public void spinDuck(CarouselSpinner spinner, long msTime) {
         if (op.getAlliance() == Alliance.RED) {
-            spinner.setLeftPower(0.75);
+            spinner.setPower(-0.75);
             op.waitForTime(msTime);
-            spinner.setLeftPower(0);
         }
         else if (op.getAlliance() == Alliance.BLUE) {
-            spinner.setRightPower(0.75);
+            spinner.setPower(0.75);
             op.waitForTime(msTime);
-            spinner.setRightPower(0);
         }
+
+        spinner.setPower(0);
     }
 }

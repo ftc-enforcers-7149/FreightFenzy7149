@@ -1,11 +1,14 @@
 package org.firstinspires.ftc.teamcode.TeleOp;
 
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.CarouselSpinner;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Intake;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorIntake;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.LED.LED;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Levels;
 
 import static org.firstinspires.ftc.teamcode.GlobalData.HEADING;
@@ -22,6 +25,7 @@ public class Tele_V2_BLUE extends TeleOp_Base {
     private MotorIntake intake;
     private Lift lift;
     private CarouselSpinner spinner;
+    private LED led;
 
     //Lift
     public Levels cycleBackward(Levels level) {
@@ -69,8 +73,11 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         intake = new MotorIntake(hardwareMap,
                 "intake", "paddle", "latch");
                 //"intakeColor");
-        lift = new Lift(hardwareMap, "lift", bReadEH, !RAN_AUTO);
-        spinner = new CarouselSpinner(hardwareMap, "leftSpinner", "rightSpinner");
+        lift = new Lift(hardwareMap, "lift", bReadCH, !RAN_AUTO);
+        spinner = new CarouselSpinner(hardwareMap, "spinner");
+
+        led = new LED(hardwareMap, "blinkin", Alliance.BLUE);
+        led.setPattern(RevBlinkinLedDriver.BlinkinPattern.BREATH_BLUE);
 
         if (RAN_AUTO) gyro.setOffset(HEADING);
         RAN_AUTO = false;
@@ -80,6 +87,10 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         addOutput(intake);
         addOutput(lift);
         addOutput(spinner);
+        addOutput(led);
+
+        led.startOutput();
+        led.updateOutput();
     }
 
     @Override
@@ -101,12 +112,46 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         // Drive
         driveHeadless(gyro.getYaw(), resetAngle);
 
-        if (lift.getHeight() > 10) {
-            lim = 0.6;
+        /*if (lift.getHeight() > 10) {
+            lim = 0.9;
         }
         else {
             lim = 1;
+        }*/
+
+        //Intake
+        if (lastLiftPos == Levels.GROUND) {
+            if (freightInIntake && !lastFreightInIntake) {
+                intake.setIntakePower(0);
+                intake.setPaddle(MotorIntake.PaddlePosition.BACK);
+                intake.setLatch(MotorIntake.LatchPosition.CLOSED);
+                toggleSharedHub = true; //Go to shared level automatically
+            } else {
+                if (in) {
+                    intake.setIntakePower(1);
+                    intake.setPaddle(MotorIntake.PaddlePosition.BACK);
+                    intake.setLatch(MotorIntake.LatchPosition.OPEN);
+                } else if (lastIn) {
+                    intake.setPaddle(MotorIntake.PaddlePosition.BACK);
+                    intake.setLatch(MotorIntake.LatchPosition.CLOSED);
+                }
+            }
         }
+
+        if (outtake) {
+            if (liftPos == Levels.LOW)
+                intake.setIntakePower(0.333);
+            else
+                intake.setIntakePower(-0.333);
+            intake.setPaddle(MotorIntake.PaddlePosition.OUT);
+            intake.setLatch(MotorIntake.LatchPosition.OPEN);
+        }
+        else if (lastOuttake) {
+            intake.setPaddle(MotorIntake.PaddlePosition.BACK);
+            intake.setLatch(MotorIntake.LatchPosition.OPEN);
+        }
+
+        if (!(in && !(atAllianceLevel || atSharedLevel || capping)) && !outtake) intake.setIntakePower(0);
 
         //Lift
 
@@ -163,46 +208,19 @@ public class Tele_V2_BLUE extends TeleOp_Base {
             manualOverride = !manualOverride;
         }
 
-        //Intake
-        if (in) {
-            intake.setIntakePower(1);
-            intake.setPaddle(MotorIntake.PaddlePosition.BACK);
-            intake.setLatch(MotorIntake.LatchPosition.OPEN);
-        }
-        else if (lastIn) {
-            intake.setPaddle(MotorIntake.PaddlePosition.BACK);
-            intake.setLatch(MotorIntake.LatchPosition.CLOSED);
-        }
-
-        if (outtake) {
-            if (liftPos == Levels.LOW)
-                intake.setIntakePower(0.333);
-            else
-                intake.setIntakePower(-0.333);
-            intake.setPaddle(MotorIntake.PaddlePosition.OUT);
-            intake.setLatch(MotorIntake.LatchPosition.OPEN);
-        }
-        else if (lastOuttake) {
-            intake.setPaddle(MotorIntake.PaddlePosition.BACK);
-            intake.setLatch(MotorIntake.LatchPosition.OPEN);
-        }
-
-        if (!in && !outtake) intake.setIntakePower(0);
-
-        /*else if (killSwitch)
-            intake.setIntakePower(0);
-        else if (freightInIntake)
-            intake.setIntakePower(-0.2);
-        else
-            intake.setIntakePower(-1);*/
-
         // Carousel
-        spinner.setLeftPower(spin ? -1 : 0);
-        spinner.setRightPower(spin ? 1 : 0);
+        spinner.setPower(gamepad2.right_trigger - gamepad2.left_trigger);
+        telemetry.addData("Spinner Power: ", gamepad2.right_trigger - gamepad2.left_trigger);
 
         // Telemetry
         telemetry.addData("Lift Height: ", lift.getHeight());
-        telemetry.addData("Freight in Intake: ", intake.getFreightInIntake());
+        telemetry.addData("Freight in Intake: ", freightInIntake);
+
+        //Led
+        if (freightInIntake)
+            led.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
+        else
+            led.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
 
         updateOutputs();
         updateStateMachine();

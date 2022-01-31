@@ -20,7 +20,7 @@ public class MotorIntake implements Input, Output {
     //Sensors
     public RevColorSensorV3 intakeColorSensor;
 
-    private static final double minDistance = .5;
+    private static final double minDistance = .75;
     private ValueTimer<Double> distance;
     private final boolean useSensor;
 
@@ -28,9 +28,9 @@ public class MotorIntake implements Input, Output {
     private double intakePower = 0,  lastIntakePower = 0;
 
     public enum PaddlePosition {
-        BACK(0),
-        OUT(1),
-        IDLE(0);
+        BACK(1),
+        OUT(0.2),
+        IDLE(BACK.pos);
 
         public final double pos;
 
@@ -39,9 +39,9 @@ public class MotorIntake implements Input, Output {
         }
     }
     public enum LatchPosition {
-        OPEN(0),
-        CLOSED(0.8),
-        IDLE(0);
+        OPEN(0.8),
+        CLOSED(0),
+        IDLE(OPEN.pos);
 
         public final double pos;
 
