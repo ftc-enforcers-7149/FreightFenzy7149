@@ -38,6 +38,7 @@ public class Lift implements Output, Input {
     private final double ticksPerInch = ticksPerRot / heightPerRot;
     private final double inchesPerTick = heightPerRot / ticksPerRot;
 
+
     private double currHeight;
 
     //PIDF Controller
