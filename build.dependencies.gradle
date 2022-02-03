@@ -26,5 +26,6 @@ dependencies {
     implementation 'com.acmerobotics.roadrunner:core:0.5.4'
     implementation 'org.apache.commons:commons-math3:3.6.1'
     implementation 'org.openftc:easyopencv:1.5.1'
+    implementation 'io.github.ftc-enforcers-7149:touchpadplusplus:0.6.0'
 }
 

@@ -1,11 +1,13 @@
 package org.firstinspires.ftc.teamcode.TeleOp;
 
+import com.enforcers7149.touchpadplusplus.src.Touchpad;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.Odometry.DriveWheels.MecanumDrive;
+import org.firstinspires.ftc.teamcode.Subsystems.EnforcersTouchpad;
 import org.firstinspires.ftc.teamcode.Subsystems.Sensors.BulkRead;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Input;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Output;
@@ -23,6 +25,9 @@ public abstract class TeleOp_Base extends OpMode {
     protected DcMotorEx fLeft, fRight, bLeft, bRight;
     protected Gyroscope gyro;
     private boolean initializedMotors = false, initializedDrive = false, initializedGyro = false;
+
+    //Touchpad
+    protected EnforcersTouchpad touchpad1, touchpad2;
 
     //Control objects
     protected BulkRead bReadCH, bReadEH;
@@ -142,6 +147,17 @@ public abstract class TeleOp_Base extends OpMode {
         xJerk = new VelLimitsJerk(0);
         turnJerk = new VelLimitsJerk(0);
     }
+
+    protected void initializeTouchpad() {
+
+        touchpad1 = new EnforcersTouchpad(gamepad1);
+        touchpad2 = new EnforcersTouchpad(gamepad2);
+
+        addInput(touchpad1);
+        addInput(touchpad2);
+
+    }
+
     protected void initializeAll() throws Exception {
         initializeSources();
         initializeDrive();
@@ -149,6 +165,7 @@ public abstract class TeleOp_Base extends OpMode {
         initializeGyro();
         initializeOdometry();
         initializeVars();
+        initializeTouchpad();
     }
 
     protected void addInput(Input input) {
