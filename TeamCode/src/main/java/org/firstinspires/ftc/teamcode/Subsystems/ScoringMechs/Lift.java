@@ -32,7 +32,7 @@ public class Lift implements Output, Input {
 
     //Convert motor ticks to rotations (using Gobilda's given equation)
     private final double ticksPerRot = ((((1+(46/17d))) * (1+(46/17d))) * 28);
-    public static final double PULLEY_CIRCUMFERENCE = 2.8285; //inches
+    public static final double PULLEY_CIRCUMFERENCE = 2.975; //inches
     public static final int STAGES = 2;
     private final double heightPerRot = PULLEY_CIRCUMFERENCE * STAGES;
     private final double ticksPerInch = ticksPerRot / heightPerRot;

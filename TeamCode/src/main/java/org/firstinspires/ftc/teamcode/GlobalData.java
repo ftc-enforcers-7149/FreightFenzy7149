@@ -16,6 +16,6 @@ public class GlobalData {
     public static double HEADING = 0;
 
     //Lift Data
-    public static final double LEVEL_OFFSET = 3.5;
+    public static final double LEVEL_OFFSET = 2.5;
     public static final double CAP_OFFSET = 1;
 }

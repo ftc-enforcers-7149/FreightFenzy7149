@@ -71,8 +71,7 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         }
 
         intake = new MotorIntake(hardwareMap,
-                "intake", "paddle", "latch");
-                //"intakeColor");
+                "intake", "paddle", "latch", "intakeColor");
         lift = new Lift(hardwareMap, "lift", bReadCH, !RAN_AUTO);
         spinner = new CarouselSpinner(hardwareMap, "spinner");
 
@@ -120,7 +119,7 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         }*/
 
         //Intake
-        if (lastLiftPos == Levels.GROUND) {
+        if (lastLiftPos == Levels.GROUND && lift.getHeight() <= Levels.GROUND.height + 0.1) {
             if (freightInIntake && !lastFreightInIntake) {
                 intake.setIntakePower(0);
                 intake.setPaddle(MotorIntake.PaddlePosition.BACK);
@@ -137,12 +136,15 @@ public class Tele_V2_BLUE extends TeleOp_Base {
                 }
             }
         }
+        else {
+            in = false;
+        }
 
         if (outtake) {
             if (liftPos == Levels.LOW)
                 intake.setIntakePower(0.333);
             else
-                intake.setIntakePower(-0.333);
+                intake.setIntakePower(0);
             intake.setPaddle(MotorIntake.PaddlePosition.OUT);
             intake.setLatch(MotorIntake.LatchPosition.OPEN);
         }
@@ -151,7 +153,7 @@ public class Tele_V2_BLUE extends TeleOp_Base {
             intake.setLatch(MotorIntake.LatchPosition.OPEN);
         }
 
-        if (!(in && !(atAllianceLevel || atSharedLevel || capping)) && !outtake) intake.setIntakePower(0);
+        if (!in && !outtake) intake.setIntakePower(0);
 
         //Lift
 
@@ -165,7 +167,7 @@ public class Tele_V2_BLUE extends TeleOp_Base {
 
         if (toggleAllianceHub && !lastToggleAllianceHub) {
             atAllianceLevel = (lastLiftPos != allianceLevel && lastLiftPos != Levels.CAP
-                                && lastLiftPos != Levels.HIGH);
+                    && lastLiftPos != Levels.HIGH);
             atSharedLevel = false;
             capping = false;
         }

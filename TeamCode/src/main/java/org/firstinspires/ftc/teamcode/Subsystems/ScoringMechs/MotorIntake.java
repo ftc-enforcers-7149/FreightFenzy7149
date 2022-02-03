@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs;
 
 import com.qualcomm.hardware.rev.RevColorSensorV3;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -29,7 +30,7 @@ public class MotorIntake implements Input, Output {
 
     public enum PaddlePosition {
         BACK(1),
-        OUT(0.2),
+        OUT(0.3),
         IDLE(BACK.pos);
 
         public final double pos;
@@ -39,8 +40,8 @@ public class MotorIntake implements Input, Output {
         }
     }
     public enum LatchPosition {
-        OPEN(0.8),
-        CLOSED(0),
+        OPEN(1),
+        CLOSED(0.2),
         IDLE(OPEN.pos);
 
         public final double pos;
@@ -58,6 +59,7 @@ public class MotorIntake implements Input, Output {
                        String intakeColorSensorName) {
         intake = hardwaremap.get(DcMotorEx.class, motorName);
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
+        intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         paddle = hardwaremap.servo.get(paddleName);
         latch = hardwaremap.servo.get(latchName);
 

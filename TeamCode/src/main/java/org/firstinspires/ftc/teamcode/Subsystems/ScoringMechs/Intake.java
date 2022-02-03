@@ -18,7 +18,7 @@ public class Intake implements Output, Input {
     //Sensors
     public RevColorSensorV3 intakeColorSensor;
 
-    private static final double minDistance = .5;
+    private static final double minDistance = 1;
     private ValueTimer<Double> distance;
     private ValueTimer<Integer> redValue;
     private final boolean useSensor;

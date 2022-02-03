@@ -144,7 +144,7 @@ public class Tele_V2_RED extends TeleOp_Base {
             if (liftPos == Levels.LOW)
                 intake.setIntakePower(0.333);
             else
-                intake.setIntakePower(-0.333);
+                intake.setIntakePower(0);
             intake.setPaddle(MotorIntake.PaddlePosition.OUT);
             intake.setLatch(MotorIntake.LatchPosition.OPEN);
         }
