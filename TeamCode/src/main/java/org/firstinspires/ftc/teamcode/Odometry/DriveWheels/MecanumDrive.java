@@ -9,6 +9,7 @@ import com.acmerobotics.roadrunner.followers.HolonomicPIDVAFollower;
 import com.acmerobotics.roadrunner.followers.TrajectoryFollower;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.acmerobotics.roadrunner.kinematics.MecanumKinematics;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder;
 import com.acmerobotics.roadrunner.trajectory.constraints.AngularVelocityConstraint;
@@ -364,6 +365,11 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
         if (bL != lastBL) bLeft.setPower(bL);
         if (bR != lastBR) bRight.setPower(bR);
         if (fR != lastFR) fRight.setPower(fR);
+
+        lastFL = fL;
+        lastBL = bL;
+        lastBR = bR;
+        lastFR = fR;
     }
 
     public void waitForIdle() {
@@ -427,8 +433,8 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
 
         wheelPositions.add(-encoderTicksToInches(bReadCH.getMotorPos(fLeft)) * WHEEL_MULT);
         wheelPositions.add(-encoderTicksToInches(bReadCH.getMotorPos(bLeft)) * WHEEL_MULT);
-        wheelPositions.add(-encoderTicksToInches(bReadCH.getMotorPos(bRight)) * WHEEL_MULT);
-        wheelPositions.add(-encoderTicksToInches(bReadCH.getMotorPos(fRight)) * WHEEL_MULT);
+        wheelPositions.add(-encoderTicksToInches(bReadEH.getMotorPos(bRight)) * WHEEL_MULT);
+        wheelPositions.add(-encoderTicksToInches(bReadEH.getMotorPos(fRight)) * WHEEL_MULT);
         return wheelPositions;
     }
 
@@ -439,8 +445,8 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
 
         wheelVelocities.add(-encoderTicksToInches(bReadCH.getMotorVel(fLeft)) * WHEEL_MULT);
         wheelVelocities.add(-encoderTicksToInches(bReadCH.getMotorVel(bLeft)) * WHEEL_MULT);
-        wheelVelocities.add(-encoderTicksToInches(bReadCH.getMotorVel(bRight)) * WHEEL_MULT);
-        wheelVelocities.add(-encoderTicksToInches(bReadCH.getMotorVel(fRight)) * WHEEL_MULT);
+        wheelVelocities.add(-encoderTicksToInches(bReadEH.getMotorVel(bRight)) * WHEEL_MULT);
+        wheelVelocities.add(-encoderTicksToInches(bReadEH.getMotorVel(fRight)) * WHEEL_MULT);
         return wheelVelocities;
     }
 

@@ -5,7 +5,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.CarouselSpinner;
-import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Intake;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorIntake;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.LED.LED;
@@ -119,25 +118,20 @@ public class Tele_V2_RED extends TeleOp_Base {
         }*/
 
         //Intake
-        if (lastLiftPos == Levels.GROUND && lift.getHeight() <= Levels.GROUND.height + 0.1) {
-            if (freightInIntake && !lastFreightInIntake) {
-                intake.setIntakePower(0);
+        if (freightInIntake && !lastFreightInIntake) {
+            intake.setIntakePower(0);
+            intake.setPaddle(MotorIntake.PaddlePosition.BACK);
+            intake.setLatch(MotorIntake.LatchPosition.CLOSED);
+            toggleSharedHub = true; //Go to shared level automatically
+        } else {
+            if (in) {
+                intake.setIntakePower(1);
+                intake.setPaddle(MotorIntake.PaddlePosition.BACK);
+                intake.setLatch(MotorIntake.LatchPosition.OPEN);
+            } else if (lastIn) {
                 intake.setPaddle(MotorIntake.PaddlePosition.BACK);
                 intake.setLatch(MotorIntake.LatchPosition.CLOSED);
-                toggleSharedHub = true; //Go to shared level automatically
-            } else {
-                if (in) {
-                    intake.setIntakePower(1);
-                    intake.setPaddle(MotorIntake.PaddlePosition.BACK);
-                    intake.setLatch(MotorIntake.LatchPosition.OPEN);
-                } else if (lastIn) {
-                    intake.setPaddle(MotorIntake.PaddlePosition.BACK);
-                    intake.setLatch(MotorIntake.LatchPosition.CLOSED);
-                }
             }
-        }
-        else {
-            in = false;
         }
 
         if (outtake) {
@@ -203,6 +197,9 @@ public class Tele_V2_RED extends TeleOp_Base {
         if (liftPos != lastLiftPos) {
             lift.setTargetHeight(liftPos);
         }
+
+        //Killswitch intake automatically
+        if (liftPos != Levels.GROUND) killSwitch = true;
 
         //Reset
         if (resetLift && !lastResetLift) {

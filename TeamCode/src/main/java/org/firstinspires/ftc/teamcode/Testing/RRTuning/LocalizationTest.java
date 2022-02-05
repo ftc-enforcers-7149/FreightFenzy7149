@@ -19,7 +19,7 @@ import java.util.List;
  * encoder localizer heading may be significantly off if the track width has not been tuned).
  */
 @TeleOp(group = "drive")
-@Disabled
+//@Disabled
 public class LocalizationTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
@@ -31,7 +31,14 @@ public class LocalizationTest extends LinearOpMode {
 
         waitForStart();
 
+        drive.startInput();
+        drive.startOutput();
+
         while (!isStopRequested()) {
+            bReadCH.updateInput();
+            bReadEH.updateInput();
+            drive.updateInput();
+
             drive.setWeightedDrivePower(
                     new Pose2d(
                             -gamepad1.left_stick_y,
@@ -39,9 +46,6 @@ public class LocalizationTest extends LinearOpMode {
                             -gamepad1.right_stick_x
                     )
             );
-
-            drive.updateInput();
-            drive.updateOutput();
 
             Pose2d poseEstimate = drive.getPoseEstimate();
             telemetry.addData("x", poseEstimate.getX());
@@ -56,6 +60,11 @@ public class LocalizationTest extends LinearOpMode {
             telemetry.addLine(wheelPositions.get(2).toString());
             telemetry.addLine(wheelPositions.get(3).toString());
             telemetry.update();
+
+            drive.updateOutput();
         }
+
+        drive.startInput();
+        drive.stopOutput();
     }
 }
