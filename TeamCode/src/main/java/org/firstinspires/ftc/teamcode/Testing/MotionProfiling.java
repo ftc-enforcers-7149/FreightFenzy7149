@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Testing;
 
 import android.os.SystemClock;
 
+import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.acmerobotics.roadrunner.control.PIDFController;
 import com.acmerobotics.roadrunner.profile.MotionProfile;
 import com.acmerobotics.roadrunner.profile.MotionProfileGenerator;
@@ -13,11 +14,15 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 public class MotionProfiling extends OpMode {
     DcMotor spinner;
     PIDFController controller;
-    double elapsedTime, currentTime = 0, lastTime = 0, lastX = 0;
-    //*************************Get conversion from encoder ticks to rotations*******************************
+    public static PIDCoefficients pidCoeffs = new PIDCoefficients(0.01, 0, 0);
+    private double elapsedTime, currentTime = 0, lastTime = 0, lastX = 0;
+    private double wheelDiam = 4 * Math.PI;
+
+    private double ticksPerRot = ((((1+(46/17))) * (1+(46/17))) * 28);
+
     MotionProfile profile = MotionProfileGenerator.generateSimpleMotionProfile(
             new MotionState(0, 0, 0),
-            new MotionState(60, 2, 2), //Set X to rotations
+            new MotionState(3.68, 2, 2),
             2,
             2,
             2
@@ -29,6 +34,7 @@ public class MotionProfiling extends OpMode {
         spinner.setDirection(DcMotorSimple.Direction.FORWARD);
 
         //Initialise PIDF
+        initPID();
     }
 
     @Override
@@ -38,7 +44,7 @@ public class MotionProfiling extends OpMode {
 
         MotionState state = profile.get(elapsedTime);
 
-        double measuredPosition = state.getX() - lastX; //Make this the actual rotations of the motor
+        double measuredPosition = inchesToRotation(state.getX()) - lastX; //Make this the actual rotations of the motor
 
         controller.setTargetPosition(state.getX());
         controller.setTargetVelocity(state.getV());
@@ -48,7 +54,7 @@ public class MotionProfiling extends OpMode {
         spinner.setPower(correction);
 
         lastTime = currentTime;
-        lastX = state.getX();
+        lastX = inchesToRotation(state.getX());
     }
 
     @Override
@@ -56,4 +62,12 @@ public class MotionProfiling extends OpMode {
 
     }
 
+    private void initPID() {
+        controller = new PIDFController(pidCoeffs);
+        controller.setOutputBounds(-1, 1);
+    }
+
+    private double inchesToRotation (double inches) {
+        return inches / wheelDiam;
+    }
 }
