@@ -26,8 +26,15 @@ public class MotionProfiling extends OpMode {
     PIDFController controller;
 
     double elapsedTime, currentTime = 0, startTime = 0;
+    private double measuredPosition;
 
-    //*************************Get conversion from encoder ticks to rotations*******************************
+    public enum MotorStates{
+        MOTION_PROFILING(),
+        FULL_POWER(),
+        IDLE()
+    }
+    MotorStates mState = MotorStates.IDLE;
+
     MotionProfile profile = MotionProfileGenerator.generateSimpleMotionProfile(
             new MotionState(0, 0, 0),
             new MotionState((15*Math.PI - 1) / (4 * Math.PI) * 2, 10, 50), //Set X to rotations
@@ -58,28 +65,46 @@ public class MotionProfiling extends OpMode {
     @Override
     public void loop() {
         currentTime = SystemClock.currentThreadTimeMillis();
+        measuredPosition = spinner.getCurrentPosition() / ticksPerRot - offset;
 
         a = gamepad1.a;
         if (a && !lastA) {
-            startTime = SystemClock.currentThreadTimeMillis();
+            startTime = currentTime;
             offset = spinner.getCurrentPosition() / ticksPerRot;
+            measuredPosition = 0;
         }
 
-        elapsedTime = currentTime - startTime;
+        if (measuredPosition < (15*Math.PI - 1) / (4 * Math.PI)) {
+            mState = MotorStates.MOTION_PROFILING;
+        } else if (measuredPosition < (15*Math.PI - 1) / (4 * Math.PI) + 10) {
+            mState = MotorStates.FULL_POWER;
+        } else {
+            mState = MotorStates.IDLE;
+        }
 
-        MotionState state = profile.get(elapsedTime / 1000.0);
+        switch (mState) {
+            case MOTION_PROFILING:
+                elapsedTime = currentTime - startTime;
 
-        double measuredPosition = spinner.getCurrentPosition() / ticksPerRot;
+                MotionState state = profile.get(elapsedTime / 1000.0);
 
-        controller.setTargetPosition(state.getX());
-        controller.setTargetVelocity(state.getV());
-        controller.setTargetAcceleration(state.getA());
+                controller.setTargetPosition(state.getX());
+                controller.setTargetVelocity(state.getV());
+                controller.setTargetAcceleration(state.getA());
 
-        double correction = controller.update(measuredPosition - offset);
-        if (Math.abs(correction) > 0.01)
-            spinner.setPower(correction);
-        else
-            spinner.setPower(0);
+                double correction = controller.update(measuredPosition);
+                if (Math.abs(correction) > 0.01)
+                    spinner.setPower(correction);
+                else
+                    spinner.setPower(0);
+                break;
+            case FULL_POWER:
+                spinner.setPower(1);
+                break;
+            case IDLE:
+                spinner.setPower(0);
+                break;
+        }
 
         lastA = gamepad1.a;
     }
