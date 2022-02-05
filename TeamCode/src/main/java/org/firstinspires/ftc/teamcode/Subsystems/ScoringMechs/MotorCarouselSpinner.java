@@ -39,8 +39,6 @@ public class MotorCarouselSpinner implements Output, Input {
             200
     );
 
-    boolean a, lastA;
-
     public MotorCarouselSpinner (HardwareMap hardwareMap, String spinnerName) {
         spinner = hardwareMap.dcMotor.get(spinnerName);
         spinner.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -59,11 +57,9 @@ public class MotorCarouselSpinner implements Output, Input {
     }
 
     public void reset() {
-        if (a && !lastA) {
-            startTime = currentTime;
-            offset = spinner.getCurrentPosition() / ticksPerRot;
-            measuredPosition = 0;
-        }
+        startTime = currentTime;
+        offset = spinner.getCurrentPosition() / ticksPerRot;
+        measuredPosition = 0;
     }
 
     @Override
