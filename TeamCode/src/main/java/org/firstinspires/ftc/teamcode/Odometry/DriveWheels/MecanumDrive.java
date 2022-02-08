@@ -73,6 +73,7 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
     private double lastFL, lastBL, lastBR, lastFR;
 
     public Gyroscope gyro;
+    private boolean innerGyro;
     public VoltageSensor batteryVoltageSensor;
 
     public BulkRead bReadCH, bReadEH;
@@ -103,6 +104,7 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
         this.bRight = bRight;
 
         this.gyro = gyro;
+        innerGyro = false;
 
         motors = Arrays.asList(fLeft, bLeft, bRight, fRight);
 
@@ -146,6 +148,7 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
         }
 
         gyro = new Gyroscope(hardwareMap);
+        innerGyro = true;
 
         this.fLeft = fLeft;
         this.fRight = fRight;
@@ -194,6 +197,7 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
         }
 
         this.gyro = gyro;
+        innerGyro = false;
 
         fLeft = hardwareMap.get(DcMotorEx.class, "fLeft");
         fRight = hardwareMap.get(DcMotorEx.class, "fRight");
@@ -250,6 +254,7 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
         }
 
         gyro = new Gyroscope(hardwareMap);
+        innerGyro = false;
 
         fLeft = hardwareMap.get(DcMotorEx.class, "fLeft");
         fRight = hardwareMap.get(DcMotorEx.class, "fRight");
@@ -350,6 +355,7 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
     @Override
     public void updateInput() {
         if (!pauseOdometry) updatePoseEstimate();
+        if (innerGyro) gyro.updateInput();
     }
 
     @Override
@@ -506,6 +512,7 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
     @Override
     public void startInput() {
         pauseOdometry = false;
+        if (innerGyro) gyro.startInput();
     }
 
     @Override
@@ -517,6 +524,7 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
     @Override
     public void stopInput() {
         pauseOdometry = true;
+        if (innerGyro) gyro.stopInput();
     }
 
     @Override

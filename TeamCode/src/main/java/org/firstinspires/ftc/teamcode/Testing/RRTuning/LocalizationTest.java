@@ -55,7 +55,7 @@ public class LocalizationTest extends LinearOpMode {
             List<Double> wheelPositions = drive.getWheelPositions();
 
             telemetry.addLine("Wheel Positions:");
-            telemetry.addLine(wheelPositions.get(0).toString());
+            telemetry.addLine(wheelPositions.get(0).toString()); //74.32375
             telemetry.addLine(wheelPositions.get(1).toString());
             telemetry.addLine(wheelPositions.get(2).toString());
             telemetry.addLine(wheelPositions.get(3).toString());

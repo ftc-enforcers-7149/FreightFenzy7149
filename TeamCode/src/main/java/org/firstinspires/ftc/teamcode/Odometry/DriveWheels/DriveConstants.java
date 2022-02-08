@@ -51,7 +51,7 @@ public class DriveConstants {
     /*
      * Precise corrections for converting motor rotations to linear movement
      */
-    public static double WHEEL_MULT = 1.02043003458;
+    public static double WHEEL_MULT = 1.023;
 
     //TODO:
     // TRACK_WIDTH is left-right distance between drive wheels (centers)
@@ -59,8 +59,8 @@ public class DriveConstants {
     // Their average is used to determine turning rates based on drive wheel positions
     // Tune both separately, TRACK_WIDTH first using TrackWidthTuner,
     // WHEEL_BASE second using the MecanumLocalizer heading estimation (without extHeading)
-    public static double TRACK_WIDTH = 10.7; // in
-    public static double WHEEL_BASE = 8.4; // in
+    public static double TRACK_WIDTH = 13.9264732455; // in
+    public static double WHEEL_BASE = 14.7784144228; // in
 
     /*
      * These are the feedforward parameters used to model the drive motor behavior. If you are using

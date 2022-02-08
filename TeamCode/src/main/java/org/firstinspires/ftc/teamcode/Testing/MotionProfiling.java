@@ -36,10 +36,10 @@ public class MotionProfiling extends OpMode {
     MotorStates mState = MotorStates.IDLE;
 
     MotionProfile profile = MotionProfileGenerator.generateSimpleMotionProfile(
-            new MotionState(0, 0, 0),
-            new MotionState((15*Math.PI - 1) / (4 * Math.PI) * 2, 10, 50), //Set X to rotations
-            10,
-            50
+            new MotionState(0, 7.25, 1000),
+            new MotionState((15*Math.PI - 1) / (4 * Math.PI) * 2, 11.75, 1000), //Set X to rotations
+            11.75,
+            1000
     );
 
     boolean a, lastA;
@@ -76,7 +76,7 @@ public class MotionProfiling extends OpMode {
 
         if (measuredPosition < (15*Math.PI - 1) / (4 * Math.PI)) {
             mState = MotorStates.MOTION_PROFILING;
-        } else if (measuredPosition < (15*Math.PI - 1) / (4 * Math.PI) + 10) {
+        } else if (measuredPosition < (15*Math.PI - 1) / (4 * Math.PI) + 1) {
             mState = MotorStates.FULL_POWER;
         } else {
             mState = MotorStates.IDLE;
