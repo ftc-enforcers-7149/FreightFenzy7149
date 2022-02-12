@@ -11,40 +11,47 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Input;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Output;
 
 public class MotorCarouselSpinner implements Output, Input {
-    DcMotor spinner;
-    final double ticksPerRot = 384.5;
-    double offset = 0;
+    public DcMotor spinner;
+    private final double ticksPerRot = 384.5;
+    private double offset = 0;
 
     private PIDFController controller;
     public static PIDCoefficients coeffs = new PIDCoefficients(0.3, 0, 0);
 
-    double elapsedTime, currentTime = 0, startTime = 0;
+    private double elapsedTime, currentTime = 0, startTime = 0;
     private double measuredPosition;
 
     public enum MotorStates{
-        MOTION_PROFILING(),
-        FULL_POWER(),
-        IDLE()
+        MOTION_PROFILING,
+        FULL_POWER,
+        IDLE
     }
-    MotorStates mState = MotorStates.IDLE;
+    private MotorStates mState = MotorStates.IDLE;
 
-    MotionProfile profile = MotionProfileGenerator.generateSimpleMotionProfile(
+    private MotionProfile profile = MotionProfileGenerator.generateSimpleMotionProfile(
             new MotionState(0, 0, 0),
-            new MotionState((15*Math.PI - 1) / (4 * Math.PI) * 2, 9, 200), //Set X to rotations
+            new MotionState((15*Math.PI - 1) / (4 * Math.PI) * 2, 9, 200),
             9,
             200
     );
 
-    public MotorCarouselSpinner (HardwareMap hardwareMap, String spinnerName) {
+    private double power, lastPower;
+
+    public MotorCarouselSpinner (HardwareMap hardwareMap, String spinnerName, Alliance alliance) {
         spinner = hardwareMap.dcMotor.get(spinnerName);
-        spinner.setDirection(DcMotorSimple.Direction.FORWARD);
         spinner.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         spinner.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         spinner.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        if (alliance == Alliance.BLUE)
+            spinner.setDirection(DcMotorSimple.Direction.FORWARD);
+        else
+            spinner.setDirection(DcMotorSimple.Direction.REVERSE);
 
         //Initialise PIDF
         controller = new PIDFController(coeffs);
@@ -70,9 +77,9 @@ public class MotorCarouselSpinner implements Output, Input {
 
     @Override
     public void updateOutput() {
-        if (measuredPosition < (15*Math.PI - 1) / (4 * Math.PI)) {
+        if (measuredPosition < (15 * Math.PI - 1) / (4 * Math.PI)) {
             mState = MotorStates.MOTION_PROFILING;
-        } else if (measuredPosition < (15*Math.PI - 1) / (4 * Math.PI) + 1) {
+        } else if (measuredPosition < (15 * Math.PI - 1) / (4 * Math.PI) + 1) {
             mState = MotorStates.FULL_POWER;
         } else {
             mState = MotorStates.IDLE;
@@ -90,16 +97,32 @@ public class MotorCarouselSpinner implements Output, Input {
 
                 double correction = controller.update(measuredPosition);
                 if (Math.abs(correction) > 0.01)
-                    spinner.setPower(correction);
+                    power = correction;
                 else
-                    spinner.setPower(0);
+                    power = 0;
                 break;
             case FULL_POWER:
-                spinner.setPower(1);
+                power = 1;
                 break;
             case IDLE:
-                spinner.setPower(0);
+                power = 0;
                 break;
         }
+
+        if (power != lastPower) {
+            spinner.setPower(power);
+        }
+
+        lastPower = power;
+    }
+
+    public boolean isBusy() {
+        return mState != MotorStates.IDLE;
+    }
+
+    @Override
+    public void stopOutput() {
+        startTime = Integer.MAX_VALUE;
+        updateOutput();
     }
 }

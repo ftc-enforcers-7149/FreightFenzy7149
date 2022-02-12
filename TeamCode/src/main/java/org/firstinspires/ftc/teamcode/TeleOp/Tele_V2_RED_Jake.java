@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.CarouselSpinner;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
+import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorCarouselSpinner;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorIntake;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.LED.LED;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Levels;
@@ -23,7 +24,7 @@ public class Tele_V2_RED_Jake extends TeleOp_Base {
     //Control objects
     private MotorIntake intake;
     private Lift lift;
-    private CarouselSpinner spinner;
+    private MotorCarouselSpinner spinner;
     private LED led;
 
     //Lift
@@ -65,7 +66,7 @@ public class Tele_V2_RED_Jake extends TeleOp_Base {
         intake = new MotorIntake(hardwareMap,
                 "intake", "paddle", "latch", "intakeColor");
         lift = new Lift(hardwareMap, "lift", bReadCH, !RAN_AUTO);
-        spinner = new CarouselSpinner(hardwareMap, "spinner");
+        spinner = new MotorCarouselSpinner(hardwareMap, "spinner", Alliance.RED);
 
         led = new LED(hardwareMap, "blinkin", Alliance.RED);
         led.setPattern(RevBlinkinLedDriver.BlinkinPattern.BREATH_RED);
@@ -180,8 +181,7 @@ public class Tele_V2_RED_Jake extends TeleOp_Base {
         }
 
         // Carousel
-        //spinner.setPower(gamepad2.right_trigger - gamepad2.left_trigger);
-        //telemetry.addData("Spinner Power: ", gamepad2.right_trigger - gamepad2.left_trigger);
+        if (gamepad1.x) spinner.reset();
 
         // Telemetry
         telemetry.addData("Lift Height: ", lift.getHeight());
@@ -206,9 +206,9 @@ public class Tele_V2_RED_Jake extends TeleOp_Base {
     @Override
     protected void getInput() {
         //Headless
-        leftX = curveInput(gamepad1.left_stick_x, 1)*lim * 0.75;
-        leftY = curveInput(gamepad1.left_stick_y, 1)*lim * 0.75;
-        rightX = curveInput(gamepad1.right_stick_x, 1)*lim*0.75 * 0.75;
+        leftX = curveInput(gamepad1.left_stick_x, 1)*lim * 1.0;
+        leftY = curveInput(gamepad1.left_stick_y, 1)*lim * 1.0;
+        rightX = curveInput(gamepad1.right_stick_x, 1)*lim*0.75 * 1.0;
         resetAngle = gamepad1.y;
 
         //Lift

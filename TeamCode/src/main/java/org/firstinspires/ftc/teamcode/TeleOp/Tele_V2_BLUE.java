@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.CarouselSpinner;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
+import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorCarouselSpinner;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorIntake;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.LED.LED;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Levels;
@@ -23,7 +24,7 @@ public class Tele_V2_BLUE extends TeleOp_Base {
     //Control objects
     private MotorIntake intake;
     private Lift lift;
-    private CarouselSpinner spinner;
+    private MotorCarouselSpinner spinner;
     private LED led;
 
     //Lift
@@ -72,7 +73,7 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         intake = new MotorIntake(hardwareMap,
                 "intake", "paddle", "latch", "intakeColor");
         lift = new Lift(hardwareMap, "lift", bReadCH, !RAN_AUTO);
-        spinner = new CarouselSpinner(hardwareMap, "spinner");
+        spinner = new MotorCarouselSpinner(hardwareMap, "spinner", Alliance.BLUE);
 
         led = new LED(hardwareMap, "blinkin", Alliance.BLUE);
         led.setPattern(RevBlinkinLedDriver.BlinkinPattern.BREATH_BLUE);
@@ -82,6 +83,7 @@ public class Tele_V2_BLUE extends TeleOp_Base {
 
         addInput(intake);
         addInput(lift);
+        addInput(spinner);
         addOutput(intake);
         addOutput(lift);
         addOutput(spinner);
@@ -118,7 +120,7 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         }*/
 
         //Intake
-        if (freightInIntake && !lastFreightInIntake) {
+        if (in && freightInIntake && !lastFreightInIntake) {
             intake.setIntakePower(0);
             intake.setPaddle(MotorIntake.PaddlePosition.BACK);
             intake.setLatch(MotorIntake.LatchPosition.CLOSED);
@@ -208,8 +210,7 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         }
 
         // Carousel
-        spinner.setPower(gamepad2.right_trigger - gamepad2.left_trigger);
-        telemetry.addData("Spinner Power: ", gamepad2.right_trigger - gamepad2.left_trigger);
+        if (gamepad1.x) spinner.reset();
 
         // Telemetry
         telemetry.addData("Lift Height: ", lift.getHeight());
@@ -234,15 +235,15 @@ public class Tele_V2_BLUE extends TeleOp_Base {
     @Override
     protected void getInput() {
         //Headless
-        leftX = curveInput(gamepad1.left_stick_x, 1)*lim * 0.75;
-        leftY = curveInput(gamepad1.left_stick_y, 1)*lim * 0.75;
-        rightX = curveInput(gamepad1.right_stick_x, 1)*lim*0.75 * 0.75;
+        leftX = curveInput(gamepad1.left_stick_x, 1)*lim * 1.0;
+        leftY = curveInput(gamepad1.left_stick_y, 1)*lim * 1.0;
+        rightX = curveInput(gamepad1.right_stick_x, 1)*lim*0.75 * 1.0;
         resetAngle = gamepad1.y;
 
         //Lift
         lastLiftPos = liftPos;
-        toggleAllianceHub = gamepad1.right_trigger > 0.2;
-        toggleSharedHub = gamepad1.left_trigger > 0.2;
+        toggleAllianceHub = gamepad1.right_trigger > 0.5;
+        toggleSharedHub = gamepad1.left_trigger > 0.5;
         toggleCapping = gamepad1.b;
         switchAllianceLevel = gamepad1.left_bumper;
         resetLift = gamepad1.back;

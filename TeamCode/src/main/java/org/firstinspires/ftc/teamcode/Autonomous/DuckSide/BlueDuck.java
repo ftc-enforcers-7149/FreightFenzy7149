@@ -5,9 +5,10 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
 import org.firstinspires.ftc.teamcode.Autonomous.Auto_V2_5;
+import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorIntake;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Levels;
 
-@Autonomous(name = "Blue Duck - WH Park")
+@Autonomous(name = "Blue Duck")
 //@Disabled
 public class BlueDuck extends Auto_V2_5 {
 
@@ -22,47 +23,63 @@ public class BlueDuck extends Auto_V2_5 {
 
         Levels liftHeight = commands.detectBarcode(tseDetector);
 
-        intake.setIntakePower(-0.2);
-
-        POS_ACC = 1;
-        SLOW_DIST = 15;
-
-        //Drive to the duckwheel
-        driveTo(8, -12, 0);
-
-        //Spin and stop duckwheel
-        commands.spinDuck(spinner, 3000);
+        SLOW_DIST = 25;
 
         //Set lift to correct level according to the vision
         lift.setTargetHeight(liftHeight);
 
         //Drive to hub
-        driveTo(29,26, Math.toRadians(40));
+        driveTo(27,24, Math.toRadians(50));
 
         //Drive to hub and outtake
-        driveTo(31,29, Math.toRadians(40));
-        commands.outtake(intake, 1250);
-
-        H_ACC = Math.toRadians(6);
-
-        //Drive a little bit back and drop lift
-        driveTo(27,29, Math.toRadians(40));
+        driveTo(31,29, Math.toRadians(50));
+        commands.outtake(intake, lift);
         lift.setTargetHeight(Levels.GROUND);
 
-        customWait(() -> (getRuntime() < 24));
+        //Drive to the duckwheel
+        POS_ACC = 2;
+        driveTo(2, -14, Math.toRadians(90));
+        POS_ACC = 1;
+
+        //Spin and stop duckwheel
+        commands.spinDuck(spinner);
+
+        waitForTime(1000);
+
+        //Try to intake duck
+        intake.setIntakePower(0.5);
+        driveTo(6, -14, Math.toRadians(160));
+        driveTo(6, -6, Math.toRadians(160));
+        driveTo(10, 9, Math.toRadians(90));
+        intake.setIntakePower(0);
+        intake.setLatch(MotorIntake.LatchPosition.DUCK_CLOSED);
+
+        lift.setTargetHeight(Levels.HIGH);
+
+        //Drive to hub
+        driveTo(28,23, Math.toRadians(60));
+
+        //Drive to hub and outtake
+        driveTo( 32,28, Math.toRadians(60));
+        commands.outtake(intake, lift);
+
+        //Back away from hub
+        driveTo(28,23, Math.toRadians(60));
+        lift.setTargetHeight(Levels.GROUND);
+
+        H_ACC = Math.toRadians(7);
+        POS_ACC = 3;
+
+        customWait(() -> (getRuntime() < 22));
         lift.setTargetHeight(Levels.LOW);
 
         //Align with the warehouse and park
-        driveTo(20,33, Math.toRadians(270));
-        commands.setLiftHeight(lift, Levels.LOW);
-
-        SLOW_DIST = 20;
-        POS_ACC = 3;
-        driveTo(20,120, Math.toRadians(280));
+        driveTo(30,33, Math.toRadians(270));
+        driveTo(35,120, Math.toRadians(280));
 
         //Lower lift all the way down for TeleOp
         commands.setLiftHeight(lift, Levels.GROUND);
 
-        driveTo(drive.getPoseEstimate().getX() - 2, drive.getPoseEstimate().getY(), 0);
+        driveTo(drive.getPoseEstimate().getX() - 5, drive.getPoseEstimate().getY(), 0);
     }
 }

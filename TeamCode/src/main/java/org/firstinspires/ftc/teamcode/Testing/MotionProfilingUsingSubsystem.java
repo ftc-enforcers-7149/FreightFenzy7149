@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Testing;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
+import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorCarouselSpinner;
 
 public class MotionProfilingUsingSubsystem extends OpMode {
@@ -11,7 +12,7 @@ public class MotionProfilingUsingSubsystem extends OpMode {
 
     @Override
     public void init() {
-        carouselSpinner = new MotorCarouselSpinner(hardwareMap, "spinner");
+        carouselSpinner = new MotorCarouselSpinner(hardwareMap, "spinner", Alliance.RED);
     }
 
     @Override

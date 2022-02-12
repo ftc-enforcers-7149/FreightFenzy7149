@@ -32,7 +32,7 @@ public class RedParkInUnit extends Auto_V2_5 {
         driveTo(8, 13, 0);
 
         //Spin and stop duckwheel
-        commands.spinDuck(spinner, 3000);
+        commands.spinDuck(spinner);
 
         //Set lift to correct level according to the vision
         lift.setTargetHeight(liftHeight);
@@ -42,7 +42,7 @@ public class RedParkInUnit extends Auto_V2_5 {
 
         //Drive to hub and outtake
         driveTo( 34,-32, Math.toRadians(320));
-        commands.outtake(intake, 1250);
+        commands.outtake(intake, lift);
 
         H_ACC = Math.toRadians(6);
 

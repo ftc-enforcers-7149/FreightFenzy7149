@@ -29,7 +29,7 @@ public class BlueNoCycles extends Auto_V2_5 {
         SPEED_MULT = 0.8;
         driveTo(32, 68, Math.toRadians(330));
         SPEED_MULT = 1;
-        commands.outtake(intake, 1250);
+        commands.outtake(intake, lift);
 
         //Align with wall
         driveToWall();

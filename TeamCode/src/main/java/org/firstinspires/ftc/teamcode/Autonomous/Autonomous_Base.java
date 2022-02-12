@@ -25,7 +25,7 @@ public abstract class Autonomous_Base extends LinearOpMode {
 
     //Drive
     protected MecanumDrive drive;
-    public static PIDCoefficients H_PID = new PIDCoefficients(-0.5, 0, -0.05);
+    public static PIDCoefficients H_PID = new PIDCoefficients(-0.45, 0, -0.05);
     protected DcMotorEx fLeft, fRight, bLeft, bRight;
     protected Gyroscope gyro;
     private boolean initializedMotors = false, initializedDrive = false, initializedGyro = false;
@@ -175,13 +175,13 @@ public abstract class Autonomous_Base extends LinearOpMode {
     }
 
     //How accurate each attribute should be at each point
-    public static double POS_ACC = 0.5;
+    public static double POS_ACC = 1;
     public static double H_ACC = Math.toRadians(1);
 
     public static double SPEED_MULT = 1;
 
-    public static double MIN_SPEED = 0.15;
-    public static double MIN_TURN = 0.2;
+    public static double MIN_SPEED = 0.2;
+    public static double MIN_TURN = 0.15;
     public static double CLOSE_DIST = 0;
 
     public static double SLOW_DIST = 15;

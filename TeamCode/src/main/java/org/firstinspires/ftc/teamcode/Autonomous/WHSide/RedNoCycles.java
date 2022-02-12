@@ -29,7 +29,7 @@ public class RedNoCycles extends Auto_V2_5 {
         SPEED_MULT = 0.8;
         driveTo(31, -64, Math.toRadians(30));
         SPEED_MULT = 1;
-        commands.outtake(intake, 1250);
+        commands.outtake(intake, lift);
 
         //Align with wall
         driveToWall();

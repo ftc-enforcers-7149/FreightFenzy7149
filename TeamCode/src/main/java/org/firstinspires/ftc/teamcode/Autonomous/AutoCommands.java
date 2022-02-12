@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode.Autonomous;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.CarouselSpinner;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Intake;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
+import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorCarouselSpinner;
+import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorIntake;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Levels;
 import org.firstinspires.ftc.teamcode.Subsystems.Webcam.OpenCV;
 import org.opencv.core.RotatedRect;
@@ -38,7 +40,7 @@ public class AutoCommands {
                 return Levels.HIGH;
             }
         }
-        catch(Exception e){
+        catch(Exception e) {
             if (op.getAlliance() == Alliance.BLUE)
                 return Levels.LOW;
             else
@@ -56,30 +58,33 @@ public class AutoCommands {
         op.customWait(() -> (lift.getHeight() < level.height - 0.5));
     }
 
-    public void outtake(Intake intake) {
-        intake.setIntakePower(1);
-        long startTime = System.currentTimeMillis();
-        op.customWait(() -> (System.currentTimeMillis() < startTime + 1100));
+    public void outtake(MotorIntake intake, Lift lift) {
+        if (lift.getHeight() <= Levels.MIDDLE.height)
+            intake.setIntakePower(0.2);
+        intake.setLatch(MotorIntake.LatchPosition.OPEN);
+
+        op.waitForTime(150);
+
+        intake.setPaddle(MotorIntake.PaddlePosition.OUT);
+
+        if (lift.getHeight() <= Levels.MIDDLE.height)
+            op.waitForTime(100);
+        op.waitForTime(200);
+
         intake.setIntakePower(0);
+        intake.setPaddle(MotorIntake.PaddlePosition.BACK);
     }
 
-    public void outtake(Intake intake, long time) {
-        intake.setIntakePower(1);
-        long startTime = System.currentTimeMillis();
-        op.customWait(() -> (System.currentTimeMillis() < startTime + time));
+    public void closeIntake(MotorIntake intake) {
         intake.setIntakePower(0);
+        intake.setPaddle(MotorIntake.PaddlePosition.BACK);
+        intake.setLatch(MotorIntake.LatchPosition.CLOSED);
+
+        op.waitForTime(150);
     }
 
-    public void spinDuck(CarouselSpinner spinner, long msTime) {
-        if (op.getAlliance() == Alliance.RED) {
-            spinner.setPower(-0.75);
-            op.waitForTime(msTime);
-        }
-        else if (op.getAlliance() == Alliance.BLUE) {
-            spinner.setPower(0.75);
-            op.waitForTime(msTime);
-        }
-
-        spinner.setPower(0);
+    public void spinDuck(MotorCarouselSpinner spinner) {
+        spinner.reset();
+        op.customWait(spinner::isBusy);
     }
 }

@@ -24,7 +24,7 @@ public class DistanceCorrection implements Input {
 
         if (alliance == Alliance.BLUE) {
             sensorL = hardwareMap.get(Rev2mDistanceSensor.class, distLName);
-            lDist = new ValueTimer<Double>(0.0, 0) {
+            lDist = new ValueTimer<Double>(0.0, 50) {
                 @Override
                 public Double readValue() {
                     return sensorL.getDistance(DistanceUnit.INCH) + L_R_OFFSET;
@@ -33,7 +33,7 @@ public class DistanceCorrection implements Input {
         }
         else {
             sensorR = hardwareMap.get(Rev2mDistanceSensor.class, distRName);
-            rDist = new ValueTimer<Double>(0.0, 0) {
+            rDist = new ValueTimer<Double>(0.0, 50) {
                 @Override
                 public Double readValue() {
                     return sensorR.getDistance(DistanceUnit.INCH) + L_R_OFFSET;
@@ -42,7 +42,7 @@ public class DistanceCorrection implements Input {
         }
 
         sensorF = hardwareMap.get(Rev2mDistanceSensor.class, distFName);
-        fDist = new ValueTimer<Double>(0.0, 0) {
+        fDist = new ValueTimer<Double>(0.0, 50) {
             @Override
             public Double readValue() {
                 return sensorF.getDistance(DistanceUnit.INCH) + F_OFFSET;
