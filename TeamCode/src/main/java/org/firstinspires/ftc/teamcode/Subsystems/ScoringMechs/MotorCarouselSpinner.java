@@ -8,6 +8,7 @@ import com.acmerobotics.roadrunner.profile.MotionProfile;
 import com.acmerobotics.roadrunner.profile.MotionProfileGenerator;
 import com.acmerobotics.roadrunner.profile.MotionState;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -16,7 +17,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Utils.Input;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Output;
 
 public class MotorCarouselSpinner implements Output, Input {
-    public DcMotor spinner;
+    public DcMotorEx spinner;
     private final double ticksPerRot = 384.5;
     private double offset = 0;
 
@@ -43,7 +44,7 @@ public class MotorCarouselSpinner implements Output, Input {
     private double power, lastPower;
 
     public MotorCarouselSpinner (HardwareMap hardwareMap, String spinnerName, Alliance alliance) {
-        spinner = hardwareMap.dcMotor.get(spinnerName);
+        spinner = (DcMotorEx) hardwareMap.dcMotor.get(spinnerName);
         spinner.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         spinner.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         spinner.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -118,6 +119,22 @@ public class MotorCarouselSpinner implements Output, Input {
 
     public boolean isBusy() {
         return mState != MotorStates.IDLE;
+    }
+
+    public double returnTargetPosition() {
+        return controller.getTargetPosition();
+    }
+
+    public double returnCurrentPosition() {
+        return spinner.getCurrentPosition() / ticksPerRot - offset;
+    }
+
+    public double returnCurrentVelocity() {
+        return spinner.getVelocity() / ticksPerRot;
+    }
+
+    public double returnTargetVelocity() {
+        return controller.getTargetVelocity();
     }
 
     @Override

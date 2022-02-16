@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Testing;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
@@ -12,6 +14,8 @@ public class MotionProfilingUsingSubsystem extends OpMode {
 
     @Override
     public void init() {
+        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+
         carouselSpinner = new MotorCarouselSpinner(hardwareMap, "spinner", Alliance.RED);
     }
 
@@ -32,6 +36,11 @@ public class MotionProfilingUsingSubsystem extends OpMode {
         carouselSpinner.updateOutput();
 
         lastA = gamepad1.a;
+
+        telemetry.addData("Current Position: ", carouselSpinner.returnCurrentPosition());
+        telemetry.addData("Current Velocity: ", carouselSpinner.returnCurrentVelocity());
+        telemetry.addData("Target Position: ", carouselSpinner.returnTargetPosition());
+        telemetry.addData("Target Velocity: ", carouselSpinner.returnTargetVelocity());
     }
 
     @Override
