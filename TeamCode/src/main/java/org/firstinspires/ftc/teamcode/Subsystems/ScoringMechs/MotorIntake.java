@@ -21,7 +21,7 @@ public class MotorIntake implements Input, Output {
     //Sensors
     public RevColorSensorV3 intakeColorSensor;
 
-    private static final double minDistance = 1.25;
+    private static final double minDistance = 1.0;
     private ValueTimer<Double> distance;
     private final boolean useSensor;
 
@@ -128,6 +128,11 @@ public class MotorIntake implements Input, Output {
 
     public boolean getFreightInIntake () {
         return useSensor && (distance.getValue() < minDistance);
+    }
+
+    public double getDistance() {
+        if (useSensor) return distance.getValue();
+        else return 0;
     }
 
     public void startScanningIntake() {

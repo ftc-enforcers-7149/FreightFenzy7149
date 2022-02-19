@@ -37,8 +37,8 @@ public class RedDuck extends Auto_V2_5 {
         lift.setTargetHeight(Levels.GROUND);
 
         //Drive to the duckwheel
-        POS_ACC = 2;
-        driveTo(4.5, 14, Math.toRadians(270));
+        POS_ACC = 3;
+        driveTo(3, 14, Math.toRadians(270));
         POS_ACC = 1;
 
         //Spin and stop duckwheel
@@ -64,7 +64,7 @@ public class RedDuck extends Auto_V2_5 {
         commands.outtake(intake, lift);
 
         //Back away from hub
-        driveTo(26,-23, Math.toRadians(320));
+        driveTo(19,-23, Math.toRadians(320));
         lift.setTargetHeight(Levels.GROUND);
 
         H_ACC = Math.toRadians(7);
@@ -74,8 +74,8 @@ public class RedDuck extends Auto_V2_5 {
         lift.setTargetHeight(Levels.LOW);
 
         //Align with the warehouse and park
-        driveTo(20,-33, Math.toRadians(90));
-        driveTo(25,-120, Math.toRadians(100));
+        driveTo(13,-33, Math.toRadians(90));
+        driveTo(18,-120, Math.toRadians(100));
 
         //Lower lift all the way down for TeleOp
         commands.setLiftHeight(lift, Levels.GROUND);

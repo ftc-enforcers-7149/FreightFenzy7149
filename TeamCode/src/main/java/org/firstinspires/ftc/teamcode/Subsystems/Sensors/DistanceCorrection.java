@@ -13,7 +13,7 @@ public class DistanceCorrection implements Input {
 
     public Rev2mDistanceSensor sensorL, sensorR, sensorF;
     private ValueTimer<Double> lDist, rDist, fDist;
-    private static final double FIELD_X = 144, FIELD_Y = 144, F_OFFSET = 6.75 - 2.65, L_R_OFFSET = 7.5 - 0.3;
+    private static final double FIELD_X = 144, FIELD_Y = 144, F_OFFSET = 6.75 - 2.65 + 1, L_R_OFFSET = 7.5 - 0.3;
 
     private final Alliance alliance;
 

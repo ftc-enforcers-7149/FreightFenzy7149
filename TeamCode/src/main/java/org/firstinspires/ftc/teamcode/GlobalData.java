@@ -1,9 +1,11 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
 
+@Config
 public class GlobalData {
     //Match Data
     public static Alliance ALLIANCE = Alliance.NONE;
@@ -17,5 +19,5 @@ public class GlobalData {
 
     //Lift Data
     public static final double LEVEL_OFFSET = 2.5;
-    public static final double CAP_OFFSET = 1;
+    public static final double CAP_OFFSET = -2;
 }

@@ -44,7 +44,7 @@ public class MotorCarouselSpinner implements Output, Input {
     private double power, lastPower;
 
     public MotorCarouselSpinner (HardwareMap hardwareMap, String spinnerName, Alliance alliance) {
-        spinner = (DcMotorEx) hardwareMap.dcMotor.get(spinnerName);
+        spinner = hardwareMap.get(DcMotorEx.class, spinnerName);
         spinner.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         spinner.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         spinner.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);

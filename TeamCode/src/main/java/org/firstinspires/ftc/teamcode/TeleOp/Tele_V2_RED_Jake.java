@@ -4,7 +4,6 @@ import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
-import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.CarouselSpinner;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorCarouselSpinner;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorIntake;
@@ -76,6 +75,7 @@ public class Tele_V2_RED_Jake extends TeleOp_Base {
 
         addInput(intake);
         addInput(lift);
+        addInput(spinner);
         addOutput(intake);
         addOutput(lift);
         addOutput(spinner);
@@ -206,9 +206,9 @@ public class Tele_V2_RED_Jake extends TeleOp_Base {
     @Override
     protected void getInput() {
         //Headless
-        leftX = curveInput(gamepad1.left_stick_x, 1)*lim * 1.0;
-        leftY = curveInput(gamepad1.left_stick_y, 1)*lim * 1.0;
-        rightX = curveInput(gamepad1.right_stick_x, 1)*lim*0.75 * 1.0;
+        leftX = curveInput(gamepad1.left_stick_x, 1)*lim * 0.8;
+        leftY = curveInput(gamepad1.left_stick_y, 1)*lim * 0.8;
+        rightX = curveInput(gamepad1.right_stick_x, 1)*lim*0.75 * 0.8;
         resetAngle = gamepad1.y;
 
         //Lift

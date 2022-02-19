@@ -47,13 +47,13 @@ public class RedCycles extends Auto_V2_5 {
             inWarehouse = true;
 
             //Park if running out of time
-            if (getRuntime() > 26) {
+            if (getRuntime() > 30) {
                 break;
             }
 
             //Intake / Don't hit wall
             if (!intake.getFreightInIntake())
-                intake(Math.max(16 - (cycle * 8), 12));
+                intake(Math.max(22 - (cycle * 8), 12));
 
             //Drive out through gap
             driveOutOfWarehouse();
@@ -68,6 +68,7 @@ public class RedCycles extends Auto_V2_5 {
         if (!inWarehouse) {
             driveToWall();
             driveIntoWarehouse();
+            intake(12);
         }
         lift.setTargetHeight(Levels.GROUND);
         driveTo(drive.getPoseEstimate().getX() + 2, drive.getPoseEstimate().getY() + 6, 0);
@@ -235,7 +236,7 @@ public class RedCycles extends Auto_V2_5 {
         lift.setTargetHeight(Levels.HIGH);
 
         H_ACC = Math.toRadians(4);
-        driveTo(37, -76, Math.toRadians(25));
+        driveTo(37, -68, Math.toRadians(25));
         H_ACC = Math.toRadians(1);
 
         commands.outtake(intake, lift);

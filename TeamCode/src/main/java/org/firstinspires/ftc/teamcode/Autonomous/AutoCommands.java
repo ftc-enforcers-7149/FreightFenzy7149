@@ -60,7 +60,7 @@ public class AutoCommands {
 
     public void outtake(MotorIntake intake, Lift lift) {
         if (lift.getHeight() <= Levels.MIDDLE.height)
-            intake.setIntakePower(0.2);
+            intake.setIntakePower(0.4);
         intake.setLatch(MotorIntake.LatchPosition.OPEN);
 
         op.waitForTime(150);

@@ -117,6 +117,7 @@ public abstract class Auto_V2_5 extends Autonomous_Base {
         telemetry.addData("Front Distance: ", distCorrect.getFrontDistance());
         telemetry.addData("Side Distance: ", distCorrect.getSideWall());
         telemetry.addData("Lift Height: ", lift.getHeight());
+        telemetry.addData("Intake Distance: ", intake.getDistance());
         telemetry.addData("Freight in Intake? ", intake.getFreightInIntake());
     }
 }

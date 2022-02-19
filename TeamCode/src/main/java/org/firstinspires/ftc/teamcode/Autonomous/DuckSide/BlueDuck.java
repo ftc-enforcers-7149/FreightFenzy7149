@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Autonomous.DuckSide;
 
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
 import org.firstinspires.ftc.teamcode.Autonomous.Auto_V2_5;
@@ -37,8 +38,8 @@ public class BlueDuck extends Auto_V2_5 {
         lift.setTargetHeight(Levels.GROUND);
 
         //Drive to the duckwheel
-        POS_ACC = 2;
-        driveTo(2, -14, Math.toRadians(90));
+        POS_ACC = 3;
+        driveTo(0, -14, Math.toRadians(90));
         POS_ACC = 1;
 
         //Spin and stop duckwheel
@@ -64,7 +65,7 @@ public class BlueDuck extends Auto_V2_5 {
         commands.outtake(intake, lift);
 
         //Back away from hub
-        driveTo(28,23, Math.toRadians(60));
+        driveTo(21,23, Math.toRadians(60));
         lift.setTargetHeight(Levels.GROUND);
 
         H_ACC = Math.toRadians(7);
@@ -74,8 +75,8 @@ public class BlueDuck extends Auto_V2_5 {
         lift.setTargetHeight(Levels.LOW);
 
         //Align with the warehouse and park
-        driveTo(30,33, Math.toRadians(270));
-        driveTo(35,120, Math.toRadians(280));
+        driveTo(24,33, Math.toRadians(270));
+        driveTo(29,120, Math.toRadians(280));
 
         //Lower lift all the way down for TeleOp
         commands.setLiftHeight(lift, Levels.GROUND);
