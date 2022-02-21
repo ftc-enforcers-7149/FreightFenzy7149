@@ -177,6 +177,7 @@ public abstract class Auto_Base_Correction extends LinearOpMode {
         for (Output o : outputs) o.stopOutput();
     }
 
+
     //How accurate each attribute should be at each point
     public static double POS_ACC = 1;
     public static double H_ACC = Math.toRadians(1);
