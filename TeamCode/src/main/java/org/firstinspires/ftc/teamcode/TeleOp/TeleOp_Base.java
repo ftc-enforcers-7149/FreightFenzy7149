@@ -18,6 +18,8 @@ import java.util.ArrayList;
 
 import static org.firstinspires.ftc.teamcode.Subsystems.Utils.FixedRoadrunner.createPose2d;
 
+import android.util.Log;
+
 public abstract class TeleOp_Base extends OpMode {
 
     //Drive
@@ -186,6 +188,7 @@ public abstract class TeleOp_Base extends OpMode {
     //Loop
     protected void updateInputs() {
         for (Input i : inputs) i.updateInput();
+        logData();
     }
     protected void updateOutputs() {
         for (Output o : outputs) o.updateOutput();
@@ -197,6 +200,36 @@ public abstract class TeleOp_Base extends OpMode {
     }
     protected void stopOutputs() {
         for (Output o : outputs) o.stopOutput();
+    }
+
+    protected void logData() {
+
+        Log.i("\nTime ", String.valueOf(System.currentTimeMillis()) + '\n');
+
+        Log.i("Pose ", drive.getPoseEstimate().toString() + '\n');
+
+        Log.i("X Accel ", String.valueOf(gyro.imu.getAcceleration().xAccel));
+        Log.i("Y Accel ", String.valueOf(gyro.imu.getAcceleration().yAccel));
+        Log.i("Z Accel ", String.valueOf(gyro.imu.getAcceleration().zAccel) + '\n');
+
+        Log.i("fL Power ", String.valueOf(fLeft.getPower()));
+        Log.i("fR Power ", String.valueOf(fRight.getPower()));
+        Log.i("bL Power ", String.valueOf(bLeft.getPower()));
+        Log.i("bR Power ", String.valueOf(bRight.getPower()) + '\n');
+
+        // in ticks/s
+        Log.i("fL Velocity (Motor) ", String.valueOf(fLeft.getVelocity()));
+        Log.i("fR Velocity (Motor) ", String.valueOf(fRight.getVelocity()));
+        Log.i("bL Velocity (Motor) ", String.valueOf(bLeft.getVelocity()));
+        Log.i("bR Velocity (Motor) ", String.valueOf(bRight.getVelocity()) + '\n');
+
+        Log.i("fL Velocity (Odo) ", String.valueOf(drive.getWheelVelocities().get(0)));
+        Log.i("fR Velocity (Odo) ", String.valueOf(drive.getWheelVelocities().get(1)));
+        Log.i("bL Velocity (Odo) ", String.valueOf(drive.getWheelVelocities().get(2)));
+        Log.i("bR Velocity (Odo) ", String.valueOf(drive.getWheelVelocities().get(3)));
+        Log.i("Overall velocity (Odo) ", drive.getPoseVelocity().toString() + '\n');
+
+
     }
 
     //Driving
