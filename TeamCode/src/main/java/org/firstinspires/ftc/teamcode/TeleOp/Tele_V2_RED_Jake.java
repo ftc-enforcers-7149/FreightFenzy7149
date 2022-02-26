@@ -37,7 +37,7 @@ public class Tele_V2_RED_Jake extends TeleOp_Base {
     }
 
     private Levels liftPos = Levels.GROUND, lastLiftPos = Levels.GROUND;
-    private boolean high, mid, low, ground, cap;
+    private boolean high, mid, low, ground, cap, shared;
     private double liftPower, lastLiftPower;
     private boolean lastPowerManual;
 
@@ -104,6 +104,8 @@ public class Tele_V2_RED_Jake extends TeleOp_Base {
         // Drive
         driveHeadless(gyro.getYaw(), resetAngle);
 
+        boolean overrideIntake = false;
+
         //Lift
         if (high)
             liftPos = Levels.HIGH;
@@ -113,10 +115,12 @@ public class Tele_V2_RED_Jake extends TeleOp_Base {
             liftPos = Levels.LOW;
         if (cap)
             liftPos = Levels.CAP;
+        if (shared)
+            liftPos = Levels.SHARED;
         if (ground) {
             liftPos = Levels.GROUND;
             if (lastLiftPos == Levels.LOW)
-                intake.setIntakePower(-0.5);
+                overrideIntake = true;
         }
         else if (!score && !outtake && !in) intake.setIntakePower(0);
 
@@ -142,14 +146,17 @@ public class Tele_V2_RED_Jake extends TeleOp_Base {
         }
 
         // Intake
-        if (in && freightInIntake && !lastFreightInIntake && false) {
+        if (in && freightInIntake && !lastFreightInIntake) {
+            intake.cancelSpitOut();
             intake.setIntakePower(0);
             intake.setPaddle(MotorIntake.PaddlePosition.BACK);
             intake.setLatch(MotorIntake.LatchPosition.CLOSED);
-            low = true;
+            //lift.setTargetHeight(Levels.LOW);
+            //lastPowerManual = false;
         }
         else {
             if (in) {
+                intake.cancelSpitOut();
                 intake.setIntakePower(1);
                 intake.setPaddle(MotorIntake.PaddlePosition.BACK);
                 intake.setLatch(MotorIntake.LatchPosition.OPEN);
@@ -161,7 +168,7 @@ public class Tele_V2_RED_Jake extends TeleOp_Base {
             }
         }
 
-        if (outtake) {
+        /*if (outtake) {
             intake.setIntakePower(-1);
             intake.setPaddle(MotorIntake.PaddlePosition.OUT);
             intake.setLatch(MotorIntake.LatchPosition.OPEN);
@@ -170,21 +177,30 @@ public class Tele_V2_RED_Jake extends TeleOp_Base {
             intake.setIntakePower(0);
             intake.setPaddle(MotorIntake.PaddlePosition.BACK);
             intake.setLatch(MotorIntake.LatchPosition.CLOSED);
-        }
+        }*/
+
+        if (outtake && !lastOuttake)
+            intake.spitOutTwo();
 
         if (score) {
+            intake.cancelSpitOut();
             if (liftPos == Levels.LOW)
                 intake.setIntakePower(0.3);
             else
                 intake.setIntakePower(0);
             intake.setPaddle(MotorIntake.PaddlePosition.OUT);
-            intake.setLatch(MotorIntake.LatchPosition.OPEN);
+            if (liftPos == Levels.GROUND)
+                intake.setLatch(MotorIntake.LatchPosition.OPEN_UP);
+            else
+                intake.setLatch(MotorIntake.LatchPosition.OPEN);
         }
         else if (lastScore) {
             intake.setIntakePower(0);
             intake.setPaddle(MotorIntake.PaddlePosition.BACK);
             intake.setLatch(MotorIntake.LatchPosition.OPEN);
         }
+
+        if (overrideIntake) intake.setIntakePower(-0.5);
 
         // Carousel
         if (gamepad1.x) spinner.reset();
@@ -199,7 +215,7 @@ public class Tele_V2_RED_Jake extends TeleOp_Base {
         else
             led.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
 
-        led.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
+        //led.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
 
         updateOutputs();
         updateStateMachine();
@@ -214,17 +230,18 @@ public class Tele_V2_RED_Jake extends TeleOp_Base {
     @Override
     protected void getInput() {
         //Headless
-        leftX = curveInput(gamepad1.left_stick_x, 1)*lim * 0.9;
-        leftY = curveInput(gamepad1.left_stick_y, 1)*lim * 0.9;
-        rightX = curveInput(gamepad1.right_stick_x, 1)*lim*0.75 * 0.9;
+        leftX = curveInput(gamepad1.left_stick_x, 1)*lim * 0.92;
+        leftY = curveInput(gamepad1.left_stick_y, 1)*lim * 0.92;
+        rightX = curveInput(gamepad1.right_stick_x, 1)*lim*0.75 * 0.92;
         resetAngle = gamepad1.y;
 
         //Lift
         high = gamepad2.dpad_up;
-        mid = gamepad2.dpad_left || gamepad2.dpad_right;
+        mid = gamepad2.dpad_left;
         low = gamepad2.dpad_down;
         ground = gamepad2.a;
         cap = gamepad2.y;
+        shared = gamepad2.dpad_right;
 
         liftPower = gamepad2.right_trigger - gamepad2.left_trigger;
 

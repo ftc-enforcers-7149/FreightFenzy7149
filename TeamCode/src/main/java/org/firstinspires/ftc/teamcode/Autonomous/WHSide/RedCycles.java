@@ -1,14 +1,18 @@
 package org.firstinspires.ftc.teamcode.Autonomous.WHSide;
 
+import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
 import org.firstinspires.ftc.teamcode.Autonomous.Auto_V2_5;
+import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorIntake;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Levels;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Autonomous(name = "Red WH Cycles")
@@ -24,14 +28,20 @@ public class RedCycles extends Auto_V2_5 {
     public void auto() {
         drive.setPoseEstimate(new Pose2d(6.75, -78.25, 0));
 
-        SLOW_DIST = 25;
+        SLOW_DIST = 20;
         SPEED_MULT = 0.9;
+
+        Lift.pidCoeffs = new PIDCoefficients(0.007, 0, 0.0002);
 
         //Score pre-loaded
         lift.setTargetHeight(commands.detectBarcode(tseDetector));
 
-        driveTo(33, -68, Math.toRadians(30));
+        H_ACC = Math.toRadians(4);
+        driveTo(28, -68, Math.toRadians(30));
+        H_ACC = Math.toRadians(1);
         commands.outtake(intake, lift);
+
+        Lift.pidCoeffs = new PIDCoefficients(0.008, 0, 0.0002);
 
         //Cycles
         int cycle = 0;
@@ -60,17 +70,16 @@ public class RedCycles extends Auto_V2_5 {
 
             //Intake / Don't hit wall
             if (!intake.getFreightInIntake())
-                intake(Math.max(26 - (cycle * 5), 12));
+                intake(Math.max(22 - (cycle * 6), 8));
+            else
+                drive.setMotorPowers(0, 0, 0, 0);
 
             //Drive out through gap
             driveOutOfWarehouse();
             inWarehouse = false;
 
             //Drive to and score in hub
-            if (cycle < 2)
-                scoreInHub(-62);
-            else
-                scoreInHub(-68);
+            scoreInHub(-75);
 
             cycle++;
         }
@@ -80,13 +89,15 @@ public class RedCycles extends Auto_V2_5 {
         if (!inWarehouse) {
             driveToWall();
             driveIntoWarehouse();
-            intake(30);
+            intake(40);
         }
         lift.setTargetHeight(Levels.GROUND);
         intake.setLatch(MotorIntake.LatchPosition.CLOSED);
         intake.setIntakePower(-0.3);
         SPEED_MULT = 1.0;
+        SLOW_DIST = 5;
         driveTo(drive.getPoseEstimate().getX() + 2, drive.getPoseEstimate().getY() - 6, 0);
+        SLOW_DIST = 20;
         intake.setIntakePower(0);
     }
 
@@ -95,27 +106,27 @@ public class RedCycles extends Auto_V2_5 {
 
         H_ACC = Math.toRadians(5);
         POS_ACC = 2;
-        SLOW_DIST = 10;
+        SLOW_DIST = 1;
         SPEED_MULT = 1.0;
 
         lift.setPower(-0.01); //Start moving the lift down
 
         driveTo(() -> {
-                    if (Math.abs(deltaHeading(drive.getPoseEstimate().getHeading(), Math.toRadians(280))) > Math.toRadians(3))
-                        return 8.5;
+                    if (Math.abs(deltaHeading(drive.getPoseEstimate().getHeading(), Math.toRadians(275))) > Math.toRadians(3))
+                        return 12.0;
                     else {
                         lift.setTargetHeight(Levels.GROUND);
                         return drive.getPoseEstimate().getX();
                     }
                 },
-                () -> -77.0,
-                () -> Math.toRadians(280)
-        );
+                () -> -80.0,
+                () -> Math.toRadians(275)
+        , false);
 
         long driveStartTime = System.currentTimeMillis();
-        drive.setWeightedDrivePower(new Pose2d(0, -0.5, 0));
-        customWait(() -> (distCorrect.getSideWall() > 8.3) && System.currentTimeMillis() < driveStartTime + 1000);
-        waitForTime(125);
+        drive.setWeightedDrivePower(new Pose2d(0.01, -0.7, 0));
+        customWait(() -> (distCorrect.getSideWall() > 8.5) && System.currentTimeMillis() < driveStartTime + 1000);
+        waitForTime(75);
         //drive.setWeightedDrivePower(new Pose2d(0, 0, 0));
 
         drive.setPoseEstimate(new Pose2d(
@@ -125,7 +136,7 @@ public class RedCycles extends Auto_V2_5 {
 
         H_ACC = Math.toRadians(1);
         POS_ACC = 1;
-        SLOW_DIST = 25;
+        SLOW_DIST = 20;
         SPEED_MULT = 0.9;
 
         distCorrect.stopRunning();
@@ -133,7 +144,7 @@ public class RedCycles extends Auto_V2_5 {
 
     private void driveIntoWarehouse() {
         distCorrect.startRunning();
-        intake.startScanningIntake();
+        //intake.startScanningIntake();
 
         lift.setTargetHeight(Levels.GROUND);
         intake.setIntakePower(1);
@@ -141,11 +152,11 @@ public class RedCycles extends Auto_V2_5 {
         POS_ACC = 2;
         H_ACC = Math.toRadians(20);
 
-        drive.setWeightedDrivePower(new Pose2d(0.8, -0.4, 0));
+        drive.setWeightedDrivePower(new Pose2d(0.9, -0.35, 0));
         long driveStartTime = System.currentTimeMillis();
 
-        customWait(() -> !intake.getFreightInIntake() &&
-                System.currentTimeMillis() < driveStartTime + 500);
+        customWait(() -> System.currentTimeMillis() < driveStartTime + 350 &&
+                distCorrect.getFrontDistance() > 50);
         //drive.setWeightedDrivePower(new Pose2d(0, 0, 0));
 
         drive.setPoseEstimate(new Pose2d(
@@ -156,7 +167,7 @@ public class RedCycles extends Auto_V2_5 {
         POS_ACC = 1;
         H_ACC = Math.toRadians(1);
 
-        intake.stopScanningIntake();
+        //intake.stopScanningIntake();
         distCorrect.stopRunning();
     }
 
@@ -168,19 +179,20 @@ public class RedCycles extends Auto_V2_5 {
         intake.setIntakePower(1);
 
         long driveStartTime = System.currentTimeMillis();
-        drive.setWeightedDrivePower(new Pose2d(0.6, -0.2, 0));
+        drive.setWeightedDrivePower(new Pose2d(0.6, -0.3, 0));
         customWait(() -> {
-            if (!intake.getFreightInIntake() && distCorrect.getFrontDistance() < 40)
-                drive.setWeightedDrivePower(new Pose2d(Math.pow(distCorrect.getFrontDistance(), 2) * 0.000375, -0.2, 0));
+            if (!intake.getFreightInIntake() && distCorrect.getFrontDistance() < 50)
+                drive.setWeightedDrivePower(new Pose2d(Math.pow(distCorrect.getFrontDistance(), 2) * 0.00036, -0.1, 0));
 
-            return !intake.getFreightInIntake() &&
-                    distCorrect.getFrontDistance() > distanceFromWall &&
-                    System.currentTimeMillis() < driveStartTime + 2000;
+            return ((!intake.getFreightInIntake() &&
+                    distCorrect.getFrontDistance() > distanceFromWall) ||
+                    distCorrect.getFrontDistance() > 30) &&
+                    System.currentTimeMillis() < driveStartTime + 1000;
         });
         drive.setWeightedDrivePower(new Pose2d(0, 0, 0));
 
         long correctStartTime = System.currentTimeMillis();
-        customWait(() -> distCorrect.getFrontDistance() > 50 && System.currentTimeMillis() < correctStartTime + 2000);
+        customWait(() -> distCorrect.getFrontDistance() > 50 && System.currentTimeMillis() < correctStartTime + 1000);
 
         if (distCorrect.getFrontDistance() < 50)
             drive.setPoseEstimate(distCorrect.correctPoseWithDist(drive.getPoseEstimate().getHeading()));
@@ -188,6 +200,8 @@ public class RedCycles extends Auto_V2_5 {
             drive.setPoseEstimate(new Vector2d(distCorrect.getSideWall(), -144));
 
         intake.stopScanningIntake();
+        //intake.setLatch(MotorIntake.LatchPosition.CLOSED);
+        //intake.setIntakePower(0);
         distCorrect.stopRunning();
     }
 
@@ -196,39 +210,47 @@ public class RedCycles extends Auto_V2_5 {
 
         POS_ACC = 3;
         SLOW_DIST = 2;
-        SPEED_MULT = 0.5;
+        SPEED_MULT = 0.9;
 
         AtomicReference<Double> lastFrontReading = new AtomicReference<>(distCorrect.getFrontDistance());
-        AtomicReference<Double> lastSideReading = new AtomicReference<>(distCorrect.getSideWall());
+
+        AtomicBoolean throughGap = new AtomicBoolean(false);
+        AtomicBoolean spitOut = new AtomicBoolean(false);
 
         driveTo(() -> {
-                    if (Math.abs(drive.getPoseEstimate().getY() + 70) > POS_ACC * 3) {
-                        intake.setIntakePower(-0.5);
-                        intake.setLatch(MotorIntake.LatchPosition.CLOSED);
+                    if (!throughGap.get())
                         return drive.getPoseEstimate().getX() - 10;
-                    }
                     else
                         return drive.getPoseEstimate().getX();
                 },
                 () -> {
                     if (distCorrect.getSideWall() > 15)
-                        return -85.0;
+                        return -100.0;
                     else {
                         SLOW_DIST = 10;
-                        SPEED_MULT = 0.75;
 
-                        return -70.0;
+                        return -85.0;
                     }
                 },
                 () -> {
-                    if (distCorrect.getFrontDistance() < 40 &&
-                        distCorrect.getSideWall() < 20 &&
-                        distCorrect.getFrontDistance() > lastFrontReading.get() + 2 &&
-                        distCorrect.getSideWall() < lastSideReading.get() - 2) {
+                    if (distCorrect.getFrontDistance() < 45 &&
+                        distCorrect.getFrontDistance() > lastFrontReading.get() + 2) {
                         double robotHeading = drive.getPoseEstimate().getHeading();
                         drive.setPoseEstimate(new Pose2d(distCorrect.correctPoseWithDist(robotHeading), robotHeading));
                         lastFrontReading.set(distCorrect.getFrontDistance());
-                        lastSideReading.set(distCorrect.getSideWall());
+                    }
+                    else if (distCorrect.getFrontDistance() >= 50 && !throughGap.get()) {
+                        double robotHeading = drive.getPoseEstimate().getHeading();
+                        drive.setPoseEstimate(new Pose2d(7, -96, robotHeading));
+
+                        throughGap.set(true);
+                    }
+
+                    if (distCorrect.getFrontDistance() > 30 && !spitOut.get()) {
+                        if (intake.getFreightInIntake())
+                            intake.spitOutTwo();
+
+                        spitOut.set(true);
                     }
 
                     if (distCorrect.getSideWall() > 15)
@@ -236,7 +258,7 @@ public class RedCycles extends Auto_V2_5 {
                     else
                         return Math.toRadians(270);
                 }
-        , 2000);
+        , 1500);
 
         drive.setPoseEstimate(new Pose2d(
                 distCorrect.getSideWall(),
@@ -245,7 +267,10 @@ public class RedCycles extends Auto_V2_5 {
 
         POS_ACC = 1;
         SPEED_MULT = 0.9;
+        SLOW_DIST = 20;
 
+        intake.cancelSpitOut();
+        intake.setLatch(MotorIntake.LatchPosition.CLOSED);
         intake.setIntakePower(0);
 
         distCorrect.stopRunning();
@@ -255,7 +280,7 @@ public class RedCycles extends Auto_V2_5 {
         lift.setTargetHeight(Levels.HIGH);
 
         H_ACC = Math.toRadians(4);
-        driveTo(37, -62, Math.toRadians(25));
+        driveTo(31, -62, Math.toRadians(25));
         H_ACC = Math.toRadians(1);
 
         commands.outtake(intake, lift);
@@ -265,7 +290,7 @@ public class RedCycles extends Auto_V2_5 {
         lift.setTargetHeight(Levels.HIGH);
 
         H_ACC = Math.toRadians(4);
-        driveTo(37, yPos, Math.toRadians(25));
+        driveTo(31, yPos, Math.toRadians(25));
         H_ACC = Math.toRadians(1);
 
         commands.outtake(intake, lift);

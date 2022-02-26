@@ -25,11 +25,11 @@ public class SimpleColorPipeline extends RectPipeline {
     private int posX, posY;
     private int width, height;
 
-    SimpleColorPipeline(Scalar lowerBound, Scalar upperBound, Scalar drawColor) {
+    public SimpleColorPipeline(Scalar lowerBound, Scalar upperBound, Scalar drawColor) {
         this(lowerBound, upperBound, drawColor, 0, 0, 0, 0);
     }
 
-    SimpleColorPipeline(Scalar lowerBound, Scalar upperBound, Scalar drawColor,
+    public SimpleColorPipeline(Scalar lowerBound, Scalar upperBound, Scalar drawColor,
                         int posX, int posY, int width, int height) {
         this.lowerBound = lowerBound; this.upperBound = upperBound;
         this.drawColor = drawColor;
