@@ -30,32 +30,21 @@ public class CrashLog extends TeleOp_Base {
     @Override
     public void init() {
 
-        fLeft = hardwareMap.get(DcMotorEx.class, "fLeft");
-        fRight = hardwareMap.get(DcMotorEx.class, "fRight");
-        bLeft = hardwareMap.get(DcMotorEx.class, "bLeft");
-        bRight = hardwareMap.get(DcMotorEx.class, "bRight");
+        try {
+            initializeAll();
+        } catch (Exception e) {
+            e.printStackTrace();
+            requestOpModeStop();
+            return;
+        }
 
-        fLeft.setDirection(DcMotorSimple.Direction.REVERSE);
-        fRight.setDirection(DcMotorSimple.Direction.FORWARD);
-        bLeft.setDirection(DcMotorSimple.Direction.REVERSE);
-        bRight.setDirection(DcMotorSimple.Direction.FORWARD);
+    }
 
-        fLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        fRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    @Override
+    public void start() {
 
-        fLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        fRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        fLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        fRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        bLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        bRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-        gyro = new Gyroscope(hardwareMap);
+        startInputs();
+        startOutputs();
 
     }
 
@@ -73,6 +62,7 @@ public class CrashLog extends TeleOp_Base {
             Log.v("\n\n\nRestarting step", steps[step]);
         }
 
+        updateInputs();
         getInput();
 
         telemetry.addData("Current step: ", steps[step]);
@@ -80,6 +70,8 @@ public class CrashLog extends TeleOp_Base {
                                     "Press A to repeat this step.");
 
         driveTank();
+
+        updateOutputs();
         updateStateMachine();
 
     }
