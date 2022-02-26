@@ -18,7 +18,7 @@ import static org.firstinspires.ftc.teamcode.GlobalData.HEADING;
 import static org.firstinspires.ftc.teamcode.GlobalData.RAN_AUTO;
 
 @TeleOp (name = "BLUE Tele_V2 TOUCHPAD")
-//@Disabled
+@Disabled
 public class Tele_V2_BLUE_Touchpad extends TeleOp_Base {
 
     //Headless

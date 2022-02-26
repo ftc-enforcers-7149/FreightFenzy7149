@@ -16,7 +16,7 @@ import static org.firstinspires.ftc.teamcode.GlobalData.HEADING;
 import static org.firstinspires.ftc.teamcode.GlobalData.RAN_AUTO;
 
 @TeleOp (name = "BLUE Tele_V2")
-//@Disabled
+@Disabled
 public class Tele_V2_BLUE extends TeleOp_Base {
 
     //Headless

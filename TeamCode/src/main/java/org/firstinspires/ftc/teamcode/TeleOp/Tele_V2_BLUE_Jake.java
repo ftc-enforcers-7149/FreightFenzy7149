@@ -38,7 +38,7 @@ public class Tele_V2_BLUE_Jake extends TeleOp_Base {
     }
 
     private Levels liftPos = Levels.GROUND, lastLiftPos = Levels.GROUND;
-    private boolean high, mid, low, ground;
+    private boolean high, mid, low, ground, cap;
     private double liftPower, lastLiftPower;
     private boolean lastPowerManual;
 
@@ -105,8 +105,45 @@ public class Tele_V2_BLUE_Jake extends TeleOp_Base {
         // Drive
         driveHeadless(gyro.getYaw(), resetAngle);
 
-        //Intake
-        if (in && freightInIntake && !lastFreightInIntake) {
+        //Lift
+        if (high)
+            liftPos = Levels.HIGH;
+        if (mid)
+            liftPos = Levels.MIDDLE;
+        if (low)
+            liftPos = Levels.LOW;
+        if (cap)
+            liftPos = Levels.CAP;
+        if (ground) {
+            liftPos = Levels.GROUND;
+            if (lastLiftPos == Levels.LOW)
+                intake.setIntakePower(-0.5);
+        }
+        else if (!score && !outtake && !in) intake.setIntakePower(0);
+
+        //Set height
+        if (liftPower != lastLiftPower) {
+            lift.setPower(liftPower);
+            lastPowerManual = true;
+        }
+        else if (lastPowerManual && liftPower == 0) {
+            lift.setTargetHeight(lift.getHeight());
+            lastPowerManual = false;
+        }
+
+        if (liftPos != lastLiftPos) {
+            lift.setTargetHeight(liftPos);
+            lastPowerManual = false;
+        }
+
+        //Reset
+        if (resetLift && !lastResetLift) {
+            lift.setManualOverride(!manualOverride);
+            manualOverride = !manualOverride;
+        }
+
+        // Intake
+        if (in && freightInIntake && !lastFreightInIntake && false) {
             intake.setIntakePower(0);
             intake.setPaddle(MotorIntake.PaddlePosition.BACK);
             intake.setLatch(MotorIntake.LatchPosition.CLOSED);
@@ -150,37 +187,6 @@ public class Tele_V2_BLUE_Jake extends TeleOp_Base {
             intake.setLatch(MotorIntake.LatchPosition.OPEN);
         }
 
-        //Lift
-        if (high)
-            liftPos = Levels.HIGH;
-        if (mid)
-            liftPos = Levels.MIDDLE;
-        if (low)
-            liftPos = Levels.LOW;
-        if (ground)
-            liftPos = Levels.GROUND;
-
-        //Set height
-        if (liftPower != lastLiftPower) {
-            lift.setPower(liftPower);
-            lastPowerManual = true;
-        }
-        else if (lastPowerManual && liftPower == 0) {
-            lift.setTargetHeight(lift.getHeight());
-            lastPowerManual = false;
-        }
-
-        if (liftPos != lastLiftPos) {
-            lift.setTargetHeight(liftPos);
-            lastPowerManual = false;
-        }
-
-        //Reset
-        if (resetLift && !lastResetLift) {
-            lift.setManualOverride(!manualOverride);
-            manualOverride = !manualOverride;
-        }
-
         // Carousel
         if (gamepad1.x) spinner.reset();
 
@@ -193,6 +199,8 @@ public class Tele_V2_BLUE_Jake extends TeleOp_Base {
             led.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
         else
             led.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
+
+        led.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
 
         updateOutputs();
         updateStateMachine();
@@ -207,9 +215,9 @@ public class Tele_V2_BLUE_Jake extends TeleOp_Base {
     @Override
     protected void getInput() {
         //Headless
-        leftX = curveInput(gamepad1.left_stick_x, 1)*lim * 0.8;
-        leftY = curveInput(gamepad1.left_stick_y, 1)*lim * 0.8;
-        rightX = curveInput(gamepad1.right_stick_x, 1)*lim*0.75 * 0.8;
+        leftX = curveInput(gamepad1.left_stick_x, 1)*lim * 0.9;
+        leftY = curveInput(gamepad1.left_stick_y, 1)*lim * 0.9;
+        rightX = curveInput(gamepad1.right_stick_x, 1)*lim*0.75 * 0.9;
         resetAngle = gamepad1.y;
 
         //Lift
@@ -217,10 +225,11 @@ public class Tele_V2_BLUE_Jake extends TeleOp_Base {
         mid = gamepad2.dpad_left || gamepad2.dpad_right;
         low = gamepad2.dpad_down;
         ground = gamepad2.a;
+        cap = gamepad2.y;
 
         liftPower = gamepad2.right_trigger - gamepad2.left_trigger;
 
-        resetLift = gamepad1.back;
+        resetLift = gamepad2.back;
 
         //Intake
         freightInIntake = intake.getFreightInIntake();

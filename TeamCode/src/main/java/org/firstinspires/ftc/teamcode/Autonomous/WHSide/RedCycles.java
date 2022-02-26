@@ -38,40 +38,56 @@ public class RedCycles extends Auto_V2_5 {
 
         boolean inWarehouse = false;
 
-        while (opModeIsActive() && cycle < 3) {
+        while (opModeIsActive() && cycle < 4) {
+            if (intake.getFreightInIntake()) {
+                intake.setLatch(MotorIntake.LatchPosition.OPEN);
+                intake.setIntakePower(-1);
+            }
+
             //Align with wall
             driveToWall();
+
+            if (!intake.getFreightInIntake())
+                intake.setIntakePower(0);
 
             //Drive through gap
             driveIntoWarehouse();
             inWarehouse = true;
 
             //Park if running out of time
-            if (getRuntime() > 30) {
+            if (getRuntime() >= 29)
                 break;
-            }
 
             //Intake / Don't hit wall
             if (!intake.getFreightInIntake())
-                intake(Math.max(22 - (cycle * 8), 12));
+                intake(Math.max(26 - (cycle * 5), 12));
 
             //Drive out through gap
             driveOutOfWarehouse();
             inWarehouse = false;
 
             //Drive to and score in hub
-            scoreInHub();
+            if (cycle < 2)
+                scoreInHub(-62);
+            else
+                scoreInHub(-68);
 
             cycle++;
         }
+        intake.setLatch(MotorIntake.LatchPosition.OPEN);
+        intake.setPaddle(MotorIntake.PaddlePosition.BACK);
 
         if (!inWarehouse) {
             driveToWall();
             driveIntoWarehouse();
-            intake(12);
+            intake(30);
         }
         lift.setTargetHeight(Levels.GROUND);
-        driveTo(drive.getPoseEstimate().getX() + 2, drive.getPoseEstimate().getY() + 6, 0);
+        intake.setLatch(MotorIntake.LatchPosition.CLOSED);
+        intake.setIntakePower(-0.3);
+        SPEED_MULT = 1.0;
+        driveTo(drive.getPoseEstimate().getX() + 2, drive.getPoseEstimate().getY() - 6, 0);
+        intake.setIntakePower(0);
     }
 
     private void driveToWall() {
@@ -79,10 +95,14 @@ public class RedCycles extends Auto_V2_5 {
 
         H_ACC = Math.toRadians(5);
         POS_ACC = 2;
+        SLOW_DIST = 10;
+        SPEED_MULT = 1.0;
+
+        lift.setPower(-0.01); //Start moving the lift down
 
         driveTo(() -> {
                     if (Math.abs(deltaHeading(drive.getPoseEstimate().getHeading(), Math.toRadians(280))) > Math.toRadians(3))
-                        return 7.5;
+                        return 8.5;
                     else {
                         lift.setTargetHeight(Levels.GROUND);
                         return drive.getPoseEstimate().getX();
@@ -93,10 +113,10 @@ public class RedCycles extends Auto_V2_5 {
         );
 
         long driveStartTime = System.currentTimeMillis();
-        drive.setWeightedDrivePower(new Pose2d(0.01, -0.5, 0));
-        customWait(() -> (distCorrect.getSideWall() > 8) && System.currentTimeMillis() < driveStartTime + 1000);
-        waitForTime(150);
-        drive.setWeightedDrivePower(new Pose2d(0, 0, 0));
+        drive.setWeightedDrivePower(new Pose2d(0, -0.5, 0));
+        customWait(() -> (distCorrect.getSideWall() > 8.3) && System.currentTimeMillis() < driveStartTime + 1000);
+        waitForTime(125);
+        //drive.setWeightedDrivePower(new Pose2d(0, 0, 0));
 
         drive.setPoseEstimate(new Pose2d(
                 distCorrect.getSideWall(),
@@ -105,6 +125,8 @@ public class RedCycles extends Auto_V2_5 {
 
         H_ACC = Math.toRadians(1);
         POS_ACC = 1;
+        SLOW_DIST = 25;
+        SPEED_MULT = 0.9;
 
         distCorrect.stopRunning();
     }
@@ -119,11 +141,12 @@ public class RedCycles extends Auto_V2_5 {
         POS_ACC = 2;
         H_ACC = Math.toRadians(20);
 
-        drive.setWeightedDrivePower(new Pose2d(0.6, -0.4, 0));
+        drive.setWeightedDrivePower(new Pose2d(0.8, -0.4, 0));
         long driveStartTime = System.currentTimeMillis();
+
         customWait(() -> !intake.getFreightInIntake() &&
-                System.currentTimeMillis() < driveStartTime + 750);
-        drive.setWeightedDrivePower(new Pose2d(0, 0, 0));
+                System.currentTimeMillis() < driveStartTime + 500);
+        //drive.setWeightedDrivePower(new Pose2d(0, 0, 0));
 
         drive.setPoseEstimate(new Pose2d(
                 distCorrect.getSideWall(),
@@ -144,28 +167,23 @@ public class RedCycles extends Auto_V2_5 {
         lift.setTargetHeight(Levels.GROUND);
         intake.setIntakePower(1);
 
-        POS_ACC = 6;
-        H_ACC = Math.toRadians(2);
-        MIN_TURN = 0.3;
-
         long driveStartTime = System.currentTimeMillis();
-        drive.setWeightedDrivePower(new Pose2d(0.5, -0.1, 0));
-        customWait(() -> (!intake.getFreightInIntake() &&
-                distCorrect.getFrontDistance() > distanceFromWall &&
-                System.currentTimeMillis() < driveStartTime + 2000));
-        intake.setIntakePower(-0.5);
-        drive.setWeightedDrivePower(new Pose2d(0, 0, 0));
+        drive.setWeightedDrivePower(new Pose2d(0.6, -0.2, 0));
+        customWait(() -> {
+            if (!intake.getFreightInIntake() && distCorrect.getFrontDistance() < 40)
+                drive.setWeightedDrivePower(new Pose2d(Math.pow(distCorrect.getFrontDistance(), 2) * 0.000375, -0.2, 0));
 
-        POS_ACC = 1;
-        H_ACC = Math.toRadians(1);
-        MIN_TURN = 0.2;
+            return !intake.getFreightInIntake() &&
+                    distCorrect.getFrontDistance() > distanceFromWall &&
+                    System.currentTimeMillis() < driveStartTime + 2000;
+        });
+        drive.setWeightedDrivePower(new Pose2d(0, 0, 0));
 
         long correctStartTime = System.currentTimeMillis();
         customWait(() -> distCorrect.getFrontDistance() > 50 && System.currentTimeMillis() < correctStartTime + 2000);
 
-        if (distCorrect.getFrontDistance() < 50) {
+        if (distCorrect.getFrontDistance() < 50)
             drive.setPoseEstimate(distCorrect.correctPoseWithDist(drive.getPoseEstimate().getHeading()));
-        }
         else
             drive.setPoseEstimate(new Vector2d(distCorrect.getSideWall(), -144));
 
@@ -176,9 +194,7 @@ public class RedCycles extends Auto_V2_5 {
     private void driveOutOfWarehouse() {
         distCorrect.startRunning();
 
-        intake.setLatch(MotorIntake.LatchPosition.CLOSED);
-
-        POS_ACC = 2;
+        POS_ACC = 3;
         SLOW_DIST = 2;
         SPEED_MULT = 0.5;
 
@@ -186,8 +202,11 @@ public class RedCycles extends Auto_V2_5 {
         AtomicReference<Double> lastSideReading = new AtomicReference<>(distCorrect.getSideWall());
 
         driveTo(() -> {
-                    if (Math.abs(drive.getPoseEstimate().getY() + 76) > POS_ACC * 3)
+                    if (Math.abs(drive.getPoseEstimate().getY() + 70) > POS_ACC * 3) {
+                        intake.setIntakePower(-0.5);
+                        intake.setLatch(MotorIntake.LatchPosition.CLOSED);
                         return drive.getPoseEstimate().getX() - 10;
+                    }
                     else
                         return drive.getPoseEstimate().getX();
                 },
@@ -195,10 +214,10 @@ public class RedCycles extends Auto_V2_5 {
                     if (distCorrect.getSideWall() > 15)
                         return -85.0;
                     else {
-                        SLOW_DIST = 25;
+                        SLOW_DIST = 10;
                         SPEED_MULT = 0.75;
 
-                        return -76.0;
+                        return -70.0;
                     }
                 },
                 () -> {
@@ -236,7 +255,17 @@ public class RedCycles extends Auto_V2_5 {
         lift.setTargetHeight(Levels.HIGH);
 
         H_ACC = Math.toRadians(4);
-        driveTo(37, -68, Math.toRadians(25));
+        driveTo(37, -62, Math.toRadians(25));
+        H_ACC = Math.toRadians(1);
+
+        commands.outtake(intake, lift);
+    }
+
+    private void scoreInHub(double yPos) {
+        lift.setTargetHeight(Levels.HIGH);
+
+        H_ACC = Math.toRadians(4);
+        driveTo(37, yPos, Math.toRadians(25));
         H_ACC = Math.toRadians(1);
 
         commands.outtake(intake, lift);
