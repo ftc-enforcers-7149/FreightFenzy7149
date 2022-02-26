@@ -150,7 +150,7 @@ public abstract class TeleOp_Base extends OpMode {
         turnJerk = new VelLimitsJerk(0);
     }
 
-    protected void initializeTouchpad() {
+    /*protected void initializeTouchpad() {
 
         touchpad1 = new EnforcersTouchpad(gamepad1);
         touchpad2 = new EnforcersTouchpad(gamepad2);
@@ -158,7 +158,7 @@ public abstract class TeleOp_Base extends OpMode {
         addInput(touchpad1);
         addInput(touchpad2);
 
-    }
+    }*/
 
     protected void initializeAll() throws Exception {
         initializeSources();
@@ -167,7 +167,7 @@ public abstract class TeleOp_Base extends OpMode {
         initializeGyro();
         initializeOdometry();
         initializeVars();
-        initializeTouchpad();
+        //initializeTouchpad();
     }
 
     protected void addInput(Input input) {
