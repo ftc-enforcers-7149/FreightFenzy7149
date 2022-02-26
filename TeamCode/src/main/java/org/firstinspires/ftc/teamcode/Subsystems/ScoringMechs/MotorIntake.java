@@ -21,7 +21,7 @@ public class MotorIntake implements Input, Output {
     //Sensors
     public RevColorSensorV3 intakeColorSensor;
 
-    private static final double minDistance = 1.0;
+    private static final double minDistance = 2.0;
     private ValueTimer<Double> distance;
     private final boolean useSensor;
 
@@ -29,7 +29,7 @@ public class MotorIntake implements Input, Output {
     private double intakePower = 0,  lastIntakePower = 0;
 
     public enum PaddlePosition {
-        BACK(1),
+        BACK(0.8),
         OUT(0.3),
         IDLE(BACK.pos);
 
@@ -43,6 +43,8 @@ public class MotorIntake implements Input, Output {
         OPEN(0),
         DUCK_CLOSED(0.2),
         CLOSED(0.25),
+        PARTIAL_CLOSE(0.18),
+        OPEN_UP(1),
         IDLE(OPEN.pos);
 
         public final double pos;
@@ -55,6 +57,12 @@ public class MotorIntake implements Input, Output {
     private PaddlePosition currPaddle = PaddlePosition.BACK, lastPaddle = PaddlePosition.IDLE;
     private LatchPosition currLatch = LatchPosition.OPEN, lastLatch = LatchPosition.IDLE;
 
+    private enum SpitTwo {
+        SPIT_OUT, CLOSE, IDLE
+    }
+    private SpitTwo spitTwoState = SpitTwo.IDLE, lastSpitTwoState = SpitTwo.IDLE;
+    private long startSpitTime;
+
     public MotorIntake(HardwareMap hardwaremap,
                        String motorName, String paddleName, String latchName,
                        String intakeColorSensorName) {
@@ -66,7 +74,7 @@ public class MotorIntake implements Input, Output {
 
         intakeColorSensor = hardwaremap.get(RevColorSensorV3.class, intakeColorSensorName);
 
-        distance = new ValueTimer<Double>(0.0, 250) {
+        distance = new ValueTimer<Double>(0.0, 200) {
             @Override
             public Double readValue() {
                 return intakeColorSensor.getDistance(DistanceUnit.INCH);
@@ -95,6 +103,31 @@ public class MotorIntake implements Input, Output {
 
     @Override
     public void updateOutput() {
+        if (spitTwoState == SpitTwo.SPIT_OUT && lastSpitTwoState == SpitTwo.SPIT_OUT) {
+            if (System.currentTimeMillis() - startSpitTime >= 500)
+                spitTwoState = SpitTwo.CLOSE;
+        }
+
+        if (spitTwoState != lastSpitTwoState) {
+            switch (spitTwoState) {
+                case SPIT_OUT:
+                    setLatch(LatchPosition.PARTIAL_CLOSE);
+                    setIntakePower(-1);
+                    startSpitTime = System.currentTimeMillis();
+                    break;
+                case CLOSE:
+                    setLatch(LatchPosition.CLOSED);
+                    setIntakePower(0);
+                    spitTwoState = SpitTwo.IDLE;
+                    break;
+                case IDLE:
+                default:
+                    break;
+            }
+        }
+
+        lastSpitTwoState = spitTwoState;
+
         if (intakePower != lastIntakePower) {
             intake.setPower(intakePower);
             lastIntakePower = intakePower;
@@ -124,6 +157,13 @@ public class MotorIntake implements Input, Output {
     }
     public void setLatch(LatchPosition pos) {
         currLatch = pos;
+    }
+
+    public void spitOutTwo() {
+        spitTwoState = SpitTwo.SPIT_OUT;
+    }
+    public void cancelSpitOut() {
+        spitTwoState = SpitTwo.IDLE;
     }
 
     public boolean getFreightInIntake () {

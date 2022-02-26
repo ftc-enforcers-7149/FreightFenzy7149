@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.Autonomous;
 
-import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.CarouselSpinner;
-import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Intake;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorCarouselSpinner;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorIntake;
