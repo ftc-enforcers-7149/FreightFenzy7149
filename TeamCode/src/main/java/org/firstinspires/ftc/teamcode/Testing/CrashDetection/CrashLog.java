@@ -87,6 +87,11 @@ public class CrashLog extends TeleOp_Base {
     @Override
     public void getInput() {
 
+        leftX = gamepad1.left_stick_x;
+        leftY = gamepad1.left_stick_y;
+        rightX = gamepad1.right_stick_x;
+        rightY = gamepad1.right_stick_y;
+
         x = gamepad1.x;
         a = gamepad1.a;
 
@@ -97,6 +102,11 @@ public class CrashLog extends TeleOp_Base {
 
     @Override
     public void updateStateMachine() {
+
+        lastLeftX = leftX;
+        lastLeftY = leftY;
+        lastRightX = rightX;
+        lastRightY = rightY;
 
         lastX = x;
         lastA = a;
