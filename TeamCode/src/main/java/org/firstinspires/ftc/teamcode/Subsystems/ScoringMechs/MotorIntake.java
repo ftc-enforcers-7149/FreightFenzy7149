@@ -21,7 +21,7 @@ public class MotorIntake implements Input, Output {
     //Sensors
     public RevColorSensorV3 intakeColorSensor;
 
-    private static final double minDistance = 2.0;
+    private static final double minDistance = 2.5;
     private ValueTimer<Double> distance;
     private final boolean useSensor;
 
@@ -43,7 +43,7 @@ public class MotorIntake implements Input, Output {
         OPEN(0),
         DUCK_CLOSED(0.2),
         CLOSED(0.25),
-        PARTIAL_CLOSE(0.18),
+        PARTIAL_CLOSE(0.175),
         OPEN_UP(1),
         IDLE(OPEN.pos);
 

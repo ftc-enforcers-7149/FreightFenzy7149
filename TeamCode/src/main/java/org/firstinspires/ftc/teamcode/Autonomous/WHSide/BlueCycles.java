@@ -28,19 +28,19 @@ public class BlueCycles extends Auto_V2_5 {
     public void auto() {
         drive.setPoseEstimate(new Pose2d(6.75, 78.25, 0));
 
-        SLOW_DIST = 20;
+        SLOW_DIST = 25;
         SPEED_MULT = 0.9;
-
         Lift.pidCoeffs = new PIDCoefficients(0.007, 0, 0.0002);
 
         //Score pre-loaded
         lift.setTargetHeight(commands.detectBarcode(tseDetector));
 
         H_ACC = Math.toRadians(4);
-        driveTo(30, 68, Math.toRadians(330));
+        driveTo(30.25, 71, Math.toRadians(330));
         H_ACC = Math.toRadians(1);
         commands.outtake(intake, lift);
 
+        SLOW_DIST = 20;
         Lift.pidCoeffs = new PIDCoefficients(0.008, 0, 0.0002);
 
         //Cycles
@@ -124,7 +124,7 @@ public class BlueCycles extends Auto_V2_5 {
         , false);
 
         long driveStartTime = System.currentTimeMillis();
-        drive.setWeightedDrivePower(new Pose2d(0.01, 0.7, 0));
+        drive.setWeightedDrivePower(new Pose2d(0.02, 0.7, 0));
         customWait(() -> distCorrect.getSideWall() > 8.5 && System.currentTimeMillis() < driveStartTime + 1000);
         waitForTime(75);
         //drive.setWeightedDrivePower(new Pose2d(0, 0, 0));
@@ -182,7 +182,7 @@ public class BlueCycles extends Auto_V2_5 {
         drive.setWeightedDrivePower(new Pose2d(0.6, 0.3, 0));
         customWait(() -> {
             if (!intake.getFreightInIntake() && distCorrect.getFrontDistance() < 50)
-                drive.setWeightedDrivePower(new Pose2d(Math.pow(distCorrect.getFrontDistance(), 2) * 0.00036, 0.1, 0));
+                drive.setWeightedDrivePower(new Pose2d(Math.pow(distCorrect.getFrontDistance(), 2) * 0.00032, 0.1, 0));
 
             return ((!intake.getFreightInIntake() &&
                     distCorrect.getFrontDistance() > distanceFromWall) ||
@@ -211,6 +211,9 @@ public class BlueCycles extends Auto_V2_5 {
         POS_ACC = 3;
         SLOW_DIST = 2;
         SPEED_MULT = 0.9;
+
+        drive.setWeightedDrivePower(new Pose2d(-0.03, 0.5, 0));
+        waitForTime(150);
 
         AtomicReference<Double> lastFrontReading = new AtomicReference<>(distCorrect.getFrontDistance());
 
@@ -247,9 +250,7 @@ public class BlueCycles extends Auto_V2_5 {
                     }
 
                     if (distCorrect.getFrontDistance() > 30 && !spitOut.get()) {
-                        if (intake.getFreightInIntake())
-                            intake.spitOutTwo();
-
+                        intake.spitOutTwo();
                         spitOut.set(true);
                     }
 
@@ -280,7 +281,7 @@ public class BlueCycles extends Auto_V2_5 {
         lift.setTargetHeight(Levels.HIGH);
 
         H_ACC = Math.toRadians(4);
-        driveTo(36, 62, Math.toRadians(335));
+        driveTo(35.25, 62, Math.toRadians(335));
         H_ACC = Math.toRadians(1);
 
         commands.outtake(intake, lift);
@@ -289,9 +290,11 @@ public class BlueCycles extends Auto_V2_5 {
     private void scoreInHub(double yPos) {
         lift.setTargetHeight(Levels.HIGH);
 
+        SLOW_DIST = 25;
         H_ACC = Math.toRadians(4);
-        driveTo(36, yPos, Math.toRadians(335));
+        driveTo(35.25, yPos, Math.toRadians(335));
         H_ACC = Math.toRadians(1);
+        SLOW_DIST = 20;
 
         commands.outtake(intake, lift);
     }
