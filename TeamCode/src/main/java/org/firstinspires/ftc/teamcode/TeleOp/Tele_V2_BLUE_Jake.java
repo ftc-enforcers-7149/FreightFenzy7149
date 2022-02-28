@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.TeleOp;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorCarouselSpinner;
@@ -185,11 +184,14 @@ public class Tele_V2_BLUE_Jake extends TeleOp_Base {
 
         if (score) {
             intake.cancelSpitOut();
-            if (liftPos == Levels.LOW)
+            if (liftPos == Levels.LOW) {
                 intake.setIntakePower(0.3);
-            else
+                intake.setPaddle(MotorIntake.PaddlePosition.OUT_FAR);
+            }
+            else {
                 intake.setIntakePower(0);
-            intake.setPaddle(MotorIntake.PaddlePosition.OUT);
+                intake.setPaddle(MotorIntake.PaddlePosition.OUT_CLOSE);
+            }
             intake.setLatch(MotorIntake.LatchPosition.OPEN);
         }
         else if (lastScore) {

@@ -184,11 +184,14 @@ public class Tele_V2_RED_Jake extends TeleOp_Base {
 
         if (score) {
             intake.cancelSpitOut();
-            if (liftPos == Levels.LOW)
+            if (liftPos == Levels.LOW) {
                 intake.setIntakePower(0.3);
-            else
+                intake.setPaddle(MotorIntake.PaddlePosition.OUT_FAR);
+            }
+            else {
                 intake.setIntakePower(0);
-            intake.setPaddle(MotorIntake.PaddlePosition.OUT);
+                intake.setPaddle(MotorIntake.PaddlePosition.OUT_CLOSE);
+            }
             intake.setLatch(MotorIntake.LatchPosition.OPEN);
         }
         else if (lastScore) {

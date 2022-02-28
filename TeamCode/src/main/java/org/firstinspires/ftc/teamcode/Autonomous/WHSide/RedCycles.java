@@ -36,7 +36,7 @@ public class RedCycles extends Auto_V2_5 {
         lift.setTargetHeight(commands.detectBarcode(tseDetector));
 
         H_ACC = Math.toRadians(4);
-        driveTo(29.75, -68, Math.toRadians(30));
+        driveTo(31, -68, Math.toRadians(30));
         H_ACC = Math.toRadians(1);
         commands.outtake(intake, lift);
 
@@ -79,7 +79,7 @@ public class RedCycles extends Auto_V2_5 {
             inWarehouse = false;
 
             //Drive to and score in hub
-            scoreInHub(-75);
+            scoreInHub(-78);
 
             cycle++;
         }
@@ -283,7 +283,7 @@ public class RedCycles extends Auto_V2_5 {
         lift.setTargetHeight(Levels.HIGH);
 
         H_ACC = Math.toRadians(4);
-        driveTo(31.75, -62, Math.toRadians(25));
+        driveTo(31.75, -62, Math.toRadians(25), 1500);
         H_ACC = Math.toRadians(1);
 
         commands.outtake(intake, lift);
@@ -294,7 +294,7 @@ public class RedCycles extends Auto_V2_5 {
 
         SLOW_DIST = 25;
         H_ACC = Math.toRadians(4);
-        driveTo(31.75, yPos, Math.toRadians(25));
+        driveTo(32.5, yPos, Math.toRadians(25), 1500);
         H_ACC = Math.toRadians(1);
         SLOW_DIST = 20;
 

@@ -281,7 +281,7 @@ public class BlueCycles extends Auto_V2_5 {
         lift.setTargetHeight(Levels.HIGH);
 
         H_ACC = Math.toRadians(4);
-        driveTo(35.25, 62, Math.toRadians(335));
+        driveTo(35.25, 62, Math.toRadians(335), 1500);
         H_ACC = Math.toRadians(1);
 
         commands.outtake(intake, lift);
@@ -292,7 +292,7 @@ public class BlueCycles extends Auto_V2_5 {
 
         SLOW_DIST = 25;
         H_ACC = Math.toRadians(4);
-        driveTo(35.25, yPos, Math.toRadians(335));
+        driveTo(35.25, yPos, Math.toRadians(335), 1500);
         H_ACC = Math.toRadians(1);
         SLOW_DIST = 20;
 
