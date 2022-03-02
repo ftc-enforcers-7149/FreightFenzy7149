@@ -204,7 +204,7 @@ public class Lift implements Output, Input {
         return (int) (inches * ticksPerInch);
     }
 
-    private void initPID() {
+    public void initPID() {
         controller = new PIDFController(pidCoeffs);
         controller.setOutputBounds(-1, 1);
     }

@@ -12,6 +12,8 @@ import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorIntake;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Levels;
 
+import static org.firstinspires.ftc.teamcode.GlobalData.*;
+
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -30,7 +32,8 @@ public class RedCycles extends Auto_V2_5 {
 
         SLOW_DIST = 25;
         SPEED_MULT = 0.9;
-        Lift.pidCoeffs = new PIDCoefficients(0.007, 0, 0.0002);
+        Lift.pidCoeffs = new PIDCoefficients(0.004, 0, 0.0001);
+        lift.initPID();
 
         //Score pre-loaded
         lift.setTargetHeight(commands.detectBarcode(tseDetector));
@@ -41,7 +44,8 @@ public class RedCycles extends Auto_V2_5 {
         commands.outtake(intake, lift);
 
         SLOW_DIST = 20;
-        Lift.pidCoeffs = new PIDCoefficients(0.008, 0, 0.0002);
+        Lift.pidCoeffs = new PIDCoefficients(0.006, 0, 0.00015);
+        lift.initPID();
 
         //Cycles
         int cycle = 0;

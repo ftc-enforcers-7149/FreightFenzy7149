@@ -10,6 +10,8 @@ import org.firstinspires.ftc.teamcode.Autonomous.Auto_V2_5;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Levels;
 
+import static org.firstinspires.ftc.teamcode.GlobalData.*;
+
 @Autonomous(name = "Blue WH No Cycles")
 @Disabled
 public class BlueNoCycles extends Auto_V2_5 {

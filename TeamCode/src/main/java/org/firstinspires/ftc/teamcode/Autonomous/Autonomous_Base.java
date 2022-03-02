@@ -18,6 +18,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Sensors.Gyroscope;
 import java.util.ArrayList;
 import java.util.function.Supplier;
 
+import static org.firstinspires.ftc.teamcode.GlobalData.*;
 import static org.firstinspires.ftc.teamcode.Subsystems.Utils.FixedRoadrunner.createPose2d;
 
 import android.util.Log;
@@ -27,7 +28,6 @@ public abstract class Autonomous_Base extends LinearOpMode {
 
     //Drive
     protected MecanumDrive drive;
-    public static PIDCoefficients H_PID = new PIDCoefficients(-0.45, 0, -0.05);
     protected DcMotorEx fLeft, fRight, bLeft, bRight;
     protected Gyroscope gyro;
     private boolean initializedMotors = false, initializedDrive = false, initializedGyro = false;
@@ -176,18 +176,6 @@ public abstract class Autonomous_Base extends LinearOpMode {
     protected void stopOutputs() {
         for (Output o : outputs) o.stopOutput();
     }
-
-    //How accurate each attribute should be at each point
-    public static double POS_ACC = 1;
-    public static double H_ACC = Math.toRadians(1);
-
-    public static double SPEED_MULT = 1;
-
-    public static double MIN_SPEED = 0.2;
-    public static double MIN_TURN = 0.15;
-    public static double CLOSE_DIST = 0;
-
-    public static double SLOW_DIST = 15;
 
     public void driveTo(double destX, double destY, double destH) {
         drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);

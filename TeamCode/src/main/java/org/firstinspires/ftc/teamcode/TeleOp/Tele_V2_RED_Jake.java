@@ -19,6 +19,7 @@ public class Tele_V2_RED_Jake extends TeleOp_Base {
 
     //Headless
     private boolean resetAngle;
+    private boolean sharedBarrier, lastSharedBarrier;
 
     //Control objects
     private MotorIntake intake;
@@ -102,7 +103,12 @@ public class Tele_V2_RED_Jake extends TeleOp_Base {
         getInput();
 
         // Drive
-        driveHeadless(gyro.getYaw(), resetAngle);
+        if (sharedBarrier && !lastSharedBarrier)
+            startSharedBarrierForward();
+        if (leftX != lastLeftX || leftY != lastLeftY || rightX != lastRightX || resetAngle)
+            cancelAutomatedDriving();
+        if (!isAutomatedDriving())
+            driveHeadless(gyro.getYaw(), resetAngle);
 
         boolean overrideIntake = false;
 
@@ -168,17 +174,6 @@ public class Tele_V2_RED_Jake extends TeleOp_Base {
             }
         }
 
-        /*if (outtake) {
-            intake.setIntakePower(-1);
-            intake.setPaddle(MotorIntake.PaddlePosition.OUT);
-            intake.setLatch(MotorIntake.LatchPosition.OPEN);
-        }
-        else if (lastOuttake) {
-            intake.setIntakePower(0);
-            intake.setPaddle(MotorIntake.PaddlePosition.BACK);
-            intake.setLatch(MotorIntake.LatchPosition.CLOSED);
-        }*/
-
         if (outtake && !lastOuttake)
             intake.spitOutTwo();
 
@@ -217,6 +212,7 @@ public class Tele_V2_RED_Jake extends TeleOp_Base {
 
         //led.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
 
+        updateAutomatedDriving();
         updateOutputs();
         updateStateMachine();
     }
@@ -229,17 +225,18 @@ public class Tele_V2_RED_Jake extends TeleOp_Base {
 
     @Override
     protected void getInput() {
-        //Headless
+        //Drive
         leftX = curveInput(gamepad1.left_stick_x, 1)*lim * 0.92;
         leftY = curveInput(gamepad1.left_stick_y, 1)*lim * 0.92;
         rightX = curveInput(gamepad1.right_stick_x, 1)*lim*0.75 * 0.92;
         resetAngle = gamepad1.y;
+        sharedBarrier = gamepad1.a && !gamepad1.start;
 
         //Lift
-        high = gamepad2.dpad_up;
+        high = gamepad2.dpad_up || gamepad1.dpad_up;
         mid = gamepad2.dpad_left;
         low = gamepad2.dpad_down;
-        ground = gamepad2.a;
+        ground = gamepad2.a || gamepad1.dpad_down;
         cap = gamepad2.y;
         shared = gamepad2.dpad_right;
 
@@ -260,8 +257,9 @@ public class Tele_V2_RED_Jake extends TeleOp_Base {
 
     @Override
     protected void updateStateMachine() {
-        //Headless
+        //Drive
         lastLeftX = leftX; lastLeftY = leftY; lastRightX = rightX;
+        lastSharedBarrier = sharedBarrier;
 
         //Lift
         lastLiftPower = liftPower;

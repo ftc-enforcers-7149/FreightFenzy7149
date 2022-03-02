@@ -12,6 +12,8 @@ import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorIntake;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Levels;
 
+import static org.firstinspires.ftc.teamcode.GlobalData.*;
+
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -30,18 +32,20 @@ public class BlueCycles extends Auto_V2_5 {
 
         SLOW_DIST = 25;
         SPEED_MULT = 0.9;
-        Lift.pidCoeffs = new PIDCoefficients(0.007, 0, 0.0002);
+        Lift.pidCoeffs = new PIDCoefficients(0.004, 0, 0.0001);
+        lift.initPID();
 
         //Score pre-loaded
         lift.setTargetHeight(commands.detectBarcode(tseDetector));
 
         H_ACC = Math.toRadians(4);
-        driveTo(30.25, 71, Math.toRadians(330));
+        driveTo(31.5, 71, Math.toRadians(330));
         H_ACC = Math.toRadians(1);
         commands.outtake(intake, lift);
 
         SLOW_DIST = 20;
-        Lift.pidCoeffs = new PIDCoefficients(0.008, 0, 0.0002);
+        Lift.pidCoeffs = new PIDCoefficients(0.006, 0, 0.00015);
+        lift.initPID();
 
         //Cycles
         int cycle = 0;
@@ -113,7 +117,7 @@ public class BlueCycles extends Auto_V2_5 {
 
         driveTo(() -> {
                     if (Math.abs(deltaHeading(drive.getPoseEstimate().getHeading(), Math.toRadians(85))) > Math.toRadians(3))
-                        return 12.0;
+                        return 20.0;
                     else {
                         lift.setTargetHeight(Levels.GROUND);
                         return drive.getPoseEstimate().getX();
@@ -182,7 +186,10 @@ public class BlueCycles extends Auto_V2_5 {
         drive.setWeightedDrivePower(new Pose2d(0.6, 0.3, 0));
         customWait(() -> {
             if (!intake.getFreightInIntake() && distCorrect.getFrontDistance() < 50)
-                drive.setWeightedDrivePower(new Pose2d(Math.pow(distCorrect.getFrontDistance(), 2) * 0.00032, 0.1, 0));
+                drive.setWeightedDrivePower(new Pose2d(
+                        Math.pow(distCorrect.getFrontDistance(), 2) * 0.00025, //Slow down as approaches wall
+                        -distanceFromWall * (0.5 / 22), //Drive away from wall
+                        0));
 
             return ((!intake.getFreightInIntake() &&
                     distCorrect.getFrontDistance() > distanceFromWall) ||
@@ -213,7 +220,7 @@ public class BlueCycles extends Auto_V2_5 {
         SPEED_MULT = 0.9;
 
         drive.setWeightedDrivePower(new Pose2d(-0.03, 0.5, 0));
-        waitForTime(150);
+        waitForTime(175);
 
         AtomicReference<Double> lastFrontReading = new AtomicReference<>(distCorrect.getFrontDistance());
 
@@ -228,7 +235,7 @@ public class BlueCycles extends Auto_V2_5 {
                 },
                 () -> {
                     if (distCorrect.getSideWall() > 15)
-                        return 100.0;
+                        return 105.0;
                     else {
                         SLOW_DIST = 10;
 
@@ -249,7 +256,7 @@ public class BlueCycles extends Auto_V2_5 {
                         throughGap.set(true);
                     }
 
-                    if (distCorrect.getFrontDistance() > 30 && !spitOut.get()) {
+                    if (distCorrect.getFrontDistance() > 45 && !spitOut.get()) {
                         intake.spitOutTwo();
                         spitOut.set(true);
                     }
