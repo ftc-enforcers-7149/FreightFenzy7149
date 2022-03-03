@@ -384,7 +384,7 @@ public abstract class TeleOp_Base extends OpMode {
 
         switch (currDriveState) {
             case SHARED_BARRIER:
-                driveCompleted = driveTo(driveStartPose.plus(new Pose2d(24, 0, 0)));
+                driveCompleted = driveTo(driveStartPose.plus(new Pose2d(22, 0, 0)));
                 break;
             case DRIVE:
             default:
@@ -428,7 +428,7 @@ public abstract class TeleOp_Base extends OpMode {
         //While robot is not at the current destination point
         if ((Math.abs(relX) > 2 || //POSE_ACC
                         Math.abs(relY) > 2 || //POSE_ACC
-                        Math.abs(relH) > H_ACC)) {
+                        Math.abs(relH) > Math.toRadians(1))) { //H_ACC
 
             //Update robot position
             robotX = drive.getPoseEstimate().getX();
@@ -444,7 +444,7 @@ public abstract class TeleOp_Base extends OpMode {
 
             if (Math.abs(relX) < 2) relX = 0; //POSE_ACC
             if (Math.abs(relY) < 2) relY = 0; //POSE_ACC
-            if (Math.abs(relH) < H_ACC) hWeight = 0;
+            if (Math.abs(relH) < Math.toRadians(1)) hWeight = 0; //H_ACC
 
             double driveAngle = deltaHeading(robotH, Math.atan2(relY, relX));
 
@@ -461,12 +461,12 @@ public abstract class TeleOp_Base extends OpMode {
 
             double max = Math.max(Math.abs(xPower), Math.abs(yPower));
 
-            if (max < 0.2 && max != 0) { //MIN_SPEED
-                xPower /= max / 0.2;
-                yPower /= max / 0.2;
+            if (max < 0.1 && max != 0) { //MIN_SPEED
+                xPower /= max / 0.1;
+                yPower /= max / 0.1;
             }
-            if (Math.abs(hPower) < 0.2 && Math.abs(hPower) > 0) //MIN_TURN
-                hPower = Math.copySign(0.2, hPower);
+            if (Math.abs(hPower) < 0.1 && Math.abs(hPower) > 0) //MIN_TURN
+                hPower = Math.copySign(0.1, hPower);
 
             drive.setWeightedDrivePower(new Pose2d(xPower, yPower, hPower));
 

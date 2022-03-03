@@ -44,7 +44,7 @@ public class MotorIntake implements Input, Output {
         OPEN(0),
         DUCK_CLOSED(0.22),
         CLOSED(0.25),
-        PARTIAL_CLOSE(0.21),
+        PARTIAL_CLOSE(0.215),
         OPEN_UP(1),
         IDLE(OPEN.pos);
 
@@ -105,7 +105,7 @@ public class MotorIntake implements Input, Output {
     @Override
     public void updateOutput() {
         if (spitTwoState == SpitTwo.SPIT_OUT && lastSpitTwoState == SpitTwo.SPIT_OUT) {
-            if (System.currentTimeMillis() - startSpitTime >= 500)
+            if (System.currentTimeMillis() - startSpitTime >= 300)
                 spitTwoState = SpitTwo.CLOSE;
         }
 
@@ -113,7 +113,7 @@ public class MotorIntake implements Input, Output {
             switch (spitTwoState) {
                 case SPIT_OUT:
                     setLatch(LatchPosition.PARTIAL_CLOSE);
-                    setIntakePower(-1);
+                    setIntakePower(-0.6);
                     startSpitTime = System.currentTimeMillis();
                     break;
                 case CLOSE:

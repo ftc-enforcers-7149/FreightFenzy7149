@@ -110,7 +110,8 @@ public class Tele_V2_BLUE_Jake extends TeleOp_Base {
         if (!isAutomatedDriving())
             driveHeadless(gyro.getYaw(), resetAngle);
 
-        boolean overrideIntake = false;
+        boolean overrideIntakeDropLift = false;
+        boolean overrideIntakeSharedBarrier = isAutomatedDriving();
 
         //Lift
         if (high)
@@ -126,7 +127,7 @@ public class Tele_V2_BLUE_Jake extends TeleOp_Base {
         if (ground) {
             liftPos = Levels.GROUND;
             if (lastLiftPos == Levels.LOW)
-                overrideIntake = true;
+                overrideIntakeDropLift = true;
         }
         else if (!score && !outtake && !in) intake.setIntakePower(0);
 
@@ -195,7 +196,8 @@ public class Tele_V2_BLUE_Jake extends TeleOp_Base {
             intake.setLatch(MotorIntake.LatchPosition.OPEN);
         }
 
-        if (overrideIntake) intake.setIntakePower(-0.5);
+        if (overrideIntakeDropLift) intake.setIntakePower(-0.5);
+        if (overrideIntakeSharedBarrier) intake.setIntakePower(0.2);
 
         // Carousel
         if (gamepad1.x) spinner.reset();
