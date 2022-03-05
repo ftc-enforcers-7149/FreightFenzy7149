@@ -143,7 +143,7 @@ public class Tele_V2_BLUE extends TeleOp_Base {
                 intake.setIntakePower(0.333);
             else
                 intake.setIntakePower(0);
-            intake.setPaddle(MotorIntake.PaddlePosition.OUT);
+            intake.setPaddle(MotorIntake.PaddlePosition.OUT_CLOSE);
             intake.setLatch(MotorIntake.LatchPosition.OPEN);
         }
         else if (lastOuttake) {

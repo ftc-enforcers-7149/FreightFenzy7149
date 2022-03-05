@@ -9,6 +9,8 @@ import org.firstinspires.ftc.teamcode.Autonomous.Auto_V2_5;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorIntake;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Levels;
 
+import static org.firstinspires.ftc.teamcode.GlobalData.*;
+
 @Autonomous(name = "Blue Duck")
 //@Disabled
 public class BlueDuck extends Auto_V2_5 {

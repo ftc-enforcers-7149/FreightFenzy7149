@@ -63,7 +63,7 @@ public class AutoCommands {
 
         op.waitForTime(150);
 
-        intake.setPaddle(MotorIntake.PaddlePosition.OUT);
+        intake.setPaddle(MotorIntake.PaddlePosition.OUT_CLOSE);
 
         if (lift.getHeight() <= Levels.MIDDLE.height)
             op.waitForTime(100);

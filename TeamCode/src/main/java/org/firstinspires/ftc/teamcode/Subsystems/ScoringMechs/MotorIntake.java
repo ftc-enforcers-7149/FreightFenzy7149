@@ -21,7 +21,7 @@ public class MotorIntake implements Input, Output {
     //Sensors
     public RevColorSensorV3 intakeColorSensor;
 
-    private static final double minDistance = 2.0;
+    private static final double minDistance = 2.5;
     private ValueTimer<Double> distance;
     private final boolean useSensor;
 
@@ -29,8 +29,9 @@ public class MotorIntake implements Input, Output {
     private double intakePower = 0,  lastIntakePower = 0;
 
     public enum PaddlePosition {
-        BACK(0.8),
-        OUT(0.3),
+        BACK(0.94),
+        OUT_CLOSE(0.38),
+        OUT_FAR(0.3),
         IDLE(BACK.pos);
 
         public final double pos;
@@ -41,9 +42,9 @@ public class MotorIntake implements Input, Output {
     }
     public enum LatchPosition {
         OPEN(0),
-        DUCK_CLOSED(0.2),
+        DUCK_CLOSED(0.22),
         CLOSED(0.25),
-        PARTIAL_CLOSE(0.18),
+        PARTIAL_CLOSE(0.215),
         OPEN_UP(1),
         IDLE(OPEN.pos);
 
@@ -104,7 +105,7 @@ public class MotorIntake implements Input, Output {
     @Override
     public void updateOutput() {
         if (spitTwoState == SpitTwo.SPIT_OUT && lastSpitTwoState == SpitTwo.SPIT_OUT) {
-            if (System.currentTimeMillis() - startSpitTime >= 500)
+            if (System.currentTimeMillis() - startSpitTime >= 300)
                 spitTwoState = SpitTwo.CLOSE;
         }
 
@@ -112,7 +113,7 @@ public class MotorIntake implements Input, Output {
             switch (spitTwoState) {
                 case SPIT_OUT:
                     setLatch(LatchPosition.PARTIAL_CLOSE);
-                    setIntakePower(-1);
+                    setIntakePower(-0.6);
                     startSpitTime = System.currentTimeMillis();
                     break;
                 case CLOSE:

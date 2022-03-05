@@ -12,6 +12,8 @@ import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorIntake;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Levels;
 
+import static org.firstinspires.ftc.teamcode.GlobalData.*;
+
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -28,20 +30,22 @@ public class RedCycles extends Auto_V2_5 {
     public void auto() {
         drive.setPoseEstimate(new Pose2d(6.75, -78.25, 0));
 
-        SLOW_DIST = 20;
+        SLOW_DIST = 25;
         SPEED_MULT = 0.9;
-
-        Lift.pidCoeffs = new PIDCoefficients(0.007, 0, 0.0002);
+        Lift.pidCoeffs = new PIDCoefficients(0.004, 0, 0.0001);
+        lift.initPID();
 
         //Score pre-loaded
         lift.setTargetHeight(commands.detectBarcode(tseDetector));
 
         H_ACC = Math.toRadians(4);
-        driveTo(28, -68, Math.toRadians(30));
+        driveTo(31, -68, Math.toRadians(30));
         H_ACC = Math.toRadians(1);
         commands.outtake(intake, lift);
 
-        Lift.pidCoeffs = new PIDCoefficients(0.008, 0, 0.0002);
+        SLOW_DIST = 20;
+        Lift.pidCoeffs = new PIDCoefficients(0.006, 0, 0.00015);
+        lift.initPID();
 
         //Cycles
         int cycle = 0;
@@ -79,7 +83,7 @@ public class RedCycles extends Auto_V2_5 {
             inWarehouse = false;
 
             //Drive to and score in hub
-            scoreInHub(-75);
+            scoreInHub(-78);
 
             cycle++;
         }
@@ -124,7 +128,7 @@ public class RedCycles extends Auto_V2_5 {
         , false);
 
         long driveStartTime = System.currentTimeMillis();
-        drive.setWeightedDrivePower(new Pose2d(0.01, -0.7, 0));
+        drive.setWeightedDrivePower(new Pose2d(0.02, -0.7, 0));
         customWait(() -> (distCorrect.getSideWall() > 8.5) && System.currentTimeMillis() < driveStartTime + 1000);
         waitForTime(75);
         //drive.setWeightedDrivePower(new Pose2d(0, 0, 0));
@@ -182,7 +186,7 @@ public class RedCycles extends Auto_V2_5 {
         drive.setWeightedDrivePower(new Pose2d(0.6, -0.3, 0));
         customWait(() -> {
             if (!intake.getFreightInIntake() && distCorrect.getFrontDistance() < 50)
-                drive.setWeightedDrivePower(new Pose2d(Math.pow(distCorrect.getFrontDistance(), 2) * 0.00036, -0.1, 0));
+                drive.setWeightedDrivePower(new Pose2d(Math.pow(distCorrect.getFrontDistance(), 2) * 0.00032, -0.1, 0));
 
             return ((!intake.getFreightInIntake() &&
                     distCorrect.getFrontDistance() > distanceFromWall) ||
@@ -211,6 +215,11 @@ public class RedCycles extends Auto_V2_5 {
         POS_ACC = 3;
         SLOW_DIST = 2;
         SPEED_MULT = 0.9;
+
+        if (drive.getPoseEstimate().getY() < -85) {
+            drive.setWeightedDrivePower(new Pose2d(-0.03, -0.5, 0));
+            waitForTime(150);
+        }
 
         AtomicReference<Double> lastFrontReading = new AtomicReference<>(distCorrect.getFrontDistance());
 
@@ -247,9 +256,7 @@ public class RedCycles extends Auto_V2_5 {
                     }
 
                     if (distCorrect.getFrontDistance() > 30 && !spitOut.get()) {
-                        if (intake.getFreightInIntake())
-                            intake.spitOutTwo();
-
+                        intake.spitOutTwo();
                         spitOut.set(true);
                     }
 
@@ -280,7 +287,7 @@ public class RedCycles extends Auto_V2_5 {
         lift.setTargetHeight(Levels.HIGH);
 
         H_ACC = Math.toRadians(4);
-        driveTo(31, -62, Math.toRadians(25));
+        driveTo(31.75, -62, Math.toRadians(25), 1500);
         H_ACC = Math.toRadians(1);
 
         commands.outtake(intake, lift);
@@ -289,9 +296,11 @@ public class RedCycles extends Auto_V2_5 {
     private void scoreInHub(double yPos) {
         lift.setTargetHeight(Levels.HIGH);
 
+        SLOW_DIST = 25;
         H_ACC = Math.toRadians(4);
-        driveTo(31, yPos, Math.toRadians(25));
+        driveTo(32.5, yPos, Math.toRadians(25), 1500);
         H_ACC = Math.toRadians(1);
+        SLOW_DIST = 20;
 
         commands.outtake(intake, lift);
     }

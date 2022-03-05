@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Webcam.OpenCV;
 import org.firstinspires.ftc.teamcode.Subsystems.Webcam.ballsnblocks.BallsNBlocksPipeline;
 
 @Autonomous(name = "Test Balls N Blocks")
-//@Disabled
+@Disabled
 public class TestBallsNBlocks extends OpMode {
 
     private OpenCV detector;

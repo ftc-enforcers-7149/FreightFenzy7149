@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.TeleOp;
 
+import com.acmerobotics.roadrunner.control.PIDFController;
+import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.enforcers7149.touchpadplusplus.src.Touchpad;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -17,6 +19,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Utils.VelLimitsJerk;
 
 import java.util.ArrayList;
 
+import static org.firstinspires.ftc.teamcode.GlobalData.*;
 import static org.firstinspires.ftc.teamcode.Subsystems.Utils.FixedRoadrunner.createPose2d;
 
 import android.util.Log;
@@ -273,6 +276,8 @@ public abstract class TeleOp_Base extends OpMode {
     protected void driveHeadless(double angle, boolean reset) {
         if (reset) {
             offset = angle;
+            drive.setPoseEstimate(new Pose2d(
+                    drive.getPoseEstimate().getX(), drive.getPoseEstimate().getY(), 0));
         }
 
         if ((leftY == 0 && lastLeftY != 0) &&
@@ -330,6 +335,8 @@ public abstract class TeleOp_Base extends OpMode {
     protected final void driveHeadlessSmooth(double angle, boolean reset) {
         if (reset) {
             offset = angle;
+            drive.setPoseEstimate(new Pose2d(
+                    drive.getPoseEstimate().getX(), drive.getPoseEstimate().getY(), 0));
         }
 
         if ((leftY == 0 && lastLeftY != 0) &&
@@ -369,6 +376,123 @@ public abstract class TeleOp_Base extends OpMode {
         setMotorPowers(vFL, vFR, vBL, vBR);
     }
 
+    //Automated driving
+    private enum DriveState {
+        DRIVE, SHARED_BARRIER
+    }
+    private DriveState currDriveState = DriveState.DRIVE, lastDriveState = DriveState.DRIVE;
+    private Pose2d driveStartPose = new Pose2d(0, 0, 0);
+    private PIDFController hControl;
+
+    protected final void startSharedBarrierForward() {
+        currDriveState = DriveState.SHARED_BARRIER;
+    }
+    protected final void updateAutomatedDriving() {
+        if (currDriveState != lastDriveState) {
+            driveStartPose = drive.getPoseEstimate();
+            hControl = new PIDFController(H_PID);
+            hControl.setOutputBounds(0, 1);
+            hControl.setTargetPosition(0);
+        }
+
+        boolean driveCompleted = true;
+
+        switch (currDriveState) {
+            case SHARED_BARRIER:
+                driveCompleted = driveTo(driveStartPose.plus(new Pose2d(22, 0, 0)));
+                break;
+            case DRIVE:
+            default:
+                break;
+        }
+
+        lastDriveState = currDriveState;
+
+        if (driveCompleted) currDriveState = DriveState.DRIVE;
+    }
+    protected final void cancelAutomatedDriving() {
+        currDriveState = DriveState.DRIVE;
+    }
+    protected final boolean isAutomatedDriving() {
+        return currDriveState != DriveState.DRIVE;
+    }
+
+
+    /**
+     * Sets drive powers to move from one point to another
+     * @param endPose Destination position
+     * @return False while driving, true if done
+     */
+    public boolean driveTo(Pose2d endPose) {
+        double destX = endPose.getX();
+        double destY = endPose.getY();
+        double destH = endPose.getHeading();
+
+        //Current robot position
+        double robotX = drive.getPoseEstimate().getX();
+        double robotY = drive.getPoseEstimate().getY();
+        double robotH = drive.getPoseEstimate().getHeading();
+
+        //Calculate relatives
+        double relX = destX - robotX;
+        double relY = destY - robotY;
+        double relH = deltaHeading(robotH, destH);
+
+        double hWeight;
+
+        //While robot is not at the current destination point
+        if ((Math.abs(relX) > 2 || //POSE_ACC
+                        Math.abs(relY) > 2 || //POSE_ACC
+                        Math.abs(relH) > Math.toRadians(1))) { //H_ACC
+
+            //Update robot position
+            robotX = drive.getPoseEstimate().getX();
+            robotY = drive.getPoseEstimate().getY();
+            robotH = drive.getPoseEstimate().getHeading();
+
+            //Calculate relatives
+            relX = destX - robotX;
+            relY = destY - robotY;
+            relH = deltaHeading(robotH, destH);
+
+            hWeight = hControl.update(Math.abs(relH));
+
+            if (Math.abs(relX) < 2) relX = 0; //POSE_ACC
+            if (Math.abs(relY) < 2) relY = 0; //POSE_ACC
+            if (Math.abs(relH) < Math.toRadians(1)) hWeight = 0; //H_ACC
+
+            double driveAngle = deltaHeading(robotH, Math.atan2(relY, relX));
+
+            double xPower = Math.cos(driveAngle);
+            double yPower = Math.sin(driveAngle);
+            double hPower = Math.copySign(hWeight, relH);
+
+            double dist = Math.sqrt((relX*relX) + (relY*relY));
+
+            if (dist <= 5) { //SLOW_DIST
+                xPower *= Math.pow(dist / 5, 3);
+                yPower *= Math.pow(dist / 5, 3);
+            }
+
+            double max = Math.max(Math.abs(xPower), Math.abs(yPower));
+
+            if (max < 0.1 && max != 0) { //MIN_SPEED
+                xPower /= max / 0.1;
+                yPower /= max / 0.1;
+            }
+            if (Math.abs(hPower) < 0.1 && Math.abs(hPower) > 0) //MIN_TURN
+                hPower = Math.copySign(0.1, hPower);
+
+            drive.setWeightedDrivePower(new Pose2d(xPower, yPower, hPower));
+
+            return false;
+        }
+        else
+            setMotorPowers(0, 0, 0, 0);
+
+        return true;
+    }
+
     /**
      * Sets the new "maxTime" for velocity curves
      * @param yTime yJerk time in ms
@@ -386,6 +510,23 @@ public abstract class TeleOp_Base extends OpMode {
     protected abstract void updateStateMachine();
 
     //Useful functions
+
+    /**
+     * @param robotH Robot heading in radians
+     * @param destH Destination heading in radians
+     * @return Shortest heading difference in radians
+     */
+    protected double deltaHeading(double robotH, double destH) {
+        if (robotH < 0) robotH += Math.PI * 2;
+        if (destH < 0) destH += Math.PI * 2;
+
+        double diff = destH - robotH;
+
+        if (diff < -Math.PI) diff += Math.PI * 2;
+        if (diff > Math.PI) diff -= Math.PI * 2;
+
+        return diff;
+    }
 
     /**
      * Curves an input so that 0->0, -1->-1, and 1->1,

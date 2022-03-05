@@ -6,7 +6,7 @@ import static org.firstinspires.ftc.teamcode.GlobalData.LEVEL_OFFSET;
 public enum Levels {
     GROUND(0),
     LOW(3 + LEVEL_OFFSET),
-    SHARED(4.5 + LEVEL_OFFSET),
+    SHARED(5 + LEVEL_OFFSET),
     MIDDLE(8.5 + LEVEL_OFFSET),
     HIGH(14.75 + LEVEL_OFFSET - 1),
     CAP(20.25 + CAP_OFFSET),
