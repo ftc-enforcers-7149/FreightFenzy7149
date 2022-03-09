@@ -30,6 +30,7 @@ public class MotorCarouselSpinner implements Output, Input {
     public enum MotorStates{
         MOTION_PROFILING,
         FULL_POWER,
+        DUCK_PROFILING,
         IDLE
     }
     private MotorStates mState = MotorStates.IDLE;
@@ -40,6 +41,15 @@ public class MotorCarouselSpinner implements Output, Input {
             9,
             200
     );
+
+    private MotionProfile profileSlow = MotionProfileGenerator.generateSimpleMotionProfile(
+            new MotionState(0, 0, 0),
+            new MotionState((15*Math.PI - 1) / (4 * Math.PI) * 2, 5, 150),
+            5,
+            150
+    );
+
+    private boolean slowProfile = false;
 
     private double power, lastPower;
 
@@ -70,6 +80,11 @@ public class MotorCarouselSpinner implements Output, Input {
         measuredPosition = 0;
     }
 
+    public void resetSlow() {
+        reset();
+        slowProfile = true;
+    }
+
     @Override
     public void updateInput() {
         currentTime = SystemClock.currentThreadTimeMillis();
@@ -78,25 +93,55 @@ public class MotorCarouselSpinner implements Output, Input {
 
     @Override
     public void updateOutput() {
-        if (measuredPosition < (15 * Math.PI - 1) / (4 * Math.PI)) {
-            mState = MotorStates.MOTION_PROFILING;
-        } else if (measuredPosition < (15 * Math.PI - 1) / (4 * Math.PI) + 1) {
-            mState = MotorStates.FULL_POWER;
-        } else {
-            mState = MotorStates.IDLE;
+        if (!slowProfile) {
+            if (measuredPosition < (15 * Math.PI - 1) / (4 * Math.PI)) {
+                mState = MotorStates.MOTION_PROFILING;
+            } else if (measuredPosition < (15 * Math.PI - 1) / (4 * Math.PI) + 1) {
+                mState = MotorStates.FULL_POWER;
+            } else {
+                mState = MotorStates.IDLE;
+            }
         }
+        else {
+            if (measuredPosition < (15 * Math.PI - 1) / (4 * Math.PI)) {
+                mState = MotorStates.DUCK_PROFILING;
+            } else if (measuredPosition < (15 * Math.PI - 1) / (4 * Math.PI) + 1) {
+                mState = MotorStates.FULL_POWER;
+            } else {
+                mState = MotorStates.IDLE;
+            }
+        }
+
+        MotionState state;
+        double correction;
+
 
         switch (mState) {
             case MOTION_PROFILING:
                 elapsedTime = currentTime - startTime;
 
-                MotionState state = profile.get(elapsedTime / 1000.0);
+                state = profile.get(elapsedTime / 1000.0);
 
                 controller.setTargetPosition(state.getX());
                 controller.setTargetVelocity(state.getV());
                 controller.setTargetAcceleration(state.getA());
 
-                double correction = controller.update(measuredPosition);
+                correction = controller.update(measuredPosition);
+                if (Math.abs(correction) > 0.01)
+                    power = correction;
+                else
+                    power = 0;
+                break;
+            case DUCK_PROFILING:
+                elapsedTime = currentTime - startTime;
+
+                state = profileSlow.get(elapsedTime / 1000.0);
+
+                controller.setTargetPosition(state.getX());
+                controller.setTargetVelocity(state.getV());
+                controller.setTargetAcceleration(state.getA());
+
+                correction = controller.update(measuredPosition);
                 if (Math.abs(correction) > 0.01)
                     power = correction;
                 else
@@ -104,6 +149,7 @@ public class MotorCarouselSpinner implements Output, Input {
                 break;
             case FULL_POWER:
                 power = 1;
+                slowProfile = false;
                 break;
             case IDLE:
                 power = 0;

@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Subsystems.Sensors;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
@@ -24,7 +25,7 @@ public class DistanceCorrection implements Input {
 
         if (alliance == Alliance.BLUE) {
             sensorL = hardwareMap.get(Rev2mDistanceSensor.class, distLName);
-            lDist = new ValueTimer<Double>(0.0, 50) {
+            lDist = new ValueTimer<Double>(350.0, 200) {
                 @Override
                 public Double readValue() {
                     return sensorL.getDistance(DistanceUnit.INCH) + L_R_OFFSET;
@@ -33,7 +34,7 @@ public class DistanceCorrection implements Input {
         }
         else {
             sensorR = hardwareMap.get(Rev2mDistanceSensor.class, distRName);
-            rDist = new ValueTimer<Double>(0.0, 50) {
+            rDist = new ValueTimer<Double>(350.0, 200) {
                 @Override
                 public Double readValue() {
                     return sensorR.getDistance(DistanceUnit.INCH) + L_R_OFFSET;
@@ -42,7 +43,7 @@ public class DistanceCorrection implements Input {
         }
 
         sensorF = hardwareMap.get(Rev2mDistanceSensor.class, distFName);
-        fDist = new ValueTimer<Double>(0.0, 50) {
+        fDist = new ValueTimer<Double>(350.0, 200) {
             @Override
             public Double readValue() {
                 return sensorF.getDistance(DistanceUnit.INCH) + F_OFFSET;
@@ -50,6 +51,10 @@ public class DistanceCorrection implements Input {
         };
 
         this.alliance = alliance;
+
+        /*I2cDeviceSynch.ReadWindow oldW = sensorL.getDeviceClient().getReadWindow();
+        I2cDeviceSynch.ReadWindow w = new I2cDeviceSynch.ReadWindow(oldW.getRegisterFirst(), oldW.getRegisterCount(), I2cDeviceSynch.ReadMode.ONLY_ONCE);
+        sensorL.getDeviceClient().setReadWindow(w);*/
 
         running = false;
     }
@@ -106,6 +111,19 @@ public class DistanceCorrection implements Input {
         running = true;
     }
 
+    public void startSideSensor() {
+        if (alliance == Alliance.BLUE)
+            lDist.startInput();
+        else
+            rDist.startInput();
+
+        running = true;
+    }
+
+    public void startFrontSensor() {
+        fDist.startInput();
+    }
+
     public void stopRunning() {
         if (alliance == Alliance.BLUE)
             lDist.stopInput();
@@ -130,6 +148,22 @@ public class DistanceCorrection implements Input {
     @Override
     public void stopInput() {
         stopRunning();
+    }
+
+    public void setSensorL(HardwareMap hardwareMap, String distLName) {
+        sensorL.resetDeviceConfigurationForOpMode();
+        //sensorL.close();
+        //sensorL = hardwareMap.get(Rev2mDistanceSensor.class, distLName);
+    }
+    public void setSensorR(HardwareMap hardwareMap, String distRName) {
+        sensorR.resetDeviceConfigurationForOpMode();
+        //sensorR.close();
+        //sensorR = hardwareMap.get(Rev2mDistanceSensor.class, distRName);
+    }
+    public void setSensorF(HardwareMap hardwareMap, String distFName) {
+        sensorF.resetDeviceConfigurationForOpMode();
+        //sensorF.close();
+        //sensorF = hardwareMap.get(Rev2mDistanceSensor.class, distFName);
     }
 
     public Rev2mDistanceSensor getSensorL() {

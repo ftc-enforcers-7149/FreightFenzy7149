@@ -42,9 +42,9 @@ public class MotorIntake implements Input, Output {
     }
     public enum LatchPosition {
         OPEN(0),
-        DUCK_CLOSED(0.22),
-        CLOSED(0.25),
-        PARTIAL_CLOSE(0.215),
+        DUCK_CLOSED(0.25),
+        CLOSED(0.28),
+        PARTIAL_CLOSE(0.25),
         OPEN_UP(1),
         IDLE(OPEN.pos);
 

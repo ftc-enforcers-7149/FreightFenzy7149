@@ -384,7 +384,7 @@ public abstract class TeleOp_Base extends OpMode {
 
         switch (currDriveState) {
             case SHARED_BARRIER:
-                driveCompleted = driveTo(driveStartPose.plus(new Pose2d(22, 0, 0)));
+                driveCompleted = driveTo(driveStartPose.plus(new Pose2d(20.5, 0, 0)));
                 break;
             case DRIVE:
             default:

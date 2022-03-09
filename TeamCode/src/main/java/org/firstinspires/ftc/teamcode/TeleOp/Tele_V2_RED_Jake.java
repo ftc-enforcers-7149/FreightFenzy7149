@@ -48,6 +48,7 @@ public class Tele_V2_RED_Jake extends TeleOp_Base {
     //Intake
     private boolean freightInIntake, lastFreightInIntake;
     private boolean outtake, lastOuttake, in, lastIn;
+    private boolean outDuck, lastOutDuck;
     private boolean score, lastScore;
 
     //Spinner
@@ -134,6 +135,8 @@ public class Tele_V2_RED_Jake extends TeleOp_Base {
         if (liftPower != lastLiftPower) {
             lift.setPower(liftPower);
             lastPowerManual = true;
+            liftPos = Levels.MAX;
+            lastLiftPos = Levels.MAX;
         }
         else if (lastPowerManual && liftPower == 0) {
             lift.setTargetHeight(lift.getHeight());
@@ -195,6 +198,24 @@ public class Tele_V2_RED_Jake extends TeleOp_Base {
             intake.setLatch(MotorIntake.LatchPosition.OPEN);
         }
 
+        if (outDuck) {
+            intake.cancelSpitOut();
+            if (liftPos == Levels.LOW) {
+                intake.setIntakePower(0.3);
+                intake.setPaddle(MotorIntake.PaddlePosition.OUT_FAR);
+            }
+            else {
+                intake.setIntakePower(0);
+                intake.setPaddle(MotorIntake.PaddlePosition.OUT_CLOSE);
+            }
+            intake.setLatch(MotorIntake.LatchPosition.OPEN_UP);
+        }
+        else if (lastOutDuck) {
+            intake.setIntakePower(0);
+            intake.setPaddle(MotorIntake.PaddlePosition.BACK);
+            intake.setLatch(MotorIntake.LatchPosition.OPEN);
+        }
+
         if (overrideIntake) intake.setIntakePower(-0.5);
 
         // Carousel
@@ -240,7 +261,7 @@ public class Tele_V2_RED_Jake extends TeleOp_Base {
         cap = gamepad2.y;
         shared = gamepad2.dpad_right;
 
-        liftPower = gamepad2.right_trigger - gamepad2.left_trigger;
+        liftPower = 0.67 * (gamepad2.right_trigger - gamepad2.left_trigger);
 
         resetLift = gamepad2.back;
 
@@ -249,6 +270,7 @@ public class Tele_V2_RED_Jake extends TeleOp_Base {
 
         in = gamepad1.right_trigger > 0.2;
         outtake = gamepad1.right_bumper;
+        outDuck = gamepad1.left_bumper;
         score = gamepad1.left_trigger > 0.2;
 
         //Spinner
@@ -270,6 +292,7 @@ public class Tele_V2_RED_Jake extends TeleOp_Base {
         lastFreightInIntake = freightInIntake;
         lastIn = in;
         lastOuttake = outtake;
+        lastOutDuck = outDuck;
         lastScore = score;
 
         //Spinner

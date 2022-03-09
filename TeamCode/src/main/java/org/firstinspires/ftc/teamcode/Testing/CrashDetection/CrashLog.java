@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Testing.CrashDetection;
 import android.util.Log;
 
 import com.acmerobotics.roadrunner.drive.TankDrive;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -13,6 +14,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Sensors.Gyroscope;
 import org.firstinspires.ftc.teamcode.TeleOp.TeleOp_Base;
 
 @TeleOp(name="Crash Detection Logging")
+@Disabled
 public class CrashLog extends TeleOp_Base {
 
     protected DcMotorEx fLeft, fRight, bLeft, bRight;

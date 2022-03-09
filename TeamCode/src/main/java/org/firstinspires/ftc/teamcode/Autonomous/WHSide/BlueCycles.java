@@ -32,15 +32,18 @@ public class BlueCycles extends Auto_V2_5 {
 
         SLOW_DIST = 25;
         SPEED_MULT = 0.9;
-        Lift.pidCoeffs = new PIDCoefficients(0.004, 0, 0.0001);
+        Lift.pidCoeffs = new PIDCoefficients(0.0045, 0, 0.0001);
         lift.initPID();
 
         //Score pre-loaded
         lift.setTargetHeight(commands.detectBarcode(tseDetector));
+        waitForTime(100);
 
         H_ACC = Math.toRadians(4);
-        driveTo(31.5, 71, Math.toRadians(330));
+        SPEED_MULT = 0.8;
+        driveTo(31.75, 71, Math.toRadians(330));
         H_ACC = Math.toRadians(1);
+        SPEED_MULT = 0.9;
         commands.outtake(intake, lift);
 
         SLOW_DIST = 20;
@@ -52,7 +55,7 @@ public class BlueCycles extends Auto_V2_5 {
 
         boolean inWarehouse = false;
 
-        while (opModeIsActive() && cycle < 4) {
+        while (opModeIsActive() && cycle < 3) {
             if (intake.getFreightInIntake()) {
                 intake.setLatch(MotorIntake.LatchPosition.OPEN);
                 intake.setIntakePower(-1);
@@ -62,7 +65,7 @@ public class BlueCycles extends Auto_V2_5 {
             if (cycle == 0)
                 driveToWall(75);
             else
-                driveToWall(78);
+                driveToWall(75);
 
             if (!intake.getFreightInIntake())
                 intake.setIntakePower(0);
@@ -76,19 +79,7 @@ public class BlueCycles extends Auto_V2_5 {
                 break;
 
             //Intake / Don't hit wall
-            if (!intake.getFreightInIntake())
-                intake(Math.max(22 - (cycle * 6), 8));
-            else {
-                drive.setMotorPowers(0, 0, 0, 0);
-
-                long correctStartTime = System.currentTimeMillis();
-                customWait(() -> distCorrect.getFrontDistance() > 50 && System.currentTimeMillis() < correctStartTime + 500);
-
-                if (distCorrect.getFrontDistance() < 50)
-                    drive.setPoseEstimate(distCorrect.correctPoseWithDist(drive.getPoseEstimate().getHeading()));
-                else
-                    drive.setPoseEstimate(new Vector2d(distCorrect.getSideWall(), drive.getPoseEstimate().getY()));
-            }
+            intake(Math.max(22 - (cycle * 6), 5));
 
             //Drive out through gap
             driveOutOfWarehouse();
@@ -105,7 +96,7 @@ public class BlueCycles extends Auto_V2_5 {
         if (!inWarehouse) {
             driveToWall(78);
             driveIntoWarehouse();
-            intake(40);
+            intake(50);
         }
         lift.setTargetHeight(Levels.GROUND);
         intake.setLatch(MotorIntake.LatchPosition.CLOSED);
@@ -118,16 +109,16 @@ public class BlueCycles extends Auto_V2_5 {
     }
 
     private void driveToWall(double endPos) {
-        distCorrect.startRunning();
+        distCorrect.startSideSensor();
 
         H_ACC = Math.toRadians(5);
         POS_ACC = 2;
         SLOW_DIST = 10;
-        SPEED_MULT = 1.0;
+        SPEED_MULT = 0.7;
 
         lift.setPower(-0.01); //Start moving the lift down
 
-        driveTo(() -> {
+        boolean timeOut = driveTo(() -> {
                     if (Math.abs(deltaHeading(drive.getPoseEstimate().getHeading(), Math.toRadians(85))) > Math.toRadians(3))
                         return 20.0;
                     else {
@@ -137,18 +128,26 @@ public class BlueCycles extends Auto_V2_5 {
                 },
                 () -> endPos,
                 () -> Math.toRadians(85)
-        , false);
+        , 2000, true);
 
         long driveStartTime = System.currentTimeMillis();
-        drive.setWeightedDrivePower(new Pose2d(0.02, 0.7, 0));
-        customWait(() -> distCorrect.getSideWall() > 8.5 && System.currentTimeMillis() < driveStartTime + 1000);
+        drive.setWeightedDrivePower(new Pose2d(0.01, 0.4, 0));
+        customWait(() -> distCorrect.getSideWall() > 8.5 && System.currentTimeMillis() < driveStartTime + 1150);
         waitForTime(100);
         //drive.setWeightedDrivePower(new Pose2d(0, 0, 0));
 
-        drive.setPoseEstimate(new Pose2d(
-                distCorrect.getSideWall(),
-                endPos,
-                Math.toRadians(90)));
+        if (!timeOut) {
+            drive.setPoseEstimate(new Pose2d(
+                    distCorrect.getSideWall(),
+                    endPos,
+                    Math.toRadians(90)));
+        }
+        else {
+            drive.setPoseEstimate(new Pose2d(
+                    8.5,
+                    endPos,
+                    Math.toRadians(90)));
+        }
 
         H_ACC = Math.toRadians(1);
         POS_ACC = 1;
@@ -168,10 +167,10 @@ public class BlueCycles extends Auto_V2_5 {
         POS_ACC = 2;
         H_ACC = Math.toRadians(20);
 
-        drive.setWeightedDrivePower(new Pose2d(0.8, 0.35, 0));
-        long driveStartTime = System.currentTimeMillis();
+        drive.setWeightedDrivePower(new Pose2d(0.5, 0.35, 0));
 
-        customWait(() -> System.currentTimeMillis() < driveStartTime + 350 &&
+        long driveStartTime = System.currentTimeMillis();
+        customWait(() -> System.currentTimeMillis() < driveStartTime + 450 &&
                 distCorrect.getFrontDistance() > 50);
         //drive.setWeightedDrivePower(new Pose2d(0, 0, 0));
 
@@ -195,28 +194,47 @@ public class BlueCycles extends Auto_V2_5 {
         intake.setIntakePower(1);
 
         long driveStartTime = System.currentTimeMillis();
-        drive.setWeightedDrivePower(new Pose2d(0.6, 0.3, 0));
+        drive.setWeightedDrivePower(new Pose2d(0.4, 0.3, 0));
         customWait(() -> {
-            if (!intake.getFreightInIntake() && distCorrect.getFrontDistance() < 50)
+            if (distCorrect.getFrontDistance() < 50)
                 drive.setWeightedDrivePower(new Pose2d(
-                        Math.pow(distCorrect.getFrontDistance(), 2) * 0.00022, //Slow down as approaches wall
-                        -distanceFromWall * (0.4 / 22), //Drive away from wall
+                        Math.min(Math.pow(distCorrect.getFrontDistance(), 2) * 0.0002, 0.4), //Slow down as approaches wall
+                        -distanceFromWall * (0.2 / 22), //Drive away from wall
                         0));
 
             return ((!intake.getFreightInIntake() &&
                     distCorrect.getFrontDistance() > distanceFromWall) ||
                     distCorrect.getFrontDistance() > 30) &&
-                    System.currentTimeMillis() < driveStartTime + 1000;
+                    System.currentTimeMillis() < driveStartTime + 2000;
         });
         drive.setWeightedDrivePower(new Pose2d(0, 0, 0));
 
+        boolean wait = false;
+        if (distCorrect.getFrontDistance() > 500) {
+            distCorrect.stopRunning();
+            distCorrect.setSensorF(hardwareMap, "distF");
+            wait = true;
+        }
+        else if(distCorrect.getSideWall() > 500) {
+            distCorrect.stopRunning();
+            distCorrect.setSensorL(hardwareMap, "distL");
+            wait = true;
+        }
+
+        long sensorFixStartTime = System.currentTimeMillis();
+        if (wait)
+            while (opModeIsActive() && System.currentTimeMillis() < sensorFixStartTime + 2000) {
+                telemetry.addLine("Attempting to fix sensors");
+                telemetry.update();
+            }
+
         long correctStartTime = System.currentTimeMillis();
-        customWait(() -> distCorrect.getFrontDistance() > 50 && System.currentTimeMillis() < correctStartTime + 500);
+        customWait(() -> distCorrect.getFrontDistance() > 50 && System.currentTimeMillis() < correctStartTime + 1000);
 
         if (distCorrect.getFrontDistance() < 50)
             drive.setPoseEstimate(distCorrect.correctPoseWithDist(drive.getPoseEstimate().getHeading()));
         else
-            drive.setPoseEstimate(new Vector2d(distCorrect.getSideWall(), 144));
+            requestOpModeStop();
 
         intake.stopScanningIntake();
         //intake.setLatch(MotorIntake.LatchPosition.CLOSED);
@@ -229,13 +247,13 @@ public class BlueCycles extends Auto_V2_5 {
 
         POS_ACC = 3;
         SLOW_DIST = 2;
-        SPEED_MULT = 0.9;
+        SPEED_MULT = 0.7;
 
-        drive.setWeightedDrivePower(new Pose2d(-0.03, 0.5, 0));
+        drive.setWeightedDrivePower(new Pose2d(-0.04, 0.5, 0));
         waitForTime(175);
 
         long correctStartTime = System.currentTimeMillis();
-        customWait(() -> distCorrect.getFrontDistance() > 50 && System.currentTimeMillis() < correctStartTime + 500);
+        customWait(() -> distCorrect.getFrontDistance() > 50 && System.currentTimeMillis() < correctStartTime + 1000);
 
         if (distCorrect.getFrontDistance() < 50)
             drive.setPoseEstimate(distCorrect.correctPoseWithDist(drive.getPoseEstimate().getHeading()));
@@ -245,7 +263,7 @@ public class BlueCycles extends Auto_V2_5 {
         AtomicBoolean throughGap = new AtomicBoolean(false);
         AtomicBoolean spitOut = new AtomicBoolean(false);
 
-        driveTo(() -> {
+        boolean timeOut = driveTo(() -> {
                     if (!throughGap.get())
                         return drive.getPoseEstimate().getX() - 15;
                     else
@@ -284,12 +302,20 @@ public class BlueCycles extends Auto_V2_5 {
                     else
                         return Math.toRadians(90);
                 }
-        , 1500);
+        , 2000);
 
-        drive.setPoseEstimate(new Pose2d(
-                distCorrect.getSideWall(),
-                drive.getPoseEstimate().getY(),
-                Math.toRadians(90)));
+        if (!timeOut) {
+            drive.setPoseEstimate(new Pose2d(
+                    distCorrect.getSideWall(),
+                    drive.getPoseEstimate().getY(),
+                    Math.toRadians(90)));
+        }
+        else {
+            drive.setPoseEstimate(new Pose2d(
+                    8.5,
+                    drive.getPoseEstimate().getY(),
+                    Math.toRadians(90)));
+        }
 
         POS_ACC = 1;
         SPEED_MULT = 0.9;
@@ -306,7 +332,7 @@ public class BlueCycles extends Auto_V2_5 {
         lift.setTargetHeight(Levels.HIGH);
 
         H_ACC = Math.toRadians(4);
-        driveTo(35.25, 62, Math.toRadians(335), 1500);
+        driveTo(36, 62, Math.toRadians(330), 1500);
         H_ACC = Math.toRadians(1);
 
         commands.outtake(intake, lift);
@@ -315,11 +341,13 @@ public class BlueCycles extends Auto_V2_5 {
     private void scoreInHub(double yPos) {
         lift.setTargetHeight(Levels.HIGH);
 
+        SPEED_MULT = 0.7;
         SLOW_DIST = 25;
         H_ACC = Math.toRadians(4);
-        driveTo(35.25, yPos, Math.toRadians(335), 1500);
+        driveTo(36, yPos, Math.toRadians(330), 1500);
         H_ACC = Math.toRadians(1);
         SLOW_DIST = 20;
+        SPEED_MULT = 0.9;
 
         commands.outtake(intake, lift);
     }
