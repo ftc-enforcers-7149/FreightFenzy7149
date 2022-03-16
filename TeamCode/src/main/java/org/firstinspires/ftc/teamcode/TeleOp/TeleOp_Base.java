@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.Odometry.DriveWheels.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Subsystems.EnforcersTouchpad;
 import org.firstinspires.ftc.teamcode.Subsystems.Sensors.BulkRead;
@@ -209,8 +210,9 @@ public abstract class TeleOp_Base extends OpMode {
 
         Log.i("\nTime ", String.valueOf(System.currentTimeMillis()) + '\n');
 
-        Log.i("Pose ", drive.getPoseEstimate().toString() + '\n');
+        if(initializedDrive) Log.i("Pose ", drive.getPoseEstimate().toString() + '\n');
 
+        Log.i("Heading ", String.valueOf(gyro.getRawYaw()));
         Log.i("X Accel ", String.valueOf(gyro.imu.getAcceleration().xAccel));
         Log.i("Y Accel ", String.valueOf(gyro.imu.getAcceleration().yAccel));
         Log.i("Z Accel ", String.valueOf(gyro.imu.getAcceleration().zAccel) + '\n');
@@ -226,11 +228,23 @@ public abstract class TeleOp_Base extends OpMode {
         Log.i("bL Velocity (Motor) ", String.valueOf(bLeft.getVelocity()));
         Log.i("bR Velocity (Motor) ", String.valueOf(bRight.getVelocity()) + '\n');
 
-        Log.i("fL Velocity (Odo) ", String.valueOf(drive.getWheelVelocities().get(0)));
-        Log.i("fR Velocity (Odo) ", String.valueOf(drive.getWheelVelocities().get(1)));
-        Log.i("bL Velocity (Odo) ", String.valueOf(drive.getWheelVelocities().get(2)));
-        Log.i("bR Velocity (Odo) ", String.valueOf(drive.getWheelVelocities().get(3)));
-        Log.i("Overall velocity (Odo) ", drive.getPoseVelocity().toString() + '\n');
+        if(initializedDrive) {
+            Log.i("fL Velocity (Odo) ", String.valueOf(drive.getWheelVelocities().get(0)));
+            Log.i("fR Velocity (Odo) ", String.valueOf(drive.getWheelVelocities().get(1)));
+            Log.i("bL Velocity (Odo) ", String.valueOf(drive.getWheelVelocities().get(2)));
+            Log.i("bR Velocity (Odo) ", String.valueOf(drive.getWheelVelocities().get(3)));
+            Log.i("Overall velocity (Odo) ", drive.getPoseVelocity().toString() + '\n');
+        }
+
+        Log.i("fL Milliamps ", String.valueOf(fLeft.getCurrent(CurrentUnit.MILLIAMPS)));
+        Log.i("fR Milliamps ", String.valueOf(fRight.getCurrent(CurrentUnit.MILLIAMPS)));
+        Log.i("bL Milliamps ", String.valueOf(bLeft.getCurrent(CurrentUnit.MILLIAMPS)));
+        Log.i("bR Milliamps ", String.valueOf(bRight.getCurrent(CurrentUnit.MILLIAMPS)) + '\n');
+
+        Log.i("fL over draw ", String.valueOf(fLeft.isOverCurrent()));
+        Log.i("fR over draw ", String.valueOf(fRight.isOverCurrent()));
+        Log.i("bL over draw ", String.valueOf(bLeft.isOverCurrent()));
+        Log.i("bR over draw ", String.valueOf(bRight.isOverCurrent()));
 
 
     }
