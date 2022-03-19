@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.TeleOp;
 
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
@@ -13,9 +14,9 @@ import org.firstinspires.ftc.teamcode.Subsystems.Utils.Levels;
 import static org.firstinspires.ftc.teamcode.GlobalData.HEADING;
 import static org.firstinspires.ftc.teamcode.GlobalData.RAN_AUTO;
 
-@TeleOp (name = "BLUE Tele_V2 (Jacob)")
+@TeleOp (name = "BLUE 4Bar TeleOp")
 //@Disabled
-public class Tele_V2_BLUE_Jake extends TeleOp_Base {
+public class Tele_V2_BLUE_4Bar extends TeleOp_Base {
 
     //Drive
     private boolean resetAngle;
@@ -54,6 +55,14 @@ public class Tele_V2_BLUE_Jake extends TeleOp_Base {
     //Spinner
     private boolean spin, lastSpin;
 
+    //4Bar
+    private Servo fourBarL, fourBarR;
+
+    private boolean fbIn, fbHalf, fbOut;
+    private boolean lastFBIn, lastFBHalf, lastFBOut;
+
+    private double curr4BPos, last4BPos;
+
     @Override
     public void init() {
         try {
@@ -67,10 +76,18 @@ public class Tele_V2_BLUE_Jake extends TeleOp_Base {
         intake = new MotorIntake(hardwareMap,
                 "intake", "paddle", "latch", "intakeColor");
         lift = new Lift(hardwareMap, "lift", bReadCH, !RAN_AUTO);
+        lift.setCurrPosition(-128);
         spinner = new MotorCarouselSpinner(hardwareMap, "spinner", Alliance.BLUE);
 
         led = new LED(hardwareMap, "blinkin", Alliance.BLUE);
         led.setPattern(RevBlinkinLedDriver.BlinkinPattern.BREATH_BLUE);
+
+        fourBarL = hardwareMap.servo.get("fourBarL");
+        fourBarL.setDirection(Servo.Direction.FORWARD);
+        fourBarL.setPosition(scalePos(0));
+        fourBarR = hardwareMap.servo.get("fourBarR");
+        fourBarL.setDirection(Servo.Direction.REVERSE);
+        fourBarR.setPosition(scalePos(0));
 
         if (RAN_AUTO) gyro.setOffset(HEADING);
         RAN_AUTO = false;
@@ -223,6 +240,16 @@ public class Tele_V2_BLUE_Jake extends TeleOp_Base {
         // Carousel
         if (gamepad1.x) spinner.reset();
 
+        //4Bar
+        if (fbIn) curr4BPos = 0;
+        else if (fbHalf) curr4BPos = 0.2;
+        else if (fbOut) curr4BPos = 0.85;
+
+        if (curr4BPos != last4BPos) {
+            fourBarR.setPosition(scalePos(curr4BPos));
+            fourBarL.setPosition(scalePos(curr4BPos));
+        }
+
         // Telemetry
         telemetry.addData("Lift Height: ", lift.getHeight());
         telemetry.addData("Freight in Intake: ", freightInIntake);
@@ -277,6 +304,15 @@ public class Tele_V2_BLUE_Jake extends TeleOp_Base {
 
         //Spinner
         spin = gamepad1.x;
+
+        curr4BPos += -gamepad2.right_stick_y / 25; //Fine tune or adjust for actual time changes
+        if (curr4BPos < 0) curr4BPos = 0;
+        else if (curr4BPos > 1) curr4BPos = 1;
+
+        //4Bar
+        fbIn = gamepad2.right_stick_button;
+        fbHalf = gamepad2.x; //TODO: Figure out controls
+        fbOut = gamepad2.b;
     }
 
     @Override
@@ -299,5 +335,18 @@ public class Tele_V2_BLUE_Jake extends TeleOp_Base {
 
         //Spinner
         lastSpin = spin;
+
+        //4Bar
+        last4BPos = curr4BPos;
+
+        lastFBIn = fbIn;
+        lastFBHalf = fbHalf;
+        lastFBOut = fbOut;
+    }
+
+    private double scalePos(double pos) {
+        double zeroOutput = 0.06;
+        double oneOutput = 1;
+        return (oneOutput-zeroOutput) * pos  + zeroOutput;
     }
 }
