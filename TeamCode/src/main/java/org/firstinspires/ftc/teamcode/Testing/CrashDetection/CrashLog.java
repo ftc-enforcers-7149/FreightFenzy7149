@@ -17,14 +17,13 @@ import org.firstinspires.ftc.teamcode.TeleOp.TeleOp_Base;
 @Disabled
 public class CrashLog extends TeleOp_Base {
 
-    protected DcMotorEx fLeft, fRight, bLeft, bRight;
     protected Gyroscope gyro;
 
     String[] steps = new String[]{"Drive straight and stop", "Strafe and stop", "Drive straight and coast", "Strafe and coast", "Turn",
 
                                   "Drive straight into wall", "Strafe into wall", "Hit from front", "Hit from sides", "Drive over barrier",
                                   "Hit barrier with right set of wheels", "Clipped by object"};
-    int step = 0;
+    int step = 0; boolean firstLoop = true;
 
     boolean nextStep = false, x = false, lastX = false;
     boolean restartStep = false, a = false, lastA = false;
@@ -33,12 +32,21 @@ public class CrashLog extends TeleOp_Base {
     public void init() {
 
         try {
-            initializeAll();
+            initializeSources();
+            initializeDrive();
+            initializeBulkRead();
+            initializeGyro();
+            initializeVars();
         } catch (Exception e) {
             e.printStackTrace();
             requestOpModeStop();
             return;
         }
+
+        fLeft.setDirection(DcMotorSimple.Direction.FORWARD);
+        fRight.setDirection(DcMotorSimple.Direction.REVERSE);
+        bLeft.setDirection(DcMotorSimple.Direction.FORWARD);
+        bRight.setDirection(DcMotorSimple.Direction.REVERSE);
 
     }
 
@@ -53,7 +61,10 @@ public class CrashLog extends TeleOp_Base {
     @Override
     public void loop() {
 
-        if(step == 0) Log.v("\n\n\nBeginning step", steps[step]);
+        if(step == 0 && firstLoop) {
+            Log.v("\n\n\nBeginning step", steps[step]);
+            firstLoop = false;
+        }
 
         if(nextStep) {
             step++;

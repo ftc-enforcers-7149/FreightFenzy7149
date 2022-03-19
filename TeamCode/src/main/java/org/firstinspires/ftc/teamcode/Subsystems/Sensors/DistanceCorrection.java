@@ -25,6 +25,7 @@ public class DistanceCorrection implements Input {
 
         if (alliance == Alliance.BLUE) {
             sensorL = hardwareMap.get(Rev2mDistanceSensor.class, distLName);
+            sensorL.resetDeviceConfigurationForOpMode();
             lDist = new ValueTimer<Double>(350.0, 200) {
                 @Override
                 public Double readValue() {
@@ -34,6 +35,7 @@ public class DistanceCorrection implements Input {
         }
         else {
             sensorR = hardwareMap.get(Rev2mDistanceSensor.class, distRName);
+            sensorR.resetDeviceConfigurationForOpMode();
             rDist = new ValueTimer<Double>(350.0, 200) {
                 @Override
                 public Double readValue() {
@@ -43,6 +45,7 @@ public class DistanceCorrection implements Input {
         }
 
         sensorF = hardwareMap.get(Rev2mDistanceSensor.class, distFName);
+        sensorF.resetDeviceConfigurationForOpMode();
         fDist = new ValueTimer<Double>(350.0, 200) {
             @Override
             public Double readValue() {
@@ -52,9 +55,9 @@ public class DistanceCorrection implements Input {
 
         this.alliance = alliance;
 
-        /*I2cDeviceSynch.ReadWindow oldW = sensorL.getDeviceClient().getReadWindow();
+        I2cDeviceSynch.ReadWindow oldW = sensorL.getDeviceClient().getReadWindow();
         I2cDeviceSynch.ReadWindow w = new I2cDeviceSynch.ReadWindow(oldW.getRegisterFirst(), oldW.getRegisterCount(), I2cDeviceSynch.ReadMode.ONLY_ONCE);
-        sensorL.getDeviceClient().setReadWindow(w);*/
+        sensorL.getDeviceClient().setReadWindow(w);
 
         running = false;
     }
