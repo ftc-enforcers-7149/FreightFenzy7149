@@ -86,7 +86,7 @@ public class Tele_V2_BLUE_4Bar extends TeleOp_Base {
         fourBarL.setDirection(Servo.Direction.FORWARD);
         fourBarL.setPosition(scalePos(0));
         fourBarR = hardwareMap.servo.get("fourBarR");
-        fourBarL.setDirection(Servo.Direction.REVERSE);
+        fourBarR.setDirection(Servo.Direction.REVERSE);
         fourBarR.setPosition(scalePos(0));
 
         if (RAN_AUTO) gyro.setOffset(HEADING);
@@ -133,15 +133,15 @@ public class Tele_V2_BLUE_4Bar extends TeleOp_Base {
 
         //Lift
         if (high)
-            liftPos = Levels.HIGH;
-        if (mid)
             liftPos = Levels.MIDDLE;
-        if (low)
-            liftPos = Levels.LOW;
-        if (cap)
-            liftPos = Levels.CAP;
-        if (shared)
-            liftPos = Levels.SHARED;
+        //if (mid)
+        //    liftPos = Levels.MIDDLE;
+        //if (low)
+        //    liftPos = Levels.LOW;
+        //if (cap)
+        //    liftPos = Levels.CAP;
+        //if (shared)
+        //    liftPos = Levels.SHARED;
         if (ground) {
             liftPos = Levels.GROUND;
             if (lastLiftPos == Levels.LOW)
@@ -243,8 +243,11 @@ public class Tele_V2_BLUE_4Bar extends TeleOp_Base {
         //4Bar
         if (fbIn) curr4BPos = 0;
         else if (fbHalf) curr4BPos = 0.2;
-        else if (fbOut) curr4BPos = 0.85;
+        else if (fbOut) curr4BPos = 0.75;
+        else if (lastFBOut) curr4BPos = 0;
 
+        //adam was here :D
+        
         if (curr4BPos != last4BPos) {
             fourBarR.setPosition(scalePos(curr4BPos));
             fourBarL.setPosition(scalePos(curr4BPos));
@@ -284,11 +287,11 @@ public class Tele_V2_BLUE_4Bar extends TeleOp_Base {
 
         //Lift
         high = gamepad2.dpad_up || gamepad1.dpad_up;
-        mid = gamepad2.dpad_left;
-        low = gamepad2.dpad_down;
-        ground = gamepad2.a || gamepad1.dpad_down;
-        cap = gamepad2.y;
-        shared = gamepad2.dpad_right;
+        //mid = gamepad2.dpad_left;
+        //low = gamepad2.dpad_down;
+        ground = gamepad2.dpad_down || gamepad1.dpad_down;
+        //cap = gamepad2.y;
+        //shared = gamepad2.dpad_right;
 
         liftPower = 0.67 * (gamepad2.right_trigger - gamepad2.left_trigger);
 
@@ -305,14 +308,14 @@ public class Tele_V2_BLUE_4Bar extends TeleOp_Base {
         //Spinner
         spin = gamepad1.x;
 
-        curr4BPos += -gamepad2.right_stick_y / 25; //Fine tune or adjust for actual time changes
+        curr4BPos -= gamepad2.right_stick_y / 20; //Fine tune or adjust for actual time changes
         if (curr4BPos < 0) curr4BPos = 0;
         else if (curr4BPos > 1) curr4BPos = 1;
 
         //4Bar
         fbIn = gamepad2.right_stick_button;
         fbHalf = gamepad2.x; //TODO: Figure out controls
-        fbOut = gamepad2.b;
+        fbOut = gamepad2.b && !gamepad2.start;
     }
 
     @Override

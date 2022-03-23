@@ -19,7 +19,7 @@ public class GlobalData {
     public static double HEADING = 0;
 
     //Lift Data
-    public static final double LEVEL_OFFSET = 2;
+    public static final double LEVEL_OFFSET = 3;
     public static final double CAP_OFFSET = -1.5;
 
     public static PIDCoefficients H_PID = new PIDCoefficients(-0.45, 0, -0.05);
