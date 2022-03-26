@@ -10,7 +10,7 @@ public class FourBar implements Output, Input {
 
     private Servo left, right, counterL, counterR;
     private double angle, desiredAngle, counterAngle, desiredCounterAngle;
-    private boolean atPos = true, atCounterPos = true;
+    private boolean atPos = false, atCounterPos = false;
 
     public static final double TRAVEL_DIST = 151 /*degrees*/;
 
@@ -37,16 +37,27 @@ public class FourBar implements Output, Input {
 
     }
 
-    public FourBar(HardwareMap hardwareMap, String leftName, String rightName) {
+    public FourBar(HardwareMap hardwareMap, String leftName, String rightName, String counterLName, String counterRName) {
         left = hardwareMap.servo.get(leftName);
         left.setDirection(Servo.Direction.FORWARD);
         right = hardwareMap.servo.get(rightName);
         right.setDirection(Servo.Direction.REVERSE);
+
+        counterL = hardwareMap.servo.get(counterLName);
+        // todo get direction
+        counterR = hardwareMap.servo.get(counterRName);
+
     }
 
     public void init() {
 
-        // todo move to zero positions
+        desiredAngle = Position.IN.angle;
+        while(!atPos) {
+
+            updateInput();
+            updateOutput();
+
+        }
 
     }
 
