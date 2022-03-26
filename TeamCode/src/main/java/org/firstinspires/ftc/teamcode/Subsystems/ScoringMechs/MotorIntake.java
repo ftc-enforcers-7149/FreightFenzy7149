@@ -29,9 +29,9 @@ public class MotorIntake implements Input, Output {
     private double intakePower = 0,  lastIntakePower = 0;
 
     public enum PaddlePosition {
-        BACK(0.94),
-        OUT_CLOSE(0.38),
-        OUT_FAR(0.3),
+        BACK(0.85),
+        OUT_CLOSE(0.65),
+        OUT_FAR(0.75),
         IDLE(BACK.pos);
 
         public final double pos;

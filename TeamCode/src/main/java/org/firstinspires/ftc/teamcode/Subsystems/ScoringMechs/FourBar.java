@@ -4,7 +4,6 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Input;
-import org.firstinspires.ftc.teamcode.Subsystems.Utils.Levels;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Output;
 
 public class FourBar implements Output, Input {
@@ -13,14 +12,14 @@ public class FourBar implements Output, Input {
     private double angle, desiredAngle;
     private boolean atPos = true;
 
-    public final double TRAVEL_DIST = 100 /*degrees*/;
+    public static final double TRAVEL_DIST = 151 /*degrees*/;
 
     public enum Position {
 
-        GROUND(0),
-        HALF(20),
-        OUT(85),
-        MAX(100);
+        IN(0),
+        HALF(56),
+        OUT(113),
+        MAX(TRAVEL_DIST);
 
         private final double angle;
 
@@ -32,26 +31,22 @@ public class FourBar implements Output, Input {
         }
 
         public Position goDown() {
-            if (this == GROUND) return GROUND;
+            if (this == IN) return IN;
             return values()[this.ordinal() - 1];
         }
 
     }
 
-    public FourBar(HardwareMap hardwareMap) {
-
-        left = hardwareMap.servo.get("fourBarL");
+    public FourBar(HardwareMap hardwareMap, String leftName, String rightName) {
+        left = hardwareMap.servo.get(leftName);
         left.setDirection(Servo.Direction.FORWARD);
-        right = hardwareMap.servo.get("fourBarR");
+        right = hardwareMap.servo.get(rightName);
         right.setDirection(Servo.Direction.REVERSE);
-
     }
 
     @Override
     public void updateInput() {
-
-        angle = (left.getPosition() + right.getPosition()) / 2;
-
+        angle = left.getPosition() * 151; /*degrees of full rotation*/
     }
 
     @Override
