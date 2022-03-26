@@ -9,9 +9,9 @@ import org.firstinspires.ftc.teamcode.Subsystems.Utils.Output;
 
 public class FourBar implements Output, Input {
 
-    private Servo left, right;
-    private double angle, desiredAngle;
-    private boolean atPos = true;
+    private Servo left, right, counterL, counterR;
+    private double angle, desiredAngle, counterAngle, desiredCounterAngle;
+    private boolean atPos = true, atCounterPos = true;
 
     public final double TRAVEL_DIST = 100 /*degrees*/;
 
@@ -47,10 +47,19 @@ public class FourBar implements Output, Input {
 
     }
 
+    public void init() {
+
+        // todo move to zero positions
+
+    }
+
     @Override
     public void updateInput() {
 
         angle = (left.getPosition() + right.getPosition()) / 2;
+        counterAngle = (counterL.getPosition() + counterR.getPosition()) / 2;
+
+        desiredCounterAngle = Math.cos(Math.toRadians(angle));
 
     }
 
@@ -66,10 +75,20 @@ public class FourBar implements Output, Input {
         }
         else atPos = true;
 
+        if(counterAngle != desiredCounterAngle) {
+
+            atPos = false;
+            left.setPosition(scalePos(counterAngle));
+            right.setPosition(scalePos(counterAngle));
+
+        }
+        else atCounterPos = true;
+
     }
 
     public double getAngle() { return angle; }
     public boolean isAtPos() { return atPos; }
+    public boolean isAtCounterPos() { return atCounterPos; }
 
     public void goToAngle(double angle) {
 
