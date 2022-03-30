@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.CarouselSpinner;
+import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.FourBar;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Intake;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorCarouselSpinner;
@@ -18,6 +19,7 @@ public abstract class Auto_V2_5 extends Autonomous_Base {
 
     protected MotorIntake intake;
     protected Lift lift;
+    protected FourBar fourBar;
     protected MotorCarouselSpinner spinner;
     protected DistanceCorrection distCorrect;
 
@@ -39,6 +41,7 @@ public abstract class Auto_V2_5 extends Autonomous_Base {
         intake = new MotorIntake(hardwareMap,
                 "intake", "paddle", "latch", "intakeColor");
         lift = new Lift(hardwareMap, "lift", bReadCH, !RAN_AUTO);
+        fourBar = new FourBar(hardwareMap, "fourBarL", "fourBarR", "counterL", "counterR");
         spinner = new MotorCarouselSpinner(hardwareMap, "spinner", getAlliance());
         distCorrect = new DistanceCorrection(hardwareMap, "distL", "distR", "distF", getAlliance());
 
@@ -50,6 +53,7 @@ public abstract class Auto_V2_5 extends Autonomous_Base {
         addOutput(intake);
         addOutput(lift);
         addOutput(spinner);
+        addOutput(fourBar);
 
         //Update global headless data as an input
         addInput(new Input() {
@@ -64,6 +68,8 @@ public abstract class Auto_V2_5 extends Autonomous_Base {
         intake.setPaddle(MotorIntake.PaddlePosition.BACK);
         intake.startOutput();
         intake.updateOutput();
+        fourBar.startOutput();
+        fourBar.updateOutput();
 
         //Initialize vision for either alliance
         tseDetector = new OpenCV(hardwareMap);
@@ -99,6 +105,7 @@ public abstract class Auto_V2_5 extends Autonomous_Base {
 
         setMotorPowers(0, 0, 0, 0);
         lift.setPower(0.05);
+        fourBar.goToAngle(0);
         intake.setIntakePower(0);
         intake.setPaddle(MotorIntake.PaddlePosition.BACK);
         intake.setLatch(MotorIntake.LatchPosition.OPEN);
@@ -117,6 +124,7 @@ public abstract class Auto_V2_5 extends Autonomous_Base {
         telemetry.addData("Front Distance: ", distCorrect.getFrontDistance());
         telemetry.addData("Side Distance: ", distCorrect.getSideWall());
         telemetry.addData("Lift Height: ", lift.getHeight());
+        telemetry.addData("Four Bar Angle: ", fourBar.getCurrAngle());
         telemetry.addData("Intake Distance: ", intake.getDistance());
         telemetry.addData("Freight in Intake? ", intake.getFreightInIntake());
     }

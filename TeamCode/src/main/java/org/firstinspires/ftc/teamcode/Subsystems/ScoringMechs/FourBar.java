@@ -4,7 +4,6 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.BettaServo;
-import org.firstinspires.ftc.teamcode.Subsystems.Utils.Input;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Output;
 
 import static org.firstinspires.ftc.teamcode.GlobalData.SLIDE_ANGLE;
@@ -14,6 +13,8 @@ public class FourBar implements Output {
     public BettaServo left, right;
     public Servo counterL, counterR;
     private double currAngle, desiredAngle, lastDesiredAngle;
+    public boolean manualCounter;
+    public double manualCounterPos;
 
     public static final double TRAVEL_DIST = Math.toRadians(151); /*degrees*/
 
@@ -61,19 +62,31 @@ public class FourBar implements Output {
     @Override
     public void updateOutput() {
         //Calculate angle from servo position, and servo positions from desired angle
-        currAngle = left.getPosition() * TRAVEL_DIST - Math.PI/2 - SLIDE_ANGLE;
-        double desiredPos = scalePos((desiredAngle + Math.PI/2 + SLIDE_ANGLE)/TRAVEL_DIST);
-        double desiredCounterPos = Math.cos(desiredAngle * (Math.PI/(Math.PI+SLIDE_ANGLE/2)));
+        currAngle = left.getPosition() * TRAVEL_DIST - Math.PI / 2 - SLIDE_ANGLE;
+        double desiredPos = scalePos((desiredAngle + Math.PI / 2 + SLIDE_ANGLE) / TRAVEL_DIST);
+        double desiredCounterPos = Math.cos(desiredAngle * (Math.PI / (Math.PI + SLIDE_ANGLE / 2)));
 
-        if(desiredAngle != lastDesiredAngle) {
-            left.setPosition(desiredPos);
-            right.setPosition(desiredPos);
+        if (!manualCounter) {
+            if (desiredAngle != lastDesiredAngle) {
+                left.setPosition(desiredPos);
+                right.setPosition(desiredPos);
 
-            counterL.setPosition(desiredCounterPos);
-            counterR.setPosition(desiredCounterPos);
+                counterL.setPosition(desiredCounterPos);
+                counterR.setPosition(desiredCounterPos);
+            }
+
+            lastDesiredAngle = desiredAngle;
+        } else {
+            if (desiredAngle != lastDesiredAngle) {
+                left.setPosition(desiredPos);
+                right.setPosition(desiredPos);
+
+                counterL.setPosition(manualCounterPos);
+                counterR.setPosition(manualCounterPos);
+            }
+
+            lastDesiredAngle = desiredAngle;
         }
-
-        lastDesiredAngle = desiredAngle;
     }
 
     public void goToAngle(double angle) {
@@ -96,5 +109,14 @@ public class FourBar implements Output {
         double zeroOutput = 0.06;
         double oneOutput = 1;
         return (oneOutput-zeroOutput) * pos  + zeroOutput;
+    }
+
+    public void setManualCounterPos(double pos) {
+        manualCounter = true;
+        manualCounterPos = pos;
+    }
+
+    public void stopManualCounter() {
+        manualCounter = false;
     }
 }
