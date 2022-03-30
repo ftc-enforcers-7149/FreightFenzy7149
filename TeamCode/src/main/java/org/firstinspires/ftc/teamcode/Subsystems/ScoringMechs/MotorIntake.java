@@ -29,9 +29,9 @@ public class MotorIntake implements Input, Output {
     private double intakePower = 0,  lastIntakePower = 0;
 
     public enum PaddlePosition {
-        BACK(0.94),
-        OUT_CLOSE(0.38),
-        OUT_FAR(0.3),
+        BACK(0.925),
+        OUT_CLOSE(0.65),
+        OUT_FAR(0.75),
         IDLE(BACK.pos);
 
         public final double pos;
@@ -42,9 +42,9 @@ public class MotorIntake implements Input, Output {
     }
     public enum LatchPosition {
         OPEN(0),
-        DUCK_CLOSED(0.22),
-        CLOSED(0.25),
-        PARTIAL_CLOSE(0.215),
+        DUCK_CLOSED(0.3),
+        CLOSED(0.35),
+        PARTIAL_CLOSE(0.28),
         OPEN_UP(1),
         IDLE(OPEN.pos);
 

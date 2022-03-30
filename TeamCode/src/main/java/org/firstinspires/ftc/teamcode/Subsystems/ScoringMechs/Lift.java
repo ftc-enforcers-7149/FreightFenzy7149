@@ -33,11 +33,10 @@ public class Lift implements Output, Input {
     //Convert motor ticks to rotations (using Gobilda's given equation)
     private final double ticksPerRot = ((((1+(46/17d))) * (1+(46/17d))) * 28);
     public static final double PULLEY_CIRCUMFERENCE = 2.975; //inches
-    public static final int STAGES = 2;
+    public static final int STAGES = 1;
     private final double heightPerRot = PULLEY_CIRCUMFERENCE * STAGES;
     private final double ticksPerInch = ticksPerRot / heightPerRot;
     private final double inchesPerTick = heightPerRot / ticksPerRot;
-
 
     private double currHeight;
 
@@ -61,7 +60,8 @@ public class Lift implements Output, Input {
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        lift.setDirection(DcMotorSimple.Direction.REVERSE);
+        //lift.setDirection(DcMotorSimple.Direction.REVERSE);
+        lift.setDirection(DcMotorSimple.Direction.FORWARD);
 
         initPID();
         initVars();
@@ -74,7 +74,8 @@ public class Lift implements Output, Input {
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        lift.setDirection(DcMotorSimple.Direction.REVERSE);
+        //lift.setDirection(DcMotorSimple.Direction.REVERSE);
+        lift.setDirection(DcMotorSimple.Direction.FORWARD);
 
         initPID();
         initVars();
@@ -88,7 +89,8 @@ public class Lift implements Output, Input {
         if (reset) lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        lift.setDirection(DcMotorSimple.Direction.REVERSE);
+        //lift.setDirection(DcMotorSimple.Direction.REVERSE);
+        lift.setDirection(DcMotorSimple.Direction.FORWARD);
 
         initPID();
         initVars();
@@ -97,7 +99,7 @@ public class Lift implements Output, Input {
         useBR = true;
     }
 
-    private void setCurrPosition(int position) {
+    public void setCurrPosition(int position) {
         offset = position - currPosition;
         currPosition = position;
     }
@@ -113,12 +115,14 @@ public class Lift implements Output, Input {
 
     @Override
     public void updateOutput() {
+        if (liftPower < 0 && currHeight < GROUND.height) setTargetHeight(GROUND);
+
         //Use PID to go to position
         if (usePID && !manualOverride) {
             output = controller.update(currPosition); //Update PID
 
             //Stop the motor when at rest on the floor
-            if (setPosition == GROUND.height && currPosition < GROUND.height - 0.05) {
+            if (setPosition == 0 && output < 0 && currPosition < GROUND.height) {
                 output = 0;
             }
             if (output != lastOutput) {
@@ -130,9 +134,7 @@ public class Lift implements Output, Input {
 
         //Use motor power to move lift
         else {
-            if (!manualOverride && (
-                    (liftPower < 0 && currHeight < -0.05) ||
-                    (liftPower > 0 && currHeight > MAX.height + 0.05))) liftPower = 0;
+            if (!manualOverride && ((liftPower > 0 && currHeight > MAX.height))) liftPower = 0;
 
             if (liftPower != lastLiftPower) {
                 lift.setPower(liftPower);
@@ -211,6 +213,8 @@ public class Lift implements Output, Input {
 
     private void initVars() {
         usePID = true;
+        setCurrPosition(-50);
+        setTargetHeight(GROUND);
     }
 
     @Override

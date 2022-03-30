@@ -1,7 +1,10 @@
 package org.firstinspires.ftc.teamcode.TeleOp;
 
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.ServoImplEx;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
@@ -13,9 +16,9 @@ import org.firstinspires.ftc.teamcode.Subsystems.Utils.Levels;
 import static org.firstinspires.ftc.teamcode.GlobalData.HEADING;
 import static org.firstinspires.ftc.teamcode.GlobalData.RAN_AUTO;
 
-@TeleOp (name = "BLUE TeleOp")
-//@Disabled
-public class Tele_V2_BLUE extends TeleOp_Base {
+@TeleOp (name = "BLUE 4Bar TeleOp")
+@Disabled
+public class Tele_V2_BLUE_4Bar extends TeleOp_Base {
 
     //Drive
     private boolean resetAngle;
@@ -54,6 +57,15 @@ public class Tele_V2_BLUE extends TeleOp_Base {
     //Spinner
     private boolean spin, lastSpin;
 
+    //4Bar
+    private Servo fourBarL, fourBarR;
+    private Servo counterL, counterR;
+
+    private boolean fbIn, fbHalf, fbOut;
+    private boolean lastFBIn, lastFBHalf, lastFBOut;
+
+    private double curr4BPos, last4BPos;
+
     @Override
     public void init() {
         try {
@@ -71,6 +83,20 @@ public class Tele_V2_BLUE extends TeleOp_Base {
 
         led = new LED(hardwareMap, "blinkin", Alliance.BLUE);
         led.setPattern(RevBlinkinLedDriver.BlinkinPattern.BREATH_BLUE);
+
+        fourBarL = hardwareMap.servo.get("fourBarL");
+        fourBarL.setDirection(Servo.Direction.FORWARD);
+        fourBarL.setPosition(scalePos(0));
+        fourBarR = hardwareMap.servo.get("fourBarR");
+        fourBarR.setDirection(Servo.Direction.REVERSE);
+        fourBarR.setPosition(scalePos(0));
+
+        counterL = hardwareMap.servo.get("counterL");
+        counterL.setDirection(Servo.Direction.REVERSE);
+        counterL.setPosition(0);
+        counterR = hardwareMap.servo.get("counterR");
+        counterR.setDirection(Servo.Direction.FORWARD);
+        counterR.setPosition(0);
 
         if (RAN_AUTO) gyro.setOffset(HEADING);
         RAN_AUTO = false;
@@ -116,15 +142,15 @@ public class Tele_V2_BLUE extends TeleOp_Base {
 
         //Lift
         if (high)
-            liftPos = Levels.HIGH;
-        if (mid)
             liftPos = Levels.MIDDLE;
-        if (low)
-            liftPos = Levels.LOW;
-        if (cap)
-            liftPos = Levels.CAP;
-        if (shared)
-            liftPos = Levels.SHARED;
+        //if (mid)
+        //    liftPos = Levels.MIDDLE;
+        //if (low)
+        //    liftPos = Levels.LOW;
+        //if (cap)
+        //    liftPos = Levels.CAP;
+        //if (shared)
+        //    liftPos = Levels.SHARED;
         if (ground) {
             liftPos = Levels.GROUND;
             if (lastLiftPos == Levels.LOW)
@@ -223,6 +249,22 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         // Carousel
         if (gamepad1.x) spinner.reset();
 
+        //4Bar
+        if (fbIn) curr4BPos = 0;
+        else if (fbHalf) curr4BPos = 0.2;
+        else if (fbOut) curr4BPos = 0.75;
+        else if (lastFBOut) curr4BPos = 0;
+
+        //adam was here :D
+        
+        if (curr4BPos != last4BPos) {
+            fourBarR.setPosition(scalePos(curr4BPos));
+            fourBarL.setPosition(scalePos(curr4BPos));
+
+            counterL.setPosition(curr4BPos);
+            counterR.setPosition(curr4BPos);
+        }
+
         // Telemetry
         telemetry.addData("Lift Height: ", lift.getHeight());
         telemetry.addData("Freight in Intake: ", freightInIntake);
@@ -257,11 +299,11 @@ public class Tele_V2_BLUE extends TeleOp_Base {
 
         //Lift
         high = gamepad2.dpad_up || gamepad1.dpad_up;
-        mid = gamepad2.dpad_left;
-        low = gamepad2.dpad_down;
-        ground = gamepad2.a || gamepad1.dpad_down;
-        cap = gamepad2.y;
-        shared = gamepad2.dpad_right;
+        //mid = gamepad2.dpad_left;
+        //low = gamepad2.dpad_down;
+        ground = gamepad2.dpad_down || gamepad1.dpad_down;
+        //cap = gamepad2.y;
+        //shared = gamepad2.dpad_right;
 
         liftPower = 0.67 * (gamepad2.right_trigger - gamepad2.left_trigger);
 
@@ -277,6 +319,15 @@ public class Tele_V2_BLUE extends TeleOp_Base {
 
         //Spinner
         spin = gamepad1.x;
+
+        curr4BPos -= gamepad2.right_stick_y / 20; //Fine tune or adjust for actual time changes
+        if (curr4BPos < 0) curr4BPos = 0;
+        else if (curr4BPos > 1) curr4BPos = 1;
+
+        //4Bar
+        fbIn = gamepad2.right_stick_button;
+        fbHalf = gamepad2.x; //TODO: Figure out controls
+        fbOut = gamepad2.b && !gamepad2.start;
     }
 
     @Override
@@ -299,5 +350,18 @@ public class Tele_V2_BLUE extends TeleOp_Base {
 
         //Spinner
         lastSpin = spin;
+
+        //4Bar
+        last4BPos = curr4BPos;
+
+        lastFBIn = fbIn;
+        lastFBHalf = fbHalf;
+        lastFBOut = fbOut;
+    }
+
+    private double scalePos(double pos) {
+        double zeroOutput = 0.06;
+        double oneOutput = 1;
+        return (oneOutput-zeroOutput) * pos  + zeroOutput;
     }
 }

@@ -19,8 +19,12 @@ public class GlobalData {
     public static double HEADING = 0;
 
     //Lift Data
-    public static final double LEVEL_OFFSET = 2;
-    public static final double CAP_OFFSET = -1.5;
+    public static final double LEVEL_OFFSET = 0;
+    public static final double CAP_OFFSET = 0;
+    public static final double SLIDE_ANGLE = Math.toRadians(90-17);
+
+    //Four Bar Data
+    public static final double BAR_LENGTH = 18.5;
 
     public static PIDCoefficients H_PID = new PIDCoefficients(-0.45, 0, -0.05);
 

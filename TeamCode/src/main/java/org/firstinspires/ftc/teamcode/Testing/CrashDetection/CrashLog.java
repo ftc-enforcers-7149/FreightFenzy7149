@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Testing.CrashDetection;
 import android.util.Log;
 
 import com.acmerobotics.roadrunner.drive.TankDrive;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -13,16 +14,16 @@ import org.firstinspires.ftc.teamcode.Subsystems.Sensors.Gyroscope;
 import org.firstinspires.ftc.teamcode.TeleOp.TeleOp_Base;
 
 @TeleOp(name="Crash Detection Logging")
+@Disabled
 public class CrashLog extends TeleOp_Base {
 
-    protected boolean firstLoop = true;
     protected Gyroscope gyro;
 
     String[] steps = new String[]{"Drive straight and stop", "Strafe and stop", "Drive straight and coast", "Strafe and coast", "Turn",
 
                                   "Drive straight into wall", "Strafe into wall", "Hit from front", "Hit from sides", "Drive over barrier",
                                   "Hit barrier with right set of wheels", "Clipped by object"};
-    int step = 0;
+    int step = 0; boolean firstLoop = true;
 
     boolean nextStep = false, x = false, lastX = false;
     boolean restartStep = false, a = false, lastA = false;
@@ -31,16 +32,12 @@ public class CrashLog extends TeleOp_Base {
     public void init() {
 
         try {
-
             initializeSources();
             initializeDrive();
             initializeBulkRead();
             initializeGyro();
-            //initializeOdometry();
             initializeVars();
-
         } catch (Exception e) {
-            Log.e("ERROR", e.getMessage());
             e.printStackTrace();
             requestOpModeStop();
             return;
@@ -71,11 +68,11 @@ public class CrashLog extends TeleOp_Base {
 
         if(nextStep) {
             step++;
-            Log.w("\n\n\nBeginning step", steps[step]);
+            Log.v("\n\n\nBeginning step", steps[step]);
         }
 
         if(restartStep) {
-            Log.w("\n\n\nRestarting step", steps[step]);
+            Log.v("\n\n\nRestarting step", steps[step]);
         }
 
         updateInputs();

@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.TeleOp;
 
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
@@ -13,11 +14,11 @@ import org.firstinspires.ftc.teamcode.Subsystems.Utils.Levels;
 import static org.firstinspires.ftc.teamcode.GlobalData.HEADING;
 import static org.firstinspires.ftc.teamcode.GlobalData.RAN_AUTO;
 
-@TeleOp (name = "RED Tele_V2 (Jacob)")
+@TeleOp (name = "BLUE 4Bar TeleOp NEW")
 //@Disabled
-public class Tele_V2_RED_Jake extends TeleOp_Base {
+public class Tele_V2_BLUE_4Bar_NEW extends TeleOp_Base {
 
-    //Headless
+    //Drive
     private boolean resetAngle;
     private boolean sharedBarrier, lastSharedBarrier;
 
@@ -27,18 +28,12 @@ public class Tele_V2_RED_Jake extends TeleOp_Base {
     private MotorCarouselSpinner spinner;
     private LED led;
 
-    //Lift
-    public Levels cycleBackward(Levels level) {
-        switch (level) {
-            case HIGH: return Levels.MIDDLE;
-            case MIDDLE: return Levels.LOW;
-            case LOW:
-            default: return Levels.HIGH;
-        }
-    }
+    //4Bar
+    private Servo fourBarL, fourBarR;
+    private Servo counterL, counterR;
 
     private Levels liftPos = Levels.GROUND, lastLiftPos = Levels.GROUND;
-    private boolean high, mid, low, ground, cap, shared;
+    private boolean high, ground;
     private double liftPower, lastLiftPower;
     private boolean lastPowerManual;
 
@@ -48,10 +43,16 @@ public class Tele_V2_RED_Jake extends TeleOp_Base {
     //Intake
     private boolean freightInIntake, lastFreightInIntake;
     private boolean outtake, lastOuttake, in, lastIn;
+    private boolean outDuck, lastOutDuck;
     private boolean score, lastScore;
 
     //Spinner
     private boolean spin, lastSpin;
+
+    private boolean fbIn, fbHalf, fbOut;
+    private boolean lastFBIn, lastFBHalf, lastFBOut;
+
+    private double curr4BPos, last4BPos;
 
     @Override
     public void init() {
@@ -66,10 +67,24 @@ public class Tele_V2_RED_Jake extends TeleOp_Base {
         intake = new MotorIntake(hardwareMap,
                 "intake", "paddle", "latch", "intakeColor");
         lift = new Lift(hardwareMap, "lift", bReadCH, !RAN_AUTO);
-        spinner = new MotorCarouselSpinner(hardwareMap, "spinner", Alliance.RED);
+        spinner = new MotorCarouselSpinner(hardwareMap, "spinner", Alliance.BLUE);
 
-        led = new LED(hardwareMap, "blinkin", Alliance.RED);
-        led.setPattern(RevBlinkinLedDriver.BlinkinPattern.BREATH_RED);
+        led = new LED(hardwareMap, "blinkin", Alliance.BLUE);
+        led.setPattern(RevBlinkinLedDriver.BlinkinPattern.BREATH_BLUE);
+
+        fourBarL = hardwareMap.servo.get("fourBarL");
+        fourBarL.setDirection(Servo.Direction.FORWARD);
+        fourBarL.setPosition(scalePos(0));
+        fourBarR = hardwareMap.servo.get("fourBarR");
+        fourBarR.setDirection(Servo.Direction.REVERSE);
+        fourBarR.setPosition(scalePos(0));
+
+        counterL = hardwareMap.servo.get("counterL");
+        counterL.setDirection(Servo.Direction.REVERSE);
+        counterL.setPosition(0);
+        counterR = hardwareMap.servo.get("counterR");
+        counterR.setDirection(Servo.Direction.FORWARD);
+        counterR.setPosition(0);
 
         if (RAN_AUTO) gyro.setOffset(HEADING);
         RAN_AUTO = false;
@@ -110,23 +125,24 @@ public class Tele_V2_RED_Jake extends TeleOp_Base {
         if (!isAutomatedDriving())
             driveHeadless(gyro.getYaw(), resetAngle);
 
-        boolean overrideIntake = false;
+        boolean overrideIntakeDropLift = false;
+        boolean overrideIntakeSharedBarrier = isAutomatedDriving();
 
         //Lift
         if (high)
-            liftPos = Levels.HIGH;
-        if (mid)
             liftPos = Levels.MIDDLE;
-        if (low)
-            liftPos = Levels.LOW;
-        if (cap)
-            liftPos = Levels.CAP;
-        if (shared)
-            liftPos = Levels.SHARED;
+        //if (mid)
+        //    liftPos = Levels.MIDDLE;
+        //if (low)
+        //    liftPos = Levels.LOW;
+        //if (cap)
+        //    liftPos = Levels.CAP;
+        //if (shared)
+        //    liftPos = Levels.SHARED;
         if (ground) {
             liftPos = Levels.GROUND;
             if (lastLiftPos == Levels.LOW)
-                overrideIntake = true;
+                overrideIntakeDropLift = true;
         }
         else if (!score && !outtake && !in) intake.setIntakePower(0);
 
@@ -134,6 +150,8 @@ public class Tele_V2_RED_Jake extends TeleOp_Base {
         if (liftPower != lastLiftPower) {
             lift.setPower(liftPower);
             lastPowerManual = true;
+            liftPos = Levels.MAX;
+            lastLiftPos = Levels.MAX;
         }
         else if (lastPowerManual && liftPower == 0) {
             lift.setTargetHeight(lift.getHeight());
@@ -195,16 +213,51 @@ public class Tele_V2_RED_Jake extends TeleOp_Base {
             intake.setLatch(MotorIntake.LatchPosition.OPEN);
         }
 
-        if (overrideIntake) intake.setIntakePower(-0.5);
+        if (outDuck) {
+            intake.cancelSpitOut();
+            if (liftPos == Levels.LOW) {
+                intake.setIntakePower(0.3);
+                intake.setPaddle(MotorIntake.PaddlePosition.OUT_FAR);
+            }
+            else {
+                intake.setIntakePower(0);
+                intake.setPaddle(MotorIntake.PaddlePosition.OUT_CLOSE);
+            }
+            intake.setLatch(MotorIntake.LatchPosition.OPEN_UP);
+        }
+        else if (lastOutDuck) {
+            intake.setIntakePower(0);
+            intake.setPaddle(MotorIntake.PaddlePosition.BACK);
+            intake.setLatch(MotorIntake.LatchPosition.OPEN);
+        }
+
+        if (overrideIntakeDropLift) intake.setIntakePower(-0.5);
+        if (overrideIntakeSharedBarrier) intake.setIntakePower(0.2);
 
         // Carousel
         if (gamepad1.x) spinner.reset();
+
+        //4Bar
+        if (fbIn) curr4BPos = 0;
+        else if (fbHalf) curr4BPos = 0.2;
+        else if (fbOut) curr4BPos = 0.75;
+        else if (lastFBOut) curr4BPos = 0;
+
+        //adam was here :D
+        
+        if (curr4BPos != last4BPos) {
+            fourBarR.setPosition(scalePos(curr4BPos));
+            fourBarL.setPosition(scalePos(curr4BPos));
+
+            counterL.setPosition(curr4BPos);
+            counterR.setPosition(curr4BPos);
+        }
 
         // Telemetry
         telemetry.addData("Lift Height: ", lift.getHeight());
         telemetry.addData("Freight in Intake: ", freightInIntake);
 
-        //Led
+        // Led
         if (freightInIntake)
             led.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
         else
@@ -234,25 +287,46 @@ public class Tele_V2_RED_Jake extends TeleOp_Base {
 
         //Lift
         high = gamepad2.dpad_up || gamepad1.dpad_up;
-        mid = gamepad2.dpad_left;
-        low = gamepad2.dpad_down;
-        ground = gamepad2.a || gamepad1.dpad_down;
-        cap = gamepad2.y;
-        shared = gamepad2.dpad_right;
+        //mid = gamepad2.dpad_left;
+        //low = gamepad2.dpad_down;
+        ground = gamepad2.dpad_down || gamepad1.dpad_down;
+        //cap = gamepad2.y;
+        //shared = gamepad2.dpad_right;
 
-        liftPower = gamepad2.right_trigger - gamepad2.left_trigger;
+        //liftPower = 0.67 * (gamepad2.right_trigger - gamepad2.left_trigger);
+        liftPower = (gamepad2.left_trigger - (gamepad2.left_bumper ? 0.7 : 0));
 
         resetLift = gamepad2.back;
 
         //Intake
         freightInIntake = intake.getFreightInIntake();
 
-        in = gamepad1.right_trigger > 0.2;
+        /*in = gamepad1.right_trigger > 0.2;
         outtake = gamepad1.right_bumper;
-        score = gamepad1.left_trigger > 0.2;
+        outDuck = gamepad1.left_bumper;
+        score = gamepad1.left_trigger > 0.2;*/
+
+        in = gamepad1.right_trigger > 0.2;
+        score = gamepad1.right_bumper;
 
         //Spinner
-        spin = gamepad1.x;
+        /*spin = gamepad1.x;
+
+        curr4BPos -= gamepad2.right_stick_y / 20; //Fine tune or adjust for actual time changes
+        if (curr4BPos < 0) curr4BPos = 0;
+        else if (curr4BPos > 1) curr4BPos = 1;
+
+        //4Bar
+        fbIn = gamepad2.right_stick_button;
+        fbHalf = gamepad2.x; //TODO: Figure out controls
+        fbOut = gamepad2.b && !gamepad2.start;*/
+
+        curr4BPos += (gamepad2.right_trigger - (gamepad2.right_bumper ? 0.5 : 0)) / 20;
+
+        fbOut = gamepad1.left_trigger > 0.2;
+        fbIn = gamepad1.left_bumper;
+
+
     }
 
     @Override
@@ -270,9 +344,23 @@ public class Tele_V2_RED_Jake extends TeleOp_Base {
         lastFreightInIntake = freightInIntake;
         lastIn = in;
         lastOuttake = outtake;
+        lastOutDuck = outDuck;
         lastScore = score;
 
         //Spinner
         lastSpin = spin;
+
+        //4Bar
+        last4BPos = curr4BPos;
+
+        lastFBIn = fbIn;
+        lastFBHalf = fbHalf;
+        lastFBOut = fbOut;
+    }
+
+    private double scalePos(double pos) {
+        double zeroOutput = 0.06;
+        double oneOutput = 1;
+        return (oneOutput-zeroOutput) * pos  + zeroOutput;
     }
 }
