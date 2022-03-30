@@ -36,7 +36,7 @@ public class BlueCycles extends Auto_V2_5 {
         lift.initPID();
 
         //Score pre-loaded
-        lift.setTargetHeight(commands.detectBarcode(tseDetector));
+        lift.setTargetHeight(commands.detectBarcode(tseDetector));  //TODO: Four Bar
         waitForTime(100);
 
         H_ACC = Math.toRadians(4);
@@ -98,7 +98,7 @@ public class BlueCycles extends Auto_V2_5 {
             driveIntoWarehouse();
             intake(50);
         }
-        lift.setTargetHeight(Levels.GROUND);
+        lift.setTargetHeight(Levels.GROUND);    //TODO: Four Bar
         intake.setLatch(MotorIntake.LatchPosition.CLOSED);
         intake.setIntakePower(-0.3);
         SPEED_MULT = 1.0;
@@ -116,13 +116,13 @@ public class BlueCycles extends Auto_V2_5 {
         SLOW_DIST = 10;
         SPEED_MULT = 0.7;
 
-        lift.setPower(-0.01); //Start moving the lift down
+        lift.setPower(-0.01); //Start moving the lift down //TODO: Four Bar
 
         boolean timeOut = driveTo(() -> {
                     if (Math.abs(deltaHeading(drive.getPoseEstimate().getHeading(), Math.toRadians(85))) > Math.toRadians(3))
                         return 20.0;
                     else {
-                        lift.setTargetHeight(Levels.GROUND);
+                        lift.setTargetHeight(Levels.GROUND);    //TODO: Four Bar
                         return drive.getPoseEstimate().getX();
                     }
                 },
@@ -161,7 +161,7 @@ public class BlueCycles extends Auto_V2_5 {
         distCorrect.startRunning();
         //intake.startScanningIntake();
 
-        lift.setTargetHeight(Levels.GROUND);
+        lift.setTargetHeight(Levels.GROUND);    //TODO: Four Bar
         intake.setIntakePower(1);
 
         POS_ACC = 2;
@@ -190,7 +190,7 @@ public class BlueCycles extends Auto_V2_5 {
         distCorrect.startRunning();
         intake.startScanningIntake();
 
-        lift.setTargetHeight(Levels.GROUND);
+        lift.setTargetHeight(Levels.GROUND);    //TODO: Four Bar
         intake.setIntakePower(1);
 
         long driveStartTime = System.currentTimeMillis();
@@ -329,7 +329,7 @@ public class BlueCycles extends Auto_V2_5 {
     }
 
     private void scoreInHub() {
-        lift.setTargetHeight(Levels.HIGH);
+        lift.setTargetHeight(Levels.HIGH);  //TODO: Four Bar
 
         H_ACC = Math.toRadians(4);
         driveTo(36, 62, Math.toRadians(330), 1500);
@@ -339,7 +339,7 @@ public class BlueCycles extends Auto_V2_5 {
     }
 
     private void scoreInHub(double yPos) {
-        lift.setTargetHeight(Levels.HIGH);
+        lift.setTargetHeight(Levels.HIGH);  //TODO: Four Bar
 
         SPEED_MULT = 0.7;
         SLOW_DIST = 25;

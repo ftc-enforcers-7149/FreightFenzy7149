@@ -34,7 +34,7 @@ public class BlueDuck extends Auto_V2_5 {
         //Set lift to correct level according to the vision
         Lift.pidCoeffs = new PIDCoefficients(0.004, 0, 0.0001);
         lift.initPID();
-        lift.setTargetHeight(liftHeight);
+        lift.setTargetHeight(liftHeight);   //TODO: Four Bar
 
         //Drive to hub
         SLOW_DIST = 10;
@@ -47,7 +47,7 @@ public class BlueDuck extends Auto_V2_5 {
 
         Lift.pidCoeffs = new PIDCoefficients(0.006, 0, 0.00015);
         lift.initPID();
-        lift.setTargetHeight(Levels.GROUND);
+        lift.setTargetHeight(Levels.GROUND);    //TODO: Four Bar
 
         //Drive to the duckwheel
         POS_ACC = 3;
@@ -71,7 +71,7 @@ public class BlueDuck extends Auto_V2_5 {
         intake.setIntakePower(0);
         intake.setLatch(MotorIntake.LatchPosition.DUCK_CLOSED);
 
-        lift.setTargetHeight(Levels.HIGH);
+        lift.setTargetHeight(Levels.HIGH);  //TODO: Four Bar
 
         //Drive to hub
         driveTo(25,21, Math.toRadians(60));
@@ -82,7 +82,7 @@ public class BlueDuck extends Auto_V2_5 {
 
         //Back away from hub
         driveTo(19,23, Math.toRadians(60));
-        lift.setTargetHeight(Levels.GROUND);
+        lift.setTargetHeight(Levels.GROUND);    //TODO: Four Bar
 
         //Park in storage unit
         driveTo(28.5, -25, Math.toRadians(0), 1500);
