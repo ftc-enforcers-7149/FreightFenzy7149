@@ -4,9 +4,9 @@ import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.ServoImplEx;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
+import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.FourBar;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorCarouselSpinner;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorIntake;
@@ -16,9 +16,9 @@ import org.firstinspires.ftc.teamcode.Subsystems.Utils.Levels;
 import static org.firstinspires.ftc.teamcode.GlobalData.HEADING;
 import static org.firstinspires.ftc.teamcode.GlobalData.RAN_AUTO;
 
-@TeleOp (name = "BLUE 4Bar TeleOp")
+@TeleOp (name = "BLUE 4BarSub TeleOp")
 @Disabled
-public class Tele_V2_BLUE_4Bar extends TeleOp_Base {
+public class Tele_V2_BLUE_4BarSub extends TeleOp_Base {
 
     //Drive
     private boolean resetAngle;
@@ -29,6 +29,7 @@ public class Tele_V2_BLUE_4Bar extends TeleOp_Base {
     private Lift lift;
     private MotorCarouselSpinner spinner;
     private LED led;
+    private FourBar bar;
 
     //Lift
     public Levels cycleBackward(Levels level) {
@@ -57,10 +58,6 @@ public class Tele_V2_BLUE_4Bar extends TeleOp_Base {
     //Spinner
     private boolean spin, lastSpin;
 
-    //4Bar
-    private Servo fourBarL, fourBarR;
-    private Servo counterL, counterR;
-
     private boolean fbIn, fbHalf, fbOut;
     private boolean lastFBIn, lastFBHalf, lastFBOut;
 
@@ -79,24 +76,13 @@ public class Tele_V2_BLUE_4Bar extends TeleOp_Base {
         intake = new MotorIntake(hardwareMap,
                 "intake", "paddle", "latch", "intakeColor");
         lift = new Lift(hardwareMap, "lift", bReadCH, !RAN_AUTO);
+        lift.setCurrPosition(-128);
         spinner = new MotorCarouselSpinner(hardwareMap, "spinner", Alliance.BLUE);
 
         led = new LED(hardwareMap, "blinkin", Alliance.BLUE);
         led.setPattern(RevBlinkinLedDriver.BlinkinPattern.BREATH_BLUE);
 
-        fourBarL = hardwareMap.servo.get("fourBarL");
-        fourBarL.setDirection(Servo.Direction.FORWARD);
-        fourBarL.setPosition(scalePos(0));
-        fourBarR = hardwareMap.servo.get("fourBarR");
-        fourBarR.setDirection(Servo.Direction.REVERSE);
-        fourBarR.setPosition(scalePos(0));
-
-        counterL = hardwareMap.servo.get("counterL");
-        counterL.setDirection(Servo.Direction.REVERSE);
-        counterL.setPosition(0);
-        counterR = hardwareMap.servo.get("counterR");
-        counterR.setDirection(Servo.Direction.FORWARD);
-        counterR.setPosition(0);
+        bar = new FourBar(hardwareMap, "fourBarL", "fourBarR", "counterL", "counterR");
 
         if (RAN_AUTO) gyro.setOffset(HEADING);
         RAN_AUTO = false;
@@ -108,6 +94,7 @@ public class Tele_V2_BLUE_4Bar extends TeleOp_Base {
         addOutput(lift);
         addOutput(spinner);
         addOutput(led);
+        addOutput(bar);
 
         led.startOutput();
         led.updateOutput();
@@ -256,18 +243,15 @@ public class Tele_V2_BLUE_4Bar extends TeleOp_Base {
         else if (lastFBOut) curr4BPos = 0;
 
         //adam was here :D
-        
-        if (curr4BPos != last4BPos) {
-            fourBarR.setPosition(scalePos(curr4BPos));
-            fourBarL.setPosition(scalePos(curr4BPos));
 
-            counterL.setPosition(curr4BPos);
-            counterR.setPosition(curr4BPos);
+        if (curr4BPos != last4BPos) {
+            bar.goToServoPos(curr4BPos);
         }
 
         // Telemetry
         telemetry.addData("Lift Height: ", lift.getHeight());
         telemetry.addData("Freight in Intake: ", freightInIntake);
+        telemetry.addData("Four Bar Angle: ", Math.toDegrees(bar.getCurrAngle()));
 
         // Led
         if (freightInIntake)

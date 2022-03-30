@@ -4,13 +4,13 @@ import static org.firstinspires.ftc.teamcode.GlobalData.CAP_OFFSET;
 import static org.firstinspires.ftc.teamcode.GlobalData.LEVEL_OFFSET;
 
 public enum Levels {
-    GROUND(0),
+    GROUND(0.05),
     LOW(3 + LEVEL_OFFSET),
     SHARED(5 + LEVEL_OFFSET),
     MIDDLE(8.5 + LEVEL_OFFSET),
-    HIGH(14.75 + LEVEL_OFFSET - 1),
+    HIGH(14.75 + LEVEL_OFFSET),
     CAP(20.25 + CAP_OFFSET),
-    MAX(22);
+    MAX(15);
 
     public final double height;
 

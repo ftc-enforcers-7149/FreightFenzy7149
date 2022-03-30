@@ -3,22 +3,24 @@ package org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.BettaServo;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Input;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Output;
 
-public class FourBar implements Output, Input {
+import static org.firstinspires.ftc.teamcode.GlobalData.SLIDE_ANGLE;
 
-    private Servo left, right, counterL, counterR;
-    private double angle, desiredAngle, counterAngle, desiredCounterAngle;
-    private boolean atPos = false, atCounterPos = false;
+public class FourBar implements Output {
 
-    public static final double TRAVEL_DIST = 151 /*degrees*/;
+    public BettaServo left, right;
+    public Servo counterL, counterR;
+    private double currAngle, desiredAngle, lastDesiredAngle;
+
+    public static final double TRAVEL_DIST = Math.toRadians(151); /*degrees*/
 
     public enum Position {
-
-        IN(0),
-        HALF(56),
-        OUT(113),
+        IN(Math.toRadians(-107)),
+        HALF(Math.toRadians(-60)),
+        OUT(Math.toRadians(0)),
         MAX(TRAVEL_DIST);
 
         private final double angle;
@@ -37,84 +39,62 @@ public class FourBar implements Output, Input {
 
     }
 
-    public FourBar(HardwareMap hardwareMap, String leftName, String rightName, String counterLName, String counterRName) {
-        left = hardwareMap.servo.get(leftName);
+    public FourBar(HardwareMap hardwareMap, String leftName, String rightName,
+                   String counterLName, String counterRName) {
+        left = hardwareMap.get(BettaServo.class, leftName);
         left.setDirection(Servo.Direction.FORWARD);
-        right = hardwareMap.servo.get(rightName);
+        right = hardwareMap.get(BettaServo.class, rightName);
         right.setDirection(Servo.Direction.REVERSE);
 
+        left.setFullRangeTime(1000);
+        right.setFullRangeTime(1000);
+
         counterL = hardwareMap.servo.get(counterLName);
-        // todo get direction
+        counterL.setDirection(Servo.Direction.REVERSE);
         counterR = hardwareMap.servo.get(counterRName);
+        counterR.setDirection(Servo.Direction.FORWARD);
 
-    }
-
-    public void init() {
-
-        desiredAngle = Position.IN.angle;
-        while(!atPos) {
-
-            updateInput();
-            updateOutput();
-
-        }
-
-    }
-
-    @Override
-    public void updateInput() {
-
-        angle = (left.getPosition() + right.getPosition()) / 2;
-        counterAngle = (counterL.getPosition() + counterR.getPosition()) / 2;
-
-        desiredCounterAngle = Math.cos(Math.toRadians(angle));
-
+        goToAngle(Position.IN);
+        updateOutput();
     }
 
     @Override
     public void updateOutput() {
+        //Calculate angle from servo position, and servo positions from desired angle
+        currAngle = left.getPosition() * TRAVEL_DIST - Math.PI/2 - SLIDE_ANGLE;
+        double desiredPos = scalePos((desiredAngle + Math.PI/2 + SLIDE_ANGLE)/TRAVEL_DIST);
+        double desiredCounterPos = Math.cos(desiredAngle * (Math.PI/(Math.PI+SLIDE_ANGLE/2)));
 
-        if(angle != desiredAngle) {
+        if(desiredAngle != lastDesiredAngle) {
+            left.setPosition(desiredPos);
+            right.setPosition(desiredPos);
 
-            atPos = false;
-            left.setPosition(scalePos(angle));
-            right.setPosition(scalePos(angle));
-
+            counterL.setPosition(desiredCounterPos);
+            counterR.setPosition(desiredCounterPos);
         }
-        else atPos = true;
 
-        if(counterAngle != desiredCounterAngle) {
-
-            atPos = false;
-            left.setPosition(scalePos(counterAngle));
-            right.setPosition(scalePos(counterAngle));
-
-        }
-        else atCounterPos = true;
-
+        lastDesiredAngle = desiredAngle;
     }
 
-    public double getAngle() { return angle; }
-    public boolean isAtPos() { return atPos; }
-    public boolean isAtCounterPos() { return atCounterPos; }
-
     public void goToAngle(double angle) {
-
-        desiredAngle = angle;
-
+        desiredAngle = Math.min(Math.max(-Math.PI/2-SLIDE_ANGLE, angle), -Math.PI/2-SLIDE_ANGLE + TRAVEL_DIST);
     }
 
     public void goToAngle(Position p) {
+        goToAngle(p.angle);
+    }
 
-        desiredAngle = p.angle;
+    public void goToServoPos(double pos) {
+        goToAngle(pos * TRAVEL_DIST);
+    }
 
+    public double getCurrAngle() {
+        return currAngle;
     }
 
     private double scalePos(double pos) {
         double zeroOutput = 0.06;
         double oneOutput = 1;
-
-        return (oneOutput-zeroOutput) * (pos / TRAVEL_DIST)  + zeroOutput;
+        return (oneOutput-zeroOutput) * pos  + zeroOutput;
     }
-
 }
