@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Input;
 
-public class MaxbotixMB1220 implements Input {
+public class MaxbotixMB1220 extends Sensor {
 
     AnalogInput mb1220;
     VOLTAGE v;
@@ -22,8 +22,9 @@ public class MaxbotixMB1220 implements Input {
 
     }
 
-    public MaxbotixMB1220(HardwareMap h, String name, VOLTAGE v) {
+    public MaxbotixMB1220(HardwareMap h, String name, VOLTAGE v, int smoothing) {
 
+        super(smoothing);
         mb1220 = h.analogInput.get(name);
         this.v = v;
 
@@ -34,7 +35,9 @@ public class MaxbotixMB1220 implements Input {
 
         try {
 
-            distance = mb1220.getVoltage() / (v == VOLTAGE.THREE ? THREEV_POWER : FIVEV_POWER);
+            super.add(mb1220.getVoltage() / (v == VOLTAGE.THREE ? THREEV_POWER : FIVEV_POWER));
+            super.updateInput();
+            distance = super.getValue() * 2;
 
         }
         catch(Exception e) {
