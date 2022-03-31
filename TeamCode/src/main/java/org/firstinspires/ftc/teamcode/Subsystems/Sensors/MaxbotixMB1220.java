@@ -7,7 +7,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Utils.Input;
 
 public class MaxbotixMB1220 implements Input {
 
-    AnalogInput sensor;
+    AnalogInput mb1220;
     VOLTAGE v;
 
     private double distance;
@@ -24,7 +24,7 @@ public class MaxbotixMB1220 implements Input {
 
     public MaxbotixMB1220(HardwareMap h, String name, VOLTAGE v) {
 
-        sensor = h.analogInput.get(name);
+        mb1220 = h.analogInput.get(name);
         this.v = v;
 
     }
@@ -34,7 +34,7 @@ public class MaxbotixMB1220 implements Input {
 
         try {
 
-            distance = sensor.getVoltage() / (v == VOLTAGE.THREE ? THREEV_POWER : FIVEV_POWER);
+            distance = mb1220.getVoltage() / (v == VOLTAGE.THREE ? THREEV_POWER : FIVEV_POWER);
 
         }
         catch(Exception e) {
