@@ -10,6 +10,7 @@ public class Sensor implements Input {
 
     // generic type
     private ArrayList<Double> filterVals;
+    private ArrayList<Double> outliers;
     private int smoothingSize;
     private boolean enableQuartileSmoothing = false;
 
@@ -19,6 +20,7 @@ public class Sensor implements Input {
 
         this.smoothingSize = smoothingSize;
         filterVals = new ArrayList<>();
+        outliers = new ArrayList<>();
 
     }
 
@@ -31,38 +33,9 @@ public class Sensor implements Input {
         }
         else {
 
-            if(!enableQuartileSmoothing) {
-
-                double sum = 0;
-                for(Double t : filterVals) { sum += t; }
-                value = sum / smoothingSize;
-
-            }
-            else {
-                ArrayList<Double> dupli = filterVals;
-                Collections.sort(dupli);
-
-                double q1 = dupli.get((int) Math.ceil(dupli.size() / 4d));
-                double q3 = dupli.get((int) Math.floor(3 * dupli.size() / 4d));
-                double bound = 1.5d * (q3 - q1);
-
-                double sum = 0;
-                double iter = 0;
-
-                for (double i : dupli) {
-
-                    if (i >= q1 - bound && i <= q3 + bound) {
-
-                        sum += i;
-                        iter++;
-
-                    }
-
-                }
-
-                value = sum / iter;
-
-            }
+            double sum = 0;
+            for(Double t : filterVals) { sum += t; }
+            value = sum / smoothingSize;
 
         }
 
@@ -70,8 +43,54 @@ public class Sensor implements Input {
 
     public void add(double newVal) {
 
-        if(filterVals.size() + 1 > smoothingSize) filterVals.remove(0);
-        filterVals.add(newVal);
+        if(enableQuartileSmoothing) {
+
+            ArrayList<Double> dupli = (ArrayList<Double>) filterVals.clone();
+
+            double q1 = dupli.get((int) Math.ceil(dupli.size() / 4d));
+            double q3 = dupli.get((int) Math.floor(3 * dupli.size() / 4d));
+            double bound = 1.5d * (q3 - q1);
+
+            if(newVal > q3 + bound || newVal < q1 - bound) {
+
+                outliers.add(newVal);
+
+                if(outliers.size() + 1 > smoothingSize) {
+
+                    outliers.remove(0);
+
+                    dupli = (ArrayList<Double>) outliers.clone();
+                    q1 = dupli.get((int) Math.ceil(dupli.size() / 4d));
+                    q3 = dupli.get((int) Math.floor(3 * dupli.size() / 4d));
+                    bound = 1.5d * (q3 - q1);
+
+                    int fails = 0;
+
+                    for(double i : dupli) {
+
+                        if(i > q3 + bound || i < q1 - bound) fails++;
+
+                    }
+
+                    if(fails / (double) dupli.size() < .5) filterVals = (ArrayList<Double>) outliers.clone();
+
+                }
+
+            }
+            else {
+
+                if(filterVals.size() + 1 > smoothingSize) filterVals.remove(0);
+                filterVals.add(newVal);
+
+            }
+
+        }
+        else {
+
+            if(filterVals.size() + 1 > smoothingSize) filterVals.remove(0);
+            filterVals.add(newVal);
+
+        }
 
     }
 
