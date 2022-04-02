@@ -12,52 +12,60 @@ import org.firstinspires.ftc.teamcode.Subsystems.Utils.ValueTimer;
 
 public class DistanceCorrection implements Input {
 
-    public Rev2mDistanceSensor sensorL, sensorR, sensorF;
-    private ValueTimer<Double> lDist, rDist, fDist;
+    // public Rev2mDistanceSensor sensorL, sensorR, sensorF;
+    public MaxbotixMB1220 sensorL, sensorR, sensorF;
+    // private ValueTimer<Double> lDist, rDist, fDist;
+
     private static final double FIELD_X = 144, FIELD_Y = 144, F_OFFSET = 6.75 - 2.65 + 1, L_R_OFFSET = 7.5 - 0.3;
 
     private final Alliance alliance;
 
     private boolean running;
 
-    public DistanceCorrection(HardwareMap hardwareMap, String distLName, String distRName, String distFName,
+    public DistanceCorrection(HardwareMap hardwareMap, String distLName, String distRName, String distFName, BulkRead bRead,
                               Alliance alliance) {
 
         if (alliance == Alliance.BLUE) {
-            sensorL = hardwareMap.get(Rev2mDistanceSensor.class, distLName);
-            sensorL.resetDeviceConfigurationForOpMode();
-            lDist = new ValueTimer<Double>(350.0, 200) {
+            // sensorL = hardwareMap.get(Rev2mDistanceSensor.class, distLName);
+            sensorL = new MaxbotixMB1220(hardwareMap, distLName, bRead, MaxbotixMB1220.VOLTAGE.THREE, 9);
+            //sensorL.mb1220.resetDeviceConfigurationForOpMode();
+            /*lDist = new ValueTimer<Double>(350.0, 200) {
                 @Override
                 public Double readValue() {
-                    return sensorL.getDistance(DistanceUnit.INCH) + L_R_OFFSET;
+                    //return sensorL.getDistance(DistanceUnit.INCH) + L_R_OFFSET;
+                    return sensorL.getDistance() * 0.393701d *//*cvt to cm*//* + L_R_OFFSET;
                 }
-            };
+            };*/
         }
         else {
-            sensorR = hardwareMap.get(Rev2mDistanceSensor.class, distRName);
-            sensorR.resetDeviceConfigurationForOpMode();
-            rDist = new ValueTimer<Double>(350.0, 200) {
+            //sensorR = hardwareMap.get(Rev2mDistanceSensor.class, distRName);
+            sensorR = new MaxbotixMB1220(hardwareMap, distRName, bRead, MaxbotixMB1220.VOLTAGE.THREE, 9);
+            //sensorR.mb1220.resetDeviceConfigurationForOpMode();
+            /*rDist = new ValueTimer<Double>(350.0, 200) {
                 @Override
                 public Double readValue() {
-                    return sensorR.getDistance(DistanceUnit.INCH) + L_R_OFFSET;
+                    //return sensorR.getDistance(DistanceUnit.INCH) + L_R_OFFSET;
+                    return sensorR.getDistance() * 0.393701d *//*cvt to cm*//* + L_R_OFFSET;
                 }
-            };
+            };*/
         }
 
-        sensorF = hardwareMap.get(Rev2mDistanceSensor.class, distFName);
-        sensorF.resetDeviceConfigurationForOpMode();
-        fDist = new ValueTimer<Double>(350.0, 200) {
+        // sensorF = hardwareMap.get(Rev2mDistanceSensor.class, distFName);
+        sensorF = new MaxbotixMB1220(hardwareMap, distFName, bRead, MaxbotixMB1220.VOLTAGE.THREE, 9);
+        //sensorF.mb1220.resetDeviceConfigurationForOpMode();
+        /*fDist = new ValueTimer<Double>(350.0, 200) {
             @Override
             public Double readValue() {
-                return sensorF.getDistance(DistanceUnit.INCH) + F_OFFSET;
+                //return sensorF.getDistance(DistanceUnit.INCH) + F_OFFSET;
+                return sensorF.getDistance() * 0.393701d *//*cvt to cm*//* + F_OFFSET;
             }
-        };
+        };*/
 
         this.alliance = alliance;
 
-        I2cDeviceSynch.ReadWindow oldW = sensorL.getDeviceClient().getReadWindow();
+        /*I2cDeviceSynch.ReadWindow oldW = sensorL.getDeviceClient().getReadWindow();
         I2cDeviceSynch.ReadWindow w = new I2cDeviceSynch.ReadWindow(oldW.getRegisterFirst(), oldW.getRegisterCount(), I2cDeviceSynch.ReadMode.ONLY_ONCE);
-        sensorL.getDeviceClient().setReadWindow(w);
+        sensorL.getDeviceClient().setReadWindow(w);*/
 
         running = false;
     }
@@ -69,9 +77,13 @@ public class DistanceCorrection implements Input {
      * @return A new robot position
      */
     public Vector2d correctPoseWithDist(double angle) {
+
         if (alliance == Alliance.BLUE) {
-            double leftDist = lDist.getValue();
-            double frontDist = fDist.getValue();
+            /*double leftDist = lDist.getValue();
+            double frontDist = fDist.getValue();*/
+
+            double leftDist = sensorL.getDistance(DistanceUnit.INCH);
+            double frontDist = sensorF.getDistance(DistanceUnit.INCH);
 
             double robotX = leftDist * sensorMultiplier(angle);
             double robotY = 144 - frontDist * sensorMultiplier(angle);
@@ -79,8 +91,8 @@ public class DistanceCorrection implements Input {
             return new Vector2d(robotX, robotY);
         }
         else {
-            double rightDist = rDist.getValue();
-            double frontDist = fDist.getValue();
+            double rightDist = sensorR.getDistance(DistanceUnit.INCH);
+            double frontDist = sensorF.getDistance(DistanceUnit.INCH);
 
             double robotX = rightDist * sensorMultiplier(angle);
             double robotY = frontDist * sensorMultiplier(angle) - 144;
@@ -97,42 +109,44 @@ public class DistanceCorrection implements Input {
     }
 
     public double getSideWall() {
-        return alliance.equals(Alliance.BLUE) ? lDist.getValue() : rDist.getValue();
+        return alliance.equals(Alliance.BLUE) ? sensorL.getDistance(DistanceUnit.INCH) : sensorR.getDistance(DistanceUnit.INCH);
     }
 
     public double getFrontDistance() {
-        return fDist.getValue();
+        return sensorF.getDistance(DistanceUnit.INCH);
     }
 
     public void startRunning() {
-        if (alliance == Alliance.BLUE)
+        /*if (alliance == Alliance.BLUE)
             lDist.startInput();
         else
             rDist.startInput();
-        fDist.startInput();
+        fDist.startInput();*/
 
         running = true;
     }
 
     public void startSideSensor() {
-        if (alliance == Alliance.BLUE)
+        /*if (alliance == Alliance.BLUE)
             lDist.startInput();
         else
-            rDist.startInput();
+            rDist.startInput();*/
 
         running = true;
     }
 
     public void startFrontSensor() {
-        fDist.startInput();
+        /*fDist.startInput();*/
+
+        running = true;
     }
 
     public void stopRunning() {
-        if (alliance == Alliance.BLUE)
+        /*if (alliance == Alliance.BLUE)
             lDist.stopInput();
         else
             rDist.stopInput();
-        fDist.stopInput();
+        fDist.stopInput();*/
 
         running = false;
     }
@@ -141,10 +155,10 @@ public class DistanceCorrection implements Input {
     public void updateInput() {
         if (running) {
             if (alliance == Alliance.BLUE)
-                lDist.updateInput();
+                sensorL.updateInput();
             else
-                rDist.updateInput();
-            fDist.updateInput();
+                sensorR.updateInput();
+            sensorF.updateInput();
         }
     }
 
@@ -154,22 +168,22 @@ public class DistanceCorrection implements Input {
     }
 
     public void setSensorL(HardwareMap hardwareMap, String distLName) {
-        sensorL.resetDeviceConfigurationForOpMode();
+        sensorL.mb1220.resetDeviceConfigurationForOpMode();
         //sensorL.close();
         //sensorL = hardwareMap.get(Rev2mDistanceSensor.class, distLName);
     }
     public void setSensorR(HardwareMap hardwareMap, String distRName) {
-        sensorR.resetDeviceConfigurationForOpMode();
+        sensorR.mb1220.resetDeviceConfigurationForOpMode();
         //sensorR.close();
         //sensorR = hardwareMap.get(Rev2mDistanceSensor.class, distRName);
     }
     public void setSensorF(HardwareMap hardwareMap, String distFName) {
-        sensorF.resetDeviceConfigurationForOpMode();
+        sensorF.mb1220.resetDeviceConfigurationForOpMode();
         //sensorF.close();
         //sensorF = hardwareMap.get(Rev2mDistanceSensor.class, distFName);
     }
 
-    public Rev2mDistanceSensor getSensorL() {
+    /*public Rev2mDistanceSensor getSensorL() {
         return sensorL;
     }
 
@@ -179,5 +193,18 @@ public class DistanceCorrection implements Input {
 
     public Rev2mDistanceSensor getSensorF() {
         return sensorF;
+    }*/
+
+    public MaxbotixMB1220 getSensorL() {
+        return sensorL;
     }
+
+    public MaxbotixMB1220 getSensorR() {
+        return sensorR;
+    }
+
+    public MaxbotixMB1220 getSensorF() {
+        return sensorF;
+    }
+
 }

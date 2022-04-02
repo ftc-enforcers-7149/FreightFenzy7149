@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Subsystems.Sensors;
 
 import com.acmerobotics.roadrunner.util.NanoClock;
 import com.qualcomm.hardware.lynx.LynxModule;
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -245,6 +246,19 @@ public class BulkRead implements Input {
         {
             return 0;
         }
+
+    }
+
+    public synchronized double getAnalogValue(AnalogInput input) {
+
+        int portNum = Integer.parseInt(input.getConnectionInfo().split("; analog port ")[1]);
+        return getAnalogValue(portNum);
+
+    }
+
+    public synchronized double getAnalogValue(int portNum) {
+
+        return bData.getAnalogInputVoltage(portNum);
 
     }
 

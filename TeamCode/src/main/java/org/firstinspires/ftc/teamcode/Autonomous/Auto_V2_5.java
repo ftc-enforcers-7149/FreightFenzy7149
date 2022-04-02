@@ -43,7 +43,7 @@ public abstract class Auto_V2_5 extends Autonomous_Base {
         lift = new Lift(hardwareMap, "lift", bReadCH, !RAN_AUTO);
         fourBar = new FourBar(hardwareMap, "fourBarL", "fourBarR", "counterL", "counterR");
         spinner = new MotorCarouselSpinner(hardwareMap, "spinner", getAlliance());
-        distCorrect = new DistanceCorrection(hardwareMap, "distL", "distR", "distF", getAlliance());
+        distCorrect = new DistanceCorrection(hardwareMap, "distL", "distR","distF", bReadEH, getAlliance());
 
         //Add inputs & outputs
         addInput(intake);
