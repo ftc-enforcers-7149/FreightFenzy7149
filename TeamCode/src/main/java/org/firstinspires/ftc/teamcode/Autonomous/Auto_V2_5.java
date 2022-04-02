@@ -45,6 +45,8 @@ public abstract class Auto_V2_5 extends Autonomous_Base {
         spinner = new MotorCarouselSpinner(hardwareMap, "spinner", getAlliance());
         distCorrect = new DistanceCorrection(hardwareMap, "distL", "distR","distF", bReadEH, getAlliance());
 
+        distCorrect.setQuartileSmoothing(true);
+
         //Add inputs & outputs
         addInput(intake);
         addInput(lift);

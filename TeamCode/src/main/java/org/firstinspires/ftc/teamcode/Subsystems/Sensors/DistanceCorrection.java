@@ -183,6 +183,14 @@ public class DistanceCorrection implements Input {
         //sensorF = hardwareMap.get(Rev2mDistanceSensor.class, distFName);
     }
 
+    public void setQuartileSmoothing(boolean q) {
+
+        sensorF.setQuartileSmoothing(q);
+        sensorL.setQuartileSmoothing(q);
+        sensorR.setQuartileSmoothing(q);
+
+    }
+
     /*public Rev2mDistanceSensor getSensorL() {
         return sensorL;
     }
