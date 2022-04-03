@@ -12,7 +12,8 @@ public class Sensor implements Input {
     private ArrayList<Double> filterVals;
     private ArrayList<Double> outliers;
     private int smoothingSize;
-    private boolean enableQuartileSmoothing = false;
+    private boolean enableQuartileSmoothing = false, enableHighPass = false, enableLowPass = false;
+    private double highPassMax = 0, lowPassMax = 0;
 
     private double value;
 
@@ -103,6 +104,36 @@ public class Sensor implements Input {
 
     public void setSmoothingSize(int smoothingSize) {
         this.smoothingSize = smoothingSize;
+        filterVals.clear();
+        outliers.clear();
+    }
+
+    public void setHighPass(boolean enableHighPass) {
+
+        this.enableHighPass = enableHighPass;
+        this.highPassMax = 420d;
+
+    }
+
+    public void setLowPass(boolean enableLowPass) {
+
+        this.enableLowPass = enableLowPass;
+        this.lowPassMax = 69d;
+
+    }
+
+    public void setHighPass(boolean enableHighPass, double highPassMax) {
+
+        this.enableHighPass = enableHighPass;
+        this.highPassMax = highPassMax;
+
+    }
+
+    public void setLowPass(boolean enableLowPass, double lowPassMax) {
+
+        this.enableLowPass = enableLowPass;
+        this.lowPassMax = lowPassMax;
+
     }
 
     public double getValue() { return value; }

@@ -17,9 +17,9 @@ public class MaxBotixDistance extends OpMode {
         maxbotixL = new MaxbotixMB1220(hardwareMap, "distL", MaxbotixMB1220.VOLTAGE.THREE, INITIAL_SMOOTHING);
         maxbotixR = new MaxbotixMB1220(hardwareMap, "distR", MaxbotixMB1220.VOLTAGE.THREE, INITIAL_SMOOTHING);
 
-        maxbotixF.setQuartileSmoothing(false);
-        maxbotixL.setQuartileSmoothing(false);
-        maxbotixR.setQuartileSmoothing(false);
+        maxbotixF.setQuartileSmoothing(true);
+        maxbotixL.setQuartileSmoothing(true);
+        maxbotixR.setQuartileSmoothing(true);
 
     }
 

@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Autonomous;
 
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
+
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.ArmController;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.FourBar;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
@@ -7,6 +9,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorCarouselSpinn
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorIntake;
 import org.firstinspires.ftc.teamcode.Subsystems.Sensors.DistanceCorrection;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Input;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.LED.LED;
 import org.firstinspires.ftc.teamcode.Subsystems.Webcam.OpenCV;
 import org.firstinspires.ftc.teamcode.Subsystems.Webcam.TSEPipeline;
 
@@ -22,6 +25,8 @@ public abstract class Auto_V2_5 extends Autonomous_Base {
     protected ArmController armController;
     protected MotorCarouselSpinner spinner;
     protected DistanceCorrection distCorrect;
+
+    protected LED led;
 
     protected OpenCV tseDetector;
 
@@ -49,6 +54,15 @@ public abstract class Auto_V2_5 extends Autonomous_Base {
 
         armController = new ArmController(lift, fourBar);
 
+        led = new LED(hardwareMap, "blinkin", Alliance.BLUE);
+
+        if (getAlliance() == Alliance.BLUE)
+            led.setPattern(RevBlinkinLedDriver.BlinkinPattern.BREATH_BLUE);
+        else
+            led.setPattern(RevBlinkinLedDriver.BlinkinPattern.BREATH_RED);
+
+        led.updateOutput();
+
         //Add inputs & outputs
         addInput(intake);
         addInput(lift);
@@ -58,6 +72,7 @@ public abstract class Auto_V2_5 extends Autonomous_Base {
         addOutput(lift);
         addOutput(spinner);
         addOutput(fourBar);
+        addOutput(led);
 
         //Update global headless data as an input
         addInput(new Input() {

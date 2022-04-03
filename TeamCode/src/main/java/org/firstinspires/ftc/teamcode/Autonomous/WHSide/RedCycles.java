@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Autonomous(name = "Red WH Cycles")
-//@Disabled
+@Disabled
 public class RedCycles extends Auto_V2_5 {
 
     @Override
