@@ -1,10 +1,15 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Sensors;
 
+import android.util.Log;
+
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Input;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 public class MaxbotixMB1220 extends Sensor {
 
@@ -57,6 +62,9 @@ public class MaxbotixMB1220 extends Sensor {
         }
         catch(Exception e) {
 
+            StringWriter sw = new StringWriter();
+            e.printStackTrace(new PrintWriter(sw));
+            Log.e("Error: ", sw.toString());
             distance = ERROR_VALUE;
 
         }

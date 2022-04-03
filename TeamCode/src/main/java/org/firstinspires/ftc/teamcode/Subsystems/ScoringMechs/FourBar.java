@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.Subsystems.Utils.BettaServo;
+import org.firstinspires.ftc.teamcode.Subsystems.Hardware.BettaServo;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Output;
 
 import static org.firstinspires.ftc.teamcode.GlobalData.SLIDE_ANGLE;
@@ -42,10 +42,10 @@ public class FourBar implements Output {
 
     public FourBar(HardwareMap hardwareMap, String leftName, String rightName,
                    String counterLName, String counterRName) {
-        left = hardwareMap.get(BettaServo.class, leftName);
-        left.setDirection(Servo.Direction.FORWARD);
-        right = hardwareMap.get(BettaServo.class, rightName);
-        right.setDirection(Servo.Direction.REVERSE);
+        left = new BettaServo(hardwareMap, leftName);
+        left.servo.setDirection(Servo.Direction.FORWARD);
+        right = new BettaServo(hardwareMap, rightName);
+        right.servo.setDirection(Servo.Direction.REVERSE);
 
         left.setFullRangeTime(1000);
         right.setFullRangeTime(1000);

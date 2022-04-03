@@ -43,6 +43,13 @@ public class Sensor implements Input {
 
     public void add(double newVal) {
 
+        if(filterVals.size() < smoothingSize) {
+
+            filterVals.add(newVal);
+            return;
+
+        }
+
         if(enableQuartileSmoothing) {
 
             ArrayList<Double> dupli = (ArrayList<Double>) filterVals.clone();
@@ -55,7 +62,7 @@ public class Sensor implements Input {
 
                 outliers.add(newVal);
 
-                if(outliers.size() + 1 > smoothingSize) {
+                if(outliers.size() > smoothingSize) {
 
                     outliers.remove(0);
 
