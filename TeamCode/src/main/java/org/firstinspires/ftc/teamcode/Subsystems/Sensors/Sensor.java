@@ -9,13 +9,13 @@ import java.util.Collections;
 public class Sensor implements Input {
 
     // generic type
-    private ArrayList<Double> filterVals;
-    private ArrayList<Double> outliers;
-    private int smoothingSize;
-    private boolean enableQuartileSmoothing = false, enableHighPass = false, enableLowPass = false;
-    private double highPassMax = 0, lowPassMax = 0;
+    protected ArrayList<Double> filterVals;
+    protected ArrayList<Double> outliers;
+    protected int smoothingSize;
+    protected boolean enableQuartileSmoothing = false, enableHighPass = false, enableLowPass = false;
+    protected double highPassMax = 0, lowPassMax = 0;
 
-    private double value;
+    protected double value;
 
     public Sensor(int smoothingSize) {
 
@@ -43,6 +43,8 @@ public class Sensor implements Input {
     }
 
     public void add(double newVal) {
+
+        if(enableHighPass && newVal > highPassMax || enableLowPass && newVal < lowPassMax) return;
 
         if(filterVals.size() < smoothingSize) {
 

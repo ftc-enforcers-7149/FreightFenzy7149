@@ -2,16 +2,16 @@ package org.firstinspires.ftc.teamcode.Subsystems.Sensors;
 
 import android.util.Log;
 
+import com.acmerobotics.roadrunner.localization.Localizer;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.Subsystems.Utils.Input;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-public class MaxbotixMB1220 extends Sensor {
+public class CorrectedMB1220 extends MovingUltrasonicSensor {
 
     public AnalogInput mb1220;
     private VOLTAGE v;
@@ -30,27 +30,27 @@ public class MaxbotixMB1220 extends Sensor {
 
     }
 
-    public MaxbotixMB1220(HardwareMap h, String name, int smoothing) {
+    public CorrectedMB1220(HardwareMap h, String name, int smoothing, Facing f, Localizer l) {
 
-        super(smoothing);
+        super(smoothing, f, l);
         mb1220 = h.analogInput.get(name);
         portNum = Integer.parseInt(mb1220.getConnectionInfo().split("; analog port ")[1]);
         this.v = VOLTAGE.THREE;
 
     }
 
-    public MaxbotixMB1220(HardwareMap h, String name, VOLTAGE v, int smoothing) {
+    public CorrectedMB1220(HardwareMap h, String name, VOLTAGE v, int smoothing, Facing f, Localizer l) {
 
-        super(smoothing);
+        super(smoothing, f, l);
         mb1220 = h.analogInput.get(name);
         portNum = Integer.parseInt(mb1220.getConnectionInfo().split("; analog port ")[1]);
         this.v = v;
 
     }
 
-    public MaxbotixMB1220(HardwareMap h, String name, BulkRead bRead, VOLTAGE v, int smoothing) {
+    public CorrectedMB1220(HardwareMap h, String name, BulkRead bRead, VOLTAGE v, int smoothing, Facing f, Localizer l) {
 
-        super(smoothing);
+        super(smoothing, f, l);
         mb1220 = h.analogInput.get(name);
         this.bRead = bRead;
         portNum = Integer.parseInt(mb1220.getConnectionInfo().split("; analog port ")[1]);
@@ -96,4 +96,5 @@ public class MaxbotixMB1220 extends Sensor {
         }
 
     }
+
 }
