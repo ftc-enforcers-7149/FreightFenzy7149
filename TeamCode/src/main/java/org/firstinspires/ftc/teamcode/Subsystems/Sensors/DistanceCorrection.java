@@ -16,7 +16,7 @@ public class DistanceCorrection implements Input {
     public MaxbotixMB1220 sensorL, sensorR, sensorF;
     // private ValueTimer<Double> lDist, rDist, fDist;
 
-    private static final double FIELD_X = 144, FIELD_Y = 144, F_OFFSET = 6.75 - 2.65 + 1, L_R_OFFSET = 7.5 - 0.3;
+    private static final double FIELD_X = 144, FIELD_Y = 144, F_OFFSET = 6, L_R_OFFSET = 0;
 
     private final Alliance alliance;
 
@@ -184,11 +184,12 @@ public class DistanceCorrection implements Input {
     }
 
     public void setQuartileSmoothing(boolean q) {
-
         sensorF.setQuartileSmoothing(q);
-        sensorL.setQuartileSmoothing(q);
-        sensorR.setQuartileSmoothing(q);
 
+        if (alliance == Alliance.BLUE)
+            sensorL.setQuartileSmoothing(q);
+        else
+            sensorR.setQuartileSmoothing(q);
     }
 
     /*public Rev2mDistanceSensor getSensorL() {

@@ -54,6 +54,27 @@ public class Tele_V2_BLUE_4Bar_NEW extends TeleOp_Base {
 
     private double curr4BPos, last4BPos;
 
+    private enum ScoringPosition {
+        IN(0, 0, 1),
+        UP(7, 0, 1),
+        LOW(0, 0.5, 0.6),
+        MIDDLE(0, 0.75, 0.6),
+        HIGH(4.8, 0.815, 0.6),
+        CLOSE(5, 0, 0.6),
+        CENTER(4.5, 0.2, 0.6),
+        FAR(3.5, 0.35, 0.6),
+        REACH(0, 0.6, 0.45);
+
+        double liftPos, barPos, maxSpeed;
+
+        ScoringPosition(double liftPos, double barPos, double maxSpeed) {
+            this.liftPos = liftPos;
+            this.barPos = barPos;
+            this.maxSpeed = maxSpeed;
+        }
+    }
+    private ScoringPosition scorePos = ScoringPosition.IN, lastScorePos = ScoringPosition.IN;
+
     @Override
     public void init() {
         try {
@@ -235,7 +256,7 @@ public class Tele_V2_BLUE_4Bar_NEW extends TeleOp_Base {
         if (overrideIntakeSharedBarrier) intake.setIntakePower(0.2);
 
         // Carousel
-        if (gamepad1.x) spinner.reset();
+        if (spin) spinner.reset();
 
         //4Bar
         if (fbIn) curr4BPos = 0;
@@ -243,7 +264,11 @@ public class Tele_V2_BLUE_4Bar_NEW extends TeleOp_Base {
         else if (fbOut) curr4BPos = 0.75;
         else if (lastFBOut) curr4BPos = 0;
 
-        //adam was here :D
+        if (scorePos != lastScorePos) {
+            lift.setTargetHeight(scorePos.liftPos, scorePos.maxSpeed);
+
+            curr4BPos = scorePos.barPos;
+        }
         
         if (curr4BPos != last4BPos) {
             fourBarR.setPosition(scalePos(curr4BPos));
@@ -286,45 +311,49 @@ public class Tele_V2_BLUE_4Bar_NEW extends TeleOp_Base {
         sharedBarrier = gamepad1.a && !gamepad1.start;
 
         //Lift
-        high = gamepad2.dpad_up || gamepad1.dpad_up;
-        //mid = gamepad2.dpad_left;
-        //low = gamepad2.dpad_down;
-        ground = gamepad2.dpad_down || gamepad1.dpad_down;
-        //cap = gamepad2.y;
-        //shared = gamepad2.dpad_right;
 
-        //liftPower = 0.67 * (gamepad2.right_trigger - gamepad2.left_trigger);
-        liftPower = (gamepad2.left_trigger - (gamepad2.left_bumper ? 0.7 : 0));
+        if (gamepad2.dpad_up || gamepad1.dpad_up)
+            scorePos = ScoringPosition.UP;
+        else if (gamepad2.dpad_down || gamepad1.dpad_down)
+            scorePos = ScoringPosition.IN;
+        else if (gamepad2.dpad_right)
+            scorePos = ScoringPosition.HIGH;
+        else if (gamepad2.dpad_left)
+            scorePos = ScoringPosition.MIDDLE;
+        else if (gamepad2.y)
+            scorePos = ScoringPosition.FAR;
+        else if (gamepad2.b && !gamepad2.start)
+            scorePos = ScoringPosition.CENTER;
+        else if (gamepad2.a)
+            scorePos = ScoringPosition.CLOSE;
+        else if (gamepad2.x)
+            scorePos = ScoringPosition.REACH;
+        else if (scorePos != ScoringPosition.IN)
+            scorePos = ScoringPosition.UP;
+
+        liftPower = 0.8 * (gamepad2.right_trigger - gamepad2.left_trigger);
 
         resetLift = gamepad2.back;
 
         //Intake
         freightInIntake = intake.getFreightInIntake();
 
-        /*in = gamepad1.right_trigger > 0.2;
+        in = gamepad1.right_trigger > 0.2;
         outtake = gamepad1.right_bumper;
         outDuck = gamepad1.left_bumper;
-        score = gamepad1.left_trigger > 0.2;*/
-
-        in = gamepad1.right_trigger > 0.2;
-        score = gamepad1.right_bumper;
+        score = gamepad1.left_trigger > 0.2;
 
         //Spinner
-        /*spin = gamepad1.x;
+        spin = gamepad1.x;
 
         curr4BPos -= gamepad2.right_stick_y / 20; //Fine tune or adjust for actual time changes
         if (curr4BPos < 0) curr4BPos = 0;
         else if (curr4BPos > 1) curr4BPos = 1;
 
         //4Bar
-        fbIn = gamepad2.right_stick_button;
-        fbHalf = gamepad2.x; //TODO: Figure out controls
-        fbOut = gamepad2.b && !gamepad2.start;*/
-
-        curr4BPos += (gamepad2.right_trigger - (gamepad2.right_bumper ? 0.5 : 0)) / 20;
-
-        fbOut = gamepad1.left_trigger > 0.2;
-        fbIn = gamepad1.left_bumper;
+        //fbIn = gamepad2.right_stick_button;
+        //fbHalf = gamepad2.x; //TODO: Figure out controls
+        //fbOut = gamepad2.b && !gamepad2.start;
 
 
     }
@@ -356,6 +385,8 @@ public class Tele_V2_BLUE_4Bar_NEW extends TeleOp_Base {
         lastFBIn = fbIn;
         lastFBHalf = fbHalf;
         lastFBOut = fbOut;
+
+        lastScorePos = scorePos;
     }
 
     private double scalePos(double pos) {

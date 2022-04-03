@@ -21,7 +21,7 @@ public class MotorIntake implements Input, Output {
     //Sensors
     public RevColorSensorV3 intakeColorSensor;
 
-    private static final double minDistance = 2.5;
+    private static final double minDistance = 2;
     private ValueTimer<Double> distance;
     private final boolean useSensor;
 
