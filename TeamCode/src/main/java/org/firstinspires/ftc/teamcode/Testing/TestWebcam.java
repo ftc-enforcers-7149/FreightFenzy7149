@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Webcam.OpenCV;
 import org.firstinspires.ftc.teamcode.Subsystems.Webcam.TSEPipeline;
 
 @Autonomous(name = "Test Webcam")
-@Disabled
+//@Disabled
 public class TestWebcam extends OpMode {
 
     private OpenCV tseDetector;
@@ -23,7 +23,7 @@ public class TestWebcam extends OpMode {
     public void init() {
         tseDetector = new OpenCV(hardwareMap, FtcDashboard.getInstance());
 
-        pipeline = new TSEPipeline(0, 320, 360, 320);
+        pipeline = new TSEPipeline(0, 0, 640, 360);
 
         tseDetector.start(pipeline);
     }

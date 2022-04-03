@@ -57,19 +57,19 @@ public class AutoCommands {
     }
 
     public void outtake(MotorIntake intake, Lift lift) {
-        if (lift.getHeight() <= (Levels.LOW.height + Levels.MIDDLE.height) / 2)
-            intake.setIntakePower(0.6);
+        //if (lift.getHeight() <= (Levels.LOW.height + Levels.MIDDLE.height) / 2)
+        //    intake.setIntakePower(0.6);
         intake.setLatch(MotorIntake.LatchPosition.OPEN);
 
         op.waitForTime(150);
 
-        if (lift.getHeight() <= (Levels.MIDDLE.height + Levels.HIGH.height) / 2)
+        //if (lift.getHeight() <= (Levels.MIDDLE.height + Levels.HIGH.height) / 2)
             intake.setPaddle(MotorIntake.PaddlePosition.OUT_FAR);
-        else
-            intake.setPaddle(MotorIntake.PaddlePosition.OUT_CLOSE);
+        //else
+        //    intake.setPaddle(MotorIntake.PaddlePosition.OUT_CLOSE);
 
-        if (lift.getHeight() <= Levels.MIDDLE.height)
-            op.waitForTime(150);
+        //if (lift.getHeight() <= Levels.MIDDLE.height)
+        //    op.waitForTime(150);
         op.waitForTime(150);
 
         intake.setIntakePower(0);

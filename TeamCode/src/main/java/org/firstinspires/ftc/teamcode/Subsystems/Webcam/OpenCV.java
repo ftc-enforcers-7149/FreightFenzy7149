@@ -41,7 +41,7 @@ public class OpenCV {
             @Override
             public void onOpened() {
                 //Starts streaming with width, height, and rotation
-                webcam.startStreaming(640, 360, OpenCvCameraRotation.SIDEWAYS_LEFT);
+                webcam.startStreaming(640, 360, OpenCvCameraRotation.UPSIDE_DOWN);
             }
 
             @Override

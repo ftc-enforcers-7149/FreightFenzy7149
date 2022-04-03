@@ -3,22 +3,20 @@ package org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.Subsystems.Hardware.BettaServo;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Output;
-
-import static org.firstinspires.ftc.teamcode.GlobalData.SLIDE_ANGLE;
 
 public class FourBar implements Output {
 
-    public BettaServo left, right;
+    public Servo left, right;
     public Servo counterL, counterR;
-    private double currAngle, desiredAngle, lastDesiredAngle;
+    //private double currAngle, desiredAngle, lastDesiredAngle;
+    private double currPos, desiredPos, lastDesiredPos;
     public boolean manualCounter;
-    public double manualCounterPos;
+    public double manualCounterPos, lastManualCounterPos;
 
-    public static final double TRAVEL_DIST = Math.toRadians(151); /*degrees*/
+    //public static final double TRAVEL_DIST = Math.toRadians(151); /*degrees*/
 
-    public enum Position {
+    /*public enum Position {
         IN(Math.toRadians(-107)),
         HALF(Math.toRadians(-60)),
         OUT(Math.toRadians(0)),
@@ -38,71 +36,77 @@ public class FourBar implements Output {
             return values()[this.ordinal() - 1];
         }
 
-    }
+    }*/
 
     public FourBar(HardwareMap hardwareMap, String leftName, String rightName,
                    String counterLName, String counterRName) {
-        left = new BettaServo(hardwareMap, leftName);
-        left.servo.setDirection(Servo.Direction.FORWARD);
-        right = new BettaServo(hardwareMap, rightName);
-        right.servo.setDirection(Servo.Direction.REVERSE);
+        left = hardwareMap.servo.get(leftName);
+        left.setDirection(Servo.Direction.FORWARD);
+        left.setPosition(0);
+        right = hardwareMap.servo.get(rightName);
+        right.setDirection(Servo.Direction.REVERSE);
+        right.setPosition(0);
 
-        left.setFullRangeTime(1000);
-        right.setFullRangeTime(1000);
+        //left.setFullRangeTime(1000);
+        //right.setFullRangeTime(1000);
 
         counterL = hardwareMap.servo.get(counterLName);
         counterL.setDirection(Servo.Direction.REVERSE);
         counterR = hardwareMap.servo.get(counterRName);
         counterR.setDirection(Servo.Direction.FORWARD);
 
-        goToAngle(Position.IN);
+        //goToAngle(Position.IN);
+        setPosition(0);
         updateOutput();
     }
 
     @Override
     public void updateOutput() {
         //Calculate angle from servo position, and servo positions from desired angle
-        currAngle = left.getPosition() * TRAVEL_DIST - Math.PI / 2 - SLIDE_ANGLE;
-        double desiredPos = scalePos((desiredAngle + Math.PI / 2 + SLIDE_ANGLE) / TRAVEL_DIST);
-        double desiredCounterPos = Math.cos(desiredAngle * (Math.PI / (Math.PI + SLIDE_ANGLE / 2)));
+        //currAngle = left.getPosition() * TRAVEL_DIST - Math.PI / 2 - SLIDE_ANGLE;
+        //double desiredPos = scalePos((desiredAngle + Math.PI / 2 + SLIDE_ANGLE) / TRAVEL_DIST);
+        //double desiredCounterPos = Math.cos(desiredAngle * (Math.PI / (Math.PI + SLIDE_ANGLE / 2)));
 
         if (!manualCounter) {
-            if (desiredAngle != lastDesiredAngle) {
-                left.setPosition(desiredPos);
-                right.setPosition(desiredPos);
+            //if (desiredPos != lastDesiredPos) {
+                left.setPosition(scalePos(desiredPos));
+                right.setPosition(scalePos(desiredPos));
 
-                counterL.setPosition(desiredCounterPos);
-                counterR.setPosition(desiredCounterPos);
+                counterL.setPosition(desiredPos);
+                counterR.setPosition(desiredPos);
+            //}
+        }
+        else {
+            if (desiredPos != lastDesiredPos) {
+                left.setPosition(scalePos(desiredPos));
+                right.setPosition(scalePos(desiredPos));
             }
-
-            lastDesiredAngle = desiredAngle;
-        } else {
-            if (desiredAngle != lastDesiredAngle) {
-                left.setPosition(desiredPos);
-                right.setPosition(desiredPos);
-
+            if (manualCounterPos != lastManualCounterPos) {
                 counterL.setPosition(manualCounterPos);
                 counterR.setPosition(manualCounterPos);
-            }
 
-            lastDesiredAngle = desiredAngle;
+                lastManualCounterPos = manualCounterPos;
+            }
         }
+
+        lastDesiredPos = desiredPos;
     }
 
-    public void goToAngle(double angle) {
+    /*public void goToAngle(double angle) {
         desiredAngle = Math.min(Math.max(-Math.PI/2-SLIDE_ANGLE, angle), -Math.PI/2-SLIDE_ANGLE + TRAVEL_DIST);
     }
 
     public void goToAngle(Position p) {
         goToAngle(p.angle);
-    }
+    }*/
 
-    public void goToServoPos(double pos) {
-        goToAngle(pos * TRAVEL_DIST);
+    public void setPosition(double pos) {
+        //goToAngle(pos * TRAVEL_DIST);
+        desiredPos = pos;
     }
 
     public double getCurrAngle() {
-        return currAngle;
+        return desiredPos;
     }
 
     private double scalePos(double pos) {

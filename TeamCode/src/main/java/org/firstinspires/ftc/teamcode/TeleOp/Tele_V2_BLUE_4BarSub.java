@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.TeleOp;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.FourBar;
@@ -245,7 +244,7 @@ public class Tele_V2_BLUE_4BarSub extends TeleOp_Base {
         //adam was here :D
 
         if (curr4BPos != last4BPos) {
-            bar.goToServoPos(curr4BPos);
+            bar.setPosition(curr4BPos);
         }
 
         // Telemetry

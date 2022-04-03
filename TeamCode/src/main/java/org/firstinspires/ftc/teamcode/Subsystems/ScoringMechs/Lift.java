@@ -55,6 +55,8 @@ public class Lift implements Output, Input {
     //If using manual override
     private boolean manualOverride;
 
+    private double maxSpeed;
+
     public Lift(HardwareMap hardwareMap, String liftName) {
         lift = hardwareMap.get(DcMotorEx.class, liftName);
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -121,6 +123,8 @@ public class Lift implements Output, Input {
         if (usePID && !manualOverride) {
             output = controller.update(currPosition); //Update PID
 
+            output = Math.min(Math.max(-maxSpeed, output), maxSpeed);
+
             //Stop the motor when at rest on the floor
             if (setPosition == 0 && output < 0 && currPosition < GROUND.height) {
                 output = 0;
@@ -158,6 +162,8 @@ public class Lift implements Output, Input {
         else if (!manualOverride) { //Hold position
             setTargetHeight(getHeight());
         }
+
+        this.maxSpeed = 1;
     }
 
     /**
@@ -169,6 +175,15 @@ public class Lift implements Output, Input {
         setPosition = inchesToTicks(Math.min(Math.max(inches, GROUND.height), MAX.height));
         controller.setTargetPosition(setPosition);
         usePID = true;
+        this.maxSpeed = 1;
+    }
+
+    public void setTargetHeight(double inches, double maxSpeed) {
+        //Keep bounds between 0 and MAX_HEIGHT
+        setPosition = inchesToTicks(Math.min(Math.max(inches, GROUND.height), MAX.height));
+        controller.setTargetPosition(setPosition);
+        usePID = true;
+        this.maxSpeed = maxSpeed;
     }
 
     /**
@@ -215,6 +230,7 @@ public class Lift implements Output, Input {
         usePID = true;
         setCurrPosition(-50);
         setTargetHeight(GROUND);
+        maxSpeed = 0.6;
     }
 
     @Override

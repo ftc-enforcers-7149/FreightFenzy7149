@@ -7,7 +7,7 @@ import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
 import org.firstinspires.ftc.teamcode.Autonomous.Auto_V2_5;
 
 @Autonomous(name = "Distance Correction Test")
-@Disabled
+//@Disabled
 public class DistanceCorrectionTest extends Auto_V2_5 {
 
     @Override
@@ -28,6 +28,6 @@ public class DistanceCorrectionTest extends Auto_V2_5 {
 
     @Override
     protected Alliance getAlliance() {
-        return Alliance.BLUE;
+        return Alliance.RED;
     }
 }

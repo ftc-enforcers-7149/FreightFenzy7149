@@ -1,8 +1,7 @@
 package org.firstinspires.ftc.teamcode.Autonomous;
 
-import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.CarouselSpinner;
+import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.ArmController;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.FourBar;
-import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Intake;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorCarouselSpinner;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorIntake;
@@ -20,6 +19,7 @@ public abstract class Auto_V2_5 extends Autonomous_Base {
     protected MotorIntake intake;
     protected Lift lift;
     protected FourBar fourBar;
+    protected ArmController armController;
     protected MotorCarouselSpinner spinner;
     protected DistanceCorrection distCorrect;
 
@@ -45,7 +45,9 @@ public abstract class Auto_V2_5 extends Autonomous_Base {
         spinner = new MotorCarouselSpinner(hardwareMap, "spinner", getAlliance());
         distCorrect = new DistanceCorrection(hardwareMap, "distL", "distR","distF", bReadEH, getAlliance());
 
-        distCorrect.setQuartileSmoothing(true);
+        distCorrect.setQuartileSmoothing(false);
+
+        armController = new ArmController(lift, fourBar);
 
         //Add inputs & outputs
         addInput(intake);
@@ -70,19 +72,17 @@ public abstract class Auto_V2_5 extends Autonomous_Base {
         intake.setPaddle(MotorIntake.PaddlePosition.BACK);
         intake.startOutput();
         intake.updateOutput();
-        fourBar.startOutput();
-        fourBar.updateOutput();
 
         //Initialize vision for either alliance
         tseDetector = new OpenCV(hardwareMap);
-        tseDetector.start(new TSEPipeline(0, 350, 360, 100));
+        //tseDetector.start(new TSEPipeline(0, 350, 360, 100));
 
         /// Init Loop ///
 
         //Check vision
         while (!isStarted() && !isStopRequested()) {
-            tseDetector.update();
-            telemetry.addData("Hub Level: ", commands.detectBarcode(tseDetector));
+            //tseDetector.update();
+            //telemetry.addData("Hub Level: ", commands.detectBarcode(tseDetector));
             telemetry.update();
         }
         if (isStopRequested()) return;
@@ -107,7 +107,7 @@ public abstract class Auto_V2_5 extends Autonomous_Base {
 
         setMotorPowers(0, 0, 0, 0);
         lift.setPower(0.05);
-        fourBar.goToAngle(0);
+        fourBar.setPosition(0);
         intake.setIntakePower(0);
         intake.setPaddle(MotorIntake.PaddlePosition.BACK);
         intake.setLatch(MotorIntake.LatchPosition.OPEN);
