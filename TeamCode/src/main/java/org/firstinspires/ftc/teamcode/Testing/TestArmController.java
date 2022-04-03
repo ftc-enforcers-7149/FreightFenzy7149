@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode.TeleOp.TeleOp_Base;
 import static org.firstinspires.ftc.teamcode.GlobalData.RAN_AUTO;
 
 @TeleOp(name = "Test Arm Controller")
-//@Disabled
+@Disabled
 public class TestArmController extends TeleOp_Base {
 
     Lift lift;

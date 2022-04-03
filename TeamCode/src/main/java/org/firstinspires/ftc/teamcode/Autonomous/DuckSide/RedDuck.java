@@ -4,6 +4,7 @@ import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
 import org.firstinspires.ftc.teamcode.Autonomous.Auto_V2_5;
@@ -14,7 +15,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Utils.Levels;
 import static org.firstinspires.ftc.teamcode.GlobalData.*;
 
 @Autonomous(name = "Red Duck")
-//@Disabled
+@Disabled
 public class RedDuck extends Auto_V2_5 {
 
     @Override

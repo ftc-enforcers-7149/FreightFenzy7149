@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Autonomous;
 
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 
+import org.firstinspires.ftc.teamcode.GlobalData;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.ArmController;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.FourBar;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
@@ -10,12 +11,13 @@ import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorIntake;
 import org.firstinspires.ftc.teamcode.Subsystems.Sensors.DistanceCorrection;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Input;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.LED.LED;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.Output;
 import org.firstinspires.ftc.teamcode.Subsystems.Webcam.OpenCV;
-import org.firstinspires.ftc.teamcode.Subsystems.Webcam.TSEPipeline;
 
 import static org.firstinspires.ftc.teamcode.GlobalData.ALLIANCE;
 import static org.firstinspires.ftc.teamcode.GlobalData.HEADING;
 import static org.firstinspires.ftc.teamcode.GlobalData.RAN_AUTO;
+import static org.firstinspires.ftc.teamcode.GlobalData.openSignal;
 
 public abstract class Auto_V2_5 extends Autonomous_Base {
 
@@ -79,6 +81,126 @@ public abstract class Auto_V2_5 extends Autonomous_Base {
             @Override
             public void updateInput() {
                 HEADING = drive.getPoseEstimate().getHeading();
+            }
+        });
+
+        //Handle open signalling
+        addOutput(new Output() {
+            long startTime = 0;
+            boolean running = false;
+
+            @Override
+            public void updateOutput() {
+                if (GlobalData.openSignal) {
+                    startTime = System.currentTimeMillis();
+                    running = true;
+                    GlobalData.openSignal = false;
+                }
+
+                if (running) {
+                    if (System.currentTimeMillis() < startTime + 150)
+                        intake.setLatch(MotorIntake.LatchPosition.OPEN);
+                    else
+                        running = false;
+                }
+            }
+
+            @Override
+            public void stopOutput() {
+                GlobalData.openSignal = false;
+            }
+        });
+
+        //Handle outtake signalling
+        addOutput(new Output() {
+            long startTime = 0;
+            boolean running = false;
+
+            @Override
+            public void updateOutput() {
+                if (GlobalData.outtakeSignal) {
+                    startTime = System.currentTimeMillis();
+                    running = true;
+                    GlobalData.outtakeSignal = false;
+                }
+
+                if (running) {
+                    if (System.currentTimeMillis() < startTime + 150)
+                        intake.setPaddle(MotorIntake.PaddlePosition.OUT_FAR);
+                    else {
+                        intake.setPaddle(MotorIntake.PaddlePosition.BACK);
+                        running = false;
+                    }
+                }
+            }
+
+            @Override
+            public void stopOutput() {
+                GlobalData.outtakeSignal = false;
+            }
+        });
+
+        //Handle intake signalling
+        addOutput(new Output() {
+            @Override
+            public void updateOutput() {
+                if (GlobalData.intakeSignal)
+                    intake.setIntakePower(1);
+            }
+
+            @Override
+            public void stopOutput() {
+                GlobalData.intakeSignal = false;
+            }
+        });
+
+        //Handle arm up signalling
+        addOutput(new Output() {
+            @Override
+            public void updateOutput() {
+                if (GlobalData.armUpSignal) {
+                    armController.setScorePos(ArmController.ScoringPosition.UP);
+                    GlobalData.armUpSignal = false;
+                }
+            }
+        });
+
+        //Handle arm out signalling
+        addOutput(new Output() {
+            @Override
+            public void updateOutput() {
+                if (GlobalData.armOutSignal) {
+                    armController.setScorePos(ArmController.ScoringPosition.HIGH);
+                    GlobalData.armOutSignal = false;
+                }
+            }
+        });
+
+        //Handle arm in signalling
+        addOutput(new Output() {
+            long startTime = 0;
+            boolean running = false;
+
+            @Override
+            public void updateOutput() {
+                if (GlobalData.armInSignal) {
+                    startTime = System.currentTimeMillis();
+                    running = true;
+                    GlobalData.armInSignal = false;
+                }
+
+                if (running) {
+                    if (System.currentTimeMillis() < startTime + 150) {
+                        armController.setScorePos(ArmController.ScoringPosition.IN);
+                        if (intake.getIntakePower() == 0)
+                            intake.setIntakePower(-1);
+                    }
+                    else {
+                        if (intake.getIntakePower() == -1)
+                            intake.setIntakePower(0);
+                        running = false;
+                    }
+                }
             }
         });
 

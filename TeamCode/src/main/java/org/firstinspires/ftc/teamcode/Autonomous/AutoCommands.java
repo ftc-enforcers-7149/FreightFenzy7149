@@ -4,6 +4,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorCarouselSpinner;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorIntake;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Levels;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.Output;
 import org.firstinspires.ftc.teamcode.Subsystems.Webcam.OpenCV;
 import org.opencv.core.RotatedRect;
 
@@ -74,6 +75,36 @@ public class AutoCommands {
 
         intake.setIntakePower(0);
         intake.setPaddle(MotorIntake.PaddlePosition.BACK);
+    }
+
+    public void outtake(MotorIntake intake) {
+        intake.setLatch(MotorIntake.LatchPosition.OPEN);
+        op.waitForTime(150);
+
+        Output outtake = new Output() {
+            long startTime = 0;
+
+            @Override
+            public void updateOutput() {
+                if (System.currentTimeMillis() >= startTime + 150)
+                    stopOutput();
+            }
+
+            @Override
+            public void startOutput() {
+                startTime = System.currentTimeMillis();
+                intake.setPaddle(MotorIntake.PaddlePosition.OUT_FAR);
+            }
+
+            @Override
+            public void stopOutput() {
+                intake.setPaddle(MotorIntake.PaddlePosition.BACK);
+                op.removeOutput(this);
+            }
+        };
+
+        op.addOutput(outtake);
+        outtake.startOutput();
     }
 
     public void closeIntake(MotorIntake intake) {

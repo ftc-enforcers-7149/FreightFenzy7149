@@ -151,6 +151,10 @@ public abstract class Autonomous_Base extends LinearOpMode {
         outputs.add(output);
     }
 
+    protected void removeOutput(Output output) {
+        outputs.remove(output);
+    }
+
     //Start
     protected void startInputs() {
         for (Input i : inputs) i.startInput();
@@ -165,6 +169,11 @@ public abstract class Autonomous_Base extends LinearOpMode {
         logData();
     }
     protected void updateOutputs() {
+        for (Output o : actionQueue) {
+            addOutput(o);
+            o.startOutput();
+        }
+
         for (Output o : outputs) o.updateOutput();
         updateTelemetry();
     }

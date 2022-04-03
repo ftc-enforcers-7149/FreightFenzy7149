@@ -5,6 +5,9 @@ import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.Output;
+
+import java.util.ArrayList;
 
 @Config
 public class GlobalData {
@@ -18,6 +21,8 @@ public class GlobalData {
     public static Pose2d POSITION = new Pose2d();
     public static double HEADING = 0;
 
+    public static ArrayList<Output> actionQueue = new ArrayList<>();
+
     //Lift Data
     public static final double LEVEL_OFFSET = 0;
     public static final double CAP_OFFSET = 0;
@@ -25,6 +30,15 @@ public class GlobalData {
 
     //Four Bar Data
     public static final double BAR_LENGTH = 18.5;
+
+    public static boolean armUpSignal = false;
+    public static boolean armOutSignal = false;
+    public static boolean armInSignal = false;
+
+    //Intake Data
+    public static boolean openSignal = false;
+    public static boolean outtakeSignal = false;
+    public static boolean intakeSignal = false;
 
     public static PIDCoefficients H_PID = new PIDCoefficients(-0.45, 0, -0.05);
 

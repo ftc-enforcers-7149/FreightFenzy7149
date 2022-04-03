@@ -18,7 +18,7 @@ public class ArmController implements Output {
         FAR(3.5, 0.35, 0.6),
         REACH(0, 0.6, 0.45);
 
-        double liftPos, barPos, maxSpeed;
+        public double liftPos, barPos, maxSpeed;
 
         ScoringPosition(double liftPos, double barPos, double maxSpeed) {
             this.liftPos = liftPos;

@@ -153,6 +153,10 @@ public class MotorIntake implements Input, Output {
         this.intakePower = intakePower;
     }
 
+    public double getIntakePower() {
+        return intakePower;
+    }
+
     public void setPaddle(PaddlePosition pos) {
         currPaddle = pos;
     }
