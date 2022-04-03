@@ -45,7 +45,7 @@ public class MaxBotixDistance extends OpMode {
             maxbotixF.setSmoothingSize(1);
             maxbotixL.setSmoothingSize(1);
             maxbotixR.setSmoothingSize(1);
-
+//
         }
 
         if(gamepad1.x) {
