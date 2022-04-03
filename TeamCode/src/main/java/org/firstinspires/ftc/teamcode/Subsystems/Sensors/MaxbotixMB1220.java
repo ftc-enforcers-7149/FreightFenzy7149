@@ -30,6 +30,15 @@ public class MaxbotixMB1220 extends Sensor {
 
     }
 
+    public MaxbotixMB1220(HardwareMap h, String name, int smoothing) {
+
+        super(smoothing);
+        mb1220 = h.analogInput.get(name);
+        portNum = Integer.parseInt(mb1220.getConnectionInfo().split("; analog port ")[1]);
+        this.v = VOLTAGE.THREE;
+
+    }
+
     public MaxbotixMB1220(HardwareMap h, String name, VOLTAGE v, int smoothing) {
 
         super(smoothing);

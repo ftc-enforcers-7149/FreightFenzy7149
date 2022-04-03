@@ -14,7 +14,7 @@ import java.io.StringWriter;
 public class CorrectedMB1220 extends MovingUltrasonicSensor {
 
     public AnalogInput mb1220;
-    private MaxbotixMB1220.VOLTAGE v;
+    private VOLTAGE v;
     private BulkRead bRead = null;
     private int portNum;
 
@@ -30,7 +30,16 @@ public class CorrectedMB1220 extends MovingUltrasonicSensor {
 
     }
 
-    public CorrectedMB1220(HardwareMap h, String name, MaxbotixMB1220.VOLTAGE v, int smoothing, Facing f, Localizer l) {
+    public CorrectedMB1220(HardwareMap h, String name, int smoothing, Facing f, Localizer l) {
+
+        super(smoothing, f, l);
+        mb1220 = h.analogInput.get(name);
+        portNum = Integer.parseInt(mb1220.getConnectionInfo().split("; analog port ")[1]);
+        this.v = VOLTAGE.THREE;
+
+    }
+
+    public CorrectedMB1220(HardwareMap h, String name, VOLTAGE v, int smoothing, Facing f, Localizer l) {
 
         super(smoothing, f, l);
         mb1220 = h.analogInput.get(name);
@@ -39,7 +48,7 @@ public class CorrectedMB1220 extends MovingUltrasonicSensor {
 
     }
 
-    public CorrectedMB1220(HardwareMap h, String name, BulkRead bRead, MaxbotixMB1220.VOLTAGE v, int smoothing, Facing f, Localizer l) {
+    public CorrectedMB1220(HardwareMap h, String name, BulkRead bRead, VOLTAGE v, int smoothing, Facing f, Localizer l) {
 
         super(smoothing, f, l);
         mb1220 = h.analogInput.get(name);
@@ -55,7 +64,7 @@ public class CorrectedMB1220 extends MovingUltrasonicSensor {
         try {
 
             super.add((bRead != null ? bRead.getAnalogValue(portNum) : mb1220.getVoltage())
-                    / (v == MaxbotixMB1220.VOLTAGE.THREE ? THREEV_POWER : FIVEV_POWER) * 0.393701d);
+                    / (v == VOLTAGE.THREE ? THREEV_POWER : FIVEV_POWER) * 0.393701d);
             super.updateInput();
             distance = super.getValue() * 2;
 
@@ -71,8 +80,8 @@ public class CorrectedMB1220 extends MovingUltrasonicSensor {
 
     }
 
-    public MaxbotixMB1220.VOLTAGE getVoltage() {return v;}
-    public void setVoltage(MaxbotixMB1220.VOLTAGE v) {this.v = v;}
+    public VOLTAGE getVoltage() {return v;}
+    public void setVoltage(VOLTAGE v) {this.v = v;}
 
     public double getDistance(DistanceUnit u) {
 

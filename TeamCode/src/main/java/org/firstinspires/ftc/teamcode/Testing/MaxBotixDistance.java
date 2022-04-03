@@ -4,18 +4,21 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.Subsystems.Sensors.CorrectedMB1220;
 import org.firstinspires.ftc.teamcode.Subsystems.Sensors.MaxbotixMB1220;
+import org.firstinspires.ftc.teamcode.Subsystems.Sensors.MovingUltrasonicSensor;
+import org.firstinspires.ftc.teamcode.TeleOp.TeleOp_Base;
 
 @TeleOp(name="MaxbotixTest")
-public class MaxBotixDistance extends OpMode {
+public class MaxBotixDistance extends TeleOp_Base {
 
-    MaxbotixMB1220 maxbotixF, maxbotixL, maxbotixR;
+    CorrectedMB1220 maxbotixF, maxbotixL, maxbotixR;
     private final int INITIAL_SMOOTHING = 9;
 
     public void init() {
-        maxbotixF = new MaxbotixMB1220(hardwareMap, "distF", MaxbotixMB1220.VOLTAGE.THREE, INITIAL_SMOOTHING);
-        maxbotixL = new MaxbotixMB1220(hardwareMap, "distL", MaxbotixMB1220.VOLTAGE.THREE, INITIAL_SMOOTHING);
-        maxbotixR = new MaxbotixMB1220(hardwareMap, "distR", MaxbotixMB1220.VOLTAGE.THREE, INITIAL_SMOOTHING);
+        maxbotixF = new CorrectedMB1220(hardwareMap, "distF", INITIAL_SMOOTHING, MovingUltrasonicSensor.Facing.FRONT, drive.getLocalizer());
+        maxbotixL = new CorrectedMB1220(hardwareMap, "distL", INITIAL_SMOOTHING, MovingUltrasonicSensor.Facing.LEFT, drive.getLocalizer());
+        maxbotixR = new CorrectedMB1220(hardwareMap, "distR", INITIAL_SMOOTHING, MovingUltrasonicSensor.Facing.RIGHT, drive.getLocalizer());
 
         maxbotixF.setQuartileSmoothing(true);
         maxbotixL.setQuartileSmoothing(true);
@@ -24,9 +27,6 @@ public class MaxBotixDistance extends OpMode {
     }
 
     public void loop() {
-        maxbotixF.updateInput();
-        maxbotixL.updateInput();
-        maxbotixR.updateInput();
 
         if(gamepad1.a) {
 
@@ -45,7 +45,7 @@ public class MaxBotixDistance extends OpMode {
             maxbotixF.setSmoothingSize(1);
             maxbotixL.setSmoothingSize(1);
             maxbotixR.setSmoothingSize(1);
-//
+
         }
 
         if(gamepad1.x) {
@@ -63,5 +63,17 @@ public class MaxBotixDistance extends OpMode {
         telemetry.addData("Distance F: ", maxbotixF.getDistance(DistanceUnit.INCH));
         telemetry.addData("Distance L: ", maxbotixL.getDistance(DistanceUnit.INCH));
         telemetry.addData("Distance R: ", maxbotixR.getDistance(DistanceUnit.INCH));
+    }
+
+    @Override
+    protected void getInput() {
+        maxbotixF.updateInput();
+        maxbotixL.updateInput();
+        maxbotixR.updateInput();
+    }
+
+    @Override
+    protected void updateStateMachine() {
+
     }
 }

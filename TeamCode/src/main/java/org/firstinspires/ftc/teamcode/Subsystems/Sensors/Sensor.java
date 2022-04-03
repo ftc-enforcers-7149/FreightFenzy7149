@@ -44,6 +44,8 @@ public class Sensor implements Input {
 
     public void add(double newVal) {
 
+        if(enableHighPass && newVal > highPassMax || enableLowPass && newVal < lowPassMax) return;
+
         if(filterVals.size() < smoothingSize) {
 
             filterVals.add(newVal);
