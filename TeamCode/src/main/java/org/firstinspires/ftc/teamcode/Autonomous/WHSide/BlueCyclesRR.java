@@ -27,17 +27,17 @@ public class BlueCyclesRR extends Auto_V2_5 {
             .splineToSplineHeading(new Pose2d(9, 58, Math.toRadians(-90)), Math.toRadians(60))
             .splineToConstantHeading(new Vector2d(16, 66), Math.toRadians(0))
             .addSpatialMarker(new Vector2d(24, 66), () -> GlobalData.armInSignal = true) //Bring arm to ground
-            .splineToConstantHeading(new Vector2d(36, 66), Math.toRadians(0))
+            .splineToConstantHeading(new Vector2d(32, 66), Math.toRadians(0))
             .addDisplacementMarker(() -> GlobalData.intakeSignal = true) //Start intaking once in the warehouse
-            .splineToSplineHeading(new Pose2d(48, 60, Math.toRadians(-45)), Math.toRadians(-45))
-            .splineTo(new Vector2d(60, 60), Math.toRadians(20))
+            .splineToSplineHeading(new Pose2d(48, 60, Math.toRadians(-45)), Math.toRadians(-30))
+            .splineTo(new Vector2d(60, 60), Math.toRadians(25))
             .build();
-    private static final Trajectory driveOut = MecanumDrive.trajectoryBuilder(new Pose2d(60, 60, Math.toRadians(20)), Math.toRadians(-160))
+    private static final Trajectory driveOut = MecanumDrive.trajectoryBuilder(new Pose2d(60, 60, Math.toRadians(15)), Math.toRadians(-160))
             .splineTo(new Vector2d(48, 60), Math.toRadians(160))
             .splineTo(new Vector2d(38, 64), Math.toRadians(165))
             .addDisplacementMarker(() -> GlobalData.armUpSignal = true) //Bring arm up while going through gap
             .splineTo(new Vector2d(28, 66), Math.toRadians(175))
-            .splineTo(new Vector2d(20, 66), Math.toRadians(185))
+            .splineTo(new Vector2d(19, 66), Math.toRadians(185))
             .splineToSplineHeading(new Pose2d(6, 44, Math.toRadians(-145)), Math.toRadians(-90))
             .addTemporalMarker(2.0, () -> GlobalData.armOutSignal = true) //Start moving arm out as late as possible
             .addTemporalMarker(2.54, () -> GlobalData.openSignal = true) //Open latch just as arm lines up
@@ -47,7 +47,7 @@ public class BlueCyclesRR extends Auto_V2_5 {
             .splineToSplineHeading(new Pose2d(9, 58, Math.toRadians(-90)), Math.toRadians(60))
             .splineToConstantHeading(new Vector2d(16, 66), Math.toRadians(0))
             .addSpatialMarker(new Vector2d(24, 66), () -> GlobalData.armInSignal = true) //Bring arm to ground
-            .splineToConstantHeading(new Vector2d(36, 66), Math.toRadians(0))
+            .splineToConstantHeading(new Vector2d(40, 66), Math.toRadians(0))
             .build();
 
     @Override
