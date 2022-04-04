@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Sensors;
 
 import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.acmerobotics.roadrunner.localization.Localizer;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
@@ -13,7 +14,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Utils.ValueTimer;
 public class DistanceCorrection implements Input {
 
     // public Rev2mDistanceSensor sensorL, sensorR, sensorF;
-    public MaxbotixMB1220 sensorL, sensorR, sensorF;
+    public CorrectedMB1220 sensorL, sensorR, sensorF;
     // private ValueTimer<Double> lDist, rDist, fDist;
 
     private static final double FIELD_X = 144, FIELD_Y = 144, F_OFFSET = 6, L_R_OFFSET = 0;
@@ -22,12 +23,13 @@ public class DistanceCorrection implements Input {
 
     private boolean running;
 
-    public DistanceCorrection(HardwareMap hardwareMap, String distLName, String distRName, String distFName, BulkRead bRead,
+    public DistanceCorrection(HardwareMap hardwareMap, String distLName, String distRName, String distFName, BulkRead bRead, Localizer l,
                               Alliance alliance) {
 
         if (alliance == Alliance.BLUE) {
             // sensorL = hardwareMap.get(Rev2mDistanceSensor.class, distLName);
-            sensorL = new MaxbotixMB1220(hardwareMap, distLName, bRead, MaxbotixMB1220.VOLTAGE.THREE, 9);
+            //sensorL = new MaxbotixMB1220(hardwareMap, distLName, bRead, MaxbotixMB1220.VOLTAGE.THREE, 9);
+            sensorL = new CorrectedMB1220(hardwareMap, distLName, bRead, 9, MovingUltrasonicSensor.Facing.LEFT, l);
             //sensorL.mb1220.resetDeviceConfigurationForOpMode();
             /*lDist = new ValueTimer<Double>(350.0, 200) {
                 @Override
@@ -39,7 +41,7 @@ public class DistanceCorrection implements Input {
         }
         else {
             //sensorR = hardwareMap.get(Rev2mDistanceSensor.class, distRName);
-            sensorR = new MaxbotixMB1220(hardwareMap, distRName, bRead, MaxbotixMB1220.VOLTAGE.THREE, 9);
+            sensorR = new CorrectedMB1220(hardwareMap, distRName, bRead, 9, MovingUltrasonicSensor.Facing.RIGHT, l);
             //sensorR.mb1220.resetDeviceConfigurationForOpMode();
             /*rDist = new ValueTimer<Double>(350.0, 200) {
                 @Override
@@ -51,7 +53,7 @@ public class DistanceCorrection implements Input {
         }
 
         // sensorF = hardwareMap.get(Rev2mDistanceSensor.class, distFName);
-        sensorF = new MaxbotixMB1220(hardwareMap, distFName, bRead, MaxbotixMB1220.VOLTAGE.THREE, 9);
+        sensorF = new CorrectedMB1220(hardwareMap, distLName, bRead, 9, MovingUltrasonicSensor.Facing.FRONT, l);
         //sensorF.mb1220.resetDeviceConfigurationForOpMode();
         /*fDist = new ValueTimer<Double>(350.0, 200) {
             @Override
@@ -204,15 +206,15 @@ public class DistanceCorrection implements Input {
         return sensorF;
     }*/
 
-    public MaxbotixMB1220 getSensorL() {
+    public CorrectedMB1220 getSensorL() {
         return sensorL;
     }
 
-    public MaxbotixMB1220 getSensorR() {
+    public CorrectedMB1220 getSensorR() {
         return sensorR;
     }
 
-    public MaxbotixMB1220 getSensorF() {
+    public CorrectedMB1220 getSensorF() {
         return sensorF;
     }
 

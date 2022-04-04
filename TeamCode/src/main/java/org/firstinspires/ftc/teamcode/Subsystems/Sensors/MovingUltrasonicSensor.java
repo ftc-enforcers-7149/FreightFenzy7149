@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Sensors;
 
+import android.util.Log;
+
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.localization.Localizer;
 
@@ -35,6 +37,8 @@ public class MovingUltrasonicSensor extends Sensor {
 
     @Override
     public void add(double newVal) {
+
+        Log.i("Adding: ", String.valueOf(newVal));
 
         double time = getTimeFromDistance(newVal);
 

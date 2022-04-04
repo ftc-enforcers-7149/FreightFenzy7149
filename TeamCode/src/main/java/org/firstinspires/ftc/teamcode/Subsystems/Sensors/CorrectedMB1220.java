@@ -39,6 +39,16 @@ public class CorrectedMB1220 extends MovingUltrasonicSensor {
 
     }
 
+    public CorrectedMB1220(HardwareMap h, String name, BulkRead bRead, int smoothing, Facing f, Localizer l) {
+
+        super(smoothing, f, l);
+        mb1220 = h.analogInput.get(name);
+        this.bRead = bRead;
+        portNum = Integer.parseInt(mb1220.getConnectionInfo().split("; analog port ")[1]);
+        this.v = VOLTAGE.THREE;
+
+    }
+
     public CorrectedMB1220(HardwareMap h, String name, VOLTAGE v, int smoothing, Facing f, Localizer l) {
 
         super(smoothing, f, l);

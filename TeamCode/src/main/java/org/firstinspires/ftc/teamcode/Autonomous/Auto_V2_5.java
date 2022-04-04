@@ -50,9 +50,9 @@ public abstract class Auto_V2_5 extends Autonomous_Base {
         lift = new Lift(hardwareMap, "lift", bReadCH, !RAN_AUTO);
         fourBar = new FourBar(hardwareMap, "fourBarL", "fourBarR", "counterL", "counterR");
         spinner = new MotorCarouselSpinner(hardwareMap, "spinner", getAlliance());
-        distCorrect = new DistanceCorrection(hardwareMap, "distL", "distR","distF", bReadEH, getAlliance());
+        distCorrect = new DistanceCorrection(hardwareMap, "distL", "distR","distF", bReadEH, drive.getLocalizer(), getAlliance());
 
-        distCorrect.setQuartileSmoothing(false);
+        distCorrect.setQuartileSmoothing(true);
 
         armController = new ArmController(lift, fourBar);
 

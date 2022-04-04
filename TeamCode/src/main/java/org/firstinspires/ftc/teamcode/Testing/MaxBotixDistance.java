@@ -16,6 +16,13 @@ public class MaxBotixDistance extends TeleOp_Base {
     private final int INITIAL_SMOOTHING = 9;
 
     public void init() {
+
+        try {
+            initializeAll();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         maxbotixF = new CorrectedMB1220(hardwareMap, "distF", INITIAL_SMOOTHING, MovingUltrasonicSensor.Facing.FRONT, drive.getLocalizer());
         maxbotixL = new CorrectedMB1220(hardwareMap, "distL", INITIAL_SMOOTHING, MovingUltrasonicSensor.Facing.LEFT, drive.getLocalizer());
         maxbotixR = new CorrectedMB1220(hardwareMap, "distR", INITIAL_SMOOTHING, MovingUltrasonicSensor.Facing.RIGHT, drive.getLocalizer());
@@ -27,6 +34,8 @@ public class MaxBotixDistance extends TeleOp_Base {
     }
 
     public void loop() {
+
+        getInput();
 
         if(gamepad1.a) {
 
