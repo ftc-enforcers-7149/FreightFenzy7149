@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Autonomous.WHSide;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
 import org.firstinspires.ftc.teamcode.Autonomous.Auto_V2_5;
@@ -19,7 +20,7 @@ import static org.firstinspires.ftc.teamcode.GlobalData.SLOW_DIST;
 import static org.firstinspires.ftc.teamcode.GlobalData.SPEED_MULT;
 
 @Autonomous(name = "Red WH Cycles NEW")
-//@Disabled
+@Disabled
 public class RedCyclesNEW extends Auto_V2_5 {
 
     @Override

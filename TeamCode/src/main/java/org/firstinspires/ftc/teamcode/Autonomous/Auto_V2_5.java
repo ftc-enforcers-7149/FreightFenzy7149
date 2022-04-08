@@ -48,9 +48,12 @@ public abstract class Auto_V2_5 extends Autonomous_Base {
         intake = new MotorIntake(hardwareMap,
                 "intake", "paddle", "latch", "intakeColor");
         lift = new Lift(hardwareMap, "lift", bReadCH, !RAN_AUTO);
-        fourBar = new FourBar(hardwareMap, "fourBarL", "fourBarR", "counterL", "counterR");
+        fourBar = new FourBar(hardwareMap, "fourBarL", "fourBarR",
+                "counterL", "counterR");
         spinner = new MotorCarouselSpinner(hardwareMap, "spinner", getAlliance());
-        distCorrect = new DistanceCorrection(hardwareMap, "distL", "distR","distF", bReadEH, drive.getLocalizer(), getAlliance());
+        distCorrect = new DistanceCorrection(hardwareMap,
+                "distL", "distR","distF",
+                bReadEH, drive.getLocalizer(), getAlliance());
 
         distCorrect.setQuartileSmoothing(true);
 
@@ -144,8 +147,10 @@ public abstract class Auto_V2_5 extends Autonomous_Base {
         addOutput(new Output() {
             @Override
             public void updateOutput() {
-                if (GlobalData.intakeSignal)
+                if (GlobalData.intakeSignal) {
                     intake.setIntakePower(1);
+                    GlobalData.intakeSignal = false;
+                }
             }
 
             @Override
