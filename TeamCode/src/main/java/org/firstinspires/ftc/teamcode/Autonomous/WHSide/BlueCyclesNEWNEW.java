@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Utils.Output;
 import static org.firstinspires.ftc.teamcode.GlobalData.*;
 
 @Autonomous(name = "Blue WH Cycles NEW NEW")
-//@Disabled
+@Disabled
 public class BlueCyclesNEWNEW extends Auto_V2_5 {
 
     @Override

@@ -14,6 +14,7 @@ public class Sensor implements Input {
     protected int smoothingSize;
     protected boolean enableQuartileSmoothing = false, enableHighPass = false, enableLowPass = false;
     protected double highPassMax = 0, lowPassMax = 0;
+    protected double lastNonOutlier;
 
     protected double value;
 
@@ -65,9 +66,7 @@ public class Sensor implements Input {
 
                 outliers.add(newVal);
 
-                if(outliers.size() > smoothingSize) {
-
-                    outliers.remove(0);
+                if(outliers.size() == smoothingSize) {
 
                     dupli = (ArrayList<Double>) outliers.clone();
                     q1 = dupli.get((int) Math.ceil(dupli.size() / 4d));
@@ -82,12 +81,18 @@ public class Sensor implements Input {
 
                     }
 
-                    if(fails / (double) dupli.size() < .5) filterVals = (ArrayList<Double>) outliers.clone();
+                    if(fails / (double) dupli.size() < .5) {
+                        filterVals = (ArrayList<Double>) outliers.clone();
+                        outliers.clear();
+                    }
+                    else outliers.remove(0);
 
                 }
 
             }
             else {
+
+                lastNonOutlier = newVal;
 
                 if(filterVals.size() + 1 > smoothingSize) filterVals.remove(0);
                 filterVals.add(newVal);
@@ -96,6 +101,15 @@ public class Sensor implements Input {
 
         }
         else {
+
+            ArrayList<Double> dupli = (ArrayList<Double>) filterVals.clone();
+
+            double q1 = dupli.get((int) Math.ceil(dupli.size() / 4d));
+            double q3 = dupli.get((int) Math.floor(3 * dupli.size() / 4d));
+            double bound = 1.5d * (q3 - q1);
+
+            if(!(newVal > q3 + bound || newVal < q1 - bound))
+                lastNonOutlier = newVal;
 
             if(filterVals.size() + 1 > smoothingSize) filterVals.remove(0);
             filterVals.add(newVal);
@@ -141,5 +155,13 @@ public class Sensor implements Input {
     public double getValue() { return value; }
 
     public void setQuartileSmoothing(boolean enableQuartileSmoothing) { this.enableQuartileSmoothing = enableQuartileSmoothing;}
+
+    public void clearFilterVals() {
+
+        filterVals.clear();
+
+    }
+
+    public double getLastNonOutlier() { return lastNonOutlier; }
 
 }

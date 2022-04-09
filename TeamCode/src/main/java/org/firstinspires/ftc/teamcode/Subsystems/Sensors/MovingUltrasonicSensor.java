@@ -22,11 +22,13 @@ public class MovingUltrasonicSensor extends Sensor {
 
     private Localizer localizer;
     private Facing f;
+    private Gyroscope gyro;
 
-    public MovingUltrasonicSensor(int smoothingSize, Facing f, Localizer localizer) {
+    public MovingUltrasonicSensor(int smoothingSize, Facing f, Localizer localizer, Gyroscope gyro) {
         super(smoothingSize);
         this.f = f;
         this.localizer = localizer;
+        this.gyro = gyro;
     }
 
     public double getTimeFromDistance(double distance) {
@@ -42,7 +44,7 @@ public class MovingUltrasonicSensor extends Sensor {
 
         double time = getTimeFromDistance(newVal);
 
-        double heading = localizer.getPoseEstimate().getHeading();
+        double heading = gyro.getRawYaw();
         double pi = Math.PI;
 
         if(heading >= pi/4 && heading <= 3*pi/4) {// facing "front" (positive y)
@@ -116,23 +118,6 @@ public class MovingUltrasonicSensor extends Sensor {
                     break;
 
             }
-        }
-
-        switch(f) {
-
-            case FRONT:
-                super.add(newVal  - localizer.getPoseVelocity().getY() * time);
-                break;
-            case BACK:
-                super.add(newVal  + localizer.getPoseVelocity().getY() * time);
-                break;
-            case LEFT:
-                super.add(newVal  + localizer.getPoseVelocity().getX() * time);
-                break;
-            case RIGHT:
-                super.add(newVal  - localizer.getPoseVelocity().getX() * time);
-                break;
-
         }
 
     }

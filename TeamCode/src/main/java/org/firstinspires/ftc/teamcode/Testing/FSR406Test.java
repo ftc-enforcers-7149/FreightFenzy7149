@@ -21,7 +21,7 @@ public class FSR406Test extends TeleOp_Base {
     @Override
     public void init() {
 
-        force = new FSR406(hardwareMap, "force", 10000d, 9);
+        force = new FSR406(hardwareMap, "force", 10000d, 15);
         force.setQuartileSmoothing(true);
         led = new LED(hardwareMap, "blinkin", Alliance.NONE);
 
@@ -41,7 +41,7 @@ public class FSR406Test extends TeleOp_Base {
     protected void getInput() {
 
         force.updateInput();
-        forceVal = force.getForce();
+        forceVal = force.getWeight();
 
     }
 
