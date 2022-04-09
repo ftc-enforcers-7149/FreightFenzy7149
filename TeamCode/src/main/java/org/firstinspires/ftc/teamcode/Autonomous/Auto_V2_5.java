@@ -52,7 +52,7 @@ public abstract class Auto_V2_5 extends Autonomous_Base {
                 "counterL", "counterR");
         spinner = new MotorCarouselSpinner(hardwareMap, "spinner", getAlliance());
         distCorrect = new DistanceCorrection(hardwareMap,
-                "distL", "distR","distF",
+                "distFL", "distFR",
                 bReadEH, drive.getLocalizer(), getAlliance());
 
         distCorrect.setQuartileSmoothing(true);
@@ -266,7 +266,6 @@ public abstract class Auto_V2_5 extends Autonomous_Base {
     protected final void addTelemetryData() {
         telemetry.addData("Position: ", drive.getPoseEstimate());
         telemetry.addData("Front Distance: ", distCorrect.getFrontDistance());
-        telemetry.addData("Side Distance: ", distCorrect.getSideWall());
         telemetry.addData("Lift Height: ", lift.getHeight());
         telemetry.addData("Four Bar Angle: ", fourBar.getCurrAngle());
         telemetry.addData("Freight in Intake? ", intake.getFreightInIntake());

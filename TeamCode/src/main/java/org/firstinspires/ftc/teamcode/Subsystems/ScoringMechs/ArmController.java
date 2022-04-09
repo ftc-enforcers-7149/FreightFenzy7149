@@ -11,13 +11,15 @@ public class ArmController implements Output {
         IDLE(0, 0, 1),
         IN(0, 0, 1),
         UP(7, 0, 1),
-        LOW(0, 0.5, 0.6),
-        MIDDLE(0, 0.75, 0.6),
+        LOW(1.5, 0.55, 0.6),
+        MIDDLE(0.2, 0.75, 0.6),
         HIGH(4.8, 0.815, 0.6),
         CLOSE(5, 0, 0.6),
-        CENTER(4.5, 0.2, 0.6),
-        FAR(3.5, 0.35, 0.6),
-        REACH(0, 0.6, 0.45);
+        CENTER(4.75, 0.2, 0.45),
+        FAR(3.75, 0.35, 0.45),
+        REACH(0, 0.6, 0.45),
+        MIDDLE_AUTO(1.5, 0.815, 0.1),
+        LOW_AUTO(1, 0.65, 0.1);
 
         public double liftPos, barPos, maxSpeed;
 

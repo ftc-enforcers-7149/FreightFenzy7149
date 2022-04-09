@@ -790,14 +790,14 @@ public abstract class Autonomous_Base extends LinearOpMode {
      * @param destH Destination heading in radians
      * @return Shortest heading difference in radians
      */
-    protected double deltaHeading(double robotH, double destH) {
-        if (robotH < 0) robotH += Math.PI * 2;
-        if (destH < 0) destH += Math.PI * 2;
+    public static double deltaHeading(double robotH, double destH) {
+        while (robotH < 0) robotH += Math.PI * 2;
+        while (destH < 0) destH += Math.PI * 2;
 
         double diff = destH - robotH;
 
-        if (diff < -Math.PI) diff += Math.PI * 2;
-        if (diff > Math.PI) diff -= Math.PI * 2;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+        while (diff > Math.PI) diff -= Math.PI * 2;
 
         return diff;
     }

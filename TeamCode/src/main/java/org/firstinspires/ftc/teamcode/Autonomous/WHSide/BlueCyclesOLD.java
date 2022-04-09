@@ -19,9 +19,9 @@ import static org.firstinspires.ftc.teamcode.GlobalData.POS_ACC;
 import static org.firstinspires.ftc.teamcode.GlobalData.SLOW_DIST;
 import static org.firstinspires.ftc.teamcode.GlobalData.SPEED_MULT;
 
-@Autonomous(name = "Blue WH Cycles NEW")
+@Autonomous(name = "Blue WH Cycles OLD")
 //@Disabled
-public class BlueCyclesNEW extends Auto_V2_5 {
+public class BlueCyclesOLD extends Auto_V2_5 {
 
     @Override
     protected Alliance getAlliance() {
@@ -72,13 +72,13 @@ public class BlueCyclesNEW extends Auto_V2_5 {
         switch (levels) {
             case HIGH:
             default:
-                scoreInHub(80, ArmController.ScoringPosition.HIGH);
+                scoreInHub(78, ArmController.ScoringPosition.HIGH);
                 break;
             case MIDDLE:
-                scoreInHub(80, ArmController.ScoringPosition.MIDDLE);
+                scoreInHub(78, ArmController.ScoringPosition.MIDDLE);
                 break;
             case LOW:
-                scoreInHub(80, ArmController.ScoringPosition.LOW);
+                scoreInHub(78, ArmController.ScoringPosition.LOW);
                 break;
         }
 
@@ -97,7 +97,7 @@ public class BlueCyclesNEW extends Auto_V2_5 {
                 break;
 
             //Intake and don't hit wall
-            intake(Math.max(25 - (cycle * 5), 5));
+            intake(Math.max(18 - (cycle * 5), 5));
 
             //Drive out through gap
             led.setPattern(RevBlinkinLedDriver.BlinkinPattern.YELLOW);
@@ -105,7 +105,7 @@ public class BlueCyclesNEW extends Auto_V2_5 {
 
             //Drive to and score in hub
             led.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
-            scoreInHub(77);
+            scoreInHub(78.5);
 
             cycle++;
         }
@@ -122,6 +122,7 @@ public class BlueCyclesNEW extends Auto_V2_5 {
         intake.setIntakePower(-0.3);
         SPEED_MULT = 1.0;
         SLOW_DIST = 5;
+        driveTo(drive.getPoseEstimate().getX(), drive.getPoseEstimate().getY() + 20, Math.toRadians(90));
         driveTo(drive.getPoseEstimate().getX() + 2, drive.getPoseEstimate().getY() + 6, 0);
         SLOW_DIST = 20;
         intake.setIntakePower(0);
@@ -158,7 +159,7 @@ public class BlueCyclesNEW extends Auto_V2_5 {
                         armController.setScorePos(ArmController.ScoringPosition.UP);
                     return Math.toRadians(95);
                 }
-                );
+        );
 
         //Strafe into wall
         long driveStartTime = System.currentTimeMillis();
@@ -230,19 +231,19 @@ public class BlueCyclesNEW extends Auto_V2_5 {
             if (distCorrect.getFrontDistance() < 50) {
                 if (drive.getPoseEstimate().getHeading() > Math.toRadians(95)) {
                     drive.setWeightedDrivePower(new Pose2d(
-                            Math.min(Math.pow(distCorrect.getFrontDistance()-10-distanceFromWall, 2) * 0.0005, 0.8), //Slow down as approaches wall
+                            Math.min(Math.pow(distCorrect.getFrontDistance()-10-distanceFromWall, 2) * 0.00055, 0.8), //Slow down as approaches wall
                             -0.075, //Drive away from wall
                             -0.2));
                 }
                 else if (drive.getPoseEstimate().getHeading() < Math.toRadians(85)) {
                     drive.setWeightedDrivePower(new Pose2d(
-                            Math.min(Math.pow(distCorrect.getFrontDistance()-10-distanceFromWall, 2) * 0.0005, 0.8), //Slow down as approaches wall
+                            Math.min(Math.pow(distCorrect.getFrontDistance()-10-distanceFromWall, 2) * 0.00055, 0.8), //Slow down as approaches wall
                             -0.075, //Drive away from wall
                             0.2));
                 }
                 else {
                     drive.setWeightedDrivePower(new Pose2d(
-                            Math.min(Math.pow(distCorrect.getFrontDistance()-10-distanceFromWall, 2) * 0.0005, 0.8), //Slow down as approaches wall
+                            Math.min(Math.pow(distCorrect.getFrontDistance()-10-distanceFromWall, 2) * 0.00055, 0.8), //Slow down as approaches wall
                             -0.075, //Drive away from wall
                             0));
                 }
@@ -255,7 +256,7 @@ public class BlueCyclesNEW extends Auto_V2_5 {
                         144 - distCorrect.getFrontDistance(),
                         drive.getPoseEstimate().getHeading()));
 
-                distCorrect.sensorF.disableMoving();
+                distCorrect.sensor.disableMoving();
             }
 
             if (intake.getFreightInIntake()) return false;
@@ -269,7 +270,7 @@ public class BlueCyclesNEW extends Auto_V2_5 {
         });
         drive.setWeightedDrivePower(new Pose2d(0, 0, 0));
 
-        distCorrect.sensorF.enableMoving();
+        distCorrect.sensor.enableMoving();
     }
 
     private void driveOutOfWarehouse() {
@@ -365,7 +366,7 @@ public class BlueCyclesNEW extends Auto_V2_5 {
                         return Math.toRadians(10);
                     else {
                         armController.setScorePos(ArmController.ScoringPosition.HIGH);
-                        return Math.toRadians(-5);
+                        return Math.toRadians(-7.5);
                     }
                 },
                 1500);

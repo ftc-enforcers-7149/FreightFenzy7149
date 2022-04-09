@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode.TeleOp.TeleOp_Base;
 @TeleOp(name="MaxbotixTest")
 public class MaxBotixDistance extends TeleOp_Base {
 
-    CorrectedMB1220 maxbotixF, maxbotixL, maxbotixR;
+    CorrectedMB1220 maxbotixFL, maxbotixFR;
     private final int INITIAL_SMOOTHING = 9;
 
     public void init() {
@@ -23,12 +23,11 @@ public class MaxBotixDistance extends TeleOp_Base {
             e.printStackTrace();
         }
 
-        maxbotixF = new CorrectedMB1220(hardwareMap, "distF", INITIAL_SMOOTHING, MovingUltrasonicSensor.Facing.FRONT, drive.getLocalizer());
-        maxbotixL = new CorrectedMB1220(hardwareMap, "distL", INITIAL_SMOOTHING, MovingUltrasonicSensor.Facing.LEFT, drive.getLocalizer());
-        maxbotixR = new CorrectedMB1220(hardwareMap, "distR", INITIAL_SMOOTHING, MovingUltrasonicSensor.Facing.RIGHT, drive.getLocalizer());
+        maxbotixFL = new CorrectedMB1220(hardwareMap, "distFL", INITIAL_SMOOTHING, MovingUltrasonicSensor.Facing.FRONT, drive.getLocalizer());
+        maxbotixFR = new CorrectedMB1220(hardwareMap, "distFR", INITIAL_SMOOTHING, MovingUltrasonicSensor.Facing.FRONT, drive.getLocalizer());
 
-        maxbotixF.enableMoving();
-
+        maxbotixFL.enableMoving();
+        maxbotixFR.enableMoving();
     }
 
     public void loop() {
@@ -37,46 +36,37 @@ public class MaxBotixDistance extends TeleOp_Base {
 
         if(gamepad1.a) {
 
-            maxbotixF.setQuartileSmoothing(false);
-            maxbotixL.setQuartileSmoothing(false);
-            maxbotixR.setQuartileSmoothing(false);
+            maxbotixFL.setQuartileSmoothing(false);
+            maxbotixFR.setQuartileSmoothing(false);
 
         }
 
         if(gamepad1.b) {
 
-            maxbotixF.setQuartileSmoothing(false);
-            maxbotixL.setQuartileSmoothing(false);
-            maxbotixR.setQuartileSmoothing(false);
+            maxbotixFL.setQuartileSmoothing(false);
+            maxbotixFR.setQuartileSmoothing(false);
 
-            maxbotixF.setSmoothingSize(1);
-            maxbotixL.setSmoothingSize(1);
-            maxbotixR.setSmoothingSize(1);
-
+            maxbotixFL.setSmoothingSize(1);
+            maxbotixFR.setSmoothingSize(1);
         }
 
         if(gamepad1.x) {
 
-            maxbotixF.setQuartileSmoothing(true);
-            maxbotixL.setQuartileSmoothing(true);
-            maxbotixR.setQuartileSmoothing(true);
+            maxbotixFL.setQuartileSmoothing(true);
+            maxbotixFR.setQuartileSmoothing(true);
 
-            maxbotixF.setSmoothingSize(INITIAL_SMOOTHING);
-            maxbotixL.setSmoothingSize(INITIAL_SMOOTHING);
-            maxbotixR.setSmoothingSize(INITIAL_SMOOTHING);
-
+            maxbotixFL.setSmoothingSize(INITIAL_SMOOTHING);
+            maxbotixFR.setSmoothingSize(INITIAL_SMOOTHING);
         }
 
-        telemetry.addData("Distance F: ", maxbotixF.getDistance(DistanceUnit.INCH));
-        telemetry.addData("Distance L: ", maxbotixL.getDistance(DistanceUnit.INCH));
-        telemetry.addData("Distance R: ", maxbotixR.getDistance(DistanceUnit.INCH));
+        telemetry.addData("Distance F: ", maxbotixFL.getDistance(DistanceUnit.INCH));
+        telemetry.addData("Distance L: ", maxbotixFR.getDistance(DistanceUnit.INCH));
     }
 
     @Override
     protected void getInput() {
-        maxbotixF.updateInput();
-        maxbotixL.updateInput();
-        maxbotixR.updateInput();
+        maxbotixFL.updateInput();
+        maxbotixFR.updateInput();
     }
 
     @Override

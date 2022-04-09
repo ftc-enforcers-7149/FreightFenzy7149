@@ -15,7 +15,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Utils.Levels;
 import static org.firstinspires.ftc.teamcode.GlobalData.*;
 
 @Autonomous(name = "Red Duck")
-@Disabled
+//@Disabled
 public class RedDuck extends Auto_V2_5 {
 
     @Override

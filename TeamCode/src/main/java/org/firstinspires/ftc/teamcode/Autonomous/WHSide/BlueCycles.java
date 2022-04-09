@@ -1,26 +1,43 @@
 package org.firstinspires.ftc.teamcode.Autonomous.WHSide;
 
-import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.acmerobotics.roadrunner.trajectory.Trajectory;
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
 import org.firstinspires.ftc.teamcode.Autonomous.Auto_V2_5;
+import org.firstinspires.ftc.teamcode.GlobalData;
+import org.firstinspires.ftc.teamcode.Odometry.DriveWheels.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.ArmController;
-import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorIntake;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Levels;
-
-import static org.firstinspires.ftc.teamcode.GlobalData.*;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.Output;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
-@Autonomous(name = "Blue WH Cycles")
-@Disabled
+import static org.firstinspires.ftc.teamcode.GlobalData.H_ACC;
+import static org.firstinspires.ftc.teamcode.GlobalData.MIN_TURN;
+import static org.firstinspires.ftc.teamcode.GlobalData.POS_ACC;
+import static org.firstinspires.ftc.teamcode.GlobalData.SLOW_DIST;
+import static org.firstinspires.ftc.teamcode.GlobalData.SPEED_MULT;
+
+@Autonomous(name = "BLUE WH Cycles")
+//@Disabled
 public class BlueCycles extends Auto_V2_5 {
+
+    private static final Trajectory preload = MecanumDrive.trajectoryBuilder(new Pose2d(6.75, 78.25, Math.toRadians(0)), Math.toRadians(10))
+            .splineToSplineHeading(new Pose2d(12, 78, Math.toRadians(-25)), Math.toRadians(-10))
+            .addTemporalMarker(0.67, () -> GlobalData.openSignal = true) //Open latch just as arm lines up
+            .addDisplacementMarker(() -> GlobalData.outtakeSignal = true) //Outtake freight right at the end
+            .build();
+
+    private static final Trajectory driveToWall = MecanumDrive.trajectoryBuilder(preload.end(), Math.toRadians(170))
+            .splineToSplineHeading(new Pose2d(-13, 84, Math.toRadians(95)), Math.toRadians(170))
+            .addTemporalMarker(0.35, () -> GlobalData.armUpSignal = true)
+            .build();
 
     @Override
     protected Alliance getAlliance() {
@@ -29,332 +46,378 @@ public class BlueCycles extends Auto_V2_5 {
 
     @Override
     public void auto() {
-        drive.setPoseEstimate(new Pose2d(6.75, 78.25, 0));
-        armController.setScorePos(ArmController.ScoringPosition.UP);
-        waitForTime(100);
+        distCorrect.startRunning();
 
-        SLOW_DIST = 25;
-        SPEED_MULT = 0.9;
-        //Lift.pidCoeffs = new PIDCoefficients(0.0045, 0, 0.0001);
-        //lift.initPID();
+        //Initial setup
+        drive.setPoseEstimate(new Pose2d(6.75, 78.25, Math.toRadians(0)));
+        //Levels levels = commands.detectBarcode(tseDetector);
+        Levels level = Levels.MIDDLE;
+        SLOW_DIST = 20;
+        SPEED_MULT = 1;
 
         //Score pre-loaded
-        H_ACC = Math.toRadians(4);
-        SPEED_MULT = 0.8;
+        led.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
+        lift.setPower(1); //Bring arm out of robot
+        waitForTime(125);
 
-        Levels levels = commands.detectBarcode(tseDetector);
-        //lift.setTargetHeight(commands.detectBarcode(tseDetector));
-        switch (levels) { //TODO: Positions
-            default:
+        switch (level) {
             case HIGH:
-                armController.setScorePos(ArmController.ScoringPosition.HIGH);
-                driveTo(12, 71, Math.toRadians(330));
+            default:
+                scoreInHub(77, ArmController.ScoringPosition.HIGH);
                 break;
             case MIDDLE:
-                armController.setScorePos(ArmController.ScoringPosition.MIDDLE);
-                driveTo(12, 71, Math.toRadians(330));
+                scoreInHub(74.5, ArmController.ScoringPosition.MIDDLE_AUTO);
                 break;
             case LOW:
-                armController.setScorePos(ArmController.ScoringPosition.LOW);
-                driveTo(12, 71, Math.toRadians(330));
+                scoreInHub(72, ArmController.ScoringPosition.LOW_AUTO);
                 break;
         }
 
-        H_ACC = Math.toRadians(1);
-        SPEED_MULT = 0.9;
-        commands.outtake(intake, lift);
-
-        SLOW_DIST = 20;
-        //Lift.pidCoeffs = new PIDCoefficients(0.006, 0, 0.00015);
-        //lift.initPID();
-        armController.setScorePos(ArmController.ScoringPosition.UP);
-
-        //Cycles
         int cycle = 0;
 
-        boolean inWarehouse = false;
-
-        while (opModeIsActive() && cycle < 3) {
-            if (intake.getFreightInIntake()) {
-                intake.setLatch(MotorIntake.LatchPosition.OPEN);
-                intake.setIntakePower(-1);
-            }
-
-            //Align with wall
-            if (cycle == 0)
-                driveToWall(75);
-            else
-                driveToWall(75);
-
-            if (!intake.getFreightInIntake())
-                intake.setIntakePower(0);
+        while (opModeIsActive() && cycle < 4) {
+            //Align with warehouse
+            led.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
+            driveToWall();
 
             //Drive through gap
             driveIntoWarehouse();
-            inWarehouse = true;
 
             //Park if running out of time
             if (getRuntime() >= 29)
                 break;
 
-            //Intake / Don't hit wall
-            intake(Math.max(22 - (cycle * 6), 5));
+            //Intake and don't hit wall
+            intake(Math.max(30 - (cycle * 7), 0));
 
             //Drive out through gap
+            led.setPattern(RevBlinkinLedDriver.BlinkinPattern.YELLOW);
             driveOutOfWarehouse();
-            inWarehouse = false;
 
             //Drive to and score in hub
-            scoreInHub(78);
+            led.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
+            scoreInHub(82);
 
             cycle++;
         }
+
         intake.setLatch(MotorIntake.LatchPosition.OPEN);
         intake.setPaddle(MotorIntake.PaddlePosition.BACK);
 
-        if (!inWarehouse) {
-            driveToWall(78);
-            driveIntoWarehouse();
-            intake(50);
-        }
-        //lift.setTargetHeight(Levels.GROUND);
+        //Park
+        driveToWall();
+        driveIntoWarehouse();
+
         armController.setScorePos(ArmController.ScoringPosition.IN);
         intake.setLatch(MotorIntake.LatchPosition.CLOSED);
         intake.setIntakePower(-0.3);
         SPEED_MULT = 1.0;
+        POS_ACC = 3;
         SLOW_DIST = 5;
+        driveTo(drive.getPoseEstimate().getX(), drive.getPoseEstimate().getY() + 20, Math.toRadians(90));
         driveTo(drive.getPoseEstimate().getX() + 2, drive.getPoseEstimate().getY() + 6, 0);
         SLOW_DIST = 20;
+        POS_ACC = 1;
         intake.setIntakePower(0);
     }
 
-    private void driveToWall(double endPos) {
-        distCorrect.startSideSensor();
-
+    private void driveToWall() {
         H_ACC = Math.toRadians(5);
         POS_ACC = 2;
         SLOW_DIST = 10;
-        SPEED_MULT = 0.7;
+        SPEED_MULT = 0.8;
+        MIN_TURN = 0.5;
 
-        //lift.setPower(-0.01); //Start moving the lift down
+        long startTime = System.currentTimeMillis();
 
-        boolean timeOut = driveTo(() -> {
-                    if (Math.abs(deltaHeading(drive.getPoseEstimate().getHeading(), Math.toRadians(85))) > Math.toRadians(3))
-                        return 20.0;
-                    else {
-                        //lift.setTargetHeight(Levels.GROUND);
-                        return drive.getPoseEstimate().getX();
-                    }
-                },
-                () -> endPos,
-                () -> Math.toRadians(85)
-        , 2000, true);
+        double startY = drive.getPoseEstimate().getY();
 
-        long driveStartTime = System.currentTimeMillis();
-        drive.setWeightedDrivePower(new Pose2d(0.01, 0.4, 0));
-        customWait(() -> distCorrect.getSideWall() > 8.5 && System.currentTimeMillis() < driveStartTime + 1150);
-        waitForTime(100);
+        //Drive towards wall and turn to face warehouse
+//        driveTo(() -> {
+//                    telemetry.addLine("DRIVE TO WALL");
+//
+//                    return -4.0;
+//                },
+//                () -> startY + 4,
+//                () -> {
+//                    if (System.currentTimeMillis() > startTime + 200)
+//                        armController.setScorePos(ArmController.ScoringPosition.UP);
+//                    return Math.toRadians(95);
+//                }
+//                );
 
+        //Strafe into wall
+//        long driveStartTime = System.currentTimeMillis();
+//        drive.setWeightedDrivePower(new Pose2d(0.05, 0.9, 0.05));
+//        customWait(() -> {
+//            telemetry.addLine("DRIVE TO WALL");
+//
+//            return System.currentTimeMillis() < driveStartTime + 50;
+//        });
+
+        drive.followTrajectoryAsync(driveToWall);
+        waitForDriveComplete();
+
+        Output armIn = new Output() {
+            long startTime = 0;
+
+            @Override
+            public void updateOutput() {
+                if (System.currentTimeMillis() > startTime + 100)
+                    stopOutput();
+            }
+
+            @Override
+            public void startOutput() {
+                startTime = System.currentTimeMillis();
+                intake.setIntakePower(-0.5);
+                armController.setScorePos(ArmController.ScoringPosition.IN);
+            }
+
+            @Override
+            public void stopOutput() {
+                intake.setIntakePower(1);
+                removeOutput(this);
+            }
+        };
+        addOutput(armIn);
+        armIn.startOutput();
+
+        //Bring arm to ground
         armController.setScorePos(ArmController.ScoringPosition.IN);
+        intake.setIntakePower(-0.5);
 
-        if (!timeOut) {
-            drive.setPoseEstimate(new Pose2d(
-                    distCorrect.getSideWall(),
-                    endPos,
-                    Math.toRadians(90)));
-        }
-        else {
-            drive.setPoseEstimate(new Pose2d(
-                    8.5,
-                    endPos,
-                    Math.toRadians(90)));
-        }
+        //Distance correction
+        drive.setPoseEstimate(new Pose2d(
+                6.5,
+                startY,
+                Math.toRadians(90)));
 
+        //Reset defaults
         H_ACC = Math.toRadians(1);
         POS_ACC = 1;
         SLOW_DIST = 20;
-        SPEED_MULT = 0.9;
-
-        distCorrect.stopRunning();
+        SPEED_MULT = 1;
+        MIN_TURN = 0.15;
     }
 
     private void driveIntoWarehouse() {
-        distCorrect.startRunning();
-        //intake.startScanningIntake();
-
-        //lift.setTargetHeight(Levels.GROUND);
+        //Start intaking
         armController.setScorePos(ArmController.ScoringPosition.IN);
-        intake.setIntakePower(1);
+        intake.setIntakePower(-0.5);
 
         POS_ACC = 2;
         H_ACC = Math.toRadians(20);
 
-        drive.setWeightedDrivePower(new Pose2d(0.5, 0.35, 0));
-
+        //Drive through gap
+        drive.setWeightedDrivePower(new Pose2d(0.65, 0.3, 0.05));
         long driveStartTime = System.currentTimeMillis();
-        customWait(() -> System.currentTimeMillis() < driveStartTime + 450 &&
-                distCorrect.getFrontDistance() > 50);
-        //drive.setWeightedDrivePower(new Pose2d(0, 0, 0));
+        customWait(() -> {
+            telemetry.addLine("DRIVE INTO WAREHOUSE");
 
+            return System.currentTimeMillis() < driveStartTime + 800;
+        });
+
+        intake.setIntakePower(1);
+
+        //Distance correction
         drive.setPoseEstimate(new Pose2d(
-                distCorrect.getSideWall(),
-                drive.getPoseEstimate().getY(),
+                8.5,
+                144-Math.max(Math.min(distCorrect.getFrontDistance(), 100), 10),
                 Math.toRadians(90)));
 
         POS_ACC = 1;
         H_ACC = Math.toRadians(1);
-
-        //intake.stopScanningIntake();
-        distCorrect.stopRunning();
     }
 
     private void intake(double distanceFromWall) {
-        distCorrect.startRunning();
-
-        //lift.setTargetHeight(Levels.GROUND);
+        //Start intaking
         armController.setScorePos(ArmController.ScoringPosition.IN);
         intake.setIntakePower(1);
 
+        //Drive towards back, intaking
         long driveStartTime = System.currentTimeMillis();
-        drive.setWeightedDrivePower(new Pose2d(0.4, 0.3, 0));
+        drive.setWeightedDrivePower(new Pose2d(0.8, 0.2, 0));
         customWait(() -> {
-            if (distCorrect.getFrontDistance() < 50)
-                drive.setWeightedDrivePower(new Pose2d(
-                        Math.min(Math.pow(distCorrect.getFrontDistance(), 2) * 0.0002, 0.4), //Slow down as approaches wall
-                        -distanceFromWall * (0.2 / 22), //Drive away from wall
-                        0));
+            telemetry.addLine("INTAKE");
 
-            return ((!intake.getFreightInIntake() &&
-                    distCorrect.getFrontDistance() > distanceFromWall) ||
-                    distCorrect.getFrontDistance() > 30) &&
-                    System.currentTimeMillis() < driveStartTime + 2000;
+            if (distCorrect.getFrontDistance() < 50) {
+                if (drive.getPoseEstimate().getHeading() > Math.toRadians(95)) {
+                    drive.setWeightedDrivePower(new Pose2d(
+                            Math.min(Math.pow(distCorrect.getFrontDistance()-10-distanceFromWall, 0) * 0.0004 + 0.075, 0.8), //Slow down as approaches wall
+                            -0.1, //Drive away from wall
+                            -0.2));
+                }
+                else if (drive.getPoseEstimate().getHeading() < Math.toRadians(85)) {
+                    drive.setWeightedDrivePower(new Pose2d(
+                            Math.min(Math.pow(distCorrect.getFrontDistance()-10-distanceFromWall, 0) * 0.0004 + 0.075, 0.8), //Slow down as approaches wall
+                            -0.1, //Drive away from wall
+                            0.2));
+                }
+                else {
+                    drive.setWeightedDrivePower(new Pose2d(
+                            Math.min(Math.pow(distCorrect.getFrontDistance()-10-distanceFromWall, 0) * 0.0004 + 0.075, 0.8), //Slow down as approaches wall
+                            -0.1, //Drive away from wall
+                            0));
+                }
+            }
+
+            //Distance correction
+            if (distCorrect.getFrontDistance() < 40) {
+                drive.setPoseEstimate(new Pose2d(
+                        10,
+                        144 - distCorrect.getFrontDistance(),
+                        drive.getPoseEstimate().getHeading()));
+
+                distCorrect.sensor.disableMoving();
+            }
+
+            if (intake.getFreightInIntake()) return false;
+            if (System.currentTimeMillis() > driveStartTime + 1000) return false;
+
+            if (System.currentTimeMillis() > driveStartTime + 500)
+                return distCorrect.getFrontDistance() > distanceFromWall;
+
+            return true;
         });
         drive.setWeightedDrivePower(new Pose2d(0, 0, 0));
 
-        long correctStartTime = System.currentTimeMillis();
-        customWait(() -> distCorrect.getFrontDistance() > 50 && System.currentTimeMillis() < correctStartTime + 1000);
-
-        if (distCorrect.getFrontDistance() < 50)
-            drive.setPoseEstimate(distCorrect.correctPoseWithDist(drive.getPoseEstimate().getHeading()));
-        else
-            requestOpModeStop();
-
-        //intake.setLatch(MotorIntake.LatchPosition.CLOSED);
-        //intake.setIntakePower(0);
-        distCorrect.stopRunning();
+        distCorrect.sensor.enableMoving();
     }
 
     private void driveOutOfWarehouse() {
         POS_ACC = 3;
         SLOW_DIST = 2;
-        SPEED_MULT = 0.7;
+        SPEED_MULT = 1;
 
-        drive.setWeightedDrivePower(new Pose2d(-0.04, 0.5, 0));
-        waitForTime(175);
+        //Make sure robot is against wall
+        //kyle loves u.
+        drive.setDrivePower(new Pose2d(-0.5, 0, -0.5));
+        customWait(() -> drive.getPoseEstimate().getHeading() > Math.toRadians(90));
+        drive.setWeightedDrivePower(new Pose2d(-0.6, 0.3, 0));
+        waitForTime(150);
 
-        long correctStartTime = System.currentTimeMillis();
-        customWait(() -> distCorrect.getFrontDistance() > 50 && System.currentTimeMillis() < correctStartTime + 1000);
+        //Distance correction
+        if (distCorrect.getFrontDistance() < 40) {
+            drive.setPoseEstimate(new Pose2d(
+                    8.5,
+                    144 - distCorrect.getFrontDistance(),
+                    drive.getPoseEstimate().getHeading()));
+        }
 
-        if (distCorrect.getFrontDistance() < 50)
-            drive.setPoseEstimate(distCorrect.correctPoseWithDist(drive.getPoseEstimate().getHeading()));
-
-        AtomicReference<Double> lastFrontReading = new AtomicReference<>(distCorrect.getFrontDistance());
+        drive.setWeightedDrivePower(new Pose2d(-0.7, 0.3, 0));
 
         AtomicBoolean throughGap = new AtomicBoolean(false);
         AtomicBoolean spitOut = new AtomicBoolean(false);
 
-        boolean timeOut = driveTo(() -> {
-                    if (!throughGap.get())
-                        return drive.getPoseEstimate().getX() - 15;
-                    else
-                        return drive.getPoseEstimate().getX();
-                },
-                () -> {
-                    if (distCorrect.getSideWall() > 15 && !throughGap.get())
-                        return 90.0;
-                    else {
-                        SLOW_DIST = 10;
+        long driveStartTime = System.currentTimeMillis();
 
-                        return 85.0;
-                    }
-                },
-                () -> {
-                    if (distCorrect.getFrontDistance() < 45 &&
-                        distCorrect.getFrontDistance() > lastFrontReading.get() + 2) {
-                        double robotHeading = drive.getPoseEstimate().getHeading();
-                        drive.setPoseEstimate(new Pose2d(distCorrect.correctPoseWithDist(robotHeading), robotHeading));
-                        lastFrontReading.set(distCorrect.getFrontDistance());
-                    }
-                    else if (distCorrect.getFrontDistance() >= 50 && !throughGap.get()) {
-                        double robotHeading = drive.getPoseEstimate().getHeading();
-                        drive.setPoseEstimate(new Pose2d(7, 96, robotHeading));
+        customWait(() -> {
+            telemetry.addLine("DRIVE OUT OF WAREHOUSE");
 
-                        throughGap.set(true);
-                    }
+            if (distCorrect.getFrontDistance() > 40 && !throughGap.get()) {
+                double robotHeading = drive.getPoseEstimate().getHeading();
+                drive.setPoseEstimate(new Pose2d(7, 80, robotHeading));
 
-                    if (distCorrect.getFrontDistance() > 45 && !spitOut.get()) {
-                        intake.spitOutTwo();
-                        spitOut.set(true);
-                    }
+                armController.setScorePos(ArmController.ScoringPosition.UP);
 
-                    if (distCorrect.getSideWall() > 15)
-                        return Math.toRadians(89);
-                    else
-                        return Math.toRadians(90);
-                }
-        , 2000);
+                throughGap.set(true);
+            }
 
-        if (!timeOut) {
+            //Distance correction
+            if (distCorrect.getFrontDistance() < 70 && distCorrect.getFrontDistance() > 15) {
+                drive.setPoseEstimate(new Pose2d(
+                        6.5,
+                        144 - distCorrect.getFrontDistance() - 4,
+                        drive.getPoseEstimate().getHeading()));
+            }
+
+            if (distCorrect.getFrontDistance() > 35 && !spitOut.get()) {
+                intake.spitOutTwo();
+                spitOut.set(true);
+            }
+
+            return System.currentTimeMillis() < driveStartTime + 1000 || distCorrect.getFrontDistance() < 45;
+        });
+
+        //Distance correction
+        if (distCorrect.getFrontDistance() < 100 && distCorrect.getFrontDistance() > 15) {
             drive.setPoseEstimate(new Pose2d(
-                    distCorrect.getSideWall(),
-                    drive.getPoseEstimate().getY(),
-                    Math.toRadians(90)));
-        }
-        else {
-            drive.setPoseEstimate(new Pose2d(
-                    8.5,
-                    drive.getPoseEstimate().getY(),
-                    Math.toRadians(90)));
+                    6.5,
+                    144 - distCorrect.getFrontDistance(),
+                    drive.getPoseEstimate().getHeading()));
         }
 
         POS_ACC = 1;
-        SPEED_MULT = 0.9;
+        SPEED_MULT = 1;
         SLOW_DIST = 20;
 
+        //Stop spit out two
         intake.cancelSpitOut();
         intake.setLatch(MotorIntake.LatchPosition.CLOSED);
         intake.setIntakePower(0);
-
-        distCorrect.stopRunning();
-    }
-
-    private void scoreInHub() {
-        //lift.setTargetHeight(Levels.HIGH);
-        armController.setScorePos(ArmController.ScoringPosition.UP);
-        waitForTime(100);
-        armController.setScorePos(ArmController.ScoringPosition.HIGH);
-
-        H_ACC = Math.toRadians(4);
-        driveTo(36, 62, Math.toRadians(330), 1500);
-        H_ACC = Math.toRadians(1);
-
-        commands.outtake(intake, lift);
     }
 
     private void scoreInHub(double yPos) {
-        //lift.setTargetHeight(Levels.HIGH);
+        //Put arm out
         armController.setScorePos(ArmController.ScoringPosition.UP);
-        waitForTime(100);
-        armController.setScorePos(ArmController.ScoringPosition.HIGH);
 
-        SPEED_MULT = 0.7;
-        SLOW_DIST = 25;
+        SPEED_MULT = 1;
+        SLOW_DIST = 20;
         H_ACC = Math.toRadians(4);
-        driveTo(36, yPos, Math.toRadians(330), 1500);
+        MIN_TURN = 0.25;
+
+        long startTime = System.currentTimeMillis();
+
+        //Drive to hub
+        driveTo(() -> 11.5,
+                () -> yPos,
+                () -> {
+                    //Wait for arm to get up before turning to hub
+                    if (System.currentTimeMillis() < startTime + 150)
+                        return Math.toRadians(10);
+                    else {
+                        armController.setScorePos(ArmController.ScoringPosition.HIGH);
+                        return Math.toRadians(-6);
+                    }
+                },
+                1500);
+
         H_ACC = Math.toRadians(1);
         SLOW_DIST = 20;
-        SPEED_MULT = 0.9;
+        SPEED_MULT = 1;
+        MIN_TURN = 0.15;
 
-        commands.outtake(intake, lift);
+        commands.outtake(intake);
+    }
+
+    private void scoreInHub(double yPos, ArmController.ScoringPosition scorePos) {
+        lift.setPower(1);
+
+        SPEED_MULT = 0.8;
+        SLOW_DIST = 20;
+        H_ACC = Math.toRadians(4);
+
+        long startTime = System.currentTimeMillis();
+
+        //Drive to hub
+        driveTo(() -> 12.0,
+                () -> yPos,
+                () -> {
+                    //Wait for arm to get up before turning to hub
+                    if (System.currentTimeMillis() < startTime + 150)
+                        return Math.toRadians(0);
+                    else {
+                        armController.setScorePos(scorePos);
+                        return Math.toRadians(-25);
+                    }
+                },
+                1500);
+
+        H_ACC = Math.toRadians(1);
+        SLOW_DIST = 20;
+        SPEED_MULT = 1;
+
+        commands.outtake(intake);
     }
 }
