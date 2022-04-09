@@ -7,6 +7,7 @@ import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.Rect;
 import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
@@ -103,7 +104,16 @@ public class SimpleColorPipeline extends RectPipeline {
         roiTemp.release();
         hsvMat.release();
 
+        Imgproc.rectangle(input, new Rect(posX, posY, width, height), new Scalar(0, 0, 255), 5);
+
         //return output;
         return input;
     }
+
+    public Rect getCrop() {
+
+        return new Rect(posX, posY, width, height);
+
+    }
+
 }
