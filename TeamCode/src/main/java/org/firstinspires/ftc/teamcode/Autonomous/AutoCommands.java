@@ -6,6 +6,8 @@ import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorIntake;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Levels;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Output;
 import org.firstinspires.ftc.teamcode.Subsystems.Webcam.OpenCV;
+import org.firstinspires.ftc.teamcode.Subsystems.Webcam.SimpleColorPipeline;
+import org.opencv.core.Rect;
 import org.opencv.core.RotatedRect;
 
 public class AutoCommands {
@@ -18,7 +20,18 @@ public class AutoCommands {
 
     public Levels detectBarcode(OpenCV tseDetector) {
         try {
-            if (op.getAlliance() == Alliance.BLUE) {
+
+            RotatedRect boundingRect = tseDetector.getRect();
+            Rect rectangle = ((SimpleColorPipeline) tseDetector.getPipeline()).getCrop();
+
+            if (boundingRect == null || boundingRect.size.area() < 1500) return Levels.LOW;
+            if (boundingRect.center.x - rectangle.x <= rectangle.width / 2d) {
+                return Levels.MIDDLE;
+            } else {
+                return Levels.HIGH;
+            }
+
+            /*if (op.getAlliance() == Alliance.BLUE) {
                 RotatedRect boundingRect = tseDetector.getRect();
 
                 if (boundingRect == null || boundingRect.size.area() < 1500) return Levels.LOW;
@@ -37,13 +50,10 @@ public class AutoCommands {
                 }
             } else {
                 return Levels.HIGH;
-            }
+            }*/
         }
         catch(Exception e) {
-            if (op.getAlliance() == Alliance.BLUE)
-                return Levels.LOW;
-            else
-                return Levels.HIGH;
+            return Levels.HIGH;
         }
     }
 

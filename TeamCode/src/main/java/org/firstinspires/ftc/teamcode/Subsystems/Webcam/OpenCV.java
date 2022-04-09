@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Webcam;
 
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -77,4 +78,7 @@ public class OpenCV {
     public void stop() {
         webcam.closeCameraDevice();
     }
+
+    public RectPipeline getPipeline() { return pipeline; }
+
 }
