@@ -168,7 +168,6 @@ public class RedCyclesNEW extends Auto_V2_5 {
 
     private void driveIntoWarehouse() {
         //distCorrect.startRunning();
-        intake.startScanningIntake();
 
         //Start intaking
         armController.setScorePos(ArmController.ScoringPosition.IN);
@@ -195,13 +194,11 @@ public class RedCyclesNEW extends Auto_V2_5 {
         POS_ACC = 1;
         H_ACC = Math.toRadians(1);
 
-        intake.stopScanningIntake();
         //distCorrect.stopRunning();
     }
 
     private void intake(double distanceFromWall) {
         //distCorrect.startRunning();
-        intake.startScanningIntake();
 
         //Start intaking
         armController.setScorePos(ArmController.ScoringPosition.IN);
@@ -232,7 +229,6 @@ public class RedCyclesNEW extends Auto_V2_5 {
                 -144+Math.max(Math.min(distCorrect.getFrontDistance(), 60), 10),
                 Math.toRadians(270)));
 
-        intake.stopScanningIntake();
         //distCorrect.stopRunning();
     }
 

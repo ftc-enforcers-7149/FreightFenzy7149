@@ -63,7 +63,7 @@ public class Tele_V2_RED extends TeleOp_Base {
         }
 
         intake = new MotorIntake(hardwareMap,
-                "intake", "paddle", "latch", "intakeColor");
+                "intake", "paddle", "latch", "force");
         lift = new Lift(hardwareMap, "lift", bReadCH, !RAN_AUTO);
         fourBar = new FourBar(hardwareMap, "fourBarL", "fourBarR",
                 "counterL", "counterR");

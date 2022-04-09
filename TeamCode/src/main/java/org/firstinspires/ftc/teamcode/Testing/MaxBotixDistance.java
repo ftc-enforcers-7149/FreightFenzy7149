@@ -27,9 +27,7 @@ public class MaxBotixDistance extends TeleOp_Base {
         maxbotixL = new CorrectedMB1220(hardwareMap, "distL", INITIAL_SMOOTHING, MovingUltrasonicSensor.Facing.LEFT, drive.getLocalizer());
         maxbotixR = new CorrectedMB1220(hardwareMap, "distR", INITIAL_SMOOTHING, MovingUltrasonicSensor.Facing.RIGHT, drive.getLocalizer());
 
-        maxbotixF.setQuartileSmoothing(true);
-        maxbotixL.setQuartileSmoothing(true);
-        maxbotixR.setQuartileSmoothing(true);
+        maxbotixF.enableMoving();
 
     }
 

@@ -8,6 +8,8 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.Subsystems.Sensors.FSR406;
+import org.firstinspires.ftc.teamcode.Subsystems.Sensors.WeightFreightDetector;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Input;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Output;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.ValueTimer;
@@ -18,11 +20,9 @@ public class MotorIntake implements Input, Output {
     public DcMotorEx intake;
     public Servo paddle, latch;
 
-    //Sensors
-    public RevColorSensorV3 intakeColorSensor;
+    //Force sensor
+    public WeightFreightDetector detector;
 
-    private static final double minDistance = 2;
-    private ValueTimer<Double> distance;
     private final boolean useSensor;
 
     //State machine logic
@@ -66,21 +66,15 @@ public class MotorIntake implements Input, Output {
 
     public MotorIntake(HardwareMap hardwaremap,
                        String motorName, String paddleName, String latchName,
-                       String intakeColorSensorName) {
+                       String forceName) {
         intake = hardwaremap.get(DcMotorEx.class, motorName);
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         paddle = hardwaremap.servo.get(paddleName);
         latch = hardwaremap.servo.get(latchName);
 
-        intakeColorSensor = hardwaremap.get(RevColorSensorV3.class, intakeColorSensorName);
-
-        distance = new ValueTimer<Double>(0.0, 200) {
-            @Override
-            public Double readValue() {
-                return intakeColorSensor.getDistance(DistanceUnit.INCH);
-            }
-        };
+        detector = new WeightFreightDetector(hardwaremap, forceName, 10000.0, 15);
+        detector.fsr406.setExcludeZero(true);
 
         useSensor = true;
     }
@@ -97,9 +91,8 @@ public class MotorIntake implements Input, Output {
 
     @Override
     public void updateInput() {
-        if (useSensor) {
-            distance.updateInput();
-        }
+        if (useSensor)
+            detector.updateInput();
     }
 
     @Override
@@ -172,32 +165,20 @@ public class MotorIntake implements Input, Output {
     }
 
     public boolean getFreightInIntake () {
-        return useSensor && (distance.getValue() < minDistance);
+        return useSensor && detector.isFreightInIntake();
     }
 
-    public double getDistance() {
-        if (useSensor) return distance.getValue();
-        else return 0;
-    }
-
-    public void startScanningIntake() {
-        distance.setDelayTime(0);
-    }
-
-    public void stopScanningIntake() {
-        distance.setDelayTime(250);
-    }
 
     @Override
     public void startInput() {
         if (useSensor)
-            distance.startInput();
+            detector.startInput();
     }
 
     @Override
     public void stopInput() {
         if (useSensor)
-            distance.stopInput();
+            detector.stopInput();
     }
 
     @Override

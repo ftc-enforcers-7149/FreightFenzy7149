@@ -86,7 +86,7 @@ public class Tele_V2_BLUE_4Bar_NEW extends TeleOp_Base {
         }
 
         intake = new MotorIntake(hardwareMap,
-                "intake", "paddle", "latch", "intakeColor");
+                "intake", "paddle", "latch", "force");
         lift = new Lift(hardwareMap, "lift", bReadCH, !RAN_AUTO);
         spinner = new MotorCarouselSpinner(hardwareMap, "spinner", Alliance.BLUE);
 

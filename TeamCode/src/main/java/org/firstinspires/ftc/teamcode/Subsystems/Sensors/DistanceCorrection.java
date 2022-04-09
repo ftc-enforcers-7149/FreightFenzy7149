@@ -53,7 +53,7 @@ public class DistanceCorrection implements Input {
         }
 
         // sensorF = hardwareMap.get(Rev2mDistanceSensor.class, distFName);
-        sensorF = new CorrectedMB1220(hardwareMap, distLName, bRead, 9, MovingUltrasonicSensor.Facing.FRONT, l);
+        sensorF = new CorrectedMB1220(hardwareMap, distFName, bRead, 9, MovingUltrasonicSensor.Facing.FRONT, l);
         //sensorF.mb1220.resetDeviceConfigurationForOpMode();
         /*fDist = new ValueTimer<Double>(350.0, 200) {
             @Override

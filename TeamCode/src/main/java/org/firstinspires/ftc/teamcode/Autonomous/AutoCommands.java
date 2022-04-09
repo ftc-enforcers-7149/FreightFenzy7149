@@ -62,7 +62,7 @@ public class AutoCommands {
         //    intake.setIntakePower(0.6);
         intake.setLatch(MotorIntake.LatchPosition.OPEN);
 
-        op.waitForTime(150);
+        op.waitForTime(100);
 
         //if (lift.getHeight() <= (Levels.MIDDLE.height + Levels.HIGH.height) / 2)
             intake.setPaddle(MotorIntake.PaddlePosition.OUT_FAR);
@@ -71,7 +71,7 @@ public class AutoCommands {
 
         //if (lift.getHeight() <= Levels.MIDDLE.height)
         //    op.waitForTime(150);
-        op.waitForTime(150);
+        op.waitForTime(200);
 
         intake.setIntakePower(0);
         intake.setPaddle(MotorIntake.PaddlePosition.BACK);

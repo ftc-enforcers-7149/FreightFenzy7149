@@ -57,7 +57,6 @@ public class BlueCyclesNEWNEW extends Auto_V2_5 {
     @Override
     protected void auto() {
         distCorrect.startRunning();
-        intake.startScanningIntake();
 
         //Initial setup
         drive.setPoseEstimate(new Pose2d(6.75, 78.25, Math.toRadians(0)));
@@ -83,7 +82,6 @@ public class BlueCyclesNEWNEW extends Auto_V2_5 {
         SLOW_DIST = 15;*/
 
         distCorrect.stopRunning();
-        intake.stopScanningIntake();
     }
 
     private void preloaded(ArmController.ScoringPosition scorePos) {

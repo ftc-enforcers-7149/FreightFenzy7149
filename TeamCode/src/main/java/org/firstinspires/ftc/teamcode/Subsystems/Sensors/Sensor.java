@@ -102,15 +102,6 @@ public class Sensor implements Input {
         }
         else {
 
-            ArrayList<Double> dupli = (ArrayList<Double>) filterVals.clone();
-
-            double q1 = dupli.get((int) Math.ceil(dupli.size() / 4d));
-            double q3 = dupli.get((int) Math.floor(3 * dupli.size() / 4d));
-            double bound = 1.5d * (q3 - q1);
-
-            if(!(newVal > q3 + bound || newVal < q1 - bound))
-                lastNonOutlier = newVal;
-
             if(filterVals.size() + 1 > smoothingSize) filterVals.remove(0);
             filterVals.add(newVal);
 

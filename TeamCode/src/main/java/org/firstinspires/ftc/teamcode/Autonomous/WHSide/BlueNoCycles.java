@@ -81,7 +81,6 @@ public class BlueNoCycles extends Auto_V2_5 {
 
     private void driveIntoWarehouse() {
         distCorrect.startRunning();
-        intake.startScanningIntake();
 
         lift.setTargetHeight(Levels.GROUND);
         intake.setIntakePower(-1);
@@ -103,13 +102,11 @@ public class BlueNoCycles extends Auto_V2_5 {
         POS_ACC = 0.5;
         H_ACC = Math.toRadians(1);
 
-        intake.stopScanningIntake();
         distCorrect.stopRunning();
     }
 
     private void intake(double distanceFromWall) {
         distCorrect.startRunning();
-        intake.startScanningIntake();
 
         lift.setTargetHeight(Levels.GROUND);
         intake.setIntakePower(-1);
@@ -138,7 +135,6 @@ public class BlueNoCycles extends Auto_V2_5 {
         else
             drive.setPoseEstimate(new Vector2d(distCorrect.getSideWall(), 144));
 
-        intake.stopScanningIntake();
         distCorrect.stopRunning();
 
         intake.setIntakePower(-0.2);

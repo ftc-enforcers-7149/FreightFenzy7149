@@ -110,7 +110,7 @@ public class FourBar implements Output {
     }
 
     private double scalePos(double pos) {
-        double zeroOutput = 0.06;
+        double zeroOutput = 0.05;
         double oneOutput = 1;
         return (oneOutput-zeroOutput) * pos  + zeroOutput;
     }

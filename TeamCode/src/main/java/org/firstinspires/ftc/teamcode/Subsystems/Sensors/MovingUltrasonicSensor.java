@@ -10,31 +10,37 @@ import java.util.ArrayList;
 public class MovingUltrasonicSensor extends Sensor {
 
     public enum Facing {
-
         FRONT,
         BACK,
         LEFT,
         RIGHT
-
     }
 
     public static final double SPEED_OF_SOUND = 13503.9 /*in/s, in air at 68F*/;
 
     private Localizer localizer;
     private Facing f;
-    private Gyroscope gyro;
 
-    public MovingUltrasonicSensor(int smoothingSize, Facing f, Localizer localizer, Gyroscope gyro) {
+    private boolean disabled;
+
+    public MovingUltrasonicSensor(int smoothingSize, Facing f, Localizer localizer) {
         super(smoothingSize);
         this.f = f;
         this.localizer = localizer;
-        this.gyro = gyro;
     }
 
     public double getTimeFromDistance(double distance) {
 
         return 1/SPEED_OF_SOUND * distance;
 
+    }
+
+    public void disableMoving() {
+        disabled = true;
+    }
+
+    public void enableMoving() {
+        disabled = false;
     }
 
     @Override
@@ -44,81 +50,101 @@ public class MovingUltrasonicSensor extends Sensor {
 
         double time = getTimeFromDistance(newVal);
 
-        double heading = gyro.getRawYaw();
+        double heading = localizer.getPoseEstimate().getHeading();
         double pi = Math.PI;
 
-        if(heading >= pi/4 && heading <= 3*pi/4) {// facing "front" (positive y)
-            switch(f) {
+        if (!disabled) {
+            if(heading >= pi/4 && heading <= 3*pi/4) {// facing "front" (positive y)
+                switch(f) {
+
+                    case FRONT:
+                        super.add(newVal  - localizer.getPoseVelocity().getY() * time);
+                        break;
+                    case BACK:
+                        super.add(newVal  + localizer.getPoseVelocity().getY() * time);
+                        break;
+                    case LEFT:
+                        super.add(newVal  + localizer.getPoseVelocity().getX() * time);
+                        break;
+                    case RIGHT:
+                        super.add(newVal  - localizer.getPoseVelocity().getX() * time);
+                        break;
+
+                }
+            }
+            else if(heading < pi/4 && heading >= 0 || heading > 7*pi/4 && heading <= 2*pi) {// facing "left" (positive x)
+                switch(f) {
+
+                    case FRONT:
+                        super.add(newVal  - localizer.getPoseVelocity().getX() * time);
+                        break;
+                    case BACK:
+                        super.add(newVal  + localizer.getPoseVelocity().getX() * time);
+                        break;
+                    case LEFT:
+                        super.add(newVal  + localizer.getPoseVelocity().getY() * time);
+                        break;
+                    case RIGHT:
+                        super.add(newVal  - localizer.getPoseVelocity().getY() * time);
+                        break;
+
+                }
+            }
+            else if(heading > 3*pi/4 && heading <= 5*pi/4) { // facing "right" (negative x)
+                switch(f) {
+
+                    case FRONT:
+                        super.add(newVal  + localizer.getPoseVelocity().getX() * time);
+                        break;
+                    case BACK:
+                        super.add(newVal  - localizer.getPoseVelocity().getX() * time);
+                        break;
+                    case LEFT:
+                        super.add(newVal  - localizer.getPoseVelocity().getY() * time);
+                        break;
+                    case RIGHT:
+                        super.add(newVal  + localizer.getPoseVelocity().getY() * time);
+                        break;
+
+                }
+            }
+            else { // facing "back" (negative y)
+                switch(f) {
+
+                    case FRONT:
+                        super.add(newVal  + localizer.getPoseVelocity().getY() * time);
+                        break;
+                    case BACK:
+                        super.add(newVal  - localizer.getPoseVelocity().getY() * time);
+                        break;
+                    case LEFT:
+                        super.add(newVal  - localizer.getPoseVelocity().getX() * time);
+                        break;
+                    case RIGHT:
+                        super.add(newVal  + localizer.getPoseVelocity().getX() * time);
+                        break;
+
+                }
+            }
+
+            switch (f) {
 
                 case FRONT:
-                    super.add(newVal  - localizer.getPoseVelocity().getY() * time);
+                    super.add(newVal - localizer.getPoseVelocity().getY() * time);
                     break;
                 case BACK:
-                    super.add(newVal  + localizer.getPoseVelocity().getY() * time);
+                    super.add(newVal + localizer.getPoseVelocity().getY() * time);
                     break;
                 case LEFT:
-                    super.add(newVal  + localizer.getPoseVelocity().getX() * time);
+                    super.add(newVal + localizer.getPoseVelocity().getX() * time);
                     break;
                 case RIGHT:
-                    super.add(newVal  - localizer.getPoseVelocity().getX() * time);
+                    super.add(newVal - localizer.getPoseVelocity().getX() * time);
                     break;
 
             }
         }
-        else if(heading < pi/4 && heading >= 0 || heading > 7*pi/4 && heading <= 2*pi) {// facing "left" (positive x)
-            switch(f) {
-
-                case FRONT:
-                    super.add(newVal  - localizer.getPoseVelocity().getX() * time);
-                    break;
-                case BACK:
-                    super.add(newVal  + localizer.getPoseVelocity().getX() * time);
-                    break;
-                case LEFT:
-                    super.add(newVal  + localizer.getPoseVelocity().getY() * time);
-                    break;
-                case RIGHT:
-                    super.add(newVal  - localizer.getPoseVelocity().getY() * time);
-                    break;
-
-            }
-        }
-        else if(heading > 3*pi/4 && heading <= 5*pi/4) { // facing "right" (negative x)
-            switch(f) {
-
-                case FRONT:
-                    super.add(newVal  + localizer.getPoseVelocity().getX() * time);
-                    break;
-                case BACK:
-                    super.add(newVal  - localizer.getPoseVelocity().getX() * time);
-                    break;
-                case LEFT:
-                    super.add(newVal  - localizer.getPoseVelocity().getY() * time);
-                    break;
-                case RIGHT:
-                    super.add(newVal  + localizer.getPoseVelocity().getY() * time);
-                    break;
-
-            }
-        }
-        else { // facing "back" (negative y)
-            switch(f) {
-
-                case FRONT:
-                    super.add(newVal  + localizer.getPoseVelocity().getY() * time);
-                    break;
-                case BACK:
-                    super.add(newVal  - localizer.getPoseVelocity().getY() * time);
-                    break;
-                case LEFT:
-                    super.add(newVal  - localizer.getPoseVelocity().getX() * time);
-                    break;
-                case RIGHT:
-                    super.add(newVal  + localizer.getPoseVelocity().getX() * time);
-                    break;
-
-            }
-        }
-
+        else
+            super.add(newVal);
     }
 }

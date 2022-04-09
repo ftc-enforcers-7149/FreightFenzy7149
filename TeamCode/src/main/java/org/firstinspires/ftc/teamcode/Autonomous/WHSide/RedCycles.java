@@ -188,7 +188,6 @@ public class RedCycles extends Auto_V2_5 {
 
     private void intake(double distanceFromWall) {
         distCorrect.startRunning();
-        intake.startScanningIntake();
 
         lift.setTargetHeight(Levels.GROUND);    //TODO: Four Bar
         intake.setIntakePower(1);
@@ -236,7 +235,6 @@ public class RedCycles extends Auto_V2_5 {
         else
             requestOpModeStop();
 
-        intake.stopScanningIntake();
         //intake.setLatch(MotorIntake.LatchPosition.CLOSED);
         //intake.setIntakePower(0);
         distCorrect.stopRunning();

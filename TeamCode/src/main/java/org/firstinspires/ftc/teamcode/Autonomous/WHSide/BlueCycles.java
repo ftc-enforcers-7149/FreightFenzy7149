@@ -210,7 +210,6 @@ public class BlueCycles extends Auto_V2_5 {
 
     private void intake(double distanceFromWall) {
         distCorrect.startRunning();
-        intake.startScanningIntake();
 
         //lift.setTargetHeight(Levels.GROUND);
         armController.setScorePos(ArmController.ScoringPosition.IN);
@@ -240,15 +239,12 @@ public class BlueCycles extends Auto_V2_5 {
         else
             requestOpModeStop();
 
-        intake.stopScanningIntake();
         //intake.setLatch(MotorIntake.LatchPosition.CLOSED);
         //intake.setIntakePower(0);
         distCorrect.stopRunning();
     }
 
     private void driveOutOfWarehouse() {
-        distCorrect.startRunning();
-
         POS_ACC = 3;
         SLOW_DIST = 2;
         SPEED_MULT = 0.7;

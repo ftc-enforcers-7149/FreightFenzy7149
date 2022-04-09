@@ -46,7 +46,7 @@ public abstract class Auto_V2_5 extends Autonomous_Base {
 
         //Initialize subsystems
         intake = new MotorIntake(hardwareMap,
-                "intake", "paddle", "latch", "intakeColor");
+                "intake", "paddle", "latch", "force");
         lift = new Lift(hardwareMap, "lift", bReadCH, !RAN_AUTO);
         fourBar = new FourBar(hardwareMap, "fourBarL", "fourBarR",
                 "counterL", "counterR");
@@ -62,9 +62,9 @@ public abstract class Auto_V2_5 extends Autonomous_Base {
         led = new LED(hardwareMap, "blinkin", Alliance.BLUE);
 
         if (getAlliance() == Alliance.BLUE)
-            led.setPattern(RevBlinkinLedDriver.BlinkinPattern.BREATH_BLUE);
+            led.setPattern(RevBlinkinLedDriver.BlinkinPattern.LIGHT_CHASE_BLUE);
         else
-            led.setPattern(RevBlinkinLedDriver.BlinkinPattern.BREATH_RED);
+            led.setPattern(RevBlinkinLedDriver.BlinkinPattern.LIGHT_CHASE_RED);
 
         led.updateOutput();
 
@@ -269,7 +269,6 @@ public abstract class Auto_V2_5 extends Autonomous_Base {
         telemetry.addData("Side Distance: ", distCorrect.getSideWall());
         telemetry.addData("Lift Height: ", lift.getHeight());
         telemetry.addData("Four Bar Angle: ", fourBar.getCurrAngle());
-        telemetry.addData("Intake Distance: ", intake.getDistance());
         telemetry.addData("Freight in Intake? ", intake.getFreightInIntake());
     }
 }
