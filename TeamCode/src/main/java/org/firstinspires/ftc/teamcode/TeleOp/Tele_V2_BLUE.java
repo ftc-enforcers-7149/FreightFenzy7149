@@ -5,41 +5,33 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
+import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.ArmController;
+import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.FourBar;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorCarouselSpinner;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorIntake;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.LED.LED;
-import org.firstinspires.ftc.teamcode.Subsystems.Utils.Levels;
 
 import static org.firstinspires.ftc.teamcode.GlobalData.HEADING;
 import static org.firstinspires.ftc.teamcode.GlobalData.RAN_AUTO;
 
-@TeleOp (name = "BLUE TeleOp")
-@Disabled
+@TeleOp(name = "TeleOp BLUE")
+//@Disabled
 public class Tele_V2_BLUE extends TeleOp_Base {
+
+    //Control objects
+    private MotorIntake intake;
+    private Lift lift;
+    private FourBar fourBar;
+    private ArmController armController;
+    private MotorCarouselSpinner spinner;
+    private LED led;
 
     //Drive
     private boolean resetAngle;
     private boolean sharedBarrier, lastSharedBarrier;
 
-    //Control objects
-    private MotorIntake intake;
-    private Lift lift;
-    private MotorCarouselSpinner spinner;
-    private LED led;
-
     //Lift
-    public Levels cycleBackward(Levels level) {
-        switch (level) {
-            case HIGH: return Levels.MIDDLE;
-            case MIDDLE: return Levels.LOW;
-            case LOW:
-            default: return Levels.HIGH;
-        }
-    }
-
-    private Levels liftPos = Levels.GROUND, lastLiftPos = Levels.GROUND;
-    private boolean high, mid, low, ground, cap, shared;
     private double liftPower, lastLiftPower;
     private boolean lastPowerManual;
 
@@ -55,6 +47,12 @@ public class Tele_V2_BLUE extends TeleOp_Base {
     //Spinner
     private boolean spin, lastSpin;
 
+    //Four Bar
+    private double curr4BPos, last4BPos;
+
+    private ArmController.ScoringPosition scorePos = ArmController.ScoringPosition.IN,
+            lastScorePos = ArmController.ScoringPosition.IN;
+
     @Override
     public void init() {
         try {
@@ -68,6 +66,9 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         intake = new MotorIntake(hardwareMap,
                 "intake", "paddle", "latch", "intakeColor");
         lift = new Lift(hardwareMap, "lift", bReadCH, !RAN_AUTO);
+        fourBar = new FourBar(hardwareMap, "fourBarL", "fourBarR",
+                "counterL", "counterR");
+        armController = new ArmController(lift, fourBar);
         spinner = new MotorCarouselSpinner(hardwareMap, "spinner", Alliance.BLUE);
 
         led = new LED(hardwareMap, "blinkin", Alliance.BLUE);
@@ -81,16 +82,12 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         addInput(spinner);
         addOutput(intake);
         addOutput(lift);
+        addOutput(fourBar);
         addOutput(spinner);
         addOutput(led);
 
         led.startOutput();
         led.updateOutput();
-    }
-
-    @Override
-    public void init_loop() {
-        telemetry.addData("HEADING: ", HEADING);
     }
 
     @Override
@@ -115,38 +112,13 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         boolean overrideIntakeDropLift = false;
         boolean overrideIntakeSharedBarrier = isAutomatedDriving();
 
-        //Lift
-        if (high)
-            liftPos = Levels.HIGH;
-        if (mid)
-            liftPos = Levels.MIDDLE;
-        if (low)
-            liftPos = Levels.LOW;
-        if (cap)
-            liftPos = Levels.CAP;
-        if (shared)
-            liftPos = Levels.SHARED;
-        if (ground) {
-            liftPos = Levels.GROUND;
-            if (lastLiftPos == Levels.LOW)
-                overrideIntakeDropLift = true;
-        }
-        else if (!score && !outtake && !in) intake.setIntakePower(0);
-
         //Set height
         if (liftPower != lastLiftPower) {
             lift.setPower(liftPower);
             lastPowerManual = true;
-            liftPos = Levels.MAX;
-            lastLiftPos = Levels.MAX;
         }
         else if (lastPowerManual && liftPower == 0) {
             lift.setTargetHeight(lift.getHeight());
-            lastPowerManual = false;
-        }
-
-        if (liftPos != lastLiftPos) {
-            lift.setTargetHeight(liftPos);
             lastPowerManual = false;
         }
 
@@ -156,13 +128,24 @@ public class Tele_V2_BLUE extends TeleOp_Base {
             manualOverride = !manualOverride;
         }
 
+        // Four Bar
+        if (scorePos != lastScorePos && scorePos != ArmController.ScoringPosition.IDLE) {
+            armController.setScorePos(scorePos);
+        }
+
+        if (scorePos == ArmController.ScoringPosition.IN && lift.getHeight() > scorePos.liftPos + 2)
+            overrideIntakeDropLift = true;
+
         // Intake
         if (in && freightInIntake && !lastFreightInIntake) {
             intake.cancelSpitOut();
             intake.setIntakePower(0);
             intake.setPaddle(MotorIntake.PaddlePosition.BACK);
             intake.setLatch(MotorIntake.LatchPosition.CLOSED);
-            //lift.setTargetHeight(Levels.LOW);
+
+            //Automatically move arm up
+            //if (scorePos == ArmController.ScoringPosition.IN)
+            //    armController.setScorePos(ArmController.ScoringPosition.UP);
             //lastPowerManual = false;
         }
         else {
@@ -184,14 +167,8 @@ public class Tele_V2_BLUE extends TeleOp_Base {
 
         if (score) {
             intake.cancelSpitOut();
-            if (liftPos == Levels.LOW) {
-                intake.setIntakePower(0.3);
-                intake.setPaddle(MotorIntake.PaddlePosition.OUT_FAR);
-            }
-            else {
-                intake.setIntakePower(0);
-                intake.setPaddle(MotorIntake.PaddlePosition.OUT_CLOSE);
-            }
+            intake.setIntakePower(0);
+            intake.setPaddle(MotorIntake.PaddlePosition.OUT_CLOSE);
             intake.setLatch(MotorIntake.LatchPosition.OPEN);
         }
         else if (lastScore) {
@@ -202,14 +179,8 @@ public class Tele_V2_BLUE extends TeleOp_Base {
 
         if (outDuck) {
             intake.cancelSpitOut();
-            if (liftPos == Levels.LOW) {
-                intake.setIntakePower(0.3);
-                intake.setPaddle(MotorIntake.PaddlePosition.OUT_FAR);
-            }
-            else {
-                intake.setIntakePower(0);
-                intake.setPaddle(MotorIntake.PaddlePosition.OUT_CLOSE);
-            }
+            intake.setIntakePower(0);
+            intake.setPaddle(MotorIntake.PaddlePosition.OUT_CLOSE);
             intake.setLatch(MotorIntake.LatchPosition.OPEN_UP);
         }
         else if (lastOutDuck) {
@@ -222,10 +193,10 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         if (overrideIntakeSharedBarrier) intake.setIntakePower(0.2);
 
         // Carousel
-        if (gamepad1.x) spinner.reset();
+        if (spin) spinner.reset();
 
         // Telemetry
-        telemetry.addData("Lift Height: ", lift.getHeight());
+        telemetry.addData("Score Position: ", scorePos);
         telemetry.addData("Freight in Intake: ", freightInIntake);
 
         // Led
@@ -234,17 +205,9 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         else
             led.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
 
-        //led.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
-
         updateAutomatedDriving();
         updateOutputs();
         updateStateMachine();
-    }
-
-    @Override
-    public void stop() {
-        stopInputs();
-        stopOutputs();
     }
 
     @Override
@@ -257,14 +220,27 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         sharedBarrier = gamepad1.a && !gamepad1.start;
 
         //Lift
-        high = gamepad2.dpad_up || gamepad1.dpad_up;
-        mid = gamepad2.dpad_left;
-        low = gamepad2.dpad_down;
-        ground = gamepad2.a || gamepad1.dpad_down;
-        cap = gamepad2.y;
-        shared = gamepad2.dpad_right;
 
-        liftPower = 0.67 * (gamepad2.right_trigger - gamepad2.left_trigger);
+        if (gamepad2.dpad_up || gamepad1.dpad_up)
+            scorePos = ArmController.ScoringPosition.UP;
+        else if (gamepad2.dpad_down || gamepad1.dpad_down)
+            scorePos = ArmController.ScoringPosition.IN;
+        else if (gamepad2.dpad_right)
+            scorePos = ArmController.ScoringPosition.HIGH;
+        else if (gamepad2.dpad_left)
+            scorePos = ArmController.ScoringPosition.MIDDLE;
+        else if (gamepad2.y)
+            scorePos = ArmController.ScoringPosition.FAR;
+        else if (gamepad2.b && !gamepad2.start)
+            scorePos = ArmController.ScoringPosition.CENTER;
+        else if (gamepad2.a)
+            scorePos = ArmController.ScoringPosition.CLOSE;
+        else if (gamepad2.x)
+            scorePos = ArmController.ScoringPosition.REACH;
+        else if (scorePos != ArmController.ScoringPosition.IN)
+            scorePos = ArmController.ScoringPosition.UP;
+
+        liftPower = 0.8 * (gamepad2.right_trigger - gamepad2.left_trigger);
 
         resetLift = gamepad2.back;
 
@@ -278,6 +254,13 @@ public class Tele_V2_BLUE extends TeleOp_Base {
 
         //Spinner
         spin = gamepad1.x;
+
+        curr4BPos -= gamepad2.right_stick_y / 20; //Fine tune or adjust for actual time changes
+        if (curr4BPos < 0) curr4BPos = 0;
+        else if (curr4BPos > 1) curr4BPos = 1;
+
+        if (liftPower != 0 || gamepad2.right_stick_y != 0)
+            scorePos = ArmController.ScoringPosition.IDLE;
     }
 
     @Override
@@ -289,7 +272,6 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         //Lift
         lastLiftPower = liftPower;
         lastResetLift = resetLift;
-        lastLiftPos = liftPos;
 
         //Intake
         lastFreightInIntake = freightInIntake;
@@ -300,5 +282,10 @@ public class Tele_V2_BLUE extends TeleOp_Base {
 
         //Spinner
         lastSpin = spin;
+
+        //4Bar
+        last4BPos = curr4BPos;
+
+        lastScorePos = scorePos;
     }
 }

@@ -47,8 +47,8 @@ import static org.firstinspires.ftc.teamcode.Odometry.DriveWheels.DriveConstants
 @Config
 public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
         implements Input, Output {
-    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(4, 0, 1);
-    public static PIDCoefficients HEADING_PID = new PIDCoefficients(2, 0, 0.3);
+    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(3, 0, 0.5);
+    public static PIDCoefficients HEADING_PID = new PIDCoefficients(2, 0, 0.5);
 
     public static double LATERAL_MULTIPLIER = 1.09115622611;
 
@@ -254,7 +254,7 @@ public class MecanumDrive extends com.acmerobotics.roadrunner.drive.MecanumDrive
         }
 
         gyro = new Gyroscope(hardwareMap);
-        innerGyro = false;
+        innerGyro = true;
 
         fLeft = hardwareMap.get(DcMotorEx.class, "fLeft");
         fRight = hardwareMap.get(DcMotorEx.class, "fRight");

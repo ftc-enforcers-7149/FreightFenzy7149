@@ -40,6 +40,8 @@ public class TrackWidthTuner extends LinearOpMode {
         BulkRead bReadCH = new BulkRead(hardwareMap, "Control Hub");
         BulkRead bReadEH = new BulkRead(hardwareMap, "Expansion Hub");
         MecanumDrive drive = new MecanumDrive(hardwareMap, bReadCH, bReadEH);
+        drive.startInput();
+        drive.startOutput();
 
         telemetry.addLine("Press play to begin the track width tuner routine");
         telemetry.addLine("Make sure your robot has enough clearance to turn smoothly");
@@ -64,11 +66,12 @@ public class TrackWidthTuner extends LinearOpMode {
             drive.turnAsync(Math.toRadians(ANGLE));
 
             while (!isStopRequested() && drive.isBusy()) {
+                drive.updateInput();
+
                 double heading = drive.getPoseEstimate().getHeading();
                 headingAccumulator += Angle.norm(heading - lastHeading);
                 lastHeading = heading;
 
-                drive.updateInput();
                 drive.updateOutput();
             }
 
@@ -88,5 +91,8 @@ public class TrackWidthTuner extends LinearOpMode {
         while (!isStopRequested()) {
             idle();
         }
+
+        drive.stopInput();
+        drive.stopOutput();
     }
 }

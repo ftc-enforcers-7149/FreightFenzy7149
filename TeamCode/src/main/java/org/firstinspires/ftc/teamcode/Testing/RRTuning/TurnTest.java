@@ -22,11 +22,20 @@ public class TurnTest extends LinearOpMode {
         BulkRead bReadCH = new BulkRead(hardwareMap, "Control Hub");
         BulkRead bReadEH = new BulkRead(hardwareMap, "Expansion Hub");
         MecanumDrive drive = new MecanumDrive(hardwareMap, bReadCH, bReadEH);
+        drive.startInput();
+        drive.startOutput();
 
         waitForStart();
 
         if (isStopRequested()) return;
 
-        drive.turn(Math.toRadians(ANGLE));
+        drive.turnAsync(Math.toRadians(ANGLE));
+        while (opModeIsActive() && drive.isBusy()) {
+            drive.updateInput();
+            drive.updateOutput();
+        }
+
+        drive.startInput();
+        drive.stopOutput();
     }
 }

@@ -41,9 +41,9 @@ public class MecanumLocalizer implements Localizer {
     @Override
     public void update() {
         //Only use in Tuning OpModes
-        //drive.bReadCH.update();
-        //drive.bReadEH.update();
-        //drive.gyro.update();
+        //drive.bReadCH.updateInput();
+        //drive.bReadEH.updateInput();
+        //drive.gyro.updateInput();
 
         //Get current wheel positions & heading
         List<Double> wheelPositions = drive.getWheelPositions();

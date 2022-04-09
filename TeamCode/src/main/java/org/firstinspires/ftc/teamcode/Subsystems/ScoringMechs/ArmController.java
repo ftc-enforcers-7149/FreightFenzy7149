@@ -8,6 +8,7 @@ public class ArmController implements Output {
     public final FourBar fourBar;
 
     public enum ScoringPosition {
+        IDLE(0, 0, 1),
         IN(0, 0, 1),
         UP(7, 0, 1),
         LOW(0, 0.5, 0.6),

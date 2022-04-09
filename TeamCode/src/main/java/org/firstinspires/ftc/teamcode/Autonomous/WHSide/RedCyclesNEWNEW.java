@@ -5,48 +5,46 @@ import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
 import org.firstinspires.ftc.teamcode.Autonomous.Auto_V2_5;
 import org.firstinspires.ftc.teamcode.GlobalData;
 import org.firstinspires.ftc.teamcode.Odometry.DriveWheels.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.ArmController;
-import org.firstinspires.ftc.teamcode.Subsystems.Utils.Levels;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Output;
 
-import static org.firstinspires.ftc.teamcode.GlobalData.*;
+import static org.firstinspires.ftc.teamcode.GlobalData.H_ACC;
+import static org.firstinspires.ftc.teamcode.GlobalData.MIN_TURN;
+import static org.firstinspires.ftc.teamcode.GlobalData.POS_ACC;
+import static org.firstinspires.ftc.teamcode.GlobalData.SLOW_DIST;
+import static org.firstinspires.ftc.teamcode.GlobalData.SPEED_MULT;
 
-@Autonomous(name = "Blue WH Cycles NEW NEW")
-@Disabled
-public class BlueCyclesNEWNEW extends Auto_V2_5 {
+@Autonomous(name = "Red WH Cycles NEW NEW")
+//@Disabled
+public class RedCyclesNEWNEW extends Auto_V2_5 {
 
-    private static final Trajectory preload = MecanumDrive.trajectoryBuilder(new Pose2d(6.75, 78.25, Math.toRadians(0)), Math.toRadians(10))
-            .splineToSplineHeading(new Pose2d(12, 78, Math.toRadians(-18)), Math.toRadians(-10))
+    private static final Trajectory preload = MecanumDrive.trajectoryBuilder(new Pose2d(6.75, -78.25, Math.toRadians(0)), Math.toRadians(-10))
+            .splineToSplineHeading(new Pose2d(20, -78, Math.toRadians(25)), Math.toRadians(10))
             .addTemporalMarker(0.67, () -> GlobalData.openSignal = true) //Open latch just as arm lines up
             .addDisplacementMarker(() -> GlobalData.outtakeSignal = true) //Outtake freight right at the end
             .build();
 
-    private static final Trajectory driveToWall = MecanumDrive.trajectoryBuilder(preload.end(), Math.toRadians(170))
-            .splineToSplineHeading(new Pose2d(-12, 84, Math.toRadians(65)), Math.toRadians(170))
-            .addTemporalMarker(0.35, () -> GlobalData.armUpSignal = true)
+    private static final Trajectory driveToWall = MecanumDrive.trajectoryBuilder(preload.end(), Math.toRadians(-170))
+            .splineToSplineHeading(new Pose2d(4, -84, Math.toRadians(-75)), Math.toRadians(-170))
+            .addTemporalMarker(0.5, () -> GlobalData.armUpSignal = true)
             .build();
 
-    private static final Trajectory driveOut = MecanumDrive.trajectoryBuilder(new Pose2d(12, 130, Math.toRadians(90)), Math.toRadians(-130))
-            .splineToSplineHeading(new Pose2d(-10, 120, Math.toRadians(90)), Math.toRadians(-100))
+    private static final Trajectory driveOut = MecanumDrive.trajectoryBuilder(new Pose2d(12, -130, Math.toRadians(-90)), Math.toRadians(110))
+            .splineTo(new Vector2d(7, -120), Math.toRadians(120))
             .addTemporalMarker(0.6, () ->  GlobalData.armUpSignal = true)
-            .splineToSplineHeading(new Pose2d(-10, 95, Math.toRadians(90)), Math.toRadians(-90))
-            .splineTo(new Vector2d(-10, 80), Math.toRadians(-90))
+            .splineToSplineHeading(new Pose2d(2, -95, Math.toRadians(-90)), Math.toRadians(90))
+            .splineTo(new Vector2d(2, -80), Math.toRadians(90))
             .build();
 
-    private static final Trajectory score = MecanumDrive.trajectoryBuilder(new Pose2d(6.5, 80, Math.toRadians(90)), Math.toRadians(0))
-            .splineToSplineHeading(new Pose2d(12, 78, Math.toRadians(5)), Math.toRadians(-25))
+    private static final Trajectory score = MecanumDrive.trajectoryBuilder(new Pose2d(6.5, -80, Math.toRadians(-90)), Math.toRadians(0))
+            .splineToSplineHeading(new Pose2d(20, -78, Math.toRadians(25)), Math.toRadians(25))
             .addTemporalMarker(0.77, () -> GlobalData.openSignal = true) //Open latch just as arm lines up
             .addDisplacementMarker(() -> GlobalData.outtakeSignal = true) //Outtake freight right at the end
-            .build();
-
-    private static final Trajectory turnToScore = MecanumDrive.trajectoryBuilder(new Pose2d(6.5, 80, Math.toRadians(90)), Math.toRadians(-90))
-            .splineToSplineHeading(new Pose2d(12, 80, Math.toRadians(0)), Math.toRadians(0))
             .build();
 
     @Override
@@ -60,7 +58,7 @@ public class BlueCyclesNEWNEW extends Auto_V2_5 {
         intake.startScanningIntake();
 
         //Initial setup
-        drive.setPoseEstimate(new Pose2d(6.75, 78.25, Math.toRadians(0)));
+        drive.setPoseEstimate(new Pose2d(6.75, -78.25, Math.toRadians(0)));
         //Levels levels = commands.detectBarcode(tseDetector);
         ArmController.ScoringPosition scorePos = ArmController.ScoringPosition.HIGH;
 
@@ -123,55 +121,13 @@ public class BlueCyclesNEWNEW extends Auto_V2_5 {
         drive.followTrajectoryAsync(driveToWall);
         waitForDriveComplete();
 
-        Output armIn = new Output() {
-            long startTime = 0;
-
-            @Override
-            public void updateOutput() {
-                if (System.currentTimeMillis() > startTime + 100)
-                    stopOutput();
-            }
-
-            @Override
-            public void startOutput() {
-                startTime = System.currentTimeMillis();
-                intake.setIntakePower(-0.5);
-                armController.setScorePos(ArmController.ScoringPosition.IN);
-            }
-
-            @Override
-            public void stopOutput() {
-                intake.setIntakePower(1);
-                removeOutput(this);
-            }
-        };
-        addOutput(armIn);
-        armIn.startOutput();
-
-        //drive.setDrivePower(new Pose2d(0.4, 0.6, 0));
-        //waitForTime(150);
-        drive.setDrivePower(new Pose2d(0.9, 0.1));
-
-        long driveStartTime = System.currentTimeMillis();
-        customWait(() -> {
-            //Distance correction
-            if (distCorrect.getFrontDistance() < 70 && distCorrect.getFrontDistance() > 15) {
-                drive.setPoseEstimate(new Pose2d(
-                        6.5,
-                        144 - distCorrect.getFrontDistance(),
-                        Math.toRadians(90)));
-            }
-
-            return !intake.getFreightInIntake() && System.currentTimeMillis() < driveStartTime + 800;
-        });
-
-        //Drive into warehouse
-        /*drive.setDrivePower(new Pose2d(0.8, 0.2, 0));
+        //Drive into warehouse TODO: 0.458 seconds to do this, currently
+        drive.setDrivePower(new Pose2d(0.8, -0.2, 0));
         long driveStartTime = System.currentTimeMillis();
         customWait(() -> {
             if (distCorrect.getFrontDistance() < 50)
                 drive.setWeightedDrivePower(new Pose2d(
-                        Math.min(Math.pow(distCorrect.getFrontDistance()-5, 4) * 0.000001, 0.8), //Slow down as approaches wall
+                        Math.min(Math.pow(distCorrect.getFrontDistance()-15, 4) * 0.000001, 0.8), //Slow down as approaches wall
                         0, //Drive away from wall
                         0));
 
@@ -179,15 +135,15 @@ public class BlueCyclesNEWNEW extends Auto_V2_5 {
             if (distCorrect.getFrontDistance() < 70 && distCorrect.getFrontDistance() > 25) {
                 drive.setPoseEstimate(new Pose2d(
                         6.5,
-                        144 - distCorrect.getFrontDistance(),
-                        Math.toRadians(90)));
+                        distCorrect.getFrontDistance() - 144,
+                        Math.toRadians(-90)));
             }
 
             return ((!intake.getFreightInIntake() &&
                     distCorrect.getFrontDistance() > 11) ||
                     distCorrect.getFrontDistance() > 45) &&
-                    System.currentTimeMillis() < driveStartTime + 2500;
-        });*/
+                    System.currentTimeMillis() < driveStartTime + 1000;
+        });
         drive.setWeightedDrivePower(new Pose2d(0, 0, 0));
     }
 
@@ -195,26 +151,15 @@ public class BlueCyclesNEWNEW extends Auto_V2_5 {
         led.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
 
         intake.spitOutTwo();
-        //drive.followTrajectoryAsync(driveOut);
-        //waitForDriveComplete();
-
-        drive.setDrivePower(new Pose2d(-0.5, 0, -0.01));
-        waitForTime(150);
-        drive.setDrivePower(new Pose2d(-0.9, 0.1, 0));
-        waitForTime(600);
-        drive.setDrivePower(new Pose2d(0, 0, 0));
+        drive.followTrajectoryAsync(driveOut);
+        waitForDriveComplete();
 
         if (distCorrect.getFrontDistance() < 90 && distCorrect.getFrontDistance() > 25) {
             drive.setPoseEstimate(new Pose2d(
                     6.5,
-                    144 - distCorrect.getFrontDistance(),
-                    Math.toRadians(90)));
+                    distCorrect.getFrontDistance() - 144,
+                    Math.toRadians(-90)));
         }
-        else
-            drive.setPoseEstimate(new Pose2d(
-                    6.5,
-                    80,
-                    Math.toRadians(90)));
     }
 
     private void score() {
@@ -241,15 +186,8 @@ public class BlueCyclesNEWNEW extends Auto_V2_5 {
         };
         addOutput(extendArm);
         extendArm.startOutput();
-        //drive.followTrajectoryAsync(score);
-        //waitForDriveComplete();
-
-        drive.followTrajectoryAsync(turnToScore);
+        drive.followTrajectoryAsync(score);
         waitForDriveComplete();
-
-        driveTo(12, 78, Math.toRadians(-15));
-        openSignal = true;
-        outtakeSignal = true;
     }
 
     private void cycle() {

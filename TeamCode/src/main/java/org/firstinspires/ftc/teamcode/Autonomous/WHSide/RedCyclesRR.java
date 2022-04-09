@@ -5,6 +5,7 @@ import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
 import org.firstinspires.ftc.teamcode.Autonomous.Auto_V2_5;
@@ -15,7 +16,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorIntake;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Output;
 
 @Autonomous(name = "Red Cycles WH - RR")
-//@Disabled
+@Disabled
 public class RedCyclesRR extends Auto_V2_5 {
 
     private static final Trajectory preload = MecanumDrive.trajectoryBuilder(new Pose2d(6.5, -65.5, Math.toRadians(90)), Math.toRadians(90))
@@ -71,14 +72,14 @@ public class RedCyclesRR extends Auto_V2_5 {
 
             @Override
             public void updateOutput() {
-                if (lift.getHeight() >= ArmController.ScoringPosition.UP.liftPos - 0.5)
+                if (lift.getHeight() >= ArmController.ScoringPosition.UP.liftPos - 1)
                     stopOutput();
             }
 
             @Override
             public void startOutput() {
                 startTime = System.currentTimeMillis();
-                armController.setScorePos(ArmController.ScoringPosition.UP);
+                lift.setPower(1);
             }
 
             @Override

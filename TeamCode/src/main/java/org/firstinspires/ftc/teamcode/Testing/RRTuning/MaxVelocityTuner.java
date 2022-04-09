@@ -40,6 +40,8 @@ public class MaxVelocityTuner extends LinearOpMode {
         BulkRead bReadCH = new BulkRead(hardwareMap, "Control Hub");
         BulkRead bReadEH = new BulkRead(hardwareMap, "Expansion Hub");
         MecanumDrive drive = new MecanumDrive(hardwareMap, bReadCH, bReadEH);
+        drive.startInput();
+        drive.startOutput();
 
         drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
@@ -60,14 +62,17 @@ public class MaxVelocityTuner extends LinearOpMode {
         timer = new ElapsedTime();
 
         while (!isStopRequested() && timer.seconds() < RUNTIME) {
-            drive.updatePoseEstimate();
+            drive.updateInput();
 
             Pose2d poseVelo = Objects.requireNonNull(drive.getPoseVelocity(), "poseVelocity() must not be null. Ensure that the getWheelVelocities() method has been overridden in your localizer.");
 
             maxVelocity = Math.max(poseVelo.vec().norm(), maxVelocity);
+
+            drive.updateOutput();
         }
 
         drive.setDrivePower(new Pose2d());
+        drive.updateOutput();
 
         double effectiveKf = getMotorVelocityF(veloInchesToTicks(maxVelocity));
 

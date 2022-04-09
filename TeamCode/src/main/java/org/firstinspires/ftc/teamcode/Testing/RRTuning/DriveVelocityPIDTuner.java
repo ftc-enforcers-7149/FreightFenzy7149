@@ -76,6 +76,8 @@ public class DriveVelocityPIDTuner extends LinearOpMode {
         BulkRead bReadCH = new BulkRead(hardwareMap, "Control Hub");
         BulkRead bReadEH = new BulkRead(hardwareMap, "Expansion Hub");
         MecanumDrive drive = new MecanumDrive(hardwareMap, bReadCH, bReadEH);
+        drive.startInput();
+        drive.startOutput();
 
         Mode mode = Mode.TUNING_MODE;
 
@@ -103,6 +105,8 @@ public class DriveVelocityPIDTuner extends LinearOpMode {
 
         while (!isStopRequested()) {
             telemetry.addData("mode", mode);
+
+            drive.updateInput();
 
             switch (mode) {
                 case TUNING_MODE:
@@ -168,6 +172,10 @@ public class DriveVelocityPIDTuner extends LinearOpMode {
             }
 
             telemetry.update();
+            drive.updateOutput();
         }
+
+        drive.stopInput();
+        drive.stopOutput();
     }
 }

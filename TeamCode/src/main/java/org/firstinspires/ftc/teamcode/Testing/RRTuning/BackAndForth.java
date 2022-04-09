@@ -31,13 +31,15 @@ import org.firstinspires.ftc.teamcode.Subsystems.Sensors.BulkRead;
 @Disabled
 public class BackAndForth extends LinearOpMode {
 
-    public static double DISTANCE = 50;
+    public static double DISTANCE = 72;
 
     @Override
     public void runOpMode() throws InterruptedException {
         BulkRead bReadCH = new BulkRead(hardwareMap, "Control Hub");
         BulkRead bReadEH = new BulkRead(hardwareMap, "Expansion Hub");
         MecanumDrive drive = new MecanumDrive(hardwareMap, bReadCH, bReadEH);
+        drive.startInput();
+        drive.startOutput();
 
         Trajectory trajectoryForward = drive.trajectoryBuilder(new Pose2d())
                 .forward(DISTANCE)
@@ -50,8 +52,19 @@ public class BackAndForth extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive() && !isStopRequested()) {
-            drive.followTrajectory(trajectoryForward);
+            drive.followTrajectoryAsync(trajectoryForward);
+
+            while (opModeIsActive() && drive.isBusy()) {
+                drive.updateInput();
+                drive.updateOutput();
+            }
+
             drive.followTrajectory(trajectoryBackward);
+
+            while (opModeIsActive() && drive.isBusy()) {
+                drive.updateInput();
+                drive.updateOutput();
+            }
         }
     }
 }
