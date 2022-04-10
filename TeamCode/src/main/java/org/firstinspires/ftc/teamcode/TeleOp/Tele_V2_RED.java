@@ -209,6 +209,7 @@ public class Tele_V2_RED extends TeleOp_Base {
         // Telemetry
         telemetry.addData("Score Position: ", scorePos);
         telemetry.addData("Freight in Intake: ", freightInIntake);
+        telemetry.addData("Freight type: ", intake.getFreightType());
 
         // Led
         if (freightInIntake)
