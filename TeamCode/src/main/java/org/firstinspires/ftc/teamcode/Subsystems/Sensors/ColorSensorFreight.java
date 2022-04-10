@@ -19,7 +19,8 @@ public class ColorSensorFreight implements Input {
         NONE,
         DUCK,
         BALL,
-        BLOCK
+        BLOCK,
+        UNKNOWN
 
     }
 
@@ -47,7 +48,7 @@ public class ColorSensorFreight implements Input {
         for(Sensor s : vals) s.updateInput();
 
         if(getDistance() == 0) currentType = Freight.NONE;
-        else currentType = Freight.DUCK; // lol
+        else currentType = Freight.UNKNOWN; // fix dis
 
     }
 
