@@ -28,7 +28,7 @@ public class ColorSensorFreight implements Input {
         NONE(0),
         BLOCK(50),
         DUCK(75),
-        BALL(90),
+        BALL(95),
         UNKNOWN(125);
 
         public double minHue;

@@ -40,12 +40,13 @@ public class RedCycles extends Auto_V2_5 {
 
     @Override
     protected Alliance getAlliance() {
-        return Alliance.BLUE;
+        return Alliance.RED;
     }
 
     @Override
     public void auto() {
         distCorrect.startRunning();
+        distCorrect.sensor.setHighPass(true, 150);
 
         //Initial setup
         drive.setPoseEstimate(new Pose2d(6.75, -78.25, Math.toRadians(0)));
@@ -87,7 +88,7 @@ public class RedCycles extends Auto_V2_5 {
                 break;
 
             //Intake and don't hit wall
-            intake(Math.max(28 - (cycle * 7), 0));
+            intake(Math.max(25 - (cycle * 7), 0));
 
             //Drive out through gap
             led.setPattern(RevBlinkinLedDriver.BlinkinPattern.YELLOW);
@@ -118,6 +119,8 @@ public class RedCycles extends Auto_V2_5 {
         SLOW_DIST = 20;
         POS_ACC = 1;
         intake.setIntakePower(0);
+
+        distCorrect.sensor.setHighPass(false);
     }
 
     private void driveToWall() {
@@ -189,7 +192,7 @@ public class RedCycles extends Auto_V2_5 {
         customWait(() -> {
             telemetry.addLine("DRIVE INTO WAREHOUSE");
 
-            return System.currentTimeMillis() < driveStartTime + 500;
+            return System.currentTimeMillis() < driveStartTime + 600;
         });
 
         intake.setIntakePower(1);
@@ -218,13 +221,13 @@ public class RedCycles extends Auto_V2_5 {
             telemetry.addLine("INTAKE");
 
             if (distCorrect.getFrontDistance() < 60) {
-                if (drive.getPoseEstimate().getHeading() < Math.toRadians(-95)) {
+                if (deltaHeading(drive.getPoseEstimate().getHeading(), Math.toRadians(-95)) > 0) {
                     drive.setWeightedDrivePower(new Pose2d(
                             Math.min(Math.pow(distCorrect.getFrontDistance()-5-distanceFromWall, 2) * 0.00025 + 0.125, 0.7), //Slow down as approaches wall
                             0.15, //Drive away from wall
                             0.2));
                 }
-                else if (drive.getPoseEstimate().getHeading() > Math.toRadians(-85)) {
+                else if (deltaHeading(drive.getPoseEstimate().getHeading(), Math.toRadians(-85)) < 0) {
                     drive.setWeightedDrivePower(new Pose2d(
                             Math.min(Math.pow(distCorrect.getFrontDistance()-5-distanceFromWall, 2) * 0.00025 + 0.125, 0.7), //Slow down as approaches wall
                             0.15, //Drive away from wall
@@ -258,6 +261,8 @@ public class RedCycles extends Auto_V2_5 {
         });
         drive.setWeightedDrivePower(new Pose2d(0, 0, 0));
 
+        armController.setScorePos(ArmController.ScoringPosition.UP);
+
         distCorrect.sensor.enableMoving();
         intake.stopScanningIntake();
     }
@@ -266,6 +271,8 @@ public class RedCycles extends Auto_V2_5 {
         POS_ACC = 3;
         SLOW_DIST = 2;
         SPEED_MULT = 1;
+
+        armController.setScorePos(ArmController.ScoringPosition.UP);
 
         //Make sure robot is against wall
         //kyle loves u.
@@ -296,8 +303,6 @@ public class RedCycles extends Auto_V2_5 {
             if (distCorrect.getFrontDistance() > 40 && !throughGap.get()) {
                 double robotHeading = drive.getPoseEstimate().getHeading();
                 drive.setPoseEstimate(new Pose2d(7, -84, robotHeading));
-
-                armController.setScorePos(ArmController.ScoringPosition.UP);
 
                 throughGap.set(true);
             }
@@ -339,7 +344,7 @@ public class RedCycles extends Auto_V2_5 {
 
     private void scoreInHub(double yPos) {
         //Put arm up
-        lift.setPower(1);
+        armController.setScorePos(ArmController.ScoringPosition.UP);
 
         SPEED_MULT = 1;
         SLOW_DIST = 20;
@@ -347,6 +352,8 @@ public class RedCycles extends Auto_V2_5 {
         MIN_TURN = 0.25;
 
         long startTime = System.currentTimeMillis();
+        
+        AtomicBoolean armOut = new AtomicBoolean(false);
 
         //Drive to hub
         driveTo(() -> 11.5,
@@ -355,13 +362,18 @@ public class RedCycles extends Auto_V2_5 {
                     //Wait for arm to get up before turning to hub
                     if (System.currentTimeMillis() < startTime + 50)
                         return Math.toRadians(-10);
-                    else {
+                    else if (!armOut.get()) {
                         if (intake.getFreightType() == ColorSensorFreight.Freight.BALL)
                             armController.setScorePos(ArmController.ScoringPosition.MIDDLE_AUTO);
                         else
                             armController.setScorePos(ArmController.ScoringPosition.HIGH);
+
+                        armOut.set(true);
+
                         return Math.toRadians(10);
                     }
+                    else
+                        return Math.toRadians(10);
                 },
                 1500);
 

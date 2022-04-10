@@ -17,7 +17,7 @@ public class DistanceCorrectionTest extends Auto_V2_5 {
         while(opModeIsActive()) {
             updateInputs();
 
-            drive.setPoseEstimate(distCorrect.correctPoseWithDist(drive.getPoseEstimate().getHeading()));
+            //drive.setPoseEstimate(distCorrect.correctPoseWithDist(drive.getPoseEstimate().getHeading()));
             telemetry.addData("Pose x:", drive.getPoseEstimate().getX());
             telemetry.addData("Pose y:", drive.getPoseEstimate().getY());
             // telemetry.addData("Distance F Health:", distCorrect.getSensorF().getDeviceClient().getHealthStatus());

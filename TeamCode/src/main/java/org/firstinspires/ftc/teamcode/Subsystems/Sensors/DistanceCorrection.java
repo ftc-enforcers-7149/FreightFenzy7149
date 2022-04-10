@@ -27,56 +27,13 @@ public class DistanceCorrection implements Input {
         if (alliance == Alliance.BLUE)
             sensor = new CorrectedMB1220(hardwareMap, distFRName, bRead, 9, MovingUltrasonicSensor.Facing.FRONT, l);
         else
-            sensor = new CorrectedMB1220(hardwareMap, distFLName, bRead, 9, MovingUltrasonicSensor.Facing.FRONT, l);
+            sensor = new CorrectedMB1220(hardwareMap, distFLName, bRead, 9, MovingUltrasonicSensor.Facing.BACK, l);
 
         sensor.setQuartileSmoothing(true);
 
         this.alliance = alliance;
 
         running = false;
-    }
-
-    /**
-     * Returns a robot position (x, y) based on its heading and distance sensor readings
-     * Only works when in the appropriate warehouse
-     * @param angle The robot's heading, in radians
-     * @return A new robot position
-     */
-    public Vector2d correctPoseWithDist(double angle) {
-
-        if (alliance == Alliance.BLUE) {
-            /*double leftDist = lDist.getValue();
-            double frontDist = fDist.getValue();*/
-
-            double leftDist = sensor.getDistance(DistanceUnit.INCH); //DOESNT WORK
-            double frontDist = sensor.getDistance(DistanceUnit.INCH);
-
-            double robotX = leftDist * sensorMultiplier(angle);
-            double robotY = 144 - frontDist * sensorMultiplier(angle);
-
-            return new Vector2d(robotX, robotY);
-        }
-        else {
-            double rightDist = sensor.getDistance(DistanceUnit.INCH);
-            double frontDist = sensor.getDistance(DistanceUnit.INCH);
-
-            double robotX = rightDist * sensorMultiplier(angle);
-            double robotY = frontDist * sensorMultiplier(angle) - 144;
-
-            return new Vector2d(robotX, robotY);
-        }
-    }
-
-    private double sensorMultiplier(double angle) {
-        if (alliance == Alliance.BLUE)
-            return Math.cos(Math.abs(Math.toRadians(90) - angle));
-        else
-            return Math.cos(Math.abs(Math.toRadians(270) - angle));
-    }
-
-    //DOESNT WORK
-    public double getSideWall() {
-        return alliance.equals(Alliance.BLUE) ? sensor.getDistance(DistanceUnit.INCH) : sensor.getDistance(DistanceUnit.INCH);
     }
 
     public double getFrontDistance() {

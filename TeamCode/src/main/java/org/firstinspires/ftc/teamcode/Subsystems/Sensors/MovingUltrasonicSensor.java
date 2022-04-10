@@ -56,27 +56,45 @@ public class MovingUltrasonicSensor extends Sensor {
         double pi = Math.PI;
 
         if (!disabled) {
-            if (Autonomous_Base.deltaHeading(localizer.getPoseEstimate().getHeading(), Math.toRadians(90)) <= Math.toRadians(45)) {
-                switch (f) {
+//            if (Autonomous_Base.deltaHeading(localizer.getPoseEstimate().getHeading(), Math.toRadians(90)) <= Math.toRadians(45)) {
+//                switch (f) {
+//                    case FRONT:
+//                        super.add(newVal - localizer.getPoseVelocity().getY() * time);
+//                        break;
+//                    case BACK:
+//                        super.add(newVal + localizer.getPoseVelocity().getY() * time);
+//                        break;
+//                    case LEFT:
+//                        super.add(newVal + localizer.getPoseVelocity().getX() * time);
+//                        break;
+//                    case RIGHT:
+//                        super.add(newVal - localizer.getPoseVelocity().getX() * time);
+//                        break;
+//                }
+//            }
+//            else if (Autonomous_Base.deltaHeading(localizer.getPoseEstimate().getHeading(), Math.toRadians(-90)) <= Math.toRadians(45)){
+//                switch (f) {
+//                    case FRONT:
+//                        super.add(newVal + localizer.getPoseVelocity().getY() * time);
+//                        break;
+//                    case BACK:
+//                        super.add(newVal - localizer.getPoseVelocity().getY() * time);
+//                        break;
+//                    case LEFT:
+//                        super.add(newVal - localizer.getPoseVelocity().getX() * time);
+//                        break;
+//                    case RIGHT:
+//                        super.add(newVal + localizer.getPoseVelocity().getX() * time);
+//                        break;
+//                }
+//            }
+//            else
+//                super.add(newVal);
+
+            switch (f) {
                     case FRONT:
-                        super.add(newVal - localizer.getPoseVelocity().getY() * time);
-                        break;
-                    case BACK:
                         super.add(newVal + localizer.getPoseVelocity().getY() * time);
                         break;
-                    case LEFT:
-                        super.add(newVal + localizer.getPoseVelocity().getX() * time);
-                        break;
-                    case RIGHT:
-                        super.add(newVal - localizer.getPoseVelocity().getX() * time);
-                        break;
-                }
-            }
-            else if (Autonomous_Base.deltaHeading(localizer.getPoseEstimate().getHeading(), Math.toRadians(-90)) <= Math.toRadians(45)){
-                switch (f) {
-                    case FRONT:
-                        super.add(newVal + localizer.getPoseVelocity().getY() * time);
-                        break;
                     case BACK:
                         super.add(newVal - localizer.getPoseVelocity().getY() * time);
                         break;
@@ -87,9 +105,6 @@ public class MovingUltrasonicSensor extends Sensor {
                         super.add(newVal + localizer.getPoseVelocity().getX() * time);
                         break;
                 }
-            }
-            else
-                super.add(newVal);
         }
         else
             super.add(newVal);

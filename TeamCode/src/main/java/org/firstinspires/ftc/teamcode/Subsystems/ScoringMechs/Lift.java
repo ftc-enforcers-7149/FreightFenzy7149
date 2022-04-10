@@ -43,7 +43,7 @@ public class Lift implements Output, Input {
     //PIDF Controller
     private PIDFController controller;
     private double output, lastOutput;
-    public static PIDCoefficients pidCoeffs = new PIDCoefficients(0.008, 0, 0.0002);
+    public static PIDCoefficients pidCoeffs = new PIDCoefficients(0.008, 0, 0.0003);
     private int setPosition;
 
     //Power to use if not running PID

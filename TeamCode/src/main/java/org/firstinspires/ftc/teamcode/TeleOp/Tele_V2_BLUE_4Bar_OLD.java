@@ -15,9 +15,9 @@ import org.firstinspires.ftc.teamcode.Subsystems.Utils.Levels;
 import static org.firstinspires.ftc.teamcode.GlobalData.HEADING;
 import static org.firstinspires.ftc.teamcode.GlobalData.RAN_AUTO;
 
-@TeleOp (name = "BLUE 4Bar TeleOp NEW")
+@TeleOp (name = "BLUE 4Bar TeleOp OLD")
 @Disabled
-public class Tele_V2_BLUE_4Bar_NEW extends TeleOp_Base {
+public class Tele_V2_BLUE_4Bar_OLD extends TeleOp_Base {
 
     //Drive
     private boolean resetAngle;

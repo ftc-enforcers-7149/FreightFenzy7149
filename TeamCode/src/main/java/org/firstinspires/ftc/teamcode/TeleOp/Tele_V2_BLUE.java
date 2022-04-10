@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.TeleOp;
 
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
@@ -53,7 +52,7 @@ public class Tele_V2_BLUE extends TeleOp_Base {
 
     private ArmController.ScoringPosition scorePos = ArmController.ScoringPosition.IN,
             lastScorePos = ArmController.ScoringPosition.IN;
-    private boolean g1a, g2b, lastG1A, lastG2B;
+    private boolean gStartA, gStartB, lastGStartA, lastGStartB;
 
     @Override
     public void init() {
@@ -209,19 +208,13 @@ public class Tele_V2_BLUE extends TeleOp_Base {
 
         // Telemetry
         telemetry.addData("Score Position: ", scorePos);
-        telemetry.addData("Freight in Intake: ", freightInIntake);
-
-        telemetry.addData("Distance: ", intake.sensor.getDistance());
-        telemetry.addData("Light Detected: ", intake.sensor.getLight());
-        telemetry.addData("Alpha: ", intake.sensor.getAlpha());
-        telemetry.addData("Hue: ", intake.sensor.getHue());
-        telemetry.addData("Saturation: ", intake.sensor.getSaturation());
-        telemetry.addData("Value: ", intake.sensor.getValue());
+        //telemetry.addData("Freight in Intake: ", freightInIntake);
+        telemetry.addData("Freight type: ", intake.getFreightType());
 
         // Led
         if (freightInIntake  && intake.getCurrPaddle() != MotorIntake.PaddlePosition.OUT_FAR)
             // led.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
-            led.setPattern(intake.getFreightType() == ColorSensorFreight.Freight.BLOCK ? RevBlinkinLedDriver.BlinkinPattern.WHITE : RevBlinkinLedDriver.BlinkinPattern.YELLOW);
+            led.setPattern(intake.getFreightType() == ColorSensorFreight.Freight.BALL ? RevBlinkinLedDriver.BlinkinPattern.WHITE : RevBlinkinLedDriver.BlinkinPattern.GOLD);
         else
             led.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
 
@@ -232,15 +225,15 @@ public class Tele_V2_BLUE extends TeleOp_Base {
 
     @Override
     protected void getInput() {
-        g1a = gamepad1.a && !gamepad1.start;
-        g2b = gamepad2.b && !gamepad2.start;
+        if (gamepad1.start || lastGStartA) gStartA = gamepad1.a;
+        if (gamepad2.start || lastGStartB) gStartB = gamepad2.b;
 
         //Drive
-        leftX = curveInput(gamepad1.left_stick_x, 1)*lim * 0.92;
-        leftY = curveInput(gamepad1.left_stick_y, 1)*lim * 0.92;
-        rightX = curveInput(gamepad1.right_stick_x, 1)*lim*0.75 * 0.92;
+        leftX = curveInput(gamepad1.left_stick_x, 1)*lim * 0.97;
+        leftY = curveInput(gamepad1.left_stick_y, 1)*lim * 0.97;
+        rightX = curveInput(gamepad1.right_stick_x, 1)*lim*0.75 * 0.97;
         resetAngle = gamepad1.y;
-        sharedBarrier = g1a && !lastG1A;
+        sharedBarrier = gamepad1.a && !gStartA;
 
         //Lift
 
@@ -254,7 +247,7 @@ public class Tele_V2_BLUE extends TeleOp_Base {
             scorePos = ArmController.ScoringPosition.MIDDLE;
         else if (gamepad2.y)
             scorePos = ArmController.ScoringPosition.FAR;
-        else if (g2b && !lastG2B)
+        else if (gamepad2.b && !gStartB)
             scorePos = ArmController.ScoringPosition.CENTER;
         else if (gamepad2.a)
             scorePos = ArmController.ScoringPosition.CLOSE;
@@ -282,14 +275,16 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         if (curr4BPos < 0) curr4BPos = 0;
         else if (curr4BPos > 1) curr4BPos = 1;
 
+        if (gamepad2.right_stick_button) curr4BPos = 0;
+
         if (liftPower != 0 || gamepad2.right_stick_y != 0)
             scorePos = ArmController.ScoringPosition.IDLE;
     }
 
     @Override
     protected void updateStateMachine() {
-        lastG1A = g1a;
-        lastG2B = g2b;
+        lastGStartA = gStartA;
+        lastGStartB = gStartB;
 
         //Drive
         lastLeftX = leftX; lastLeftY = leftY; lastRightX = rightX;

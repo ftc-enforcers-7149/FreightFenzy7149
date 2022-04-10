@@ -34,8 +34,8 @@ public class MotorIntake implements Input, Output {
 
     public enum PaddlePosition {
         BACK(0.925),
-        OUT_CLOSE(0.75),
-        OUT_FAR(0.7),
+        OUT_CLOSE(0.7),
+        OUT_FAR(0.65),
         IDLE(BACK.pos);
 
         public final double pos;
