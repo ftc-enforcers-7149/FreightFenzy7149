@@ -52,6 +52,7 @@ public class Tele_V2_BLUE extends TeleOp_Base {
 
     private ArmController.ScoringPosition scorePos = ArmController.ScoringPosition.IN,
             lastScorePos = ArmController.ScoringPosition.IN;
+    private boolean g1a, g2b, lastG1A, lastG2B;
 
     @Override
     public void init() {
@@ -72,7 +73,7 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         spinner = new MotorCarouselSpinner(hardwareMap, "spinner", Alliance.BLUE);
 
         led = new LED(hardwareMap, "blinkin", Alliance.BLUE);
-        led.setPattern(RevBlinkinLedDriver.BlinkinPattern.BREATH_BLUE);
+        led.setPattern(RevBlinkinLedDriver.BlinkinPattern.SHOT_BLUE);
 
         if (RAN_AUTO) gyro.setOffset(HEADING);
         RAN_AUTO = false;
@@ -130,14 +131,15 @@ public class Tele_V2_BLUE extends TeleOp_Base {
             scorePos = ArmController.ScoringPosition.IDLE;
         }
 
-        // Four Bar
-        if (scorePos != lastScorePos && scorePos != ArmController.ScoringPosition.IDLE) {
-            armController.setScorePos(scorePos);
-        }
-
         if (curr4BPos != last4BPos) {
             fourBar.setPosition(curr4BPos);
             scorePos = ArmController.ScoringPosition.IDLE;
+        }
+
+        // Four Bar
+        if (scorePos != lastScorePos && scorePos != ArmController.ScoringPosition.IDLE) {
+            armController.setScorePos(scorePos);
+            curr4BPos = scorePos.barPos;
         }
 
         if (scorePos == ArmController.ScoringPosition.IN && lift.getHeight() > ArmController.ScoringPosition.IN.liftPos + 3)
@@ -208,6 +210,13 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         telemetry.addData("Score Position: ", scorePos);
         telemetry.addData("Freight in Intake: ", freightInIntake);
 
+        telemetry.addData("Distance: ", intake.sensor.getDistance());
+        telemetry.addData("Light Detected: ", intake.sensor.getLight());
+        telemetry.addData("Alpha: ", intake.sensor.getAlpha());
+        telemetry.addData("Hue: ", intake.sensor.getHue());
+        telemetry.addData("Saturation: ", intake.sensor.getSaturation());
+        telemetry.addData("Value: ", intake.sensor.getValue());
+
         // Led
         if (freightInIntake)
             led.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
@@ -221,12 +230,15 @@ public class Tele_V2_BLUE extends TeleOp_Base {
 
     @Override
     protected void getInput() {
+        g1a = gamepad1.a && !gamepad1.start;
+        g2b = gamepad2.b && !gamepad2.start;
+
         //Drive
         leftX = curveInput(gamepad1.left_stick_x, 1)*lim * 0.92;
         leftY = curveInput(gamepad1.left_stick_y, 1)*lim * 0.92;
         rightX = curveInput(gamepad1.right_stick_x, 1)*lim*0.75 * 0.92;
         resetAngle = gamepad1.y;
-        sharedBarrier = gamepad1.a && !gamepad1.start;
+        sharedBarrier = g1a && !lastG1A;
 
         //Lift
 
@@ -234,13 +246,13 @@ public class Tele_V2_BLUE extends TeleOp_Base {
             scorePos = ArmController.ScoringPosition.UP;
         else if (gamepad2.dpad_down || gamepad1.dpad_down)
             scorePos = ArmController.ScoringPosition.IN;
-        else if (gamepad2.dpad_right)
+        else if (gamepad2.dpad_right || gamepad1.dpad_right)
             scorePos = ArmController.ScoringPosition.HIGH;
-        else if (gamepad2.dpad_left)
+        else if (gamepad2.dpad_left || gamepad1.dpad_left)
             scorePos = ArmController.ScoringPosition.MIDDLE;
         else if (gamepad2.y)
             scorePos = ArmController.ScoringPosition.FAR;
-        else if (gamepad2.b && !gamepad2.start)
+        else if (g2b && !lastG2B)
             scorePos = ArmController.ScoringPosition.CENTER;
         else if (gamepad2.a)
             scorePos = ArmController.ScoringPosition.CLOSE;
@@ -264,7 +276,7 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         //Spinner
         spin = gamepad1.x;
 
-        curr4BPos -= gamepad2.right_stick_y / 20; //Fine tune or adjust for actual time changes
+        curr4BPos -= gamepad2.right_stick_y / 15; //Fine tune or adjust for actual time changes
         if (curr4BPos < 0) curr4BPos = 0;
         else if (curr4BPos > 1) curr4BPos = 1;
 
@@ -274,6 +286,9 @@ public class Tele_V2_BLUE extends TeleOp_Base {
 
     @Override
     protected void updateStateMachine() {
+        lastG1A = g1a;
+        lastG2B = g2b;
+
         //Drive
         lastLeftX = leftX; lastLeftY = leftY; lastRightX = rightX;
         lastSharedBarrier = sharedBarrier;

@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.Subsystems.Sensors.ColorSensorFreight;
 import org.firstinspires.ftc.teamcode.Subsystems.Sensors.FSR406;
 import org.firstinspires.ftc.teamcode.Subsystems.Sensors.WeightFreightDetector;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Input;
@@ -21,10 +22,11 @@ public class MotorIntake implements Input, Output {
     public Servo paddle, latch;
 
     //Sensors
-    public RevColorSensorV3 intakeColorSensor;
+    //public RevColorSensorV3 intakeColorSensor;
+    public ColorSensorFreight sensor;
 
-    private static final double minDistance = 2;
-    private ValueTimer<Double> distance;
+    //private static final double minDistance = 2;
+    //private ValueTimer<Double> distance;
     private final boolean useSensor;
 
     //State machine logic
@@ -32,8 +34,8 @@ public class MotorIntake implements Input, Output {
 
     public enum PaddlePosition {
         BACK(0.925),
-        OUT_CLOSE(0.25),
-        OUT_FAR(0.3),
+        OUT_CLOSE(0.75),
+        OUT_FAR(0.7),
         IDLE(BACK.pos);
 
         public final double pos;
@@ -68,21 +70,23 @@ public class MotorIntake implements Input, Output {
 
     public MotorIntake(HardwareMap hardwaremap,
                        String motorName, String paddleName, String latchName,
-                       String intakeColorSensorName) {
+                       String sensorName) {
         intake = hardwaremap.get(DcMotorEx.class, motorName);
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         paddle = hardwaremap.servo.get(paddleName);
         latch = hardwaremap.servo.get(latchName);
 
-        intakeColorSensor = hardwaremap.get(RevColorSensorV3.class, intakeColorSensorName);
+        //intakeColorSensor = hardwaremap.get(RevColorSensorV3.class, intakeColorSensorName);
 
-        distance = new ValueTimer<Double>(0.0, 200) {
-            @Override
-            public Double readValue() {
-                return intakeColorSensor.getDistance(DistanceUnit.INCH);
-            }
-        };
+//        distance = new ValueTimer<Double>(0.0, 200) {
+//            @Override
+//            public Double readValue() {
+//                return intakeColorSensor.getDistance(DistanceUnit.INCH);
+//            }
+//        };
+
+        sensor = new ColorSensorFreight(hardwaremap, sensorName, 5);
 
         useSensor = true;
     }
@@ -99,9 +103,8 @@ public class MotorIntake implements Input, Output {
 
     @Override
     public void updateInput() {
-        if (useSensor) {
-            distance.updateInput();
-        }
+        if (useSensor)
+            sensor.updateInput();
     }
 
     @Override
@@ -174,32 +177,41 @@ public class MotorIntake implements Input, Output {
     }
 
     public boolean getFreightInIntake () {
-        return useSensor && (distance.getValue() < minDistance);
+        return useSensor && (sensor.getCurrentType() != ColorSensorFreight.Freight.NONE);
+    }
+
+    public ColorSensorFreight.Freight getFreightType() {
+        if (useSensor) return sensor.getCurrentType();
+        return ColorSensorFreight.Freight.UNKNOWN;
     }
 
     public double getDistance() {
-        if (useSensor) return distance.getValue();
+        if (useSensor) return sensor.getDistance();
         else return 0;
     }
 
     public void startScanningIntake() {
-        distance.setDelayTime(0);
+        sensor.red.setDelayTime(0);
+        sensor.green.setDelayTime(0);
+        sensor.blue.setDelayTime(0);
     }
 
     public void stopScanningIntake() {
-        distance.setDelayTime(250);
+        sensor.red.setDelayTime(200);
+        sensor.green.setDelayTime(200);
+        sensor.blue.setDelayTime(200);
     }
 
     @Override
     public void startInput() {
         if (useSensor)
-            distance.startInput();
+            sensor.startInput();
     }
 
     @Override
     public void stopInput() {
         if (useSensor)
-            distance.stopInput();
+            sensor.stopInput();
     }
 
     @Override

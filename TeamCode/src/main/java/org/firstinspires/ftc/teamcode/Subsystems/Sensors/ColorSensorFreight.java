@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Input;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.ValueTimer;
 
 import java.util.ArrayList;
 
@@ -14,42 +15,110 @@ public class ColorSensorFreight implements Input {
     private ArrayList<Sensor> vals = new ArrayList<>();
     private Freight currentType;
 
+    //public ValueTimer<Double> distance, light;
+    //public ValueTimer<Integer> alpha;
+    public ValueTimer<Integer> red, green, blue;
+
+    private ArrayList<ValueTimer> valueTimers;
+
+    private static final double minDistance = 2;
+
     public enum Freight {
 
-        NONE,
-        DUCK,
-        BALL,
-        BLOCK,
-        UNKNOWN
+        NONE(0),
+        BLOCK(50),
+        DUCK(75),
+        BALL(90),
+        UNKNOWN(125);
 
+        public double minHue;
+
+        Freight(double hue) {this.minHue = hue;}
+
+        public static Freight getType(double hue) {
+            if (hue <= DUCK.minHue) return BLOCK;
+            else if (hue <= BALL.minHue) return DUCK;
+            else if (hue <= UNKNOWN.minHue) return BALL;
+            else return UNKNOWN;
+        }
     }
 
     public ColorSensorFreight(HardwareMap h, String name, int smoothing) {
 
         sensor = h.get(RevColorSensorV3.class, name);
 
+//        distance = new ValueTimer<Double>(0.0, 200) {
+//            @Override
+//            public Double readValue() {
+//                return sensor.getDistance(DistanceUnit.INCH);
+//            }
+//        };
+//
+//        light = new ValueTimer<Double>(0.0, 200) {
+//            @Override
+//            public Double readValue() {
+//                return sensor.getLightDetected();
+//            }
+//        };
+//
+//        alpha = new ValueTimer<Integer>(0, 200) {
+//            @Override
+//            public Integer readValue() {
+//                return sensor.alpha();
+//            }
+//        };
+
+        red = new ValueTimer<Integer>(0, 200) {
+            @Override
+            public Integer readValue() {
+                return sensor.red();
+            }
+        };
+
+        green = new ValueTimer<Integer>(0, 200) {
+            @Override
+            public Integer readValue() {
+                return sensor.green();
+            }
+        };
+
+        blue = new ValueTimer<Integer>(0, 200) {
+            @Override
+            public Integer readValue() {
+                return sensor.blue();
+            }
+        };
+
+        valueTimers = new ArrayList<ValueTimer>();
+//        valueTimers.add(distance);
+//        valueTimers.add(light);
+//        valueTimers.add(alpha);
+        valueTimers.add(red);
+        valueTimers.add(green);
+        valueTimers.add(blue);
+
         // adds in order: light, a, h, s, v, distance
         for(int i = 0; i < 6; i++) vals.add(new Sensor(smoothing));
-
     }
 
     @Override
     public void updateInput() {
+        for (ValueTimer valueTimer : valueTimers)
+            valueTimer.updateInput();
 
-        double[] curHSV = rgbToHSV(sensor.red(), sensor.green(), sensor.blue());
+        double[] curHSV = rgbToHSV(red.getValue(), green.getValue(), blue.getValue());
 
-        vals.get(0).add(sensor.getLightDetected());             // light
-        vals.get(1).add(sensor.alpha());                        // alpha
-        vals.get(2).add(curHSV[0]);                             // hue
-        vals.get(3).add(curHSV[1]);                             // saturation
-        vals.get(4).add(curHSV[2]);                             // value
-        vals.get(5).add(sensor.getDistance(DistanceUnit.INCH)); // distance
+        vals.get(0).add(curHSV[0]);                             // hue
+        vals.get(1).add(curHSV[1]);                             // saturation
+        vals.get(2).add(curHSV[2]);                             // value
+        //vals.get(3).add(light.getValue());                      // light
+        //vals.get(4).add(alpha.getValue());                      // alpha
+        //vals.get(5).add(distance.getValue());                   // distance
 
         for(Sensor s : vals) s.updateInput();
 
-        if(getDistance() == 0) currentType = Freight.NONE;
-        else currentType = Freight.UNKNOWN; // fix dis
-
+        if(getSaturation() <= 0.1) currentType = Freight.NONE;
+        else currentType = Freight.getType(getHue()); // fix dis
     }
 
     public static double[] rgbToHSV(double r, double g, double b) {
@@ -95,13 +164,24 @@ public class ColorSensorFreight implements Input {
 
     }
 
-    public double getLight() {          return vals.get(0).getValue(); }
-    public double getAlpha() {          return vals.get(1).getValue(); }
-    public double getHue() {            return vals.get(2).getValue(); }
-    public double getSaturation() {     return vals.get(3).getValue(); }
-    public double getValue() {          return vals.get(4).getValue(); }
+    public double getLight() {          return vals.get(3).getValue(); }
+    public double getAlpha() {          return vals.get(4).getValue(); }
+    public double getHue() {            return vals.get(0).getValue(); }
+    public double getSaturation() {     return vals.get(1).getValue(); }
+    public double getValue() {          return vals.get(2).getValue(); }
     public double getDistance() {       return vals.get(5).getValue(); }
 
     public Freight getCurrentType() { return currentType; }
 
+    @Override
+    public void startInput() {
+        for (ValueTimer valueTimer : valueTimers)
+            valueTimer.startInput();
+    }
+
+    @Override
+    public void stopInput() {
+        for (ValueTimer valueTimer : valueTimers)
+            valueTimer.stopInput();
+    }
 }

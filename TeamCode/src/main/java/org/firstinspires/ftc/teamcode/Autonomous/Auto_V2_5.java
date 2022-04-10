@@ -62,9 +62,9 @@ public abstract class Auto_V2_5 extends Autonomous_Base {
         led = new LED(hardwareMap, "blinkin", Alliance.BLUE);
 
         if (getAlliance() == Alliance.BLUE)
-            led.setPattern(RevBlinkinLedDriver.BlinkinPattern.LIGHT_CHASE_BLUE);
+            led.setPattern(RevBlinkinLedDriver.BlinkinPattern.SHOT_BLUE);
         else
-            led.setPattern(RevBlinkinLedDriver.BlinkinPattern.LIGHT_CHASE_RED);
+            led.setPattern(RevBlinkinLedDriver.BlinkinPattern.SHOT_RED);
 
         led.updateOutput();
 

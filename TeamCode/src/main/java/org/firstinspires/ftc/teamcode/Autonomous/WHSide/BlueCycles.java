@@ -13,6 +13,7 @@ import org.firstinspires.ftc.teamcode.GlobalData;
 import org.firstinspires.ftc.teamcode.Odometry.DriveWheels.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.ArmController;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorIntake;
+import org.firstinspires.ftc.teamcode.Subsystems.Sensors.ColorSensorFreight;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Levels;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Output;
 
@@ -36,7 +37,7 @@ public class BlueCycles extends Auto_V2_5 {
 
     private static final Trajectory driveToWall = MecanumDrive.trajectoryBuilder(preload.end(), Math.toRadians(170))
             .splineToSplineHeading(new Pose2d(-15, 84, Math.toRadians(95)), Math.toRadians(170))
-            .addTemporalMarker(0.35, () -> GlobalData.armUpSignal = true)
+            .addTemporalMarker(0.5, () -> GlobalData.armUpSignal = true)
             .build();
 
     @Override
@@ -214,27 +215,27 @@ public class BlueCycles extends Auto_V2_5 {
 
         //Drive towards back, intaking
         long driveStartTime = System.currentTimeMillis();
-        drive.setWeightedDrivePower(new Pose2d(0.8, 0.2, 0));
+        drive.setWeightedDrivePower(new Pose2d(0.7, 0.2, 0));
         customWait(() -> {
             telemetry.addLine("INTAKE");
 
             if (distCorrect.getFrontDistance() < 60) {
                 if (drive.getPoseEstimate().getHeading() > Math.toRadians(95)) {
                     drive.setWeightedDrivePower(new Pose2d(
-                            Math.min(Math.pow(distCorrect.getFrontDistance()-5-distanceFromWall, 2) * 0.000325 + 0.075, 0.8), //Slow down as approaches wall
-                            -0.1, //Drive away from wall
+                            Math.min(Math.pow(distCorrect.getFrontDistance()-5-distanceFromWall, 2) * 0.00025 + 0.125, 0.7), //Slow down as approaches wall
+                            -0.15, //Drive away from wall
                             -0.2));
                 }
                 else if (drive.getPoseEstimate().getHeading() < Math.toRadians(85)) {
                     drive.setWeightedDrivePower(new Pose2d(
-                            Math.min(Math.pow(distCorrect.getFrontDistance()-5-distanceFromWall, 2) * 0.000325 + 0.075, 0.8), //Slow down as approaches wall
-                            -0.1, //Drive away from wall
+                            Math.min(Math.pow(distCorrect.getFrontDistance()-5-distanceFromWall, 2) * 0.00025 + 0.125, 0.7), //Slow down as approaches wall
+                            -0.15, //Drive away from wall
                             0.2));
                 }
                 else {
                     drive.setWeightedDrivePower(new Pose2d(
-                            Math.min(Math.pow(distCorrect.getFrontDistance()-5-distanceFromWall, 2) * 0.000325 + 0.075, 0.8), //Slow down as approaches wall
-                            -0.1, //Drive away from wall
+                            Math.min(Math.pow(distCorrect.getFrontDistance()-5-distanceFromWall, 2) * 0.00025 + 0.125, 0.7), //Slow down as approaches wall
+                            -0.15, //Drive away from wall
                             0));
                 }
             }
@@ -339,8 +340,8 @@ public class BlueCycles extends Auto_V2_5 {
     }
 
     private void scoreInHub(double yPos) {
-        //Put arm out
-        armController.setScorePos(ArmController.ScoringPosition.UP);
+        //Put arm up
+        lift.setPower(1);
 
         SPEED_MULT = 1;
         SLOW_DIST = 20;
@@ -357,8 +358,11 @@ public class BlueCycles extends Auto_V2_5 {
                     if (System.currentTimeMillis() < startTime + 50)
                         return Math.toRadians(10);
                     else {
-                        armController.setScorePos(ArmController.ScoringPosition.HIGH);
-                        return Math.toRadians(-6);
+                        if (intake.getFreightType() == ColorSensorFreight.Freight.BALL)
+                            armController.setScorePos(ArmController.ScoringPosition.MIDDLE_AUTO);
+                        else
+                            armController.setScorePos(ArmController.ScoringPosition.HIGH);
+                        return Math.toRadians(-10);
                     }
                 },
                 1500);

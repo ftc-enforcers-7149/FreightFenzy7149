@@ -1,17 +1,15 @@
 package org.firstinspires.ftc.teamcode.Testing;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Subsystems.Sensors.CorrectedMB1220;
-import org.firstinspires.ftc.teamcode.Subsystems.Sensors.MaxbotixMB1220;
 import org.firstinspires.ftc.teamcode.Subsystems.Sensors.MovingUltrasonicSensor;
 import org.firstinspires.ftc.teamcode.TeleOp.TeleOp_Base;
 
 @TeleOp(name="MaxbotixTest")
-@Disabled
+//@Disabled
 public class MaxBotixDistance extends TeleOp_Base {
 
     CorrectedMB1220 maxbotixFL, maxbotixFR;
@@ -61,8 +59,8 @@ public class MaxBotixDistance extends TeleOp_Base {
             maxbotixFR.setSmoothingSize(INITIAL_SMOOTHING);
         }
 
-        telemetry.addData("Distance F: ", maxbotixFL.getDistance(DistanceUnit.INCH));
-        telemetry.addData("Distance L: ", maxbotixFR.getDistance(DistanceUnit.INCH));
+        telemetry.addData("Distance FL: ", maxbotixFL.getDistance(DistanceUnit.INCH));
+        telemetry.addData("Distance FR: ", maxbotixFR.getDistance(DistanceUnit.INCH));
     }
 
     @Override
