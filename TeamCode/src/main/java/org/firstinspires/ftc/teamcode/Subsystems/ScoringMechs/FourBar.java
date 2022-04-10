@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.Interp;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Output;
 
 public class FourBar implements Output {
@@ -10,42 +11,20 @@ public class FourBar implements Output {
     public Servo left, right;
     public Servo counterL, counterR;
     //private double currAngle, desiredAngle, lastDesiredAngle;
-    private double currPos, desiredPos, lastDesiredPos;
+    private double currPos, desiredPos, lastPos;
     public boolean manualCounter;
     public double manualCounterPos, lastManualCounterPos;
 
-    //public static final double TRAVEL_DIST = Math.toRadians(151); /*degrees*/
-
-    /*public enum Position {
-        IN(Math.toRadians(-107)),
-        HALF(Math.toRadians(-60)),
-        OUT(Math.toRadians(0)),
-        MAX(TRAVEL_DIST);
-
-        private final double angle;
-
-        Position(double angle) { this.angle = angle; }
-
-        public Position goUp() {
-            if (this == MAX) return MAX;
-            return values()[this.ordinal() + 1];
-        }
-
-        public Position goDown() {
-            if (this == IN) return IN;
-            return values()[this.ordinal() - 1];
-        }
-
-    }*/
+    Interp interp;
 
     public FourBar(HardwareMap hardwareMap, String leftName, String rightName,
                    String counterLName, String counterRName) {
         left = hardwareMap.servo.get(leftName);
         left.setDirection(Servo.Direction.FORWARD);
-        left.setPosition(0);
+        left.setPosition(scalePos(0));
         right = hardwareMap.servo.get(rightName);
         right.setDirection(Servo.Direction.REVERSE);
-        right.setPosition(0);
+        right.setPosition(scalePos(0));
 
         //left.setFullRangeTime(1000);
         //right.setFullRangeTime(1000);
@@ -66,20 +45,21 @@ public class FourBar implements Output {
         //currAngle = left.getPosition() * TRAVEL_DIST - Math.PI / 2 - SLIDE_ANGLE;
         //double desiredPos = scalePos((desiredAngle + Math.PI / 2 + SLIDE_ANGLE) / TRAVEL_DIST);
         //double desiredCounterPos = Math.cos(desiredAngle * (Math.PI / (Math.PI + SLIDE_ANGLE / 2)));
+        currPos = interp.getValue();
 
         if (!manualCounter) {
-            //if (desiredPos != lastDesiredPos) {
-                left.setPosition(scalePos(desiredPos));
-                right.setPosition(scalePos(desiredPos));
+            if (currPos != lastPos) {
+                left.setPosition(scalePos(currPos));
+                right.setPosition(scalePos(currPos));
 
-                counterL.setPosition(desiredPos);
-                counterR.setPosition(desiredPos);
-            //}
+                counterL.setPosition(currPos);
+                counterR.setPosition(currPos);
+            }
         }
         else {
-            if (desiredPos != lastDesiredPos) {
-                left.setPosition(scalePos(desiredPos));
-                right.setPosition(scalePos(desiredPos));
+            if (currPos != lastPos) {
+                left.setPosition(scalePos(currPos));
+                right.setPosition(scalePos(currPos));
             }
             if (manualCounterPos != lastManualCounterPos) {
                 counterL.setPosition(manualCounterPos);
@@ -89,7 +69,7 @@ public class FourBar implements Output {
             }
         }
 
-        lastDesiredPos = desiredPos;
+        lastPos = currPos;
     }
 
     /*public void goToAngle(double angle) {
@@ -103,10 +83,17 @@ public class FourBar implements Output {
     public void setPosition(double pos) {
         //goToAngle(pos * TRAVEL_DIST);
         desiredPos = pos;
+        interp = new Interp(currPos, desiredPos, 0, Interp.Method.INSTANT);
+    }
+
+    public void setPosition(double pos, double interpTime) {
+        //goToAngle(pos * TRAVEL_DIST);
+        desiredPos = pos;
+        interp = new Interp(currPos, desiredPos, interpTime, Interp.Method.INSTANT);
     }
 
     public double getCurrAngle() {
-        return desiredPos;
+        return currPos;
     }
 
     private double scalePos(double pos) {

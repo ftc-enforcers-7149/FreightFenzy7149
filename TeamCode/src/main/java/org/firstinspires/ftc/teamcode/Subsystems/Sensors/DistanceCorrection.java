@@ -29,6 +29,8 @@ public class DistanceCorrection implements Input {
         else
             sensor = new CorrectedMB1220(hardwareMap, distFLName, bRead, 9, MovingUltrasonicSensor.Facing.FRONT, l);
 
+        sensor.setQuartileSmoothing(true);
+
         this.alliance = alliance;
 
         running = false;

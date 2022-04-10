@@ -20,7 +20,7 @@ import static org.firstinspires.ftc.teamcode.GlobalData.SLOW_DIST;
 import static org.firstinspires.ftc.teamcode.GlobalData.SPEED_MULT;
 
 @Autonomous(name = "Blue WH Cycles OLD")
-//@Disabled
+@Disabled
 public class BlueCyclesOLD extends Auto_V2_5 {
 
     @Override

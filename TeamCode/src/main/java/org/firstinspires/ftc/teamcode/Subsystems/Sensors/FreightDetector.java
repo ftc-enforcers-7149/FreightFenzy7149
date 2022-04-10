@@ -14,8 +14,8 @@ public abstract class FreightDetector implements Input {
     public enum FreightType {
 
         NONE(0),
-        DUCK(3),
-        BALL_BLOCK(12),
+        DUCK(20),
+        BALL_BLOCK(26),
         MEDIUM_BLOCK(35),
         HEAVY_BLOCK(53);
 

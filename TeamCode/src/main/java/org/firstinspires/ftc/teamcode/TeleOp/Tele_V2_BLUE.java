@@ -64,7 +64,7 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         }
 
         intake = new MotorIntake(hardwareMap,
-                "intake", "paddle", "latch", "force");
+                "intake", "paddle", "latch", "intakeColor");
         lift = new Lift(hardwareMap, "lift", bReadCH, !RAN_AUTO);
         fourBar = new FourBar(hardwareMap, "fourBarL", "fourBarR",
                 "counterL", "counterR");
@@ -116,6 +116,7 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         if (liftPower != lastLiftPower) {
             lift.setPower(liftPower);
             lastPowerManual = true;
+            scorePos = ArmController.ScoringPosition.IDLE;
         }
         else if (lastPowerManual && liftPower == 0) {
             lift.setTargetHeight(lift.getHeight());
@@ -126,6 +127,7 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         if (resetLift && !lastResetLift) {
             lift.setManualOverride(!manualOverride);
             manualOverride = !manualOverride;
+            scorePos = ArmController.ScoringPosition.IDLE;
         }
 
         // Four Bar
@@ -133,7 +135,12 @@ public class Tele_V2_BLUE extends TeleOp_Base {
             armController.setScorePos(scorePos);
         }
 
-        if (scorePos == ArmController.ScoringPosition.IN && lift.getHeight() > scorePos.liftPos + 2)
+        if (curr4BPos != last4BPos) {
+            fourBar.setPosition(curr4BPos);
+            scorePos = ArmController.ScoringPosition.IDLE;
+        }
+
+        if (scorePos == ArmController.ScoringPosition.IN && lift.getHeight() > ArmController.ScoringPosition.IN.liftPos + 3)
             overrideIntakeDropLift = true;
 
         // Intake
@@ -189,8 +196,10 @@ public class Tele_V2_BLUE extends TeleOp_Base {
             intake.setLatch(MotorIntake.LatchPosition.OPEN);
         }
 
-        if (overrideIntakeDropLift) intake.setIntakePower(-0.5);
+        if (overrideIntakeDropLift) intake.setIntakePower(-0.75);
+        else if (intake.getIntakePower() == -0.75) intake.setIntakePower(0);
         if (overrideIntakeSharedBarrier) intake.setIntakePower(0.2);
+        else if (intake.getIntakePower() == 0.2) intake.setIntakePower(0);
 
         // Carousel
         if (spin) spinner.reset();
@@ -237,7 +246,7 @@ public class Tele_V2_BLUE extends TeleOp_Base {
             scorePos = ArmController.ScoringPosition.CLOSE;
         else if (gamepad2.x)
             scorePos = ArmController.ScoringPosition.REACH;
-        else if (scorePos != ArmController.ScoringPosition.IN)
+        else if (scorePos != ArmController.ScoringPosition.IN && scorePos != ArmController.ScoringPosition.IDLE)
             scorePos = ArmController.ScoringPosition.UP;
 
         liftPower = 0.8 * (gamepad2.right_trigger - gamepad2.left_trigger);

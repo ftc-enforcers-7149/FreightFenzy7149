@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Testing;
 
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
@@ -9,6 +10,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Utils.LED.LED;
 import org.firstinspires.ftc.teamcode.TeleOp.TeleOp_Base;
 
 @TeleOp(name="Force Test")
+@Disabled
 public class FSR406Test extends TeleOp_Base {
 
     private FSR406 force;

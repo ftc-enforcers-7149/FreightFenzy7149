@@ -1,16 +1,18 @@
 package org.firstinspires.ftc.teamcode.Autonomous.WHSide;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
 import org.firstinspires.ftc.teamcode.Autonomous.Auto_V2_5;
 import org.firstinspires.ftc.teamcode.GlobalData;
+import org.firstinspires.ftc.teamcode.Odometry.DriveWheels.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.ArmController;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorIntake;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Levels;
+import org.firstinspires.ftc.teamcode.Subsystems.Utils.Output;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -24,9 +26,20 @@ import static org.firstinspires.ftc.teamcode.GlobalData.SPEED_MULT;
 //@Disabled
 public class RedCycles extends Auto_V2_5 {
 
+    private static final Trajectory preload = MecanumDrive.trajectoryBuilder(new Pose2d(6.75, -78.25, Math.toRadians(0)), Math.toRadians(-10))
+            .splineToSplineHeading(new Pose2d(12, -78, Math.toRadians(25)), Math.toRadians(10))
+            .addTemporalMarker(0.67, () -> GlobalData.openSignal = true) //Open latch just as arm lines up
+            .addDisplacementMarker(() -> GlobalData.outtakeSignal = true) //Outtake freight right at the end
+            .build();
+
+    private static final Trajectory driveToWall = MecanumDrive.trajectoryBuilder(preload.end(), Math.toRadians(-170))
+            .splineToSplineHeading(new Pose2d(-15, -84, Math.toRadians(-95)), Math.toRadians(-170))
+            .addTemporalMarker(0.35, () -> GlobalData.armUpSignal = true)
+            .build();
+
     @Override
     protected Alliance getAlliance() {
-        return Alliance.RED;
+        return Alliance.BLUE;
     }
 
     @Override
@@ -36,25 +49,25 @@ public class RedCycles extends Auto_V2_5 {
         //Initial setup
         drive.setPoseEstimate(new Pose2d(6.75, -78.25, Math.toRadians(0)));
         //Levels levels = commands.detectBarcode(tseDetector);
-        Levels levels = Levels.HIGH;
+        Levels level = Levels.LOW;
         SLOW_DIST = 20;
         SPEED_MULT = 1;
 
         //Score pre-loaded
         led.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
-        lift.setPower(1); //Bring arm out of robot
-        waitForTime(100);
+        armController.setScorePos(ArmController.ScoringPosition.UP);
+        customWait(() -> lift.getHeight() < ArmController.ScoringPosition.UP.liftPos - 2);
 
-        switch (levels) {
+        switch (level) {
             case HIGH:
             default:
                 scoreInHub(-77, ArmController.ScoringPosition.HIGH);
                 break;
             case MIDDLE:
-                scoreInHub(-75, ArmController.ScoringPosition.MIDDLE_AUTO);
+                scoreInHub(-74.5, ArmController.ScoringPosition.MIDDLE_AUTO);
                 break;
             case LOW:
-                scoreInHub(-73, ArmController.ScoringPosition.LOW_AUTO);
+                scoreInHub(-71, ArmController.ScoringPosition.LOW_AUTO);
                 break;
         }
 
@@ -69,11 +82,11 @@ public class RedCycles extends Auto_V2_5 {
             driveIntoWarehouse();
 
             //Park if running out of time
-            if (getRuntime() >= 29)
+            if (getRuntime() >= 24)
                 break;
 
             //Intake and don't hit wall
-            intake(Math.max(17 - (cycle * 5), 0));
+            intake(Math.max(28 - (cycle * 7), 0));
 
             //Drive out through gap
             led.setPattern(RevBlinkinLedDriver.BlinkinPattern.YELLOW);
@@ -81,7 +94,7 @@ public class RedCycles extends Auto_V2_5 {
 
             //Drive to and score in hub
             led.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
-            scoreInHub(-81);
+            scoreInHub(-76);
 
             cycle++;
         }
@@ -110,35 +123,38 @@ public class RedCycles extends Auto_V2_5 {
         H_ACC = Math.toRadians(5);
         POS_ACC = 2;
         SLOW_DIST = 10;
-        SPEED_MULT = 0.9;
-        MIN_TURN = 0.6;
+        SPEED_MULT = 0.8;
+        MIN_TURN = 0.5;
 
         long startTime = System.currentTimeMillis();
 
         double startY = drive.getPoseEstimate().getY();
 
         //Drive towards wall and turn to face warehouse
-        driveTo(() -> {
-                    telemetry.addLine("DRIVE TO WALL");
-
-                    return -5.0;
-                },
-                () -> startY - 4,
-                () -> {
-                    if (System.currentTimeMillis() > startTime + 200)
-                        armController.setScorePos(ArmController.ScoringPosition.UP);
-                    return Math.toRadians(-93);
-                }
-                );
+//        driveTo(() -> {
+//                    telemetry.addLine("DRIVE TO WALL");
+//
+//                    return -4.0;
+//                },
+//                () -> startY + 4,
+//                () -> {
+//                    if (System.currentTimeMillis() > startTime + 200)
+//                        armController.setScorePos(ArmController.ScoringPosition.UP);
+//                    return Math.toRadians(95);
+//                }
+//                );
 
         //Strafe into wall
-        long driveStartTime = System.currentTimeMillis();
-        drive.setWeightedDrivePower(new Pose2d(0.05, -0.9, -0.05));
-        customWait(() -> {
-            telemetry.addLine("DRIVE TO WALL");
+//        long driveStartTime = System.currentTimeMillis();
+//        drive.setWeightedDrivePower(new Pose2d(0.05, 0.9, 0.05));
+//        customWait(() -> {
+//            telemetry.addLine("DRIVE TO WALL");
+//
+//            return System.currentTimeMillis() < driveStartTime + 50;
+//        });
 
-            return System.currentTimeMillis() < driveStartTime + 50;
-        });
+        drive.followTrajectoryAsync(driveToWall);
+        waitForDriveComplete();
 
         //Bring arm to ground
         armController.setScorePos(ArmController.ScoringPosition.IN);
@@ -167,14 +183,12 @@ public class RedCycles extends Auto_V2_5 {
         H_ACC = Math.toRadians(20);
 
         //Drive through gap
-        drive.setWeightedDrivePower(new Pose2d(0.87, -0.1, -0.03));
+        drive.setWeightedDrivePower(new Pose2d(0.6, -0.35, -0.05));
         long driveStartTime = System.currentTimeMillis();
         customWait(() -> {
             telemetry.addLine("DRIVE INTO WAREHOUSE");
 
-            return Math.abs(deltaHeading(drive.getPoseEstimate().getHeading(), Math.toRadians(-90))) > 5 ||
-                    (System.currentTimeMillis() < driveStartTime + 750 &&
-                    distCorrect.getFrontDistance() > 45);
+            return System.currentTimeMillis() < driveStartTime + 500;
         });
 
         intake.setIntakePower(1);
@@ -183,13 +197,15 @@ public class RedCycles extends Auto_V2_5 {
         drive.setPoseEstimate(new Pose2d(
                 8.5,
                 Math.max(Math.min(distCorrect.getFrontDistance(), 100), 10)-144,
-                Math.toRadians(-90)));
+                drive.getPoseEstimate().getHeading()));
 
         POS_ACC = 1;
         H_ACC = Math.toRadians(1);
     }
 
     private void intake(double distanceFromWall) {
+        intake.startScanningIntake();
+
         //Start intaking
         armController.setScorePos(ArmController.ScoringPosition.IN);
         intake.setIntakePower(1);
@@ -200,29 +216,29 @@ public class RedCycles extends Auto_V2_5 {
         customWait(() -> {
             telemetry.addLine("INTAKE");
 
-            if (distCorrect.getFrontDistance() < 50) {
+            if (distCorrect.getFrontDistance() < 60) {
                 if (drive.getPoseEstimate().getHeading() < Math.toRadians(-95)) {
                     drive.setWeightedDrivePower(new Pose2d(
-                            Math.min(Math.pow(distCorrect.getFrontDistance()-10-distanceFromWall, 2) * 0.0005 + 0.03, 0.8), //Slow down as approaches wall
+                            Math.min(Math.pow(distCorrect.getFrontDistance()-5-distanceFromWall, 2) * 0.000325 + 0.075, 0.8), //Slow down as approaches wall
                             0.1, //Drive away from wall
                             0.2));
                 }
                 else if (drive.getPoseEstimate().getHeading() > Math.toRadians(-85)) {
                     drive.setWeightedDrivePower(new Pose2d(
-                            Math.min(Math.pow(distCorrect.getFrontDistance()-10-distanceFromWall, 2) * 0.0005 + 0.03, 0.8), //Slow down as approaches wall
+                            Math.min(Math.pow(distCorrect.getFrontDistance()-5-distanceFromWall, 2) * 0.000325 + 0.075, 0.8), //Slow down as approaches wall
                             0.1, //Drive away from wall
                             -0.2));
                 }
                 else {
                     drive.setWeightedDrivePower(new Pose2d(
-                            Math.min(Math.pow(distCorrect.getFrontDistance()-10-distanceFromWall, 2) * 0.0005 + 0.03, 0.8), //Slow down as approaches wall
+                            Math.min(Math.pow(distCorrect.getFrontDistance()-5-distanceFromWall, 2) * 0.000325 + 0.075, 0.8), //Slow down as approaches wall
                             0.1, //Drive away from wall
                             0));
                 }
             }
 
             //Distance correction
-            if (distCorrect.getFrontDistance() < 35) {
+            if (distCorrect.getFrontDistance() < 40) {
                 drive.setPoseEstimate(new Pose2d(
                         10,
                         distCorrect.getFrontDistance() - 144,
@@ -231,18 +247,18 @@ public class RedCycles extends Auto_V2_5 {
                 distCorrect.sensor.disableMoving();
             }
 
-            if (intake.getFreightInIntake()) return false;
+            if (distCorrect.getFrontDistance() < 50 && intake.getFreightInIntake()) return false;
             if (System.currentTimeMillis() > driveStartTime + 1000) return false;
 
             if (System.currentTimeMillis() > driveStartTime + 500)
-                return !(distCorrect.getFrontDistance() <= 40) ||
-                        !(distCorrect.getFrontDistance() <= distanceFromWall);
+                return distCorrect.getFrontDistance() > distanceFromWall;
 
             return true;
         });
         drive.setWeightedDrivePower(new Pose2d(0, 0, 0));
 
         distCorrect.sensor.enableMoving();
+        intake.stopScanningIntake();
     }
 
     private void driveOutOfWarehouse() {
@@ -253,12 +269,13 @@ public class RedCycles extends Auto_V2_5 {
         //Make sure robot is against wall
         //kyle loves u.
         drive.setDrivePower(new Pose2d(-0.5, 0, 0.5));
-        customWait(() -> drive.getPoseEstimate().getHeading() < Math.toRadians(-90));
-        drive.setWeightedDrivePower(new Pose2d(-0.7, -0.3, 0));
+        customWait(() -> distCorrect.getFrontDistance() < 50 &&
+                drive.getPoseEstimate().getHeading() < Math.toRadians(-94));
+        drive.setWeightedDrivePower(new Pose2d(-0.6, -0.3, 0));
         waitForTime(150);
 
         //Distance correction
-        if (distCorrect.getFrontDistance() < 40) {
+        if (distCorrect.getFrontDistance() < 50) {
             drive.setPoseEstimate(new Pose2d(
                     8.5,
                     distCorrect.getFrontDistance() - 144,
@@ -288,7 +305,7 @@ public class RedCycles extends Auto_V2_5 {
             if (distCorrect.getFrontDistance() < 70 && distCorrect.getFrontDistance() > 15) {
                 drive.setPoseEstimate(new Pose2d(
                         6.5,
-                        distCorrect.getFrontDistance() - 144 + 5,
+                        distCorrect.getFrontDistance() - 144 + 4,
                         drive.getPoseEstimate().getHeading()));
             }
 
@@ -297,7 +314,8 @@ public class RedCycles extends Auto_V2_5 {
                 spitOut.set(true);
             }
 
-            return System.currentTimeMillis() < driveStartTime + 1000 || distCorrect.getFrontDistance() < 50;
+            return System.currentTimeMillis() < driveStartTime + 1500 &&
+                    (System.currentTimeMillis() < driveStartTime + 750 || distCorrect.getFrontDistance() < 45);
         });
 
         //Distance correction
@@ -334,11 +352,11 @@ public class RedCycles extends Auto_V2_5 {
                 () -> yPos,
                 () -> {
                     //Wait for arm to get up before turning to hub
-                    if (System.currentTimeMillis() < startTime + 150)
+                    if (System.currentTimeMillis() < startTime + 50)
                         return Math.toRadians(-10);
                     else {
                         armController.setScorePos(ArmController.ScoringPosition.HIGH);
-                        return Math.toRadians(10);
+                        return Math.toRadians(6);
                     }
                 },
                 1500);
@@ -349,12 +367,14 @@ public class RedCycles extends Auto_V2_5 {
         MIN_TURN = 0.15;
 
         commands.outtake(intake);
+        waitForTime(150);
     }
 
     private void scoreInHub(double yPos, ArmController.ScoringPosition scorePos) {
-        lift.setPower(1);
+        armController.setScorePos(scorePos);
+        waitForTime(100);
 
-        SPEED_MULT = 0.9;
+        SPEED_MULT = 0.8;
         SLOW_DIST = 20;
         H_ACC = Math.toRadians(4);
 
@@ -365,10 +385,9 @@ public class RedCycles extends Auto_V2_5 {
                 () -> yPos,
                 () -> {
                     //Wait for arm to get up before turning to hub
-                    if (System.currentTimeMillis() < startTime + 150)
+                    if (System.currentTimeMillis() < startTime + 50)
                         return Math.toRadians(0);
                     else {
-                        armController.setScorePos(scorePos);
                         return Math.toRadians(25);
                     }
                 },
@@ -379,5 +398,6 @@ public class RedCycles extends Auto_V2_5 {
         SPEED_MULT = 1;
 
         commands.outtake(intake);
+        waitForTime(150);
     }
 }

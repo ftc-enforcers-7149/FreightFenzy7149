@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.TeleOp;
 
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -15,7 +16,7 @@ import static org.firstinspires.ftc.teamcode.GlobalData.HEADING;
 import static org.firstinspires.ftc.teamcode.GlobalData.RAN_AUTO;
 
 @TeleOp (name = "BLUE 4Bar TeleOp NEW")
-//@Disabled
+@Disabled
 public class Tele_V2_BLUE_4Bar_NEW extends TeleOp_Base {
 
     //Drive
@@ -86,7 +87,7 @@ public class Tele_V2_BLUE_4Bar_NEW extends TeleOp_Base {
         }
 
         intake = new MotorIntake(hardwareMap,
-                "intake", "paddle", "latch", "force");
+                "intake", "paddle", "latch", "intakeColor");
         lift = new Lift(hardwareMap, "lift", bReadCH, !RAN_AUTO);
         spinner = new MotorCarouselSpinner(hardwareMap, "spinner", Alliance.BLUE);
 
@@ -304,9 +305,9 @@ public class Tele_V2_BLUE_4Bar_NEW extends TeleOp_Base {
     @Override
     protected void getInput() {
         //Drive
-        leftX = curveInput(gamepad1.left_stick_x, 1)*lim * 0.92;
-        leftY = curveInput(gamepad1.left_stick_y, 1)*lim * 0.92;
-        rightX = curveInput(gamepad1.right_stick_x, 1)*lim*0.75 * 0.92;
+        leftX = curveInput(gamepad1.left_stick_x, 1)*lim * 0.97;
+        leftY = curveInput(gamepad1.left_stick_y, 1)*lim * 0.97;
+        rightX = curveInput(gamepad1.right_stick_x, 1)*lim*0.75 * 0.97;
         resetAngle = gamepad1.y;
         sharedBarrier = gamepad1.a && !gamepad1.start;
 

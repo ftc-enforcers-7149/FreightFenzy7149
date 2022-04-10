@@ -46,7 +46,7 @@ public abstract class Auto_V2_5 extends Autonomous_Base {
 
         //Initialize subsystems
         intake = new MotorIntake(hardwareMap,
-                "intake", "paddle", "latch", "force");
+                "intake", "paddle", "latch", "intakeColor");
         lift = new Lift(hardwareMap, "lift", bReadCH, !RAN_AUTO);
         fourBar = new FourBar(hardwareMap, "fourBarL", "fourBarR",
                 "counterL", "counterR");
