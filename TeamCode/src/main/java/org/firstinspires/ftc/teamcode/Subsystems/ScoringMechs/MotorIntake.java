@@ -221,4 +221,9 @@ public class MotorIntake implements Input, Output {
         setLatch(LatchPosition.OPEN);
         updateOutput();
     }
+
+    public PaddlePosition getCurrPaddle() { return currPaddle; }
+
+    public PaddlePosition getLastPaddle() { return lastPaddle; }
+
 }
