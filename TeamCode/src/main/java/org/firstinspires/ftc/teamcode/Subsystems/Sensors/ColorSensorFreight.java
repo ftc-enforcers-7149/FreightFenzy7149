@@ -46,7 +46,8 @@ public class ColorSensorFreight implements Input {
 
         for(Sensor s : vals) s.updateInput();
 
-        if(vals.get(5).getValue() == 0) currentType = Freight.NONE;
+        if(getDistance() == 0) currentType = Freight.NONE;
+        else currentType = Freight.DUCK; // lol
 
     }
 
@@ -92,5 +93,14 @@ public class ColorSensorFreight implements Input {
         return new double[]{H, S, V};
 
     }
+
+    public double getLight() {          return vals.get(0).getValue(); }
+    public double getAlpha() {          return vals.get(1).getValue(); }
+    public double getHue() {            return vals.get(2).getValue(); }
+    public double getSaturation() {     return vals.get(3).getValue(); }
+    public double getValue() {          return vals.get(4).getValue(); }
+    public double getDistance() {       return vals.get(5).getValue(); }
+
+    public Freight getCurrentType() { return currentType; }
 
 }
