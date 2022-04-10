@@ -44,9 +44,10 @@ public class WeightFreightDetector extends FreightDetector {
     @Override
     public void updateInput() {
 
-        updateWeight();
         fsr406.updateInput();
         super.updateInput();
+
+        updateWeight();
 
     }
 

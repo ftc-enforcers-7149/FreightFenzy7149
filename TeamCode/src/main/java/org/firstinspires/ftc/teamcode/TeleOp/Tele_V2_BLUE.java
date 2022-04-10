@@ -10,6 +10,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.FourBar;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorCarouselSpinner;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorIntake;
+import org.firstinspires.ftc.teamcode.Subsystems.Sensors.ColorSensorFreight;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.LED.LED;
 
 import static org.firstinspires.ftc.teamcode.GlobalData.HEADING;
@@ -219,7 +220,8 @@ public class Tele_V2_BLUE extends TeleOp_Base {
 
         // Led
         if (freightInIntake)
-            led.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
+            // led.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
+            led.setPattern(intake.getFreightType() == ColorSensorFreight.Freight.BLOCK ? RevBlinkinLedDriver.BlinkinPattern.WHITE : RevBlinkinLedDriver.BlinkinPattern.YELLOW);
         else
             led.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
 
