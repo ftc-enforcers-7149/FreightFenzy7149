@@ -43,7 +43,7 @@ public class Lift implements Output, Input {
     //PIDF Controller
     private PIDFController controller;
     private double output, lastOutput;
-    public static PIDCoefficients pidCoeffs = new PIDCoefficients(0.008, 0, 0.0003);
+    public static PIDCoefficients pidCoeffs = new PIDCoefficients(0.002, 0, 0);
     private int setPosition;
 
     //Power to use if not running PID
@@ -117,7 +117,7 @@ public class Lift implements Output, Input {
 
     @Override
     public void updateOutput() {
-        if (liftPower < 0 && currHeight < GROUND.height) setTargetHeight(GROUND);
+        if (liftPower < 0 && currHeight <= GROUND.height) setTargetHeight(GROUND);
 
         //Use PID to go to position
         if (usePID && !manualOverride) {
@@ -126,7 +126,7 @@ public class Lift implements Output, Input {
             output = Math.min(Math.max(-maxSpeed, output), maxSpeed);
 
             //Stop the motor when at rest on the floor
-            if (setPosition == 0 && output < 0 && currPosition < GROUND.height) {
+            if (setPosition <= GROUND.height && output < 0 && currPosition < GROUND.height) {
                 output = 0;
             }
             if (output != lastOutput) {
@@ -230,7 +230,7 @@ public class Lift implements Output, Input {
         usePID = true;
         setCurrPosition(-80);
         setTargetHeight(GROUND);
-        maxSpeed = 0.6;
+        maxSpeed = 1.0;
     }
 
     @Override

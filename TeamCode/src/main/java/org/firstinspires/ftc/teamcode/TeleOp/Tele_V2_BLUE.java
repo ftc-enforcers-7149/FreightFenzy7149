@@ -43,6 +43,7 @@ public class Tele_V2_BLUE extends TeleOp_Base {
     private boolean outtake, lastOuttake, in, lastIn;
     private boolean outDuck, lastOutDuck;
     private boolean score, lastScore;
+    private boolean intakeSlow, lastIntakeSlow;
 
     //Spinner
     private boolean spin, lastSpin;
@@ -198,6 +199,11 @@ public class Tele_V2_BLUE extends TeleOp_Base {
             intake.setLatch(MotorIntake.LatchPosition.OPEN);
         }
 
+        if (intakeSlow)
+            intake.setIntakePower(0.25);
+        else if (lastIntakeSlow)
+            intake.setIntakePower(0);
+
         if (overrideIntakeDropLift) intake.setIntakePower(-0.75);
         else if (intake.getIntakePower() == -0.75) intake.setIntakePower(0);
         if (overrideIntakeSharedBarrier) intake.setIntakePower(0.2);
@@ -212,7 +218,7 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         telemetry.addData("Freight type: ", intake.getFreightType());
 
         // Led
-        if (freightInIntake  && intake.getCurrPaddle() != MotorIntake.PaddlePosition.OUT_FAR)
+        if (freightInIntake && intake.getCurrPaddle() != MotorIntake.PaddlePosition.OUT_FAR)
             // led.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
             led.setPattern(intake.getFreightType() == ColorSensorFreight.Freight.BALL ? RevBlinkinLedDriver.BlinkinPattern.WHITE : RevBlinkinLedDriver.BlinkinPattern.GOLD);
         else
@@ -229,9 +235,9 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         if (gamepad2.start || lastGStartB) gStartB = gamepad2.b;
 
         //Drive
-        leftX = curveInput(gamepad1.left_stick_x, 1)*lim * 0.97;
-        leftY = curveInput(gamepad1.left_stick_y, 1)*lim * 0.97;
-        rightX = curveInput(gamepad1.right_stick_x, 1)*lim*0.75 * 0.97;
+        leftX = curveInput(gamepad1.left_stick_x, 1)*lim * 1.0;
+        leftY = curveInput(gamepad1.left_stick_y, 1)*lim * 1.0;
+        rightX = curveInput(gamepad1.right_stick_x, 1)*lim*0.75 * 1.0;
         resetAngle = gamepad1.y;
         sharedBarrier = gamepad1.a && !gStartA;
 
@@ -267,6 +273,7 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         outtake = gamepad1.right_bumper;
         outDuck = gamepad1.left_bumper;
         score = gamepad1.left_trigger > 0.2;
+        intakeSlow = gamepad1.b;
 
         //Spinner
         spin = gamepad1.x;
@@ -300,6 +307,7 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         lastOuttake = outtake;
         lastOutDuck = outDuck;
         lastScore = score;
+        lastIntakeSlow = intakeSlow;
 
         //Spinner
         lastSpin = spin;

@@ -25,7 +25,7 @@ public class AutoCommands {
             Rect rectangle = ((SimpleColorPipeline) tseDetector.getPipeline()).getCrop();
 
             if (boundingRect == null || boundingRect.size.area() < 1500) return Levels.LOW;
-            if (boundingRect.center.x - rectangle.x <= rectangle.width / 2d) {
+            if (boundingRect.center.x - rectangle.x <= rectangle.x + rectangle.width / 2d) {
                 return Levels.MIDDLE;
             } else {
                 return Levels.HIGH;
@@ -126,7 +126,7 @@ public class AutoCommands {
     }
 
     public void spinDuck(MotorCarouselSpinner spinner) {
-        spinner.reset();
+        spinner.resetSlow();
         op.customWait(spinner::isBusy);
     }
 }

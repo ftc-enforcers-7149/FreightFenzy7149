@@ -13,6 +13,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Utils.Input;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.LED.LED;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Output;
 import org.firstinspires.ftc.teamcode.Subsystems.Webcam.OpenCV;
+import org.firstinspires.ftc.teamcode.Subsystems.Webcam.TSEPipeline;
 
 import static org.firstinspires.ftc.teamcode.GlobalData.ALLIANCE;
 import static org.firstinspires.ftc.teamcode.GlobalData.HEADING;
@@ -217,14 +218,17 @@ public abstract class Auto_V2_5 extends Autonomous_Base {
 
         //Initialize vision for either alliance
         tseDetector = new OpenCV(hardwareMap);
-        //tseDetector.start(new TSEPipeline(0, 350, 360, 100));
+        if (getAlliance() == Alliance.BLUE)
+            tseDetector.start(new TSEPipeline(0, 110, 335, 110));
+        else
+            tseDetector.start(new TSEPipeline(280, 110, 360, 110));
 
         /// Init Loop ///
 
         //Check vision
         while (!isStarted() && !isStopRequested()) {
-            //tseDetector.update();
-            //telemetry.addData("Hub Level: ", commands.detectBarcode(tseDetector));
+            tseDetector.update();
+            telemetry.addData("Hub Level: ", commands.detectBarcode(tseDetector));
             telemetry.update();
         }
         if (isStopRequested()) return;

@@ -1,14 +1,12 @@
 package org.firstinspires.ftc.teamcode.Autonomous.DuckSide;
 
-import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
 import org.firstinspires.ftc.teamcode.Autonomous.Auto_V2_5;
-import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.Lift;
+import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.ArmController;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorIntake;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Levels;
 
@@ -25,70 +23,100 @@ public class RedDuck extends Auto_V2_5 {
 
     @Override
     protected void auto() {
-        drive.setPoseEstimate(new Vector2d(0, -15));
+        drive.setPoseEstimate(new Pose2d(6.75, -30.5, Math.toRadians(0)));
 
-        Levels liftHeight = commands.detectBarcode(tseDetector);
+        Levels level = commands.detectBarcode(tseDetector);
+        //Levels level = Levels.HIGH;
 
-        SLOW_DIST = 25;
+        SLOW_DIST = 15;
+        MIN_TURN = 0.2;
 
         //Set lift to correct level according to the vision
-        Lift.pidCoeffs = new PIDCoefficients(0.004, 0, 0.0001);
-        lift.initPID();
-        lift.setTargetHeight(liftHeight);   //TODO: Four Bar
+        lift.setPower(1);
+        waitForTime(500);
+        fourBar.setPosition(ArmController.ScoringPosition.HIGH.barPos);
+        waitForTime(250);
 
-        //Drive to hub
-        SLOW_DIST = 10;
-        driveTo(25,-23, Math.toRadians(310));
-        SLOW_DIST = 25;
+        driveTo(10, -32, Math.toRadians(-10));
 
-        //Drive to hub and outtake
-        driveTo( 29,-28, Math.toRadians(310));
-        commands.outtake(intake, lift);
+        switch (level) {
+            case HIGH:
+            default:
+                armController.setScorePos(ArmController.ScoringPosition.HIGH);
+                driveTo(18, -37.5, Math.toRadians(-35));
+                break;
+            case MIDDLE:
+                armController.setScorePos(ArmController.ScoringPosition.MIDDLE_AUTO);
+                driveTo(18, -37, Math.toRadians(-35));
+                break;
+            case LOW:
+                armController.setScorePos(ArmController.ScoringPosition.LOW_AUTO);
+                driveTo(18, -40, Math.toRadians(-35));
+                break;
+        }
 
-        Lift.pidCoeffs = new PIDCoefficients(0.006, 0, 0.00015);
-        lift.initPID();
-        lift.setTargetHeight(Levels.GROUND);    //TODO: Four Bar
+        commands.outtake(intake);
+        waitForTime(150);
 
         //Drive to the duckwheel
         POS_ACC = 3;
-        SPEED_MULT = 0.7;
-        driveTo(-5, 14, Math.toRadians(270), 1500);
+        SPEED_MULT = 0.55;
+
+        long driveStartTime = System.currentTimeMillis();
+        driveTo(() -> 8.5d, () -> {
+            if (System.currentTimeMillis() >= driveStartTime + 200)
+                armController.setScorePos(ArmController.ScoringPosition.UP);
+
+            return 4d;
+        }, () -> Math.toRadians(-90), 1500);
         SPEED_MULT = 1;
         POS_ACC = 1;
 
         //Spin and stop duckwheel
+        armController.setScorePos(ArmController.ScoringPosition.IN);
+        intake.setIntakePower(-0.5);
         commands.spinDuck(spinner);
+        intake.setIntakePower(0.5);
 
-        drive.setPoseEstimate(new Pose2d(3, 15, Math.toRadians(270)));
+        drive.setPoseEstimate(new Pose2d(12, -6.75, Math.toRadians(-90)));
 
         waitForTime(750);
 
         //Try to intake duck
+        SLOW_DIST = 5;
+        POS_ACC = 2;
         intake.setIntakePower(0.5);
-        driveTo(7, 12, Math.toRadians(210));
-        driveTo(7, 2, Math.toRadians(210));
-        driveTo(10, -9, Math.toRadians(270));
+        driveTo(11.5, -12, Math.toRadians(-160));
+        driveTo(11.5, -26, Math.toRadians(-160));
+        driveTo(15.5, -36, Math.toRadians(-90));
         intake.setIntakePower(0);
-        intake.setLatch(MotorIntake.LatchPosition.DUCK_CLOSED);
+        intake.setLatch(MotorIntake.LatchPosition.CLOSED);
+        SLOW_DIST = 15;
+        POS_ACC = 1;
 
-        lift.setTargetHeight(Levels.HIGH);  //TODO: Four Bar
+        lift.setPower(1);
+        long startLiftTime = System.currentTimeMillis();
 
         //Drive to hub
-        driveTo(23,-20, Math.toRadians(320));
+        driveTo(13.5, -33, Math.toRadians(-35));
+        customWait(() -> System.currentTimeMillis() <= startLiftTime + 500);
+        fourBar.setPosition(ArmController.ScoringPosition.HIGH.barPos);
+        waitForTime(250);
+
+        armController.setScorePos(ArmController.ScoringPosition.HIGH);
 
         //Drive to hub and outtake
-        driveTo( 27,-25, Math.toRadians(320));
-        //kpop
-        commands.outtake(intake, lift);
+        driveTo(20, -45, Math.toRadians(-35));
+        commands.outtake(intake);
 
         //Back away from hub
-        driveTo(19,-23, Math.toRadians(320));
-        lift.setTargetHeight(Levels.GROUND);    //TODO: Four Bar
+        driveTo(15, -23, Math.toRadians(0));
+        armController.setScorePos(ArmController.ScoringPosition.UP);
 
         //Park in storage unit
-        driveTo(27,25, Math.toRadians(0), 1500);
-
-        //Lower lift all the way down for TeleOp
-        commands.setLiftHeight(lift, Levels.GROUND);
+        driveTo(32.5, 0, Math.toRadians(0), 1500);
+        armController.setScorePos(ArmController.ScoringPosition.IN);
+        intake.setIntakePower(-1);
+        waitForTime(400);
     }
 }

@@ -47,7 +47,7 @@ public class ColorSensorFreight implements Input {
 
         sensor = h.get(RevColorSensorV3.class, name);
 
-        distance = new ValueTimer<Double>(0.0, 200) {
+        distance = new ValueTimer<Double>(0.0, 100) {
             @Override
             public Double readValue() {
                 return sensor.getDistance(DistanceUnit.INCH);
@@ -68,21 +68,21 @@ public class ColorSensorFreight implements Input {
 //            }
 //        };
 
-        red = new ValueTimer<Integer>(0, 200) {
+        red = new ValueTimer<Integer>(0, 100) {
             @Override
             public Integer readValue() {
                 return sensor.red();
             }
         };
 
-        green = new ValueTimer<Integer>(0, 200) {
+        green = new ValueTimer<Integer>(0, 100) {
             @Override
             public Integer readValue() {
                 return sensor.green();
             }
         };
 
-        blue = new ValueTimer<Integer>(0, 200) {
+        blue = new ValueTimer<Integer>(0, 100) {
             @Override
             public Integer readValue() {
                 return sensor.blue();

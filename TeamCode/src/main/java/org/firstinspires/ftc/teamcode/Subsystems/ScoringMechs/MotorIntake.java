@@ -177,7 +177,7 @@ public class MotorIntake implements Input, Output {
     }
 
     public boolean getFreightInIntake () {
-        return useSensor && (sensor.getCurrentType() != ColorSensorFreight.Freight.NONE);
+        return useSensor && (sensor.getCurrentType() != ColorSensorFreight.Freight.NONE && sensor.getCurrentType() != ColorSensorFreight.Freight.DUCK);
     }
 
     public ColorSensorFreight.Freight getFreightType() {
@@ -197,9 +197,9 @@ public class MotorIntake implements Input, Output {
     }
 
     public void stopScanningIntake() {
-        sensor.red.setDelayTime(200);
-        sensor.green.setDelayTime(200);
-        sensor.blue.setDelayTime(200);
+        sensor.red.setDelayTime(100);
+        sensor.green.setDelayTime(100);
+        sensor.blue.setDelayTime(100);
     }
 
     @Override

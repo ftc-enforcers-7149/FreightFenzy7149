@@ -49,8 +49,8 @@ public class MotorCarouselSpinner implements Output, Input {
 
     private MotionProfile profileSlow = MotionProfileGenerator.generateSimpleMotionProfile(
             new MotionState(0, 0, 0),
-            new MotionState((15*Math.PI - 1) / (4 * Math.PI) * 2, 5, 150),
-            5,
+            new MotionState((15*Math.PI - 1) / (4 * Math.PI) * 2, 3.75, 150),
+            3.75,
             150
     );
 

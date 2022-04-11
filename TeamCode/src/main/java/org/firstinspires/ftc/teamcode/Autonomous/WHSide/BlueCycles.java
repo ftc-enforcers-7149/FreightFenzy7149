@@ -48,7 +48,7 @@ public class BlueCycles extends Auto_V2_5 {
     @Override
     public void auto() {
         distCorrect.startRunning();
-        distCorrect.sensor.setHighPass(true, 150);
+        distCorrect.sensor.setHighPass(true, 200);
 
         //Initial setup
         drive.setPoseEstimate(new Pose2d(6.75, 78.25, Math.toRadians(0)));
@@ -200,10 +200,15 @@ public class BlueCycles extends Auto_V2_5 {
         intake.setIntakePower(1);
 
         //Distance correction
-        drive.setPoseEstimate(new Pose2d(
-                8.5,
-                144-Math.max(Math.min(distCorrect.getFrontDistance(), 100), 10),
-                drive.getPoseEstimate().getHeading()));
+        long sensorStartTime = System.currentTimeMillis();
+        customWait(() -> distCorrect.getFrontDistance() > 100 &&
+                System.currentTimeMillis() < sensorStartTime + 500);
+        if (distCorrect.getFrontDistance() < 50) {
+            drive.setPoseEstimate(new Pose2d(
+                    8.5,
+                    144 - distCorrect.getFrontDistance(),
+                    drive.getPoseEstimate().getHeading()));
+        }
 
         POS_ACC = 1;
         H_ACC = Math.toRadians(1);
@@ -285,6 +290,9 @@ public class BlueCycles extends Auto_V2_5 {
         waitForTime(150);
 
         //Distance correction
+        long sensorStartTime = System.currentTimeMillis();
+        customWait(() -> distCorrect.getFrontDistance() > 100 &&
+                System.currentTimeMillis() < sensorStartTime + 500);
         if (distCorrect.getFrontDistance() < 50) {
             drive.setPoseEstimate(new Pose2d(
                     8.5,
@@ -322,8 +330,8 @@ public class BlueCycles extends Auto_V2_5 {
                 spitOut.set(true);
             }
 
-            return System.currentTimeMillis() < driveStartTime + 1500 &&
-                    (System.currentTimeMillis() < driveStartTime + 750 || distCorrect.getFrontDistance() < 45);
+            return System.currentTimeMillis() < driveStartTime + 750 &&
+                    (System.currentTimeMillis() < driveStartTime + 500 || distCorrect.getFrontDistance() < 45);
         });
 
         //Distance correction
