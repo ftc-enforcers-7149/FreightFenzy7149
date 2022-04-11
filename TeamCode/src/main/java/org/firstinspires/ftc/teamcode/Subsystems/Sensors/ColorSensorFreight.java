@@ -15,7 +15,7 @@ public class ColorSensorFreight implements Input {
     private ArrayList<Sensor> vals = new ArrayList<>();
     private Freight currentType;
 
-    //public ValueTimer<Double> distance, light;
+    public ValueTimer<Double> distance/*, light*/;
     //public ValueTimer<Integer> alpha;
     public ValueTimer<Integer> red, green, blue;
 
@@ -25,9 +25,9 @@ public class ColorSensorFreight implements Input {
 
     public enum Freight {
 
-        NONE(0),
+        NONE(94.5),
         BLOCK(50),
-        DUCK(75),
+        DUCK(78),
         BALL(95),
         UNKNOWN(125);
 
@@ -47,12 +47,12 @@ public class ColorSensorFreight implements Input {
 
         sensor = h.get(RevColorSensorV3.class, name);
 
-//        distance = new ValueTimer<Double>(0.0, 200) {
-//            @Override
-//            public Double readValue() {
-//                return sensor.getDistance(DistanceUnit.INCH);
-//            }
-//        };
+        distance = new ValueTimer<Double>(0.0, 200) {
+            @Override
+            public Double readValue() {
+                return sensor.getDistance(DistanceUnit.INCH);
+            }
+        };
 //
 //        light = new ValueTimer<Double>(0.0, 200) {
 //            @Override
@@ -90,7 +90,7 @@ public class ColorSensorFreight implements Input {
         };
 
         valueTimers = new ArrayList<ValueTimer>();
-//        valueTimers.add(distance);
+        valueTimers.add(distance);
 //        valueTimers.add(light);
 //        valueTimers.add(alpha);
         valueTimers.add(red);
@@ -113,11 +113,13 @@ public class ColorSensorFreight implements Input {
         vals.get(2).add(curHSV[2]);                             // value
         //vals.get(3).add(light.getValue());                      // light
         //vals.get(4).add(alpha.getValue());                      // alpha
-        //vals.get(5).add(distance.getValue());                   // distance
+        vals.get(5).add(distance.getValue());                   // distance
 
         for(Sensor s : vals) s.updateInput();
 
-        if(getSaturation() <= 0.1) currentType = Freight.NONE;
+        if(getSaturation() <= 0.3) {
+            currentType = getHue() < Freight.NONE.minHue ? Freight.DUCK : Freight.NONE; // sometimes saturation gets really low with
+        }                                                                               // an intake duck, but hue can clue us in
         else currentType = Freight.getType(getHue()); // fix dis
     }
 
