@@ -219,10 +219,10 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         telemetry.addData("Freight type: ", intake.getFreightType());
 
         // Led
-        if (freightInIntake && intake.getCurrPaddle() != MotorIntake.PaddlePosition.OUT_FAR)
+        if (freightInIntake && intake.getCurrPaddle() != MotorIntake.PaddlePosition.OUT_FAR && scorePos == ArmController.ScoringPosition.IN)
             // led.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
             led.setPattern(intake.getFreightType() == ColorSensorFreight.Freight.BALL ? RevBlinkinLedDriver.BlinkinPattern.WHITE : RevBlinkinLedDriver.BlinkinPattern.GOLD);
-        else
+        else if(!freightInIntake)
             led.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
 
         updateAutomatedDriving();

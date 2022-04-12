@@ -111,8 +111,8 @@ public class ColorSensorFreight implements Input {
         vals.get(0).add(curHSV[0]);                             // hue
         vals.get(1).add(curHSV[1]);                             // saturation
         vals.get(2).add(curHSV[2]);                             // value
-        //vals.get(3).add(light.getValue());                      // light
-        //vals.get(4).add(alpha.getValue());                      // alpha
+  //    vals.get(3).add(light.getValue());                      // light
+  //    vals.get(4).add(alpha.getValue());                      // alpha
         vals.get(5).add(distance.getValue());                   // distance
 
         for(Sensor s : vals) s.updateInput();
@@ -120,7 +120,8 @@ public class ColorSensorFreight implements Input {
         if(getSaturation() <= 0.3) {
             currentType = getHue() < Freight.NONE.minHue ? Freight.DUCK : Freight.NONE; // sometimes saturation gets really low with
         }                                                                               // an intake duck, but hue can clue us in
-        else currentType = Freight.getType(getHue()); // fix dis
+        else currentType = Freight.getType(getHue());
+
     }
 
     public static double[] rgbToHSV(double r, double g, double b) {

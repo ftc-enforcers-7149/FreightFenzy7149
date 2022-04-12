@@ -177,7 +177,7 @@ public class MotorIntake implements Input, Output {
     }
 
     public boolean getFreightInIntake () {
-        return useSensor && (sensor.getCurrentType() != ColorSensorFreight.Freight.NONE && sensor.getCurrentType() != ColorSensorFreight.Freight.DUCK);
+        return useSensor && (sensor.getCurrentType() != ColorSensorFreight.Freight.NONE); //&& sensor.getCurrentType() != ColorSensorFreight.Freight.DUCK);
     }
 
     public ColorSensorFreight.Freight getFreightType() {
