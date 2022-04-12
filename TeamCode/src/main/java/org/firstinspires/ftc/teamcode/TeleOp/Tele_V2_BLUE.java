@@ -54,6 +54,7 @@ public class Tele_V2_BLUE extends TeleOp_Base {
     private ArmController.ScoringPosition scorePos = ArmController.ScoringPosition.IN,
             lastScorePos = ArmController.ScoringPosition.IN;
     private boolean gStartA, gStartB, lastGStartA, lastGStartB;
+    private boolean capping, capButton, lastCapButton;
 
     @Override
     public void init() {
@@ -200,7 +201,7 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         }
 
         if (intakeSlow)
-            intake.setIntakePower(0.25);
+            intake.setIntakePower(0.4);
         else if (lastIntakeSlow)
             intake.setIntakePower(0);
 
@@ -241,7 +242,12 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         resetAngle = gamepad1.y;
         sharedBarrier = gamepad1.a && !gStartA;
 
+        capButton = gamepad2.left_bumper;
+
         //Lift
+
+        if (capButton)
+            scorePos = ArmController.ScoringPosition.CAP_PICKUP;
 
         if (gamepad2.dpad_up || gamepad1.dpad_up)
             scorePos = ArmController.ScoringPosition.UP;
@@ -259,7 +265,9 @@ public class Tele_V2_BLUE extends TeleOp_Base {
             scorePos = ArmController.ScoringPosition.CLOSE;
         else if (gamepad2.x)
             scorePos = ArmController.ScoringPosition.REACH;
-        else if (scorePos != ArmController.ScoringPosition.IN && scorePos != ArmController.ScoringPosition.IDLE)
+        else if (scorePos != ArmController.ScoringPosition.IN &&
+                scorePos != ArmController.ScoringPosition.CAP_PICKUP &&
+                scorePos != ArmController.ScoringPosition.IDLE)
             scorePos = ArmController.ScoringPosition.UP;
 
         liftPower = 0.8 * (gamepad2.right_trigger - gamepad2.left_trigger);
@@ -298,6 +306,8 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         lastSharedBarrier = sharedBarrier;
 
         //Lift
+        lastCapButton = capButton;
+
         lastLiftPower = liftPower;
         lastResetLift = resetLift;
 

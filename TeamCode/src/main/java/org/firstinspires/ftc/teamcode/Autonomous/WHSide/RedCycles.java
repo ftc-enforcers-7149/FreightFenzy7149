@@ -371,10 +371,7 @@ public class RedCycles extends Auto_V2_5 {
                     if (System.currentTimeMillis() < startTime + 50)
                         return Math.toRadians(-10);
                     else if (!armOut.get()) {
-                        if (intake.getFreightType() == ColorSensorFreight.Freight.BALL)
-                            armController.setScorePos(ArmController.ScoringPosition.MIDDLE_AUTO);
-                        else
-                            armController.setScorePos(ArmController.ScoringPosition.HIGH);
+                        armController.setScorePos(ArmController.ScoringPosition.HIGH);
 
                         armOut.set(true);
 
