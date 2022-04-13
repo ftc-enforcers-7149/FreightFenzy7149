@@ -38,13 +38,19 @@ public class BlueCyclesDEBUG extends Auto_V2_5 {
             .addTemporalMarker(0.5, () -> GlobalData.armUpSignal = true)
             .build();
 
-    private AtomicBoolean sensorState = new AtomicBoolean(true);
+    private boolean sensorState = true;
 
     private boolean paused = false;
     private boolean x, lastX;
 
     private double speedMultiplier = 1.0;
     private boolean dUp, dDown, lastDUp, lastDDown;
+
+    private boolean reset = false;
+    private boolean b, lastB;
+
+    private boolean park = false;
+    private boolean y, lastY;
 
     @Override
     protected Alliance getAlliance() {
@@ -65,7 +71,7 @@ public class BlueCyclesDEBUG extends Auto_V2_5 {
         addOutput(new Output() {
             @Override
             public void updateOutput() {
-                if (sensorState.get()) {
+                if (sensorState) {
                     if (intake.getFreightInIntake())
                         led.setPattern(RevBlinkinLedDriver.BlinkinPattern.YELLOW);
                     else
@@ -104,11 +110,26 @@ public class BlueCyclesDEBUG extends Auto_V2_5 {
             @Override
             public void updateInput() {
                 x = gamepad1.x;
+                b = gamepad1.b;
+                y = gamepad1.y;
 
                 if (x && !lastX)
                     paused = !paused;
 
+                if (b && !lastB) {
+                    paused = true;
+                    reset = true;
+                }
+
+                if (y && !lastY) {
+                    park = true;
+                    reset = true;
+                    paused = true;
+                }
+
                 lastX = x;
+                lastB = b;
+                lastY = y;
             }
         });
 
@@ -139,50 +160,44 @@ public class BlueCyclesDEBUG extends Auto_V2_5 {
                 break;
         }
 
-        int cycle = 0;
-
-        while (opModeIsActive() && cycle < 4) {
+        while (opModeIsActive()) {
             //Align with warehouse
             //led.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
-            customWait(() -> paused);
-            driveToWall();
+            if (!reset) {
+                customWait(() -> paused);
+                driveToWall();
+            }
 
             //Drive through gap
+            reset = false;
             customWait(() -> paused);
             driveIntoWarehouse();
 
-            //Park if running out of time
-            if (getRuntime() >= 25)
+            if (park)
                 break;
 
             //Intake and don't hit wall
-            customWait(() -> paused);
-            intake(Math.max(28 - (cycle * 7), 0));
+            if (!reset) {
+                customWait(() -> paused);
+                intake(24);
+            }
 
             //Drive out through gap
             //led.setPattern(RevBlinkinLedDriver.BlinkinPattern.YELLOW);
-            customWait(() -> paused);
-            driveOutOfWarehouse();
+            if (!reset) {
+                customWait(() -> paused);
+                driveOutOfWarehouse();
+            }
 
             //Drive to and score in hub
             //led.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
-            customWait(() -> paused);
-            scoreInHub(84);
-
-            cycle++;
+            if (!reset) {
+                customWait(() -> paused);
+                scoreInHub(84);
+            }
         }
 
-        customWait(() -> paused);
-
-        intake.setLatch(MotorIntake.LatchPosition.OPEN);
-        intake.setPaddle(MotorIntake.PaddlePosition.BACK);
-
         //Park
-        customWait(() -> paused);
-        driveToWall();
-
-        customWait(() -> paused);
-        driveIntoWarehouse();
 
         customWait(() -> paused);
         armController.setScorePos(ArmController.ScoringPosition.IN);
@@ -253,8 +268,15 @@ public class BlueCyclesDEBUG extends Auto_V2_5 {
 
         //Distance correction
         long sensorStartTime = System.currentTimeMillis();
-        customWait(() -> distCorrect.getFrontDistance() > 100 &&
-                System.currentTimeMillis() < sensorStartTime + 500);
+        customWait(() -> {
+            if (distCorrect.getFrontDistance() > 100 &&
+                    System.currentTimeMillis() <= sensorStartTime + 500) {
+                sensorState = false;
+                return true;
+            }
+            if (System.currentTimeMillis() <= sensorStartTime + 500) sensorState = true;
+            return false;
+        });
         if (distCorrect.getFrontDistance() < 60) {
             drive.setPoseEstimate(new Pose2d(
                     8.5,
@@ -280,26 +302,28 @@ public class BlueCyclesDEBUG extends Auto_V2_5 {
             telemetry.addLine("INTAKE");
 
             if (distCorrect.getFrontDistance() < 60) {
+                sensorState = true;
                 if (deltaHeading(drive.getPoseEstimate().getHeading(), Math.toRadians(95)) < 0)  {
                     drive.setWeightedDrivePower(new Pose2d(
-                            speedMultiplier * Math.min(Math.pow(distCorrect.getFrontDistance()-5-distanceFromWall, 2) * 0.0002 + 0.125, 0.6), //Slow down as approaches wall
+                            speedMultiplier * Math.min(Math.pow(distCorrect.getFrontDistance()-distanceFromWall, 2) * 0.0002 + 0.125, 0.6), //Slow down as approaches wall
                             speedMultiplier * -0.15, //Drive away from wall
                             speedMultiplier * -0.2));
                 }
                 else if (deltaHeading(drive.getPoseEstimate().getHeading(), Math.toRadians(85)) > 0) {
                     drive.setWeightedDrivePower(new Pose2d(
-                            speedMultiplier * Math.min(Math.pow(distCorrect.getFrontDistance()-5-distanceFromWall, 2) * 0.0002 + 0.125, 0.6), //Slow down as approaches wall
+                            speedMultiplier * Math.min(Math.pow(distCorrect.getFrontDistance()-distanceFromWall, 2) * 0.0002 + 0.125, 0.6), //Slow down as approaches wall
                             speedMultiplier * -0.15, //Drive away from wall
                             speedMultiplier * 0.2));
                 }
                 else {
                     drive.setWeightedDrivePower(new Pose2d(
-                            speedMultiplier * Math.min(Math.pow(distCorrect.getFrontDistance()-5-distanceFromWall, 2) * 0.0002 + 0.125, 0.6), //Slow down as approaches wall
+                            speedMultiplier * Math.min(Math.pow(distCorrect.getFrontDistance()-distanceFromWall, 2) * 0.0002 + 0.125, 0.6), //Slow down as approaches wall
                             speedMultiplier * -0.15, //Drive away from wall
                             0));
                 }
             }
             else {
+                sensorState = false;
                 if (deltaHeading(drive.getPoseEstimate().getHeading(), Math.toRadians(95)) < 0)  {
                     drive.setWeightedDrivePower(new Pose2d(
                             speedMultiplier * 0.2, //Slow down as approaches wall
@@ -361,8 +385,15 @@ public class BlueCyclesDEBUG extends Auto_V2_5 {
 
         //Distance correction
         long sensorStartTime = System.currentTimeMillis();
-        customWait(() -> distCorrect.getFrontDistance() > 100 &&
-                System.currentTimeMillis() < sensorStartTime + 750);
+        customWait(() -> {
+            if (distCorrect.getFrontDistance() > 100 &&
+                    System.currentTimeMillis() <= sensorStartTime + 750) {
+                sensorState = false;
+                return true;
+            }
+            if (System.currentTimeMillis() <= sensorStartTime + 750) sensorState = true;
+            return false;
+        });
         if (distCorrect.getFrontDistance() < 50) {
             drive.setPoseEstimate(new Pose2d(
                     8.5,
@@ -380,12 +411,22 @@ public class BlueCyclesDEBUG extends Auto_V2_5 {
             telemetry.addLine("DRIVE OUT OF WAREHOUSE");
 
             if (distCorrect.getFrontDistance() > 70) {
+                sensorState = false;
                 drive.setDrivePower(new Pose2d(speedMultiplier * -0.2, speedMultiplier * 0.2, 0));
-                customWait(() -> distCorrect.getFrontDistance() > 100 &&
-                        System.currentTimeMillis() < sensorStartTime + 250);
+                customWait(() -> {
+                    if (distCorrect.getFrontDistance() > 100 &&
+                            System.currentTimeMillis() <= sensorStartTime + 250) {
+                        sensorState = false;
+                        return true;
+                    }
+                    if (System.currentTimeMillis() <= sensorStartTime + 250) sensorState = true;
+                    return false;
+                });
             }
-            else
+            else {
+                sensorState = true;
                 drive.setWeightedDrivePower(new Pose2d(speedMultiplier * -0.55, speedMultiplier * 0.35, 0));
+            }
 
             if (distCorrect.getFrontDistance() > 40 && !throughGap.get()) {
                 double robotHeading = drive.getPoseEstimate().getHeading();
@@ -411,11 +452,14 @@ public class BlueCyclesDEBUG extends Auto_V2_5 {
 
         //Distance correction
         if (distCorrect.getFrontDistance() < 100 && distCorrect.getFrontDistance() > 15) {
+            sensorState = true;
             drive.setPoseEstimate(new Pose2d(
                     6.5,
                     144 - distCorrect.getFrontDistance(),
                     drive.getPoseEstimate().getHeading()));
         }
+        else
+            sensorState = false;
 
         POS_ACC = 1;
         SPEED_MULT = 1;
