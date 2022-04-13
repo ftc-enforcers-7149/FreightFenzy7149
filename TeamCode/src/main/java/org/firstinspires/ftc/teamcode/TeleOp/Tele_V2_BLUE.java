@@ -217,12 +217,15 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         telemetry.addData("Score Position: ", scorePos);
         //telemetry.addData("Freight in Intake: ", freightInIntake);
         telemetry.addData("Freight type: ", intake.getFreightType());
+        telemetry.addData("Hue: ", intake.sensor.getHue());
+        telemetry.addData("Sat: ", intake.sensor.getSaturation());
+        telemetry.addData("Val: ", intake.sensor.getValue());
 
         // Led
-        if (freightInIntake && intake.getCurrPaddle() != MotorIntake.PaddlePosition.OUT_FAR && scorePos == ArmController.ScoringPosition.IN)
+        if (freightInIntake && intake.getCurrPaddle() != MotorIntake.PaddlePosition.OUT_FAR)
             // led.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
             led.setPattern(intake.getFreightType() == ColorSensorFreight.Freight.BALL ? RevBlinkinLedDriver.BlinkinPattern.WHITE : RevBlinkinLedDriver.BlinkinPattern.GOLD);
-        else if(!freightInIntake)
+        else
             led.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
 
         updateAutomatedDriving();
@@ -254,7 +257,7 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         else if (gamepad2.dpad_down || gamepad1.dpad_down)
             scorePos = ArmController.ScoringPosition.IN;
         else if (gamepad2.dpad_right || gamepad1.dpad_right)
-            scorePos = ArmController.ScoringPosition.HIGH;
+            scorePos = ArmController.ScoringPosition.HIGH_ARM;
         else if (gamepad2.dpad_left || gamepad1.dpad_left)
             scorePos = ArmController.ScoringPosition.MIDDLE;
         else if (gamepad2.y)
@@ -278,10 +281,10 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         freightInIntake = intake.getFreightInIntake();
 
         in = gamepad1.right_trigger > 0.2;
-        outtake = gamepad1.right_bumper;
+        outtake = gamepad1.right_bumper || gamepad1.left_stick_button;
         outDuck = gamepad1.left_bumper;
         score = gamepad1.left_trigger > 0.2;
-        intakeSlow = gamepad1.b;
+        intakeSlow = gamepad1.left_stick_button;
 
         //Spinner
         spin = gamepad1.x;

@@ -73,10 +73,10 @@ public class CorrectedMB1220 extends MovingUltrasonicSensor {
 
         try {
 
-            super.add((bRead != null ? bRead.getAnalogValue(portNum) : mb1220.getVoltage())
+            super.add(2 * (bRead != null ? bRead.getAnalogValue(portNum) : mb1220.getVoltage())
                     / (v == VOLTAGE.THREE ? THREEV_POWER : FIVEV_POWER) * 0.393701d);
             super.updateInput();
-            distance = super.getValue() * 2;
+            distance = super.getValue();
 
         }
         catch(Exception e) {

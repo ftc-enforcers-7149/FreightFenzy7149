@@ -27,8 +27,8 @@ public class ColorSensorFreight implements Input {
 
         NONE(94.5),
         BLOCK(50),
-        DUCK(78),
-        BALL(95),
+        DUCK(76),
+        BALL(81),
         UNKNOWN(125);
 
         public double minHue;
@@ -117,8 +117,8 @@ public class ColorSensorFreight implements Input {
 
         for(Sensor s : vals) s.updateInput();
 
-        if(getSaturation() <= 0.3) {
-            currentType = getHue() < Freight.NONE.minHue ? Freight.DUCK : Freight.NONE; // sometimes saturation gets really low with
+        if(getSaturation() <= 0.2) {
+            currentType = /*getHue() < Freight.NONE.minHue ? Freight.DUCK : */Freight.NONE; // sometimes saturation gets really low with
         }                                                                               // an intake duck, but hue can clue us in
         else currentType = Freight.getType(getHue());
 

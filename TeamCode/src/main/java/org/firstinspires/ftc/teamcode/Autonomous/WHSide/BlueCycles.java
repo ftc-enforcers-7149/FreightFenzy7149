@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.Autonomous.WHSide;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -13,9 +12,7 @@ import org.firstinspires.ftc.teamcode.GlobalData;
 import org.firstinspires.ftc.teamcode.Odometry.DriveWheels.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.ArmController;
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorIntake;
-import org.firstinspires.ftc.teamcode.Subsystems.Sensors.ColorSensorFreight;
 import org.firstinspires.ftc.teamcode.Subsystems.Utils.Levels;
-import org.firstinspires.ftc.teamcode.Subsystems.Utils.Output;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -49,11 +46,12 @@ public class BlueCycles extends Auto_V2_5 {
     public void auto() {
         distCorrect.startRunning();
         distCorrect.sensor.setHighPass(true, 200);
+        distCorrect.sensor.disableMoving();
 
         //Initial setup
         drive.setPoseEstimate(new Pose2d(6.75, 78.25, Math.toRadians(0)));
-        //Levels levels = commands.detectBarcode(tseDetector);
-        Levels level = Levels.LOW;
+        Levels level = commands.detectBarcode(tseDetector);
+        //Levels level = Levels.LOW;
         SLOW_DIST = 20;
         SPEED_MULT = 1;
 
@@ -98,7 +96,7 @@ public class BlueCycles extends Auto_V2_5 {
 
             //Drive to and score in hub
             led.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
-            scoreInHub(74);
+            scoreInHub(84);
 
             cycle++;
         }
@@ -189,12 +187,12 @@ public class BlueCycles extends Auto_V2_5 {
         H_ACC = Math.toRadians(20);
 
         //Drive through gap
-        drive.setWeightedDrivePower(new Pose2d(0.6, 0.35, 0.05));
+        drive.setWeightedDrivePower(new Pose2d(0.55, 0.45, 0));
         long driveStartTime = System.currentTimeMillis();
         customWait(() -> {
             telemetry.addLine("DRIVE INTO WAREHOUSE");
 
-            return System.currentTimeMillis() < driveStartTime + 600;
+            return System.currentTimeMillis() < driveStartTime + 600 || distCorrect.getFrontDistance() > 45;
         });
 
         intake.setIntakePower(1);
@@ -203,7 +201,7 @@ public class BlueCycles extends Auto_V2_5 {
         long sensorStartTime = System.currentTimeMillis();
         customWait(() -> distCorrect.getFrontDistance() > 100 &&
                 System.currentTimeMillis() < sensorStartTime + 500);
-        if (distCorrect.getFrontDistance() < 50) {
+        if (distCorrect.getFrontDistance() < 60) {
             drive.setPoseEstimate(new Pose2d(
                     8.5,
                     144 - distCorrect.getFrontDistance(),
@@ -223,27 +221,47 @@ public class BlueCycles extends Auto_V2_5 {
 
         //Drive towards back, intaking
         long driveStartTime = System.currentTimeMillis();
-        drive.setWeightedDrivePower(new Pose2d(0.7, 0.2, 0));
+        drive.setWeightedDrivePower(new Pose2d(0.6, 0.2, 0));
         customWait(() -> {
             telemetry.addLine("INTAKE");
 
             if (distCorrect.getFrontDistance() < 60) {
                 if (deltaHeading(drive.getPoseEstimate().getHeading(), Math.toRadians(95)) < 0)  {
                     drive.setWeightedDrivePower(new Pose2d(
-                            Math.min(Math.pow(distCorrect.getFrontDistance()-5-distanceFromWall, 2) * 0.00025 + 0.125, 0.7), //Slow down as approaches wall
+                            Math.min(Math.pow(distCorrect.getFrontDistance()-5-distanceFromWall, 2) * 0.0002 + 0.125, 0.6), //Slow down as approaches wall
                             -0.15, //Drive away from wall
                             -0.2));
                 }
                 else if (deltaHeading(drive.getPoseEstimate().getHeading(), Math.toRadians(85)) > 0) {
                     drive.setWeightedDrivePower(new Pose2d(
-                            Math.min(Math.pow(distCorrect.getFrontDistance()-5-distanceFromWall, 2) * 0.00025 + 0.125, 0.7), //Slow down as approaches wall
+                            Math.min(Math.pow(distCorrect.getFrontDistance()-5-distanceFromWall, 2) * 0.0002 + 0.125, 0.6), //Slow down as approaches wall
                             -0.15, //Drive away from wall
                             0.2));
                 }
                 else {
                     drive.setWeightedDrivePower(new Pose2d(
-                            Math.min(Math.pow(distCorrect.getFrontDistance()-5-distanceFromWall, 2) * 0.00025 + 0.125, 0.7), //Slow down as approaches wall
+                            Math.min(Math.pow(distCorrect.getFrontDistance()-5-distanceFromWall, 2) * 0.0002 + 0.125, 0.6), //Slow down as approaches wall
                             -0.15, //Drive away from wall
+                            0));
+                }
+            }
+            else {
+                if (deltaHeading(drive.getPoseEstimate().getHeading(), Math.toRadians(95)) < 0)  {
+                    drive.setWeightedDrivePower(new Pose2d(
+                            0.2, //Slow down as approaches wall
+                            0.2, //Drive away from wall
+                            -0.2));
+                }
+                else if (deltaHeading(drive.getPoseEstimate().getHeading(), Math.toRadians(85)) > 0) {
+                    drive.setWeightedDrivePower(new Pose2d(
+                            0.2, //Slow down as approaches wall
+                            0.2, //Drive away from wall
+                            0.2));
+                }
+                else {
+                    drive.setWeightedDrivePower(new Pose2d(
+                            0.2, //Slow down as approaches wall
+                            0.2, //Drive away from wall
                             0));
                 }
             }
@@ -254,23 +272,21 @@ public class BlueCycles extends Auto_V2_5 {
                         10,
                         144 - distCorrect.getFrontDistance(),
                         drive.getPoseEstimate().getHeading()));
-
-                distCorrect.sensor.disableMoving();
             }
 
             if (distCorrect.getFrontDistance() < 50 && intake.getFreightInIntake()) return false;
             if (System.currentTimeMillis() > driveStartTime + 1000) return false;
 
             if (System.currentTimeMillis() > driveStartTime + 500)
-                return distCorrect.getFrontDistance() > distanceFromWall;
+                return distCorrect.getFrontDistance() > distanceFromWall || distCorrect.getFrontDistance() > 100;
 
             return true;
         });
         drive.setWeightedDrivePower(new Pose2d(0, 0, 0));
 
-        armController.setScorePos(ArmController.ScoringPosition.UP);
+        armController.setScorePos(ArmController.ScoringPosition.PARTIAL_UP);
+        intake.setLatch(MotorIntake.LatchPosition.CLOSED);
 
-        distCorrect.sensor.enableMoving();
         intake.stopScanningIntake();
     }
 
@@ -279,7 +295,7 @@ public class BlueCycles extends Auto_V2_5 {
         SLOW_DIST = 2;
         SPEED_MULT = 1;
 
-        armController.setScorePos(ArmController.ScoringPosition.UP);
+        armController.setScorePos(ArmController.ScoringPosition.PARTIAL_UP);
 
         //Make sure robot is against wall
         //kyle loves u.
@@ -292,7 +308,7 @@ public class BlueCycles extends Auto_V2_5 {
         //Distance correction
         long sensorStartTime = System.currentTimeMillis();
         customWait(() -> distCorrect.getFrontDistance() > 100 &&
-                System.currentTimeMillis() < sensorStartTime + 500);
+                System.currentTimeMillis() < sensorStartTime + 750);
         if (distCorrect.getFrontDistance() < 50) {
             drive.setPoseEstimate(new Pose2d(
                     8.5,
@@ -300,19 +316,28 @@ public class BlueCycles extends Auto_V2_5 {
                     drive.getPoseEstimate().getHeading()));
         }
 
-        drive.setWeightedDrivePower(new Pose2d(-0.65, 0.35, 0));
+        drive.setWeightedDrivePower(new Pose2d(-0.55, 0.35, 0));
 
         AtomicBoolean throughGap = new AtomicBoolean(false);
-        AtomicBoolean spitOut = new AtomicBoolean(false);
 
         long driveStartTime = System.currentTimeMillis();
 
         customWait(() -> {
             telemetry.addLine("DRIVE OUT OF WAREHOUSE");
 
+            if (distCorrect.getFrontDistance() > 70) {
+                drive.setDrivePower(new Pose2d(-0.2, 0.2, 0));
+                customWait(() -> distCorrect.getFrontDistance() > 100 &&
+                        System.currentTimeMillis() < sensorStartTime + 250);
+            }
+            else
+                drive.setWeightedDrivePower(new Pose2d(-0.55, 0.35, 0));
+
             if (distCorrect.getFrontDistance() > 40 && !throughGap.get()) {
                 double robotHeading = drive.getPoseEstimate().getHeading();
                 drive.setPoseEstimate(new Pose2d(7, 84, robotHeading));
+
+                armController.setScorePos(ArmController.ScoringPosition.UP);
 
                 throughGap.set(true);
             }
@@ -325,13 +350,8 @@ public class BlueCycles extends Auto_V2_5 {
                         drive.getPoseEstimate().getHeading()));
             }
 
-            if (distCorrect.getFrontDistance() > 35 && !spitOut.get()) {
-                intake.spitOutTwo();
-                spitOut.set(true);
-            }
-
-            return System.currentTimeMillis() < driveStartTime + 750 &&
-                    (System.currentTimeMillis() < driveStartTime + 500 || distCorrect.getFrontDistance() < 45);
+            return System.currentTimeMillis() < driveStartTime + 1500 &&
+                    (distCorrect.getFrontDistance() < 45 || distCorrect.getFrontDistance() > 70);
         });
 
         //Distance correction
@@ -346,9 +366,6 @@ public class BlueCycles extends Auto_V2_5 {
         SPEED_MULT = 1;
         SLOW_DIST = 20;
 
-        //Stop spit out two
-        intake.cancelSpitOut();
-        intake.setLatch(MotorIntake.LatchPosition.CLOSED);
         intake.setIntakePower(0);
     }
 
