@@ -70,8 +70,9 @@ public class RedDuck extends Auto_V2_5 {
                 armController.setScorePos(ArmController.ScoringPosition.UP);
 
             return -5d;
-        }, () -> Math.toRadians(-87), 1500);
-
+        }, () -> Math.toRadians(-90), 1500);
+        SPEED_MULT = 1;
+        driveTo(5, drive.getPoseEstimate().getY(), Math.toRadians(-90), 600);
         SPEED_MULT = 1;
         POS_ACC = 1;
         SLOW_DIST = 15;
@@ -102,7 +103,7 @@ public class RedDuck extends Auto_V2_5 {
         long startLiftTime = System.currentTimeMillis();
 
         //Drive to hub
-        driveTo(12, -33, Math.toRadians(-30));
+        driveTo(12, -33, Math.toRadians(-32));
         customWait(() -> System.currentTimeMillis() <= startLiftTime + 500);
         fourBar.setPosition(ArmController.ScoringPosition.HIGH_AUTO.barPos);
         waitForTime(250);
