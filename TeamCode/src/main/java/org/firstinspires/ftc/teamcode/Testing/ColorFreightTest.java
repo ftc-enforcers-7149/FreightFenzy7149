@@ -1,11 +1,13 @@
 package org.firstinspires.ftc.teamcode.Testing;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Subsystems.ScoringMechs.MotorIntake;
 
 @TeleOp(name="Color Freight Test")
+@Disabled
 public class ColorFreightTest extends OpMode {
 
     MotorIntake i;

@@ -4,6 +4,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
 import org.firstinspires.ftc.teamcode.Autonomous.Auto_V2_5;
@@ -24,7 +25,7 @@ import static org.firstinspires.ftc.teamcode.GlobalData.SLOW_DIST;
 import static org.firstinspires.ftc.teamcode.GlobalData.SPEED_MULT;
 
 @Autonomous(name = "BLUE WH Cycles DEBUG")
-//@Disabled
+@Disabled
 public class BlueCyclesDEBUG extends Auto_V2_5 {
 
     private static final Trajectory preload = MecanumDrive.trajectoryBuilder(new Pose2d(6.75, 78.25, Math.toRadians(0)), Math.toRadians(10))
@@ -60,7 +61,7 @@ public class BlueCyclesDEBUG extends Auto_V2_5 {
     @Override
     public void auto() {
         distCorrect.startRunning();
-        distCorrect.sensor.setHighPass(true, 200);
+        //distCorrect.sensor.setHighPass(true, 200);
         distCorrect.sensor.disableMoving();
 
         //Debug distance and intake sensors with leds
@@ -115,6 +116,8 @@ public class BlueCyclesDEBUG extends Auto_V2_5 {
 
                 if (x && !lastX)
                     paused = !paused;
+
+                if (paused) intake.setIntakePower(0);
 
                 if (b && !lastB) {
                     paused = true;
@@ -179,7 +182,7 @@ public class BlueCyclesDEBUG extends Auto_V2_5 {
             //Intake and don't hit wall
             if (!reset) {
                 customWait(() -> paused);
-                intake(24);
+                intake(20);
             }
 
             //Drive out through gap
@@ -193,7 +196,7 @@ public class BlueCyclesDEBUG extends Auto_V2_5 {
             //led.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
             if (!reset) {
                 customWait(() -> paused);
-                scoreInHub(84);
+                scoreInHub(62);
             }
         }
 
@@ -260,9 +263,13 @@ public class BlueCyclesDEBUG extends Auto_V2_5 {
         customWait(() -> {
             telemetry.addLine("DRIVE INTO WAREHOUSE");
 
+            if (distCorrect.getFrontDistance() > 120)
+                drive.setWeightedDrivePower(new Pose2d(0.55 * speedMultiplier, 0.45 * speedMultiplier, 0).times(0.5));
+            else
+                drive.setWeightedDrivePower(new Pose2d(0.55 * speedMultiplier, 0.45 * speedMultiplier, 0));
             return System.currentTimeMillis() < driveStartTime + 600/speedMultiplier || distCorrect.getFrontDistance() > 45;
         });
-        drive.setDrivePower(new Pose2d());
+        drive.setWeightedDrivePower(new Pose2d());
 
         intake.setIntakePower(1);
 
@@ -305,20 +312,20 @@ public class BlueCyclesDEBUG extends Auto_V2_5 {
                 sensorState = true;
                 if (deltaHeading(drive.getPoseEstimate().getHeading(), Math.toRadians(95)) < 0)  {
                     drive.setWeightedDrivePower(new Pose2d(
-                            speedMultiplier * Math.min(Math.pow(distCorrect.getFrontDistance()-distanceFromWall, 2) * 0.0002 + 0.125, 0.6), //Slow down as approaches wall
-                            speedMultiplier * -0.15, //Drive away from wall
-                            speedMultiplier * -0.2));
+                            speedMultiplier * Math.max(Math.min(Math.pow(distCorrect.getFrontDistance()-distanceFromWall, 2) * 0.0002 + 0.125, 0.6), 0.15), //Slow down as approaches wall
+                            speedMultiplier * -0.2, //Drive away from wall
+                            speedMultiplier * -0.1));
                 }
                 else if (deltaHeading(drive.getPoseEstimate().getHeading(), Math.toRadians(85)) > 0) {
                     drive.setWeightedDrivePower(new Pose2d(
-                            speedMultiplier * Math.min(Math.pow(distCorrect.getFrontDistance()-distanceFromWall, 2) * 0.0002 + 0.125, 0.6), //Slow down as approaches wall
-                            speedMultiplier * -0.15, //Drive away from wall
-                            speedMultiplier * 0.2));
+                            speedMultiplier * Math.max(Math.min(Math.pow(distCorrect.getFrontDistance()-distanceFromWall, 2) * 0.0002 + 0.125, 0.6), 0.15), //Slow down as approaches wall
+                            speedMultiplier * -0.2, //Drive away from wall
+                            speedMultiplier * 0.1));
                 }
                 else {
                     drive.setWeightedDrivePower(new Pose2d(
-                            speedMultiplier * Math.min(Math.pow(distCorrect.getFrontDistance()-distanceFromWall, 2) * 0.0002 + 0.125, 0.6), //Slow down as approaches wall
-                            speedMultiplier * -0.15, //Drive away from wall
+                            speedMultiplier * Math.max(Math.min(Math.pow(distCorrect.getFrontDistance()-distanceFromWall, 2) * 0.0002 + 0.125, 0.6), 0.15), //Slow down as approaches wall
+                            speedMultiplier * -0.2, //Drive away from wall
                             0));
                 }
             }
@@ -326,20 +333,20 @@ public class BlueCyclesDEBUG extends Auto_V2_5 {
                 sensorState = false;
                 if (deltaHeading(drive.getPoseEstimate().getHeading(), Math.toRadians(95)) < 0)  {
                     drive.setWeightedDrivePower(new Pose2d(
-                            speedMultiplier * 0.2, //Slow down as approaches wall
-                            speedMultiplier * 0.2, //Drive away from wall
-                            speedMultiplier * -0.2));
+                            speedMultiplier * 0.15, //Slow down as approaches wall
+                            speedMultiplier * -0.15, //Drive away from wall
+                            speedMultiplier * -0.1));
                 }
                 else if (deltaHeading(drive.getPoseEstimate().getHeading(), Math.toRadians(85)) > 0) {
                     drive.setWeightedDrivePower(new Pose2d(
-                            speedMultiplier * 0.2, //Slow down as approaches wall
-                            speedMultiplier * 0.2, //Drive away from wall
-                            speedMultiplier * 0.2));
+                            speedMultiplier * 0.15, //Slow down as approaches wall
+                            speedMultiplier * -0.15, //Drive away from wall
+                            speedMultiplier * 0.1));
                 }
                 else {
                     drive.setWeightedDrivePower(new Pose2d(
-                            speedMultiplier * 0.2, //Slow down as approaches wall
-                            speedMultiplier * 0.2, //Drive away from wall
+                            speedMultiplier * 0.15, //Slow down as approaches wall
+                            speedMultiplier * -0.15, //Drive away from wall
                             0));
                 }
             }
@@ -377,10 +384,9 @@ public class BlueCyclesDEBUG extends Auto_V2_5 {
 
         //Make sure robot is against wall
         //kyle loves u.
-        drive.setDrivePower(new Pose2d(speedMultiplier * -0.5, 0, speedMultiplier * -0.5));
-        customWait(() -> distCorrect.getFrontDistance() < 50 &&
-                drive.getPoseEstimate().getHeading() > Math.toRadians(94));
-        drive.setWeightedDrivePower(new Pose2d(speedMultiplier * -0.3, speedMultiplier * 0.7, 0));
+        drive.setWeightedDrivePower(new Pose2d(speedMultiplier * -0.5, 0, speedMultiplier * -0.5));
+        customWait(() -> drive.getPoseEstimate().getHeading() > Math.toRadians(94));
+        drive.setWeightedDrivePower(new Pose2d(speedMultiplier * -0.3, speedMultiplier * 0.6, speedMultiplier * 0.1));
         waitForTime(150/speedMultiplier);
 
         //Distance correction
@@ -388,6 +394,7 @@ public class BlueCyclesDEBUG extends Auto_V2_5 {
         customWait(() -> {
             if (distCorrect.getFrontDistance() > 100 &&
                     System.currentTimeMillis() <= sensorStartTime + 750) {
+                drive.setWeightedDrivePower(new Pose2d());
                 sensorState = false;
                 return true;
             }
@@ -412,7 +419,7 @@ public class BlueCyclesDEBUG extends Auto_V2_5 {
 
             if (distCorrect.getFrontDistance() > 70) {
                 sensorState = false;
-                drive.setDrivePower(new Pose2d(speedMultiplier * -0.2, speedMultiplier * 0.2, 0));
+                drive.setWeightedDrivePower(new Pose2d(speedMultiplier * -0.2, speedMultiplier * 0.2, 0));
                 customWait(() -> {
                     if (distCorrect.getFrontDistance() > 100 &&
                             System.currentTimeMillis() <= sensorStartTime + 250) {
@@ -428,9 +435,9 @@ public class BlueCyclesDEBUG extends Auto_V2_5 {
                 drive.setWeightedDrivePower(new Pose2d(speedMultiplier * -0.55, speedMultiplier * 0.35, 0));
             }
 
-            if (distCorrect.getFrontDistance() > 40 && !throughGap.get()) {
+            if (distCorrect.getFrontDistance() > 40 && distCorrect.getFrontDistance() < 120 && !throughGap.get()) {
                 double robotHeading = drive.getPoseEstimate().getHeading();
-                drive.setPoseEstimate(new Pose2d(7, 84, robotHeading));
+                //drive.setPoseEstimate(new Pose2d(7, 84, robotHeading));
 
                 armController.setScorePos(ArmController.ScoringPosition.UP);
 
@@ -438,28 +445,44 @@ public class BlueCyclesDEBUG extends Auto_V2_5 {
             }
 
             //Distance correction
-            if (distCorrect.getFrontDistance() < 70 && distCorrect.getFrontDistance() > 15) {
-                drive.setPoseEstimate(new Pose2d(
-                        6.5,
-                        144 - distCorrect.getFrontDistance(),
-                        drive.getPoseEstimate().getHeading()));
-            }
+//            if (distCorrect.getFrontDistance() < 70 && distCorrect.getFrontDistance() > 15) {
+//                drive.setPoseEstimate(new Pose2d(
+//                        6.5,
+//                        144 - distCorrect.getFrontDistance(),
+//                        drive.getPoseEstimate().getHeading()));
+//            }
 
             return System.currentTimeMillis() < driveStartTime + 1500/speedMultiplier &&
-                    (distCorrect.getFrontDistance() < 45 || distCorrect.getFrontDistance() > 70);
+                    drive.getPoseEstimate().getY() > 90;
+
+            //return System.currentTimeMillis() < driveStartTime + 1500/speedMultiplier &&
+            //        (distCorrect.getFrontDistance() < 45 || distCorrect.getFrontDistance() > 70);
         });
-        drive.setDrivePower(new Pose2d());
+        drive.setWeightedDrivePower(new Pose2d());
 
         //Distance correction
+        //Distance correction
+        long sensorStartTimeAfter = System.currentTimeMillis();
+        customWait(() -> {
+            if (distCorrect.getFrontDistance() > 100 &&
+                    System.currentTimeMillis() <= sensorStartTimeAfter + 750) {
+                sensorState = false;
+                return true;
+            }
+            if (System.currentTimeMillis() <= sensorStartTime + 750) sensorState = true;
+            return false;
+        });
         if (distCorrect.getFrontDistance() < 100 && distCorrect.getFrontDistance() > 15) {
             sensorState = true;
-            drive.setPoseEstimate(new Pose2d(
-                    6.5,
-                    144 - distCorrect.getFrontDistance(),
-                    drive.getPoseEstimate().getHeading()));
+//            drive.setPoseEstimate(new Pose2d(
+//                    6.5,
+//                    144 - distCorrect.getFrontDistance(),
+//                    drive.getPoseEstimate().getHeading()));
         }
         else
             sensorState = false;
+
+        drive.setPoseEstimate(new Pose2d(6.5, drive.getPoseEstimate().getY(), drive.getPoseEstimate().getHeading()));
 
         POS_ACC = 1;
         SPEED_MULT = 1;

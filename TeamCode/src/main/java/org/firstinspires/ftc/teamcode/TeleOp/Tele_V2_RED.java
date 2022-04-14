@@ -273,7 +273,7 @@ public class Tele_V2_RED extends TeleOp_Base {
                 scorePos != ArmController.ScoringPosition.IDLE)
             scorePos = ArmController.ScoringPosition.UP;
 
-        liftPower = 0.8 * (gamepad2.right_trigger - gamepad2.left_trigger);
+        liftPower = 1.0 * (gamepad2.right_trigger - gamepad2.left_trigger);
 
         resetLift = gamepad2.back;
 
@@ -329,5 +329,11 @@ public class Tele_V2_RED extends TeleOp_Base {
         last4BPos = curr4BPos;
 
         lastScorePos = scorePos;
+    }
+
+    @Override
+    public void stop() {
+        stopInputs();
+        stopOutputs();
     }
 }
