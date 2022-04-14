@@ -7,8 +7,10 @@ public class TSEPipeline extends SimpleColorPipeline {
     //These scalars are the lower and upper possible values for the TSE color
     //public static Scalar lowerBound = new Scalar(100, 50, 0); //BLUE
     //public static Scalar upperBound = new Scalar(255, 255, 255); //BLUE
-    public static Scalar lowerBound = new Scalar(0, 0, 0); //BLACK
-    public static Scalar upperBound = new Scalar(255, 50, 50); //BLACK
+    //public static Scalar lowerBound = new Scalar(0, 0, 0); //BLACK
+    //public static Scalar upperBound = new Scalar(255, 50, 50); //BLACK
+    public static Scalar lowerBound = new Scalar(0, 100, 0); //TAPE
+    public static Scalar upperBound = new Scalar(255, 255, 255); //TAPE
 
     //What color to draw bounding rect
     public static Scalar drawColor = new Scalar(0, 255, 0);

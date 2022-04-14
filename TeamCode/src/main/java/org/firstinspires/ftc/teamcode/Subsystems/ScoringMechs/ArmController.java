@@ -19,6 +19,7 @@ public class ArmController implements Output {
         CENTER(5.25, 0.2, 0.45, 0),
         FAR(4.75, 0.31, 0.45, 0),
         REACH(0, 0.6, 0.45, 0),
+        HIGH_AUTO(5.5, 0.815, 0.4, 0),
         MIDDLE_AUTO(1.5, 0.815, 0.1, 0),
         LOW_AUTO(1.5, 0.65, 0.1, 0),
         PARTIAL_UP(3.5, 0, 1, 500),

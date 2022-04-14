@@ -10,6 +10,8 @@ import org.firstinspires.ftc.teamcode.Subsystems.Webcam.SimpleColorPipeline;
 import org.opencv.core.Rect;
 import org.opencv.core.RotatedRect;
 
+import java.util.ArrayList;
+
 public class AutoCommands {
 
     private final Autonomous_Base op;
@@ -20,37 +22,20 @@ public class AutoCommands {
 
     public Levels detectBarcode(OpenCV tseDetector) {
         try {
+            Rect crop = ((SimpleColorPipeline) tseDetector.getPipeline()).getCrop();
+            ArrayList<Rect> rects = ((SimpleColorPipeline) tseDetector.getPipeline()).getRects();
 
-            RotatedRect boundingRect = tseDetector.getRect();
-            Rect rectangle = ((SimpleColorPipeline) tseDetector.getPipeline()).getCrop();
+            if (rects.size() == 1) {
+                Rect boundingRect = rects.get(0);
 
-            if (boundingRect == null || boundingRect.size.area() < 1500) return Levels.LOW;
-            if (boundingRect.center.x - rectangle.x <= rectangle.x + rectangle.width / 2d) {
-                return Levels.MIDDLE;
-            } else {
-                return Levels.HIGH;
+                if (boundingRect.x + boundingRect.width / 2d <= crop.width / 2d) {
+                        return Levels.HIGH;
+                } else {
+                    return Levels.MIDDLE;
+                }
             }
-
-            /*if (op.getAlliance() == Alliance.BLUE) {
-                RotatedRect boundingRect = tseDetector.getRect();
-
-                if (boundingRect == null || boundingRect.size.area() < 1500) return Levels.LOW;
-                if (boundingRect.center.x <= 360 / 2.0) {
-                    return Levels.MIDDLE;
-                } else {
-                    return Levels.HIGH;
-                }
-            } else if (op.getAlliance() == Alliance.RED) {
-                RotatedRect boundingRect = tseDetector.getRect();
-                if (boundingRect == null || boundingRect.size.area() < 1500) return Levels.HIGH;
-                if (boundingRect.center.x <= 360 / 2.0) {
-                    return Levels.LOW;
-                } else {
-                    return Levels.MIDDLE;
-                }
-            } else {
-                return Levels.HIGH;
-            }*/
+            else
+                return Levels.LOW;
         }
         catch(Exception e) {
             return Levels.HIGH;
@@ -96,7 +81,7 @@ public class AutoCommands {
 
             @Override
             public void updateOutput() {
-                if (System.currentTimeMillis() >= startTime + 150)
+                if (System.currentTimeMillis() >= startTime + 200)
                     stopOutput();
             }
 

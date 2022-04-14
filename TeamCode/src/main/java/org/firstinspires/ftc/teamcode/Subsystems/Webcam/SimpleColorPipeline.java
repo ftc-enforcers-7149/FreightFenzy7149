@@ -26,6 +26,8 @@ public class SimpleColorPipeline extends RectPipeline {
     private int posX, posY;
     private int width, height;
 
+    private ArrayList<Rect> rects;
+
     public SimpleColorPipeline(Scalar lowerBound, Scalar upperBound, Scalar drawColor) {
         this(lowerBound, upperBound, drawColor, 0, 0, 0, 0);
     }
@@ -40,6 +42,8 @@ public class SimpleColorPipeline extends RectPipeline {
 
         //Instantiate the bitmap with the right WIDTH and HEIGHT
         bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+
+        rects = new ArrayList<>();
     }
 
     @Override
@@ -67,6 +71,7 @@ public class SimpleColorPipeline extends RectPipeline {
 
         //The contours of the mask are the outlines of the white 'blobs' in the mask
         List<MatOfPoint> contours = new ArrayList<>();
+        rects.clear();
         Imgproc.findContours(roiTemp, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
         //Set max area as 0, so first rectangle is picked by default
@@ -80,13 +85,16 @@ public class SimpleColorPipeline extends RectPipeline {
             MatOfPoint2f areaPoints = new MatOfPoint2f(contour.toArray());
             RotatedRect rect = Imgproc.minAreaRect(areaPoints);
 
+            if (rect.size != null && rect.size.width * rect.size.height > 250)
+                rects.add(rect.clone().boundingRect());
+
             //Override the largest rectangle
             if (rect.size != null && rect.size.width * rect.size.height > maxArea) {
                 maxArea = rect.size.width * rect.size.height;
                 boundingRect = rect.clone();
 
                 //Draw the rectangle on the original image for output / debugging
-                //drawFromCropped(output, boundingRect, drawColor, posX, posY);
+                drawFromCropped(input, boundingRect, drawColor, posX, posY);
             }
         }
 
@@ -114,6 +122,10 @@ public class SimpleColorPipeline extends RectPipeline {
 
         return new Rect(posX, posY, width, height);
 
+    }
+
+    public ArrayList<Rect> getRects() {
+        return rects;
     }
 
 }

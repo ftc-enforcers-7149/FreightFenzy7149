@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Autonomous;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 
 import org.firstinspires.ftc.teamcode.GlobalData;
@@ -44,6 +45,13 @@ public abstract class Auto_V2_5 extends Autonomous_Base {
             e.printStackTrace();
             throw new InterruptedException(e.getMessage());
         }
+
+        //Initialize vision for either alliance
+        tseDetector = new OpenCV(hardwareMap, FtcDashboard.getInstance()); //TODO: Take out dashboard
+        if (getAlliance() == Alliance.BLUE)
+            tseDetector.start(new TSEPipeline(0, 110, 335, 110));
+        else
+            tseDetector.start(new TSEPipeline(280, 110, 360, 110));
 
         //Initialize subsystems
         intake = new MotorIntake(hardwareMap,
@@ -215,13 +223,6 @@ public abstract class Auto_V2_5 extends Autonomous_Base {
         intake.setPaddle(MotorIntake.PaddlePosition.BACK);
         intake.startOutput();
         intake.updateOutput();
-
-        //Initialize vision for either alliance
-        tseDetector = new OpenCV(hardwareMap);
-        if (getAlliance() == Alliance.BLUE)
-            tseDetector.start(new TSEPipeline(0, 110, 335, 110));
-        else
-            tseDetector.start(new TSEPipeline(280, 110, 360, 110));
 
         /// Init Loop ///
 
