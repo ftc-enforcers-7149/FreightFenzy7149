@@ -48,7 +48,7 @@ public class RedDuck extends Auto_V2_5 {
                 break;
             case MIDDLE:
                 armController.setScorePos(ArmController.ScoringPosition.MIDDLE_AUTO);
-                driveTo(15, -40, Math.toRadians(-35));
+                driveTo(16, -41, Math.toRadians(-35));
                 break;
             case LOW:
                 armController.setScorePos(ArmController.ScoringPosition.LOW_AUTO);
@@ -72,7 +72,7 @@ public class RedDuck extends Auto_V2_5 {
             return -5d;
         }, () -> Math.toRadians(-90), 1500);
         SPEED_MULT = 1;
-        driveTo(5, drive.getPoseEstimate().getY(), Math.toRadians(-90), 600);
+        driveTo(4.5, drive.getPoseEstimate().getY(), Math.toRadians(-90), 600);
         SPEED_MULT = 1;
         POS_ACC = 1;
         SLOW_DIST = 15;
@@ -89,15 +89,19 @@ public class RedDuck extends Auto_V2_5 {
 
         //Try to intake duck
         SLOW_DIST = 5;
-        POS_ACC = 2;
+        POS_ACC = 3.5;
+        H_ACC = Math.toRadians(7);
         intake.setIntakePower(1);
-        driveTo(11.25, -10, Math.toRadians(-180));
+        driveTo(11.25, -10, Math.toRadians(-180), 750);
+        SPEED_MULT = 0.6;
         driveTo(12, -30, Math.toRadians(-160));
+        SPEED_MULT = 1;
         driveTo(15.5, -36, Math.toRadians(-90));
         intake.setIntakePower(0);
         intake.setLatch(MotorIntake.LatchPosition.DUCK_CLOSED);
         SLOW_DIST = 15;
         POS_ACC = 1;
+        H_ACC = Math.toRadians(1);
 
         lift.setPower(1);
         long startLiftTime = System.currentTimeMillis();
@@ -111,7 +115,7 @@ public class RedDuck extends Auto_V2_5 {
         armController.setScorePos(ArmController.ScoringPosition.HIGH_AUTO);
 
         //Drive to hub and outtake duck
-        driveTo(18, -47, Math.toRadians(-32));
+        driveTo(17, -44, Math.toRadians(-32));
         intake.setLatch(MotorIntake.LatchPosition.OPEN_UP);
         waitForTime(200);
         intake.setPaddle(MotorIntake.PaddlePosition.OUT_FAR);
@@ -122,7 +126,7 @@ public class RedDuck extends Auto_V2_5 {
         armController.setScorePos(ArmController.ScoringPosition.UP);
 
         //Park in storage unit
-        driveTo(32.25, 0, Math.toRadians(0), 1500);
+        driveTo(33.5, 0, Math.toRadians(0), 1500);
         armController.setScorePos(ArmController.ScoringPosition.IN);
         intake.setIntakePower(-1);
         waitForTime(400);

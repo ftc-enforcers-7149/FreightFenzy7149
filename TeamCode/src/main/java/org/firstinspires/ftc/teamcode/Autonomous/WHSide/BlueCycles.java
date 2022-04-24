@@ -38,7 +38,7 @@ public class BlueCycles extends Auto_V2_5 {
             .build();
 
     private static final Trajectory driveToWall = MecanumDrive.trajectoryBuilder(preload.end(), Math.toRadians(170))
-            .splineToSplineHeading(new Pose2d(-17, 80, Math.toRadians(95)), Math.toRadians(160))
+            .splineToSplineHeading(new Pose2d(-25, 80, Math.toRadians(100)), Math.toRadians(160))
             .addTemporalMarker(0.5, () -> GlobalData.armUpSignal = true)
             .build();
 
@@ -102,7 +102,7 @@ public class BlueCycles extends Auto_V2_5 {
             driveOutOfWarehouse();
 
             //Drive to and score in hub
-            scoreInHub(82);
+            scoreInHub(81);
 
             if (getRuntime() > 23.5) break;
         }
@@ -190,11 +190,11 @@ public class BlueCycles extends Auto_V2_5 {
 
             //return distCorrect.getFrontDistance() > 100 &&
             return        System.currentTimeMillis() <= sensorStartTime + 80;
-         });
+        });
         if (total.get()/loops.get() < 60) {
             drive.setPoseEstimate(new Pose2d(
                     8.5,
-                    144 - distCorrect.getFrontDistance(),
+                    144 - total.get()/loops.get(),
                     drive.getPoseEstimate().getHeading()));
         }
 
@@ -218,7 +218,7 @@ public class BlueCycles extends Auto_V2_5 {
             if (deltaHeading(drive.getPoseEstimate().getHeading(), Math.toRadians(95)) < 0)  {
                 drive.setWeightedDrivePower(new Pose2d(
                         Math.max(Math.min(
-                                Math.pow(Math.max(144-drive.getPoseEstimate().getY()-distanceFromWall, 0), 2) * 0.0002 + 0.15,
+                                Math.pow(Math.max(144-drive.getPoseEstimate().getY()-distanceFromWall, 0), 2) * 0.00022 + 0.15,
                                 0.7), 0.1), //Slow down as approaches wall
                         -Math.min(Math.pow(144-drive.getPoseEstimate().getY(), 2) * 0.00006 + 0.05, 0.2), //Drive away from wall
                         -0.1));
@@ -226,7 +226,7 @@ public class BlueCycles extends Auto_V2_5 {
             else if (deltaHeading(drive.getPoseEstimate().getHeading(), Math.toRadians(85)) > 0) {
                 drive.setWeightedDrivePower(new Pose2d(
                         Math.max(Math.min(
-                                Math.pow(Math.max(144-drive.getPoseEstimate().getY()-distanceFromWall, 0), 2) * 0.0002 + 0.15,
+                                Math.pow(Math.max(144-drive.getPoseEstimate().getY()-distanceFromWall, 0), 2) * 0.00022 + 0.15,
                                 0.7), 0.1), //Slow down as approaches wall
                         -Math.min(Math.pow(144-drive.getPoseEstimate().getY(), 2) * 0.00006 + 0.05, 0.2), //Drive away from wall
                         0.1));
@@ -234,7 +234,7 @@ public class BlueCycles extends Auto_V2_5 {
             else {
                 drive.setWeightedDrivePower(new Pose2d(
                         Math.max(Math.min(
-                                Math.pow(Math.max(144-drive.getPoseEstimate().getY()-distanceFromWall, 0), 2) * 0.0002 + 0.15,
+                                Math.pow(Math.max(144-drive.getPoseEstimate().getY()-distanceFromWall, 0), 2) * 0.00022 + 0.15,
                                 0.7), 0.1), //Slow down as approaches wall
                         -Math.min(Math.pow(144-drive.getPoseEstimate().getY(), 2) * 0.00006 + 0.05, 0.2), //Drive away from wall
                         0));
@@ -360,7 +360,7 @@ public class BlueCycles extends Auto_V2_5 {
         waitForTime(100);
 
         SPEED_MULT = 1;
-        SLOW_DIST = 10;
+        SLOW_DIST = 15;
         H_ACC = Math.toRadians(4);
 
         long startTime = System.currentTimeMillis();
@@ -373,7 +373,10 @@ public class BlueCycles extends Auto_V2_5 {
                     if (System.currentTimeMillis() < startTime + 50)
                         return Math.toRadians(0);
                     else {
-                        return Math.toRadians(-25);
+                        if (scorePos == ArmController.ScoringPosition.HIGH_AUTO)
+                            return Math.toRadians(-28);
+                        else
+                            return Math.toRadians(-25);
                     }
                 },
                 1500);

@@ -243,7 +243,7 @@ public class Tele_V2_BLUE extends TeleOp_Base {
         leftY = curveInput(gamepad1.left_stick_y, 1)*lim * 1.0;
         rightX = curveInput(gamepad1.right_stick_x, 1)*lim*0.75 * 1.0;
         resetAngle = gamepad1.y;
-        sharedBarrier = gamepad1.a && !gStartA;
+        //sharedBarrier = gamepad1.a && !gStartA;
 
         capButton = gamepad2.left_bumper;
 
@@ -273,7 +273,11 @@ public class Tele_V2_BLUE extends TeleOp_Base {
                 scorePos != ArmController.ScoringPosition.IDLE)
             scorePos = ArmController.ScoringPosition.UP;
 
-        liftPower = 1.0 * (gamepad2.right_trigger - gamepad2.left_trigger);
+        if (curr4BPos > 0.3) {
+            liftPower = 0.75 * gamepad2.right_trigger - 0.3 * gamepad2.left_trigger;
+        }
+        else
+            liftPower = 1.0 * (gamepad2.right_trigger - gamepad2.left_trigger);
 
         resetLift = gamepad2.back;
 

@@ -49,8 +49,8 @@ public class MotorCarouselSpinner implements Output, Input {
 
     private MotionProfile profileSlow = MotionProfileGenerator.generateSimpleMotionProfile(
             new MotionState(0, 0, 0),
-            new MotionState((15*Math.PI - 1) / (4 * Math.PI) * 2, 3.75, 150),
-            3.75,
+            new MotionState((15*Math.PI - 1) / (4 * Math.PI) * 2, 4.5, 150),
+            4.5,
             150
     );
 
@@ -129,9 +129,11 @@ public class MotorCarouselSpinner implements Output, Input {
             }
         }
         else {
-            if (measuredPosition < (15 * Math.PI - 1) / (4 * Math.PI)) {
+            //if (measuredPosition < (15 * Math.PI - 1) / (4 * Math.PI)) {
+            if (measuredPosition < (15 * Math.PI - 1) / (4 * Math.PI) - 0.05) {
                 mState = MotorStates.DUCK_PROFILING;
-            } else if (measuredPosition < (15 * Math.PI - 1) / (4 * Math.PI) + 1) {
+            //} else if (measuredPosition < (15 * Math.PI - 1) / (4 * Math.PI) + 1) {
+            } else if (measuredPosition < (15 * Math.PI - 1) / (4 * Math.PI) - 0.05 + 1) {
                 mState = MotorStates.FULL_POWER;
             } else {
                 mState = MotorStates.IDLE;

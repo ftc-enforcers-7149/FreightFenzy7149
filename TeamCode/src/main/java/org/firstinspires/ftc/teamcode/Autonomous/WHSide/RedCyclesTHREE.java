@@ -6,6 +6,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Alliance;
 import org.firstinspires.ftc.teamcode.Autonomous.Auto_V2_5;
@@ -26,9 +27,9 @@ import static org.firstinspires.ftc.teamcode.GlobalData.POS_ACC;
 import static org.firstinspires.ftc.teamcode.GlobalData.SLOW_DIST;
 import static org.firstinspires.ftc.teamcode.GlobalData.SPEED_MULT;
 
-@Autonomous(name = "Red WH Cycles")
-//@Disabled
-public class RedCycles extends Auto_V2_5 {
+@Autonomous(name = "Red WH Cycles THREE ONLY")
+@Disabled
+public class RedCyclesTHREE extends Auto_V2_5 {
 
     private static final Trajectory preload = MecanumDrive.trajectoryBuilder(new Pose2d(6.75, -78.25, Math.toRadians(0)), Math.toRadians(-10))
             .splineToSplineHeading(new Pose2d(12, -78, Math.toRadians(25)), Math.toRadians(10))
@@ -37,8 +38,8 @@ public class RedCycles extends Auto_V2_5 {
             .build();
 
     private static final Trajectory driveToWall = MecanumDrive.trajectoryBuilder(preload.end(), Math.toRadians(-170))
-            .splineToSplineHeading(new Pose2d(-12, -80, Math.toRadians(-92)), Math.toRadians(-160))
-            .addTemporalMarker(0.6, () -> GlobalData.armUpSignal = true)
+            .splineToSplineHeading(new Pose2d(-6, -80, Math.toRadians(-93)), Math.toRadians(-160))
+            .addTemporalMarker(0.5, () -> GlobalData.armUpSignal = true)
             .build();
 
     @Override
@@ -77,7 +78,7 @@ public class RedCycles extends Auto_V2_5 {
         switch (level) {
             case HIGH:
             default:
-                scoreInHub(-79, ArmController.ScoringPosition.HIGH);
+                scoreInHub(-77, ArmController.ScoringPosition.HIGH);
                 break;
             case MIDDLE:
                 scoreInHub(-74.5, ArmController.ScoringPosition.MIDDLE_AUTO);
@@ -87,7 +88,7 @@ public class RedCycles extends Auto_V2_5 {
                 break;
         }
 
-        for (int cycle = 0; cycle < 4; cycle++) {
+        for (int cycle = 0; cycle < 3; cycle++) {
             //Align with warehouse
             driveToWall();
 
@@ -95,13 +96,13 @@ public class RedCycles extends Auto_V2_5 {
             driveIntoWarehouse();
 
             //Intake and don't hit wall
-            intake(Math.max(28 - (cycle * 6), 5));
+            intake(Math.max(28 - (cycle * 5.5), 5));
 
             //Drive out through gap
             driveOutOfWarehouse();
 
             //Drive to and score in hub
-            scoreInHub(-82);
+            scoreInHub(-76);
 
             if (getRuntime() > 23.5) break;
         }
@@ -171,7 +172,7 @@ public class RedCycles extends Auto_V2_5 {
         H_ACC = Math.toRadians(20);
 
         //Drive through gap
-        drive.setWeightedDrivePower(new Pose2d(1, 0, 0));
+        drive.setWeightedDrivePower(new Pose2d(0.8, 0, 0));
         waitForTime(600);
         drive.setWeightedDrivePower(new Pose2d());
 
@@ -188,7 +189,7 @@ public class RedCycles extends Auto_V2_5 {
             Log.d("Average distance: ", String.valueOf(total.get()/loops.get()));
 
             //return distCorrect.getFrontDistance() > 100 &&
-            return        System.currentTimeMillis() <= sensorStartTime + 80;
+            return        System.currentTimeMillis() <= sensorStartTime + 150;
         });
         if (total.get()/loops.get() < 60) {
             drive.setPoseEstimate(new Pose2d(
@@ -210,31 +211,31 @@ public class RedCycles extends Auto_V2_5 {
 
         //Drive towards back, intaking
         long driveStartTime = System.currentTimeMillis();
-        drive.setWeightedDrivePower(new Pose2d(0.7, -0.2, 0));
+        drive.setWeightedDrivePower(new Pose2d(0.65, -0.2, 0));
         customWait(() -> {
             telemetry.addLine("INTAKE");
 
             if (deltaHeading(drive.getPoseEstimate().getHeading(), Math.toRadians(-95)) > 0)  {
                 drive.setWeightedDrivePower(new Pose2d(
                         Math.max(Math.min(
-                                Math.pow(Math.max(144+drive.getPoseEstimate().getY()-distanceFromWall, 0), 2) * 0.00022 + 0.165,
-                                0.7), 0.1), //Slow down as approaches wall
+                                Math.pow(Math.max(144+drive.getPoseEstimate().getY()-distanceFromWall, 0), 2) * 0.0002 + 0.15,
+                                0.65), 0.1), //Slow down as approaches wall
                         Math.min(Math.pow(144+drive.getPoseEstimate().getY(), 2) * 0.00006 + 0.05, 0.2), //Drive away from wall
                         0.1));
             }
             else if (deltaHeading(drive.getPoseEstimate().getHeading(), Math.toRadians(-85)) < 0) {
                 drive.setWeightedDrivePower(new Pose2d(
                         Math.max(Math.min(
-                                Math.pow(Math.max(144+drive.getPoseEstimate().getY()-distanceFromWall, 0), 2) * 0.00022 + 0.165,
-                                0.7), 0.1), //Slow down as approaches wall
+                                Math.pow(Math.max(144+drive.getPoseEstimate().getY()-distanceFromWall, 0), 2) * 0.0002 + 0.15,
+                                0.65), 0.1), //Slow down as approaches wall
                         Math.min(Math.pow(144+drive.getPoseEstimate().getY(), 2) * 0.00006 + 0.05, 0.2), //Drive away from wall
                         -0.1));
             }
             else {
                 drive.setWeightedDrivePower(new Pose2d(
                         Math.max(Math.min(
-                                Math.pow(Math.max(144+drive.getPoseEstimate().getY()-distanceFromWall, 0), 2) * 0.00022 + 0.165,
-                                0.7), 0.1), //Slow down as approaches wall
+                                Math.pow(Math.max(144+drive.getPoseEstimate().getY()-distanceFromWall, 0), 2) * 0.0002 + 0.15,
+                                0.65), 0.1), //Slow down as approaches wall
                         Math.min(Math.pow(144+drive.getPoseEstimate().getY(), 2) * 0.00006 + 0.05, 0.2), //Drive away from wall
                         0));
             }
@@ -248,7 +249,7 @@ public class RedCycles extends Auto_V2_5 {
             }
 
             if (distCorrect.getFrontDistance() < 43 && intake.getFreightInIntake()) return false;
-            if (System.currentTimeMillis() > driveStartTime + 1500) return false;
+            if (System.currentTimeMillis() > driveStartTime + 2000) return false;
 
             return true;
         });
@@ -278,6 +279,26 @@ public class RedCycles extends Auto_V2_5 {
 
         armController.setScorePos(ArmController.ScoringPosition.UP);
 
+        //Distance correction
+        long sensorStartTime = System.currentTimeMillis();
+        AtomicReference<Double> total = new AtomicReference<Double>(0d);
+        AtomicInteger loops = new AtomicInteger(0);
+        customWait(() -> {
+            total.set(total.get() + distCorrect.getFrontDistance());
+            loops.set(loops.get() + 1);
+
+            Log.d("Average distance: ", String.valueOf(total.get()/loops.get()));
+
+            //return distCorrect.getFrontDistance() > 100 &&
+            return        System.currentTimeMillis() <= sensorStartTime + 150;
+        });
+        if (total.get()/loops.get() < 60) {
+            drive.setPoseEstimate(new Pose2d(
+                    8.5,
+                    total.get()/loops.get() - 144,
+                    drive.getPoseEstimate().getHeading()));
+        }
+
         drive.setWeightedDrivePower(new Pose2d(-0.55, -0.45, 0));
 
         long driveStartTime = System.currentTimeMillis();
@@ -291,11 +312,11 @@ public class RedCycles extends Auto_V2_5 {
             }
 
             return System.currentTimeMillis() < driveStartTime + 1500 &&
-                    drive.getPoseEstimate().getY() < -81;
+                    drive.getPoseEstimate().getY() < -80;
         });
         drive.setWeightedDrivePower(new Pose2d());
 
-        drive.setPoseEstimate(new Pose2d(6.5, drive.getPoseEstimate().getY()-10, drive.getPoseEstimate().getHeading()));
+        drive.setPoseEstimate(new Pose2d(6.5, drive.getPoseEstimate().getY(), drive.getPoseEstimate().getHeading()));
 
         POS_ACC = 1;
         SPEED_MULT = 1;

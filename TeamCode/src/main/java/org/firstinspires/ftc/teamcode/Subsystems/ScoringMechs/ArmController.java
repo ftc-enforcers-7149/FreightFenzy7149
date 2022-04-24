@@ -23,7 +23,7 @@ public class ArmController implements Output {
         MIDDLE_AUTO(1.5, 0.815, 0.1, 0),
         LOW_AUTO(1.5, 0.65, 0.1, 0),
         PARTIAL_UP(3.5, 0, 1, 500),
-        CAP_PICKUP(1.5, 0.55, 0.45, 0);
+        CAP_PICKUP(1.65, 0.55, 0.45, 0);
 
         public double liftPos, barPos, maxSpeed, interpTime;
 

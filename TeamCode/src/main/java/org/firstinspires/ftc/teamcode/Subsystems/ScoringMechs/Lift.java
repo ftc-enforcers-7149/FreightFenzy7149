@@ -228,7 +228,7 @@ public class Lift implements Output, Input {
 
     private void initVars() {
         usePID = true;
-        setCurrPosition(-80);
+        setCurrPosition(-110);
         setTargetHeight(GROUND);
         maxSpeed = 1.0;
     }

@@ -61,18 +61,19 @@ public class BlueDuck extends Auto_V2_5 {
 
         //Drive to the duckwheel
         POS_ACC = 1.5;
-        SPEED_MULT = 0.225;
-        SLOW_DIST = 20;
+        SPEED_MULT = 0.2;
+        SLOW_DIST = 25;
 
         long driveStartTime = System.currentTimeMillis();
         driveTo(() -> 8d, () -> {
             if (System.currentTimeMillis() >= driveStartTime + 400)
                 armController.setScorePos(ArmController.ScoringPosition.UP);
 
-            return -6d;
+            return 0d;
         }, () -> Math.toRadians(90), 1500);
         SPEED_MULT = 1;
-        driveTo(5, drive.getPoseEstimate().getY(), Math.toRadians(90), 600);
+        SLOW_DIST = 15;
+        driveTo(2, drive.getPoseEstimate().getY() - 3, Math.toRadians(90), 600);
         SPEED_MULT = 1;
         POS_ACC = 1;
         SLOW_DIST = 15;
@@ -89,15 +90,17 @@ public class BlueDuck extends Auto_V2_5 {
 
         //Try to intake duck
         SLOW_DIST = 5;
-        POS_ACC = 2;
+        POS_ACC = 2.5;
+        H_ACC = Math.toRadians(5);
         intake.setIntakePower(1);
-        driveTo(12.5, 10, Math.toRadians(180));
-        driveTo(12, 30, Math.toRadians(160));
+        driveTo(12.5, 10, Math.toRadians(180), 1000);
+        driveTo(12.5, 32, Math.toRadians(160));
         driveTo(15.5, 36, Math.toRadians(90));
         intake.setIntakePower(0);
         intake.setLatch(MotorIntake.LatchPosition.DUCK_CLOSED);
         SLOW_DIST = 15;
         POS_ACC = 1;
+        H_ACC = Math.toRadians(1);
 
         lift.setPower(1);
         long startLiftTime = System.currentTimeMillis();
@@ -122,7 +125,7 @@ public class BlueDuck extends Auto_V2_5 {
         armController.setScorePos(ArmController.ScoringPosition.UP);
 
         //Park in storage unit
-        driveTo(36, 0, Math.toRadians(0), 1500);
+        driveTo(37, 0, Math.toRadians(0), 1500);
         armController.setScorePos(ArmController.ScoringPosition.IN);
         intake.setIntakePower(-1);
         waitForTime(400);
